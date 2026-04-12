@@ -1,0 +1,15 @@
+alter table public."user" enable row level security;
+alter table public.session enable row level security;
+alter table public.account enable row level security;
+alter table public.verification enable row level security;
+alter table public."organization" enable row level security;
+alter table public.member enable row level security;
+alter table public.invitation enable row level security;
+alter table public.passkey enable row level security;
+alter table public.organization_onboarding_states enable row level security;
+alter table public.staff_groups enable row level security;
+alter table public.locations enable row level security;
+alter table public.zones enable row level security;
+alter table public.employees enable row level security;
+alter table public.employee_location_assignments enable row level security;
+alter table public.staff_invite_links enable row level security;

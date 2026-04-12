@@ -8,59 +8,450 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root"
-import { Route as IndexRouteImport } from "./routes/index"
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as JoinTokenRouteImport } from './routes/join/$token'
+import { Route as AcceptInvitationInvitationIdRouteImport } from './routes/accept-invitation/$invitationId'
+import { Route as AuthedVerifiedRouteRouteImport } from './routes/_authed/_verified/route'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AuthedVerifiedDashboardRouteImport } from './routes/_authed/_verified/dashboard'
+import { Route as AuthedVerifiedOnboardingOrgRouteImport } from './routes/_authed/_verified/onboarding/org'
+import { Route as AuthedVerifiedOnboardingLocationRouteImport } from './routes/_authed/_verified/onboarding/location'
+import { Route as AuthedVerifiedOnboardingInviteRouteImport } from './routes/_authed/_verified/onboarding/invite'
+import { Route as AuthedVerifiedOOrgSlugRouteRouteImport } from './routes/_authed/_verified/o/$orgSlug/route'
+import { Route as AuthedVerifiedOOrgSlugIndexRouteImport } from './routes/_authed/_verified/o/$orgSlug/index'
+import { Route as AuthedVerifiedOOrgSlugDashboardRouteImport } from './routes/_authed/_verified/o/$orgSlug/dashboard'
+import { Route as AuthedVerifiedOOrgSlugRotaIndexRouteImport } from './routes/_authed/_verified/o/$orgSlug/rota/index'
+import { Route as AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRouteImport } from './routes/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedRouteRoute = AuthedRouteRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinTokenRoute = JoinTokenRouteImport.update({
+  id: '/join/$token',
+  path: '/join/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcceptInvitationInvitationIdRoute =
+  AcceptInvitationInvitationIdRouteImport.update({
+    id: '/accept-invitation/$invitationId',
+    path: '/accept-invitation/$invitationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthedVerifiedRouteRoute = AuthedVerifiedRouteRouteImport.update({
+  id: '/_verified',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedVerifiedDashboardRoute = AuthedVerifiedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthedVerifiedRouteRoute,
+} as any)
+const AuthedVerifiedOnboardingOrgRoute =
+  AuthedVerifiedOnboardingOrgRouteImport.update({
+    id: '/onboarding/org',
+    path: '/onboarding/org',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
+const AuthedVerifiedOnboardingLocationRoute =
+  AuthedVerifiedOnboardingLocationRouteImport.update({
+    id: '/onboarding/location',
+    path: '/onboarding/location',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
+const AuthedVerifiedOnboardingInviteRoute =
+  AuthedVerifiedOnboardingInviteRouteImport.update({
+    id: '/onboarding/invite',
+    path: '/onboarding/invite',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
+const AuthedVerifiedOOrgSlugRouteRoute =
+  AuthedVerifiedOOrgSlugRouteRouteImport.update({
+    id: '/o/$orgSlug',
+    path: '/o/$orgSlug',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
+const AuthedVerifiedOOrgSlugIndexRoute =
+  AuthedVerifiedOOrgSlugIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedVerifiedOOrgSlugRouteRoute,
+  } as any)
+const AuthedVerifiedOOrgSlugDashboardRoute =
+  AuthedVerifiedOOrgSlugDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthedVerifiedOOrgSlugRouteRoute,
+  } as any)
+const AuthedVerifiedOOrgSlugRotaIndexRoute =
+  AuthedVerifiedOOrgSlugRotaIndexRouteImport.update({
+    id: '/rota/',
+    path: '/rota/',
+    getParentRoute: () => AuthedVerifiedOOrgSlugRouteRoute,
+  } as any)
+const AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute =
+  AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRouteImport.update({
+    id: '/rota/$locationSlug/$rotaId',
+    path: '/rota/$locationSlug/$rotaId',
+    getParentRoute: () => AuthedVerifiedOOrgSlugRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute
+  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/sign-up': typeof SignUpRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
+  '/join/$token': typeof JoinTokenRoute
+  '/dashboard': typeof AuthedVerifiedDashboardRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/o/$orgSlug': typeof AuthedVerifiedOOrgSlugRouteRouteWithChildren
+  '/onboarding/invite': typeof AuthedVerifiedOnboardingInviteRoute
+  '/onboarding/location': typeof AuthedVerifiedOnboardingLocationRoute
+  '/onboarding/org': typeof AuthedVerifiedOnboardingOrgRoute
+  '/o/$orgSlug/dashboard': typeof AuthedVerifiedOOrgSlugDashboardRoute
+  '/o/$orgSlug/': typeof AuthedVerifiedOOrgSlugIndexRoute
+  '/o/$orgSlug/rota/': typeof AuthedVerifiedOOrgSlugRotaIndexRoute
+  '/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute
+  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/sign-up': typeof SignUpRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
+  '/join/$token': typeof JoinTokenRoute
+  '/dashboard': typeof AuthedVerifiedDashboardRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/onboarding/invite': typeof AuthedVerifiedOnboardingInviteRoute
+  '/onboarding/location': typeof AuthedVerifiedOnboardingLocationRoute
+  '/onboarding/org': typeof AuthedVerifiedOnboardingOrgRoute
+  '/o/$orgSlug/dashboard': typeof AuthedVerifiedOOrgSlugDashboardRoute
+  '/o/$orgSlug': typeof AuthedVerifiedOOrgSlugIndexRoute
+  '/o/$orgSlug/rota': typeof AuthedVerifiedOOrgSlugRotaIndexRoute
+  '/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  "/": typeof IndexRoute
+  '/': typeof IndexRoute
+  '/_authed': typeof AuthedRouteRouteWithChildren
+  '/login': typeof LoginRoute
+  '/sign-up': typeof SignUpRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/_authed/_verified': typeof AuthedVerifiedRouteRouteWithChildren
+  '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
+  '/join/$token': typeof JoinTokenRoute
+  '/_authed/_verified/dashboard': typeof AuthedVerifiedDashboardRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_authed/_verified/o/$orgSlug': typeof AuthedVerifiedOOrgSlugRouteRouteWithChildren
+  '/_authed/_verified/onboarding/invite': typeof AuthedVerifiedOnboardingInviteRoute
+  '/_authed/_verified/onboarding/location': typeof AuthedVerifiedOnboardingLocationRoute
+  '/_authed/_verified/onboarding/org': typeof AuthedVerifiedOnboardingOrgRoute
+  '/_authed/_verified/o/$orgSlug/dashboard': typeof AuthedVerifiedOOrgSlugDashboardRoute
+  '/_authed/_verified/o/$orgSlug/': typeof AuthedVerifiedOOrgSlugIndexRoute
+  '/_authed/_verified/o/$orgSlug/rota/': typeof AuthedVerifiedOOrgSlugRotaIndexRoute
+  '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/"
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/sign-up'
+    | '/verify-email'
+    | '/accept-invitation/$invitationId'
+    | '/join/$token'
+    | '/dashboard'
+    | '/api/auth/$'
+    | '/o/$orgSlug'
+    | '/onboarding/invite'
+    | '/onboarding/location'
+    | '/onboarding/org'
+    | '/o/$orgSlug/dashboard'
+    | '/o/$orgSlug/'
+    | '/o/$orgSlug/rota/'
+    | '/o/$orgSlug/rota/$locationSlug/$rotaId'
   fileRoutesByTo: FileRoutesByTo
-  to: "/"
-  id: "__root__" | "/"
+  to:
+    | '/'
+    | '/login'
+    | '/sign-up'
+    | '/verify-email'
+    | '/accept-invitation/$invitationId'
+    | '/join/$token'
+    | '/dashboard'
+    | '/api/auth/$'
+    | '/onboarding/invite'
+    | '/onboarding/location'
+    | '/onboarding/org'
+    | '/o/$orgSlug/dashboard'
+    | '/o/$orgSlug'
+    | '/o/$orgSlug/rota'
+    | '/o/$orgSlug/rota/$locationSlug/$rotaId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/login'
+    | '/sign-up'
+    | '/verify-email'
+    | '/_authed/_verified'
+    | '/accept-invitation/$invitationId'
+    | '/join/$token'
+    | '/_authed/_verified/dashboard'
+    | '/api/auth/$'
+    | '/_authed/_verified/o/$orgSlug'
+    | '/_authed/_verified/onboarding/invite'
+    | '/_authed/_verified/onboarding/location'
+    | '/_authed/_verified/onboarding/org'
+    | '/_authed/_verified/o/$orgSlug/dashboard'
+    | '/_authed/_verified/o/$orgSlug/'
+    | '/_authed/_verified/o/$orgSlug/rota/'
+    | '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SignUpRoute: typeof SignUpRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
+  AcceptInvitationInvitationIdRoute: typeof AcceptInvitationInvitationIdRoute
+  JoinTokenRoute: typeof JoinTokenRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/"
-      path: "/"
-      fullPath: "/"
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/join/$token': {
+      id: '/join/$token'
+      path: '/join/$token'
+      fullPath: '/join/$token'
+      preLoaderRoute: typeof JoinTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accept-invitation/$invitationId': {
+      id: '/accept-invitation/$invitationId'
+      path: '/accept-invitation/$invitationId'
+      fullPath: '/accept-invitation/$invitationId'
+      preLoaderRoute: typeof AcceptInvitationInvitationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed/_verified': {
+      id: '/_authed/_verified'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedVerifiedRouteRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed/_verified/dashboard': {
+      id: '/_authed/_verified/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthedVerifiedDashboardRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/_authed/_verified/onboarding/org': {
+      id: '/_authed/_verified/onboarding/org'
+      path: '/onboarding/org'
+      fullPath: '/onboarding/org'
+      preLoaderRoute: typeof AuthedVerifiedOnboardingOrgRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/_authed/_verified/onboarding/location': {
+      id: '/_authed/_verified/onboarding/location'
+      path: '/onboarding/location'
+      fullPath: '/onboarding/location'
+      preLoaderRoute: typeof AuthedVerifiedOnboardingLocationRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/_authed/_verified/onboarding/invite': {
+      id: '/_authed/_verified/onboarding/invite'
+      path: '/onboarding/invite'
+      fullPath: '/onboarding/invite'
+      preLoaderRoute: typeof AuthedVerifiedOnboardingInviteRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/_authed/_verified/o/$orgSlug': {
+      id: '/_authed/_verified/o/$orgSlug'
+      path: '/o/$orgSlug'
+      fullPath: '/o/$orgSlug'
+      preLoaderRoute: typeof AuthedVerifiedOOrgSlugRouteRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/_authed/_verified/o/$orgSlug/': {
+      id: '/_authed/_verified/o/$orgSlug/'
+      path: '/'
+      fullPath: '/o/$orgSlug/'
+      preLoaderRoute: typeof AuthedVerifiedOOrgSlugIndexRouteImport
+      parentRoute: typeof AuthedVerifiedOOrgSlugRouteRoute
+    }
+    '/_authed/_verified/o/$orgSlug/dashboard': {
+      id: '/_authed/_verified/o/$orgSlug/dashboard'
+      path: '/dashboard'
+      fullPath: '/o/$orgSlug/dashboard'
+      preLoaderRoute: typeof AuthedVerifiedOOrgSlugDashboardRouteImport
+      parentRoute: typeof AuthedVerifiedOOrgSlugRouteRoute
+    }
+    '/_authed/_verified/o/$orgSlug/rota/': {
+      id: '/_authed/_verified/o/$orgSlug/rota/'
+      path: '/rota'
+      fullPath: '/o/$orgSlug/rota/'
+      preLoaderRoute: typeof AuthedVerifiedOOrgSlugRotaIndexRouteImport
+      parentRoute: typeof AuthedVerifiedOOrgSlugRouteRoute
+    }
+    '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId': {
+      id: '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId'
+      path: '/rota/$locationSlug/$rotaId'
+      fullPath: '/o/$orgSlug/rota/$locationSlug/$rotaId'
+      preLoaderRoute: typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRouteImport
+      parentRoute: typeof AuthedVerifiedOOrgSlugRouteRoute
     }
   }
 }
 
+interface AuthedVerifiedOOrgSlugRouteRouteChildren {
+  AuthedVerifiedOOrgSlugDashboardRoute: typeof AuthedVerifiedOOrgSlugDashboardRoute
+  AuthedVerifiedOOrgSlugIndexRoute: typeof AuthedVerifiedOOrgSlugIndexRoute
+  AuthedVerifiedOOrgSlugRotaIndexRoute: typeof AuthedVerifiedOOrgSlugRotaIndexRoute
+  AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute: typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
+}
+
+const AuthedVerifiedOOrgSlugRouteRouteChildren: AuthedVerifiedOOrgSlugRouteRouteChildren =
+  {
+    AuthedVerifiedOOrgSlugDashboardRoute: AuthedVerifiedOOrgSlugDashboardRoute,
+    AuthedVerifiedOOrgSlugIndexRoute: AuthedVerifiedOOrgSlugIndexRoute,
+    AuthedVerifiedOOrgSlugRotaIndexRoute: AuthedVerifiedOOrgSlugRotaIndexRoute,
+    AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute:
+      AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute,
+  }
+
+const AuthedVerifiedOOrgSlugRouteRouteWithChildren =
+  AuthedVerifiedOOrgSlugRouteRoute._addFileChildren(
+    AuthedVerifiedOOrgSlugRouteRouteChildren,
+  )
+
+interface AuthedVerifiedRouteRouteChildren {
+  AuthedVerifiedDashboardRoute: typeof AuthedVerifiedDashboardRoute
+  AuthedVerifiedOOrgSlugRouteRoute: typeof AuthedVerifiedOOrgSlugRouteRouteWithChildren
+  AuthedVerifiedOnboardingInviteRoute: typeof AuthedVerifiedOnboardingInviteRoute
+  AuthedVerifiedOnboardingLocationRoute: typeof AuthedVerifiedOnboardingLocationRoute
+  AuthedVerifiedOnboardingOrgRoute: typeof AuthedVerifiedOnboardingOrgRoute
+}
+
+const AuthedVerifiedRouteRouteChildren: AuthedVerifiedRouteRouteChildren = {
+  AuthedVerifiedDashboardRoute: AuthedVerifiedDashboardRoute,
+  AuthedVerifiedOOrgSlugRouteRoute:
+    AuthedVerifiedOOrgSlugRouteRouteWithChildren,
+  AuthedVerifiedOnboardingInviteRoute: AuthedVerifiedOnboardingInviteRoute,
+  AuthedVerifiedOnboardingLocationRoute: AuthedVerifiedOnboardingLocationRoute,
+  AuthedVerifiedOnboardingOrgRoute: AuthedVerifiedOnboardingOrgRoute,
+}
+
+const AuthedVerifiedRouteRouteWithChildren =
+  AuthedVerifiedRouteRoute._addFileChildren(AuthedVerifiedRouteRouteChildren)
+
+interface AuthedRouteRouteChildren {
+  AuthedVerifiedRouteRoute: typeof AuthedVerifiedRouteRouteWithChildren
+}
+
+const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
+  AuthedVerifiedRouteRoute: AuthedVerifiedRouteRouteWithChildren,
+}
+
+const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
+  AuthedRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthedRouteRoute: AuthedRouteRouteWithChildren,
+  LoginRoute: LoginRoute,
+  SignUpRoute: SignUpRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
+  AcceptInvitationInvitationIdRoute: AcceptInvitationInvitationIdRoute,
+  JoinTokenRoute: JoinTokenRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx"
-import type { createStart } from "@tanstack/react-start"
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>

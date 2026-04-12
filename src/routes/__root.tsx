@@ -2,6 +2,10 @@ import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 
+import { RootErrorState } from "@/components/errors/root-error-state"
+import { AppToaster } from "@/components/providers/app-toaster"
+import { QueryProvider } from "@/components/providers/query-provider"
+
 import appCss from "../styles.css?url"
 
 export const Route = createRootRoute({
@@ -15,7 +19,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        title: "Northstar",
       },
     ],
     links: [
@@ -25,6 +29,7 @@ export const Route = createRootRoute({
       },
     ],
   }),
+  errorComponent: RootErrorState,
   shellComponent: RootDocument,
 })
 
@@ -35,7 +40,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <QueryProvider>
+          {children}
+          <AppToaster />
+        </QueryProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",

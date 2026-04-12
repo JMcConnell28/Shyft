@@ -7,6 +7,19 @@ import tailwindcss from "@tailwindcss/vite"
 import { nitro } from "nitro/vite"
 
 const config = defineConfig({
+  resolve: {
+    alias: {
+      "@noble/ciphers/utils.js": "/src/lib/shims/noble-ciphers-utils.ts",
+    },
+  },
+  server: {
+    host: true,
+    port: 3000,
+  },
+  preview: {
+    host: true,
+    port: 3000,
+  },
   plugins: [
     devtools(),
     nitro(),
