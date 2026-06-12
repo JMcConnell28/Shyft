@@ -1,9 +1,20 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowUpRightIcon, CopyPlusIcon, DotIcon, LoaderCircleIcon, MapPinIcon } from "lucide-react"
+import {
+  ArrowUpRightIcon,
+  DotIcon,
+  PencilIcon,
+  MoreHorizontalIcon,
+} from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { formatHours, getStatusVariant } from "@/features/rota/utils/formatting"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { getStatusVariant } from "@/features/rota/utils/formatting"
 
 type RotaListRowData = {
   id: string
@@ -20,121 +31,183 @@ type RotaListRowData = {
   zoneCount: number
   note: string | null
   isUnread: boolean
+  hasUnpublishedChanges: boolean
 }
 
 function RotaListRow({
+  canEdit,
   orgSlug,
+  workspaceType = "organization",
+  locationWorkspaceSlug,
   row,
-  isDuplicating,
-  onDuplicate,
+  onDeleteDraft,
+  onUnpublish,
+  isDeletingDraft,
+  isUnpublishing,
 }: {
+  canEdit: boolean
   orgSlug: string
+  workspaceType?: "organization" | "location"
+  locationWorkspaceSlug?: string
   row: RotaListRowData
-  isDuplicating: boolean
-  onDuplicate: (rotaId: string) => void
+  onDeleteDraft: (rotaId: string) => void
+  onUnpublish: (rotaId: string) => void
+  isDeletingDraft: boolean
+  isUnpublishing: boolean
 }) {
-  const warnings = [
-    row.status === "draft" ? "Not yet published" : null,
-    row.shiftCount === 0 ? "No shifts added" : null,
-  ].filter(Boolean) as Array<string>
+  const canOpenPublishedView = row.status === "published"
+  const routeParams =
+    workspaceType === "location"
+      ? {
+          workspaceSlug: locationWorkspaceSlug ?? row.locationSlug,
+          rotaId: row.id,
+        }
+      : {
+          workspaceSlug: orgSlug,
+          locationSlug: row.locationSlug,
+          rotaId: row.id,
+        }
 
   return (
-    <article className="px-4 py-3 transition-colors hover:bg-muted/10 sm:px-5">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            {row.isUnread ? (
-              <span className="inline-flex items-center text-rose-500">
-                <DotIcon className="-mx-1 size-6" />
-              </span>
-            ) : null}
-            <h2 className="text-sm font-semibold tracking-tight">{row.weekLabel}</h2>
+    <article className="grid gap-2 px-4 py-2.5 text-sm transition-colors hover:bg-muted/10 md:grid-cols-[minmax(13rem,1.35fr)_minmax(7rem,0.75fr)_7rem_5rem_minmax(8rem,0.85fr)_8rem] md:items-center sm:px-5">
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-1.5">
+          {row.isUnread ? (
+            <span className="inline-flex shrink-0 items-center text-rose-500">
+              <DotIcon className="-mx-1 size-6" />
+            </span>
+          ) : null}
+          <h2 className="truncate text-sm font-semibold tracking-tight">
+            {row.weekLabel}
+          </h2>
+        </div>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          Updated {row.updatedAt}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 md:contents">
+        <div className="min-w-0 md:p-0">
+          <span className="mr-1 text-[10px] font-medium tracking-[0.08em] text-muted-foreground uppercase md:hidden">
+            Created by
+          </span>
+          <span className="truncate text-xs text-foreground md:block md:text-sm">
+            {row.createdBy}
+          </span>
+        </div>
+
+        <div className="min-w-0 md:p-0">
+          <span className="mr-1 text-[10px] font-medium tracking-[0.08em] text-muted-foreground uppercase md:hidden">
+            Status
+          </span>
+          <div className="inline-flex flex-wrap items-center gap-1.5 align-middle md:flex">
             <Badge variant={getStatusVariant(row.status)}>
               {row.status === "published" ? "Published" : "Draft"}
             </Badge>
-            {warnings.map((warning) => (
-              <Badge key={warning} variant="outline" className="text-[10px]">
-                {warning}
+            {row.status === "published" && row.hasUnpublishedChanges ? (
+              <Badge
+                variant="outline"
+                className="border-amber-200/80 bg-amber-50 text-amber-700"
+              >
+                Changes not live
               </Badge>
-            ))}
+            ) : null}
           </div>
-
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPinIcon className="size-3.5" />
-              {row.locationName}
-            </span>
-            <span>Created by {row.createdBy}</span>
-            {row.publishedBy ? <span>Published by {row.publishedBy}</span> : null}
-            <span>Updated {row.updatedAt}</span>
-          </div>
-
-          {row.note?.trim() ? (
-            <p className="max-w-3xl truncate text-xs text-muted-foreground">
-              {row.note}
-            </p>
-          ) : null}
-
-          <dl className="flex flex-wrap gap-2 text-xs">
-            <StatChip label="Hours" value={formatHours(row.scheduledHours)} />
-            <StatChip label="Staff" value={String(row.scheduledStaffCount)} />
-            <StatChip label="Shifts" value={String(row.shiftCount)} />
-            <StatChip label="Zones" value={String(row.zoneCount)} />
-          </dl>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 lg:pt-0.5">
+        <div className="min-w-0 md:p-0">
+          <span className="mr-1 text-[10px] font-medium tracking-[0.08em] text-muted-foreground uppercase md:hidden">
+            Shifts
+          </span>
+          <span className="text-xs text-foreground md:block md:text-sm">
+            {row.shiftCount}
+          </span>
+        </div>
+
+        <div className="min-w-0 md:p-0">
+          <span className="mr-1 text-[10px] font-medium tracking-[0.08em] text-muted-foreground uppercase md:hidden">
+            Location
+          </span>
+          <span className="truncate text-xs text-foreground md:block md:text-sm">
+            {row.locationName}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex shrink-0 flex-wrap items-center gap-2 md:justify-end">
+        {canOpenPublishedView ? (
           <Button
             size="sm"
+            variant="pill"
             className="gap-2"
             nativeButton={false}
             render={
               <Link
-                to="/o/$orgSlug/rota/$locationSlug/$rotaId"
-                params={{
-                  orgSlug,
-                  locationSlug: row.locationSlug,
-                  rotaId: row.id,
-                }}
+                to={
+                  workspaceType === "location"
+                    ? "/w/$workspaceSlug/rota/$rotaId/view"
+                    : "/w/$workspaceSlug/rota/$locationSlug/$rotaId/view"
+                }
+                params={routeParams}
               />
             }
           >
             Open
-            <ArrowUpRightIcon className="size-3.5" />
+            <ArrowUpRightIcon className="hidden size-3.5 sm:block" />
           </Button>
+        ) : null}
+        {canEdit ? (
           <Button
             size="sm"
-            variant="outline"
-            type="button"
-            onClick={() => onDuplicate(row.id)}
-            disabled={isDuplicating}
+            variant="pill"
+            className="gap-2"
+            nativeButton={false}
+            render={
+              <Link
+                to={
+                  workspaceType === "location"
+                    ? "/w/$workspaceSlug/rota/$rotaId"
+                    : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
+                }
+                params={routeParams}
+              />
+            }
           >
-            {isDuplicating ? (
-              <>
-                <LoaderCircleIcon className="size-3.5 animate-spin" />
-                Duplicating
-              </>
-            ) : (
-              <>
-                <CopyPlusIcon className="size-3.5" />
-                Duplicate
-              </>
-            )}
+            <span className="sr-only sm:not-sr-only">Edit</span>
+            <PencilIcon className="size-3.5" />
           </Button>
-        </div>
+        ) : null}
+        {canEdit ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button size="sm" variant="pill" type="button">
+                  <MoreHorizontalIcon className="size-3.5" />
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="end" className="w-44">
+              {row.status === "published" ? (
+                <DropdownMenuItem
+                  disabled={isUnpublishing}
+                  onClick={() => onUnpublish(row.id)}
+                >
+                  {isUnpublishing ? "Unpublishing..." : "Unpublish rota"}
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  disabled={isDeletingDraft}
+                  onClick={() => onDeleteDraft(row.id)}
+                >
+                  {isDeletingDraft ? "Deleting..." : "Delete draft"}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
       </div>
     </article>
-  )
-}
-
-function StatChip({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="inline-flex items-baseline gap-1 rounded-md border border-border/60 bg-muted/20 px-2 py-1">
-      <dt className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-        {label}
-      </dt>
-      <dd className="font-medium text-foreground">{value}</dd>
-    </div>
   )
 }
 

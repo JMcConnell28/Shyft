@@ -84,9 +84,10 @@ function OrglessWorkspacePage({ organizations }: OrglessWorkspacePageProps) {
     <OnboardingShell
       badge="Workspace setup"
       eyebrow="No active organization"
-      title="Choose how you want to start using Shyft."
+      title="Choose how you want to start using RocketRota."
       description="Create a new organization for your team, or join an existing workplace with an invite. This screen is your clean starting point after account verification."
       progress={20}
+      showSignOut
     >
       <div className="space-y-5">
         <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
@@ -122,7 +123,7 @@ function OrglessWorkspacePage({ organizations }: OrglessWorkspacePageProps) {
             </Badge>
             <CardTitle className="text-2xl">Open an invite from your manager</CardTitle>
             <CardDescription>
-              Paste a Shyft invite link or token to join your workplace. Staff
+              Paste a RocketRota invite link or token to join your workplace. Staff
               and manager invites both work here.
             </CardDescription>
           </CardHeader>
@@ -147,7 +148,7 @@ function OrglessWorkspacePage({ organizations }: OrglessWorkspacePageProps) {
                       field={field}
                       label="Invite link"
                       placeholder="Paste the invite link or token"
-                      description="Ask your manager for a Shyft invite if you do not have one yet."
+                      description="Ask your manager for a RocketRota invite if you do not have one yet."
                     />
                   )}
                 </form.Field>

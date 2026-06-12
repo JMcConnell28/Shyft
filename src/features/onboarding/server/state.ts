@@ -2,14 +2,25 @@ import type {
   ActiveOnboardingState,
   OnboardingStep,
 } from "@/features/onboarding/types"
+import { getDatabase } from "@/lib/db"
 import { slugify } from "@/lib/slug"
-import { createSupabaseServerClient } from "@/lib/supabase"
+import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 
 import { FREE_TRIAL_DAYS } from "@/features/onboarding/constants"
+import { ensureWorkspaceTrial } from "@/features/billing/server/trials"
+import {
+  ensureEmployeeStaffGroup,
+  isEmployeeStaffGroup,
+} from "@/features/staff-groups/server/shared"
 import { toIsoString } from "@/features/onboarding/utils/invite-utils"
 
 async function getActiveOrganizationState(organizationId: string) {
+  await ensureEmployeeStaffGroup({
+    organizationId,
+    locationId: null,
+  })
+
   const supabase = createSupabaseServerClient()
   const now = new Date()
 
@@ -35,7 +46,6 @@ async function getActiveOrganizationState(organizationId: string) {
       .from("staff_groups")
       .select("id, name, slug, is_default")
       .eq("organization_id", organizationId)
-      .order("is_default", { ascending: false })
       .order("name", { ascending: true }),
     supabase
       .from("locations")
@@ -78,6 +88,7 @@ async function getActiveOrganizationState(organizationId: string) {
   )
 
   const onboardingRow = onboardingResult.data
+  const trial = await ensureWorkspaceTrial({ organizationId })
   const hasLocation = (locationsCountResult.count ?? 0) > 0
   const hasZone = (zonesCountResult.count ?? 0) > 0
   const hasInviteLink =
@@ -94,17 +105,15 @@ async function getActiveOrganizationState(organizationId: string) {
       ? onboardingRow.last_step
       : !hasLocation
         ? "location"
-        : !hasInviteLink
-          ? "invite"
-          : "complete"
+        : "complete"
 
   const onboarding: ActiveOnboardingState = {
     organizationId,
-    trialStartedAt: toIsoString(onboardingRow?.trial_started_at),
-    trialEndsAt: toIsoString(onboardingRow?.trial_ends_at),
+    trialStartedAt: trial.trialStartedAt,
+    trialEndsAt: trial.trialEndsAt,
     completedAt: onboardingRow?.completed_at
       ? toIsoString(onboardingRow.completed_at)
-      : hasLocation && hasZone && hasInviteLink
+      : hasLocation
         ? toIsoString(new Date())
         : null,
     lastStep,
@@ -115,33 +124,170 @@ async function getActiveOrganizationState(organizationId: string) {
 
   return {
     onboarding,
+    trial,
     locations: locationsResult.data ?? [],
     staffGroups: (staffGroupsResult.data ?? []).map((staffGroup) => ({
       id: staffGroup.id,
       name: staffGroup.name,
       slug: staffGroup.slug,
-      isDefault: staffGroup.is_default,
-    })),
+      isFallback: isEmployeeStaffGroup(staffGroup),
+    })).sort((left, right) => {
+      if (left.isFallback === right.isFallback) {
+        return left.name.localeCompare(right.name)
+      }
+
+      return left.isFallback ? -1 : 1
+    }),
   }
 }
 
 async function ensureDefaultStaffGroup(organizationId: string) {
-  const supabase = createSupabaseServerClient()
+  await ensureEmployeeStaffGroup({
+    organizationId,
+    locationId: null,
+  })
+}
 
-  const { error } = await supabase.from("staff_groups").upsert(
-    {
-      organization_id: organizationId,
-      name: "Employees",
-      slug: "employees",
-      is_default: true,
-    },
-    {
-      onConflict: "organization_id,slug",
-      ignoreDuplicates: true,
-    }
+async function getActiveLocationState(locationId: string) {
+  await ensureLocationEmployeeStaffGroup(locationId)
+
+  const database = getDatabase()
+  const now = new Date()
+  const [
+    locationResult,
+    staffGroupsResult,
+    zonesCountResult,
+    inviteLinksResult,
+  ] = await Promise.all([
+    database.query<{
+      id: string
+      name: string
+      slug: string
+      organization_id: string | null
+    }>(
+      `select id, name, slug, organization_id
+       from public.locations
+       where id = $1`,
+      [locationId],
+    ),
+    database.query<{
+      id: string
+      name: string
+      slug: string
+      is_default: boolean
+    }>(
+      `select id, name, slug, is_default
+       from public.staff_groups
+       where location_id = $1
+       order by name asc`,
+      [locationId],
+    ),
+    database.query(
+      `select id
+       from public.zones
+       where location_id = $1
+       limit 1`,
+      [locationId],
+    ),
+    database.query<{ expires_at: Date | string | null }>(
+      `select expires_at
+       from public.staff_invite_links
+       where location_id = $1
+         and disabled_at is null`,
+      [locationId],
+    ),
+  ])
+  const location = locationResult.rows.at(0)
+
+  if (!location) {
+    throw new Error("We could not load your location.")
+  }
+
+  const hasInviteLink = inviteLinksResult.rows.some((invite) => {
+    return (
+      invite.expires_at === null ||
+      new Date(invite.expires_at).getTime() > now.getTime()
+    )
+  })
+  const hasZone = zonesCountResult.rows.length > 0
+  const trial = await ensureWorkspaceTrial({ locationId: location.id })
+
+  return {
+    onboarding: {
+      organizationId: location.organization_id,
+      locationId: location.id,
+      trialStartedAt: trial.trialStartedAt,
+      trialEndsAt: trial.trialEndsAt,
+      completedAt: toIsoString(new Date()),
+      lastStep: "complete",
+      hasLocation: true,
+      hasZone,
+      hasInviteLink,
+    } satisfies ActiveOnboardingState,
+    trial,
+    locations: [
+      {
+        id: location.id,
+        name: location.name,
+        slug: location.slug,
+        organizationId: location.organization_id,
+      },
+    ],
+    staffGroups: staffGroupsResult.rows
+      .map((staffGroup) => ({
+        id: staffGroup.id,
+        name: staffGroup.name,
+        slug: staffGroup.slug,
+        isFallback: isEmployeeStaffGroup(staffGroup),
+      }))
+      .sort((left, right) => {
+        if (left.isFallback === right.isFallback) {
+          return left.name.localeCompare(right.name)
+        }
+
+        return left.isFallback ? -1 : 1
+      }),
+  }
+}
+
+async function ensureLocationEmployeeStaffGroup(locationId: string) {
+  const database = getDatabase()
+  const existingResult = await database.query<{ id: string }>(
+    `select id
+     from public.staff_groups
+     where location_id = $1
+       and (slug = 'employee' or slug = 'employees' or is_default = true)
+     order by created_at asc
+     limit 1`,
+    [locationId],
   )
+  const existing = existingResult.rows.at(0)
 
-  assertSupabaseSuccess(error, "We could not create the default staff group.")
+  if (!existing) {
+    await database.query(
+      `insert into public.staff_groups (
+         location_id,
+         name,
+         slug,
+         is_default,
+         color
+       ) values ($1, 'Employee', 'employee', true, 'emerald')`,
+      [locationId],
+    )
+
+    return
+  }
+
+  await database.query(
+    `update public.staff_groups
+     set name = 'Employee',
+         slug = 'employee',
+         is_default = true,
+         color = 'emerald',
+         updated_at = timezone('utc', now())
+     where id = $1`,
+    [existing.id],
+  )
 }
 
 async function upsertOnboardingState(
@@ -194,19 +340,25 @@ async function upsertOnboardingState(
   assertSupabaseSuccess(error, "We could not save the onboarding state.")
 }
 
-async function createUniqueLocationSlug(organizationId: string, name: string) {
+async function createUniqueLocationSlug(
+  organizationId: string | null,
+  name: string,
+) {
   const supabase = createSupabaseServerClient()
   const baseSlug = slugify(name) || "location"
   let nextSlug = baseSlug
   let counter = 2
 
   for (;;) {
-    const { data, error } = await supabase
+    const query = supabase
       .from("locations")
       .select("id")
-      .eq("organization_id", organizationId)
       .eq("slug", nextSlug)
-      .maybeSingle()
+
+    const { data, error } = await (organizationId === null
+      ? query.is("organization_id", null)
+      : query.eq("organization_id", organizationId)
+    ).maybeSingle()
 
     assertSupabaseSuccess(error, "We could not check location availability.")
 
@@ -222,6 +374,8 @@ async function createUniqueLocationSlug(organizationId: string, name: string) {
 export {
   createUniqueLocationSlug,
   ensureDefaultStaffGroup,
+  ensureLocationEmployeeStaffGroup,
   getActiveOrganizationState,
+  getActiveLocationState,
   upsertOnboardingState,
 }

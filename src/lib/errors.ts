@@ -22,12 +22,10 @@ function toAppError(
   error: unknown,
   fallbackMessage = "Something went wrong.",
 ): AppError {
-  if (typeof error === "string" && error.trim().length > 0) {
-    return buildAppError(error, fallbackMessage)
-  }
+  const message = extractErrorMessage(error)
 
-  if (error instanceof Error) {
-    return buildAppError(error.message, fallbackMessage)
+  if (message) {
+    return buildAppError(message, fallbackMessage)
   }
 
   return {
@@ -43,8 +41,87 @@ function buildAppError(message: string, fallbackMessage: string): AppError {
 
   return {
     kind,
-    message: kind === "unknown" ? fallbackMessage : normalizedMessage,
+    message:
+      kind === "unknown"
+        ? getUnknownErrorMessage(normalizedMessage, fallbackMessage)
+        : normalizedMessage,
   }
+}
+
+function extractErrorMessage(error: unknown): string | null {
+  if (typeof error === "string" && error.trim().length > 0) {
+    return error
+  }
+
+  if (error instanceof Error) {
+    return (
+      error.message ||
+      extractErrorMessage((error as Error & { cause?: unknown }).cause)
+    )
+  }
+
+  if (!isRecord(error)) {
+    return null
+  }
+
+  const directMessage = readMessageValue(error.message)
+
+  if (directMessage) {
+    return directMessage
+  }
+
+  const nestedKeys = ["error", "cause", "data", "details", "detail", "reason"] as const
+
+  for (const key of nestedKeys) {
+    const nestedMessage = readMessageValue(error[key])
+
+    if (nestedMessage) {
+      return nestedMessage
+    }
+  }
+
+  return null
+}
+
+function readMessageValue(value: unknown): string | null {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value
+  }
+
+  if (value instanceof Error) {
+    return value.message || extractErrorMessage(value.cause)
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const itemMessage = readMessageValue(item)
+
+      if (itemMessage) {
+        return itemMessage
+      }
+    }
+
+    return null
+  }
+
+  if (isRecord(value)) {
+    return extractErrorMessage(value)
+  }
+
+  return null
+}
+
+function getUnknownErrorMessage(message: string, fallbackMessage: string) {
+  const technicalPatterns = [
+    "server function error",
+    "failed to fetch",
+    "networkerror",
+    "unexpected end of json input",
+  ]
+
+  return technicalPatterns.some((pattern) => message.toLowerCase().includes(pattern))
+    ? fallbackMessage
+    : message
 }
 
 function inferErrorKind(message: string): AppErrorKind {
@@ -91,6 +168,10 @@ function inferErrorKind(message: string): AppErrorKind {
   }
 
   return "unknown"
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null
 }
 
 export { getErrorMessage, toAppError }

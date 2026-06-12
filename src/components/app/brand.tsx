@@ -4,11 +4,15 @@ function BrandMark({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex size-9 items-center justify-center rounded-2xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20",
+        "flex size-9 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-sm ring-1 ring-border/70",
         className
       )}
     >
-      S
+      <img
+        src="/brand/rocketrota-logo.png"
+        alt=""
+        className="h-full w-full object-contain"
+      />
     </div>
   )
 }
@@ -29,7 +33,9 @@ function BrandLockup({
     >
       <BrandMark className="shrink-0" />
       <div className="min-w-0 transition-[opacity,transform] duration-200 ease-out group-data-[collapsible=icon]:hidden motion-reduce:transition-none">
-        <p className="font-heading text-sm font-bold tracking-tight">Shyft</p>
+        <p className="font-heading text-sm font-bold tracking-tight">
+          RocketRota
+        </p>
         {!compact ? (
           <p className="text-xs text-muted-foreground">
             Rota management solutions

@@ -26,6 +26,7 @@ const isoDateSchema = z
 const rotaStatusSchema = z.enum(["draft", "published"])
 const rotaStatusFilterSchema = z.enum(["all", "draft", "published"])
 const rotaRangeFilterSchema = z.enum([
+  "all",
   "this-week",
   "next-4-weeks",
   "past-4-weeks",
@@ -66,6 +67,14 @@ const duplicateRotaSchema = z.object({
 })
 
 const publishRotaSchema = z.object({
+  rotaId: z.string().uuid("Choose a rota."),
+})
+
+const unpublishRotaSchema = z.object({
+  rotaId: z.string().uuid("Choose a rota."),
+})
+
+const deleteDraftRotaSchema = z.object({
   rotaId: z.string().uuid("Choose a rota."),
 })
 
@@ -189,7 +198,7 @@ function parseRotaListSearch(search: Record<string, unknown>): RotaListSearch {
         ? "next-4-weeks"
         : normalizedRange.success
           ? normalizedRange.data
-          : "next-4-weeks"
+          : "all"
 
   return {
     location: normalizedLocation.success ? normalizedLocation.data : undefined,
@@ -220,6 +229,7 @@ export {
   normalizeOptionalIsoDate,
   normalizeWeekStart,
   parseRotaListSearch,
+  deleteDraftRotaSchema,
   previewRotaCreationSchema,
   publishRotaSchema,
   rawRotaListSearchSchema,
@@ -230,5 +240,6 @@ export {
   rotaStatusFilterSchema,
   rotaStatusSchema,
   toIsoDate,
+  unpublishRotaSchema,
   updateRotaNoteSchema,
 }

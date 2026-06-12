@@ -1,0 +1,3 @@
+const PAST_DUE_GRACE_DAYS = 5
+
+export { PAST_DUE_GRACE_DAYS }

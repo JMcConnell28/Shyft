@@ -11,10 +11,12 @@ function DraggableItem({
   children,
   dragData,
   dragId,
+  dragStateClassName,
 }: {
   children: React.ReactNode
   dragData: WorkspaceDragData
   dragId: string
+  dragStateClassName?: string
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: dragId,
@@ -29,7 +31,7 @@ function DraggableItem({
           ? { transform: CSS.Translate.toString(transform) }
           : undefined
       }
-      className={cn(isDragging ? "opacity-0" : undefined)}
+      className={cn(isDragging ? dragStateClassName ?? "opacity-0" : undefined)}
       {...attributes}
       {...listeners}
     >

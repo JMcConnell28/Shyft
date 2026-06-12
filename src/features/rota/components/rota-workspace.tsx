@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
+import { toast } from "react-hot-toast"
 import {
   DndContext,
   DragOverlay,
@@ -17,6 +18,7 @@ import {
 
 import EmployeeCard from "./employee-card"
 import EmployeeList from "./employee-list"
+import RotaNavigationBlocker from "./rota-navigation-blocker"
 import ToolBar from "./tool-bar"
 import WeekContainer from "./week-container"
 import WeekSummary from "./week-summary"
@@ -25,17 +27,24 @@ import {
   RotaWorkspaceProvider,
   useRotaWorkspace,
 } from "@/features/rota/components/rota-workspace-provider"
+import type { WorkspaceBoardData } from "@/features/rota/types/workspace"
 import type { WorkspaceDragData } from "@/features/rota/types/workspace"
 
-function RotaWorkspace() {
+function RotaWorkspace({
+  boardData,
+  mode = "default",
+}: {
+  boardData: WorkspaceBoardData
+  mode?: "default" | "demo"
+}) {
   return (
-    <RotaWorkspaceProvider>
-      <RotaWorkspaceCanvas />
+    <RotaWorkspaceProvider boardData={boardData} mode={mode}>
+      <RotaWorkspaceCanvas mode={mode} />
     </RotaWorkspaceProvider>
   )
 }
 
-function RotaWorkspaceCanvas() {
+function RotaWorkspaceCanvas({ mode }: { mode: "default" | "demo" }) {
   const {
     assignEmployeeToShift,
     employeeMetricsById,
@@ -49,8 +58,8 @@ function RotaWorkspaceCanvas() {
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
-        delay: 100,
-        tolerance: 5,
+        delay: 0,
+        tolerance: 1,
       },
     }),
     useSensor(TouchSensor, {
@@ -65,7 +74,7 @@ function RotaWorkspaceCanvas() {
     setActiveDragData(getWorkspaceDragData(event.active.data.current))
   }
 
-  function handleDragEnd(event: DragEndEvent) {
+  async function handleDragEnd(event: DragEndEvent) {
     const dragData = getWorkspaceDragData(event.active.data.current)
     const overData = event.over?.data.current
     const shiftId =
@@ -93,17 +102,30 @@ function RotaWorkspaceCanvas() {
         return
       }
 
-      assignEmployeeToShift(dragData.employeeId, shiftId)
+      const result = await assignEmployeeToShift(dragData.employeeId, shiftId)
+
+      if (result.status === "overlap") {
+        toast.error(
+          `${result.employeeName} is already assigned to ${result.dayLabel} ${result.zoneName}.`
+        )
+      }
+
       return
     }
 
     if (dragData.type === "assignment" && isEmployeeListTarget) {
-      removeAssignment(dragData.assignmentId)
+      await removeAssignment(dragData.assignmentId)
       return
     }
 
     if (dragData.type === "assignment" && shiftId) {
-      moveAssignmentToShift(dragData.assignmentId, shiftId)
+      const result = await moveAssignmentToShift(dragData.assignmentId, shiftId)
+
+      if (result.status === "overlap") {
+        toast.error(
+          `${result.employeeName} is already assigned to ${result.dayLabel} ${result.zoneName}.`
+        )
+      }
     }
   }
 
@@ -132,13 +154,19 @@ function RotaWorkspaceCanvas() {
       }}
       onDragEnd={handleDragEnd}
     >
+      {mode === "default" ? <RotaNavigationBlocker /> : null}
+
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2">
-        <ToolBar />
+        <ToolBar mode={mode} />
         <div className="flex min-h-0 flex-1 gap-2 overflow-hidden">
-          <EmployeeList />
-          <WeekContainer />
+          <EmployeeList className="w-1/2 md:w-64" />
+          <WeekContainer className="w-1/2 md:w-auto" />
         </div>
-        <WeekSummary />
+        {mode === "default" ? (
+          <div className="hidden md:block">
+            <WeekSummary />
+          </div>
+        ) : null}
       </div>
 
       <ActiveEmployeeDragOverlay

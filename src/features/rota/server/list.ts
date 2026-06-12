@@ -1,17 +1,21 @@
 import { addDays, parseISO } from "date-fns"
 
 import type { RotaListPageData } from "@/features/rota/types"
-import type { RotaListSearch, RotaStatus } from "@/features/rota/schemas/rota-schemas"
+import type {
+  RotaListSearch,
+  RotaStatus,
+} from "@/features/rota/schemas/rota-schemas"
 import {
   getOrgCapabilitiesForRole,
   type OrganizationCapabilities,
 } from "@/lib/auth/get-org-capabilities"
-import { createSupabaseServerClient } from "@/lib/supabase"
+import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 import { normalizeWeekStart } from "@/lib/rota-schemas"
 
 import { listAccessibleLocations } from "@/features/rota/server/access"
 import { getMembershipRole } from "@/features/rota/server/membership"
+import { getLocationRole } from "@/lib/auth/has-location-permission"
 import {
   getSeenPublishedVersionsMap,
   getUserNameMap,
@@ -27,13 +31,17 @@ import {
 function buildEmptyRotaListPageData({
   orgSlug,
   organizationId,
+  locationSlug,
+  locationId,
   search,
   locations,
   hasUnreadRotaUpdates,
   capabilities,
 }: {
   orgSlug: string
-  organizationId: string
+  organizationId: string | null
+  locationSlug?: string
+  locationId?: string
   search: RotaListSearch
   locations: RotaListPageData["locations"]
   hasUnreadRotaUpdates: boolean
@@ -41,7 +49,9 @@ function buildEmptyRotaListPageData({
 }): RotaListPageData {
   return {
     orgSlug,
-    organizationId,
+    organizationId: organizationId ?? locationId ?? "",
+    workspaceType: organizationId ? "organization" : "location",
+    locationWorkspaceSlug: locationSlug,
     capabilities,
     locations,
     selectedLocation: null,
@@ -68,26 +78,45 @@ function buildEmptyRotaListPageData({
 async function getRotaListPageData({
   organizationId,
   orgSlug,
+  locationId,
+  locationSlug,
   userId,
   search,
 }: {
-  organizationId: string
-  orgSlug: string
+  organizationId?: string
+  orgSlug?: string
+  locationId?: string
+  locationSlug?: string
   userId: string
   search: RotaListSearch
 }): Promise<RotaListPageData> {
-  const role = await getMembershipRole(organizationId, userId)
+  const workspaceOrganizationId = organizationId ?? null
+  const role = workspaceOrganizationId
+    ? await getMembershipRole(workspaceOrganizationId, userId)
+    : locationId
+      ? await getLocationRole(locationId, userId)
+      : null
   const capabilities = getOrgCapabilitiesForRole(role)
-  const locations = await listAccessibleLocations(organizationId, userId, role)
+  const publishedOnly = !capabilities.canManageRota
+  const effectiveSearch = publishedOnly
+    ? { ...search, status: "published" as const }
+    : search
+  const locations = await listAccessibleLocations(
+    workspaceOrganizationId,
+    userId,
+    role
+  )
   const hasUnreadRotaUpdates = locations.some(
-    (location) => location.hasUnreadPublished,
+    (location) => location.hasUnreadPublished
   )
 
   if (!capabilities.canViewRota) {
     return buildEmptyRotaListPageData({
-      orgSlug,
-      organizationId,
-      search,
+      orgSlug: orgSlug ?? locationSlug ?? "",
+      organizationId: workspaceOrganizationId ?? locationId ?? "",
+      locationSlug,
+      locationId,
+      search: effectiveSearch,
       locations: [],
       hasUnreadRotaUpdates: false,
       capabilities,
@@ -103,71 +132,93 @@ async function getRotaListPageData({
 
   if (!selectedLocation) {
     return buildEmptyRotaListPageData({
-      orgSlug,
-      organizationId,
-      search,
+      orgSlug: orgSlug ?? locationSlug ?? "",
+      organizationId: workspaceOrganizationId ?? locationId ?? "",
+      locationSlug,
+      locationId,
+      search: effectiveSearch,
       locations,
       hasUnreadRotaUpdates,
       capabilities,
     })
   }
 
-  const [allLocationRotas, filteredRotas, templates, zoneCounts] = await Promise.all([
-    listLocationRotas({
-      organizationId,
-      locationId: selectedLocation.id,
-    }),
-    listLocationRotas({
-      organizationId,
-      locationId: selectedLocation.id,
-      search,
-    }),
-    getTemplatesForLocation(organizationId, selectedLocation.id),
-    getZoneCountByLocationIds([selectedLocation.id]),
-  ])
+  const [allLocationRotas, filteredRotas, templates, zoneCounts] =
+    await Promise.all([
+      listLocationRotas({
+        organizationId: workspaceOrganizationId,
+        locationId: selectedLocation.id,
+        publishedOnly,
+      }),
+      listLocationRotas({
+        organizationId: workspaceOrganizationId,
+        locationId: selectedLocation.id,
+        publishedOnly,
+        search: effectiveSearch,
+      }),
+      publishedOnly
+        ? Promise.resolve([])
+        : getTemplatesForLocation(workspaceOrganizationId, selectedLocation.id),
+      getZoneCountByLocationIds([selectedLocation.id]),
+    ])
 
   const seenVersions = await getSeenPublishedVersionsMap(
     allLocationRotas
       .filter((rota) => rota.status === "published")
       .map((rota) => rota.id),
-    userId,
+    userId
   )
   const userNameMap = await getUserNameMap(
     Array.from(
       new Set(
         filteredRotas.flatMap((rota) =>
           [rota.created_by, rota.published_by_user_id].filter(
-            (value): value is string => Boolean(value),
-          ),
-        ),
-      ),
-    ),
+            (value): value is string => Boolean(value)
+          )
+        )
+      )
+    )
   )
   const currentWeekStart = normalizeWeekStart(new Date())
   const zoneCount = zoneCounts.get(selectedLocation.id) ?? 0
-  const sortedRotas = sortRotas(filteredRotas, currentWeekStart)
+  const sortedRotas = sortRotas(filteredRotas)
   const totalItems = sortedRotas.length
-  const totalPages = Math.max(1, Math.ceil(totalItems / search.pageSize))
-  const safePage = Math.min(search.page, totalPages)
-  const offset = (safePage - 1) * search.pageSize
-  const pagedRotas = sortedRotas.slice(offset, offset + search.pageSize)
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalItems / effectiveSearch.pageSize)
+  )
+  const safePage = Math.min(effectiveSearch.page, totalPages)
+  const offset = (safePage - 1) * effectiveSearch.pageSize
+  const pagedRotas = sortedRotas.slice(
+    offset,
+    offset + effectiveSearch.pageSize
+  )
 
   return {
-    orgSlug,
-    organizationId,
+    orgSlug: orgSlug ?? locationSlug ?? "",
+    organizationId: workspaceOrganizationId ?? selectedLocation.id,
+    workspaceType: workspaceOrganizationId ? "organization" : "location",
+    locationWorkspaceSlug: locationSlug,
     capabilities,
     locations,
     selectedLocation,
     filters: {
-      ...search,
+      ...effectiveSearch,
       location: selectedLocation.slug,
       page: safePage,
     },
-    overview: buildOverview(allLocationRotas, seenVersions, currentWeekStart, userId),
+    overview: buildOverview(
+      allLocationRotas,
+      seenVersions,
+      currentWeekStart,
+      userId
+    ),
     latestDraft: buildLatestDraft(allLocationRotas, selectedLocation.slug),
     templates,
     rows: pagedRotas.map((rota) => {
-      const weekEnd = addDays(parseISO(rota.week_start), 6).toISOString().slice(0, 10)
+      const weekEnd = addDays(parseISO(rota.week_start), 6)
+        .toISOString()
+        .slice(0, 10)
       const isUnread =
         rota.status === "published" &&
         rota.published_version > (seenVersions.get(rota.id) ?? 0) &&
@@ -184,7 +235,7 @@ async function getRotaListPageData({
         status: rota.status as RotaStatus,
         createdBy: userNameMap.get(rota.created_by) ?? "Unknown",
         publishedBy: rota.published_by_user_id
-          ? userNameMap.get(rota.published_by_user_id) ?? null
+          ? (userNameMap.get(rota.published_by_user_id) ?? null)
           : null,
         updatedAt: formatUpdatedAt(rota.updated_at),
         scheduledHours: coerceNumber(rota.scheduled_hours),
@@ -193,11 +244,12 @@ async function getRotaListPageData({
         zoneCount,
         note: rota.note,
         isUnread,
+        hasUnpublishedChanges: rota.has_unpublished_changes,
       }
     }),
     pagination: {
       page: safePage,
-      pageSize: search.pageSize,
+      pageSize: effectiveSearch.pageSize,
       totalItems,
       totalPages,
     },
@@ -217,27 +269,37 @@ type RawRotaRow = {
   scheduled_staff_count: number
   shift_count: number
   note: string | null
+  has_unpublished_changes: boolean
 }
 
 async function listLocationRotas({
   organizationId,
   locationId,
   search,
+  publishedOnly = false,
 }: {
-  organizationId: string
+  organizationId: string | null
   locationId: string
   search?: RotaListSearch
+  publishedOnly?: boolean
 }): Promise<Array<RawRotaRow>> {
   const supabase = createSupabaseServerClient()
   let query = supabase
     .from("rotas")
     .select(
-      "id, week_start, status, created_by, updated_at, published_by_user_id, published_version, scheduled_hours, scheduled_staff_count, shift_count, note",
+      "id, week_start, status, created_by, updated_at, published_by_user_id, published_version, scheduled_hours, scheduled_staff_count, shift_count, note, has_unpublished_changes"
     )
-    .eq("organization_id", organizationId)
     .eq("location_id", locationId)
 
-  if (search?.status && search.status !== "all") {
+  query = organizationId
+    ? query.eq("organization_id", organizationId)
+    : query.is("organization_id", null)
+
+  if (publishedOnly) {
+    query = query.eq("status", "published")
+  }
+
+  if (!publishedOnly && search?.status && search.status !== "all") {
     query = query.eq("status", search.status)
   }
 
@@ -248,14 +310,20 @@ async function listLocationRotas({
 
   if (search?.range === "next-4-weeks") {
     const currentWeek = normalizeWeekStart(new Date())
-    const endWeek = addDays(parseISO(currentWeek), 21).toISOString().slice(0, 10)
+    const endWeek = addDays(parseISO(currentWeek), 21)
+      .toISOString()
+      .slice(0, 10)
     query = query.gte("week_start", currentWeek).lte("week_start", endWeek)
   }
 
   if (search?.range === "past-4-weeks") {
     const currentWeek = normalizeWeekStart(new Date())
-    const startWeek = addDays(parseISO(currentWeek), -28).toISOString().slice(0, 10)
-    const previousWeek = addDays(parseISO(currentWeek), -7).toISOString().slice(0, 10)
+    const startWeek = addDays(parseISO(currentWeek), -28)
+      .toISOString()
+      .slice(0, 10)
+    const previousWeek = addDays(parseISO(currentWeek), -7)
+      .toISOString()
+      .slice(0, 10)
     query = query.gte("week_start", startWeek).lte("week_start", previousWeek)
   }
 
@@ -280,7 +348,7 @@ function buildOverview(
   rows: Array<RawRotaRow>,
   seenVersions: Map<string, number>,
   currentWeekStart: string,
-  userId: string,
+  userId: string
 ) {
   return rows.reduce(
     (overview, rota) => {
@@ -312,14 +380,11 @@ function buildOverview(
       draftRotas: 0,
       publishedRotas: 0,
       unreadPublishedRotas: 0,
-    },
+    }
   )
 }
 
-function buildLatestDraft(
-  rows: Array<RawRotaRow>,
-  locationSlug: string,
-) {
+function buildLatestDraft(rows: Array<RawRotaRow>, locationSlug: string) {
   const latestDraft = rows
     .filter((rota) => rota.status === "draft")
     .sort((left, right) => right.updated_at.localeCompare(left.updated_at))
@@ -341,20 +406,9 @@ function buildLatestDraft(
   }
 }
 
-function sortRotas(rows: Array<RawRotaRow>, currentWeekStart: string) {
+function sortRotas(rows: Array<RawRotaRow>) {
   return [...rows].sort((left, right) => {
-    const leftIsUpcoming = left.week_start >= currentWeekStart
-    const rightIsUpcoming = right.week_start >= currentWeekStart
-
-    if (leftIsUpcoming !== rightIsUpcoming) {
-      return leftIsUpcoming ? -1 : 1
-    }
-
     if (left.week_start !== right.week_start) {
-      if (leftIsUpcoming) {
-        return left.week_start.localeCompare(right.week_start)
-      }
-
       return right.week_start.localeCompare(left.week_start)
     }
 
@@ -363,4 +417,3 @@ function sortRotas(rows: Array<RawRotaRow>, currentWeekStart: string) {
 }
 
 export { getRotaListPageData }
-

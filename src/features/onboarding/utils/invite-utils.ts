@@ -1,6 +1,8 @@
+import "@tanstack/react-start/server-only"
+
 import { randomUUID } from "node:crypto"
 
-import { getRequiredEnv } from "@/lib/env"
+import { getRequiredEnv } from "@/lib/env.server"
 
 function getAppBaseUrl() {
   return getRequiredEnv("BETTER_AUTH_URL").replace(/\/$/, "")

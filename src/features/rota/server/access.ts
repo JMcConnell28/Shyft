@@ -3,7 +3,9 @@ import {
   getOrgCapabilitiesForRole,
   type OrganizationCapabilities,
 } from "@/lib/auth/get-org-capabilities"
-import { createSupabaseServerClient } from "@/lib/supabase"
+import { getLocationRole } from "@/lib/auth/has-location-permission"
+import { getDatabase } from "@/lib/db"
+import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 
 import {
@@ -13,13 +15,16 @@ import {
 import { getMembershipRole } from "@/features/rota/server/membership"
 
 async function listAccessibleLocations(
-  organizationId: string,
+  organizationId: string | null,
   userId: string,
   role?: Awaited<ReturnType<typeof getMembershipRole>>,
 ): Promise<Array<AccessibleRotaLocation>> {
   const supabase = createSupabaseServerClient()
   const resolvedRole =
-    role ?? (await getMembershipRole(organizationId, userId))
+    role ??
+    (organizationId
+      ? await getMembershipRole(organizationId, userId)
+      : null)
   const capabilities = getOrgCapabilitiesForRole(resolvedRole)
 
   if (!resolvedRole || !capabilities.canViewRota) {
@@ -28,7 +33,7 @@ async function listAccessibleLocations(
 
   const baseLocations =
     capabilities.canManageRota
-      ? await listManagerAccessibleLocations(supabase, organizationId)
+      ? await listManagerAccessibleLocations(supabase, organizationId, userId)
       : await listEmployeeAccessibleLocations(supabase, organizationId, userId)
 
   if (baseLocations.length === 0) {
@@ -61,7 +66,7 @@ async function listAccessibleLocations(
 }
 
 async function ensureLocationAccessOrThrow(
-  organizationId: string,
+  organizationId: string | null,
   userId: string,
   locationId: string,
   role?: Awaited<ReturnType<typeof getMembershipRole>>,
@@ -81,14 +86,49 @@ async function ensureLocationAccessOrThrow(
 
 async function getHasUnreadRotaUpdates({
   organizationId,
+  locationId,
   userId,
   capabilities,
 }: {
-  organizationId: string
+  organizationId?: string | null
+  locationId?: string
   userId: string
   capabilities?: OrganizationCapabilities
 }) {
   if (capabilities && !capabilities.canViewRota) {
+    return false
+  }
+
+  if (locationId) {
+    const role = await getLocationRole(locationId, userId)
+    const locationCapabilities = getOrgCapabilitiesForRole(role)
+
+    if (capabilities && !capabilities.canViewRota) {
+      return false
+    }
+
+    if (!locationCapabilities.canViewRota) {
+      return false
+    }
+
+    const publishedRotas = await listPublishedRotasForLocations(
+      null,
+      [locationId],
+    )
+    const seenVersions = await getSeenPublishedVersionsMap(
+      publishedRotas.map((rota) => rota.id),
+      userId,
+    )
+
+    return publishedRotas.some((rota) => {
+      return (
+        rota.published_version > (seenVersions.get(rota.id) ?? 0) &&
+        rota.published_by_user_id !== userId
+      )
+    })
+  }
+
+  if (!organizationId) {
     return false
   }
 
@@ -104,31 +144,32 @@ export {
 
 async function listEmployeeAccessibleLocations(
   supabase: ReturnType<typeof createSupabaseServerClient>,
-  organizationId: string,
+  organizationId: string | null,
   userId: string,
 ): Promise<Array<Omit<AccessibleRotaLocation, "hasUnreadPublished">>> {
-  const employeeResult = await supabase
+  const employeeQuery = supabase
     .from("employees")
     .select("id")
-    .eq("organization_id", organizationId)
     .eq("user_id", userId)
     .eq("status", "active")
-    .maybeSingle()
+
+  const scopedEmployeeResult = await (organizationId
+    ? employeeQuery.eq("organization_id", organizationId)
+    : employeeQuery.is("organization_id", null)).maybeSingle()
 
   assertSupabaseSuccess(
-    employeeResult.error,
+    scopedEmployeeResult.error,
     "We could not load your employee profile.",
   )
 
-  if (!employeeResult.data) {
+  if (!scopedEmployeeResult.data) {
     return []
   }
 
   const assignmentResult = await supabase
     .from("employee_location_assignments")
     .select("location_id")
-    .eq("organization_id", organizationId)
-    .eq("employee_id", employeeResult.data.id)
+    .eq("employee_id", scopedEmployeeResult.data.id)
     .eq("is_enabled", true)
     .is("disabled_at", null)
 
@@ -145,12 +186,14 @@ async function listEmployeeAccessibleLocations(
     return []
   }
 
-  const locationResult = await supabase
+  const locationQuery = supabase
     .from("locations")
     .select("id, name, slug")
-    .eq("organization_id", organizationId)
     .in("id", locationIds)
     .order("name", { ascending: true })
+  const locationResult = await (organizationId
+    ? locationQuery.eq("organization_id", organizationId)
+    : locationQuery.is("organization_id", null))
 
   assertSupabaseSuccess(locationResult.error, "We could not load locations.")
 
@@ -163,14 +206,23 @@ async function listEmployeeAccessibleLocations(
 
 async function listManagerAccessibleLocations(
   supabase: ReturnType<typeof createSupabaseServerClient>,
-  organizationId: string,
+  organizationId: string | null,
+  userId: string,
 ): Promise<Array<Omit<AccessibleRotaLocation, "hasUnreadPublished">>> {
-  const result = await supabase
+  const query = supabase
     .from("locations")
     .select("id, name, slug")
-    .eq("organization_id", organizationId)
     .order("created_at", { ascending: true })
     .order("name", { ascending: true })
+
+  const result = organizationId
+    ? await query.eq("organization_id", organizationId)
+    : await query
+        .is("organization_id", null)
+        .in(
+          "id",
+          await listLocationMembershipIds(userId),
+        )
 
   assertSupabaseSuccess(result.error, "We could not load locations.")
 
@@ -179,5 +231,16 @@ async function listManagerAccessibleLocations(
     name: location.name,
     slug: location.slug,
   }))
+}
+
+async function listLocationMembershipIds(userId: string) {
+  const result = await getDatabase().query<{ location_id: string }>(
+    `select location_id
+     from public.location_memberships
+     where user_id = $1`,
+    [userId],
+  )
+
+  return result.rows.map((membership) => membership.location_id)
 }
 

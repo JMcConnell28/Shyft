@@ -15,6 +15,7 @@ type RotaTemplateSummary = {
   id: string
   name: string
   description: string | null
+  shiftCount?: number
 }
 
 type RotaListItem = {
@@ -35,6 +36,7 @@ type RotaListItem = {
   zoneCount: number
   note: string | null
   isUnread: boolean
+  hasUnpublishedChanges: boolean
 }
 
 type LatestDraftSummary = {
@@ -57,6 +59,8 @@ type PreviousPublishedSummary = {
 type RotaListPageData = {
   orgSlug: string
   organizationId: string
+  workspaceType?: "organization" | "location"
+  locationWorkspaceSlug?: string
   capabilities: OrganizationCapabilities
   locations: Array<AccessibleRotaLocation>
   selectedLocation: AccessibleRotaLocation | null
@@ -103,6 +107,8 @@ type RotaDetailRecord = {
 type RotaDetailPageData = {
   orgSlug: string
   organizationId: string
+  workspaceType?: "organization" | "location"
+  locationWorkspaceSlug?: string
   capabilities: OrganizationCapabilities
   locations: Array<AccessibleRotaLocation>
   selectedLocation: AccessibleRotaLocation
@@ -132,8 +138,35 @@ type CreateDraftRotaRecordResult = {
 }
 
 type PublishRotaVersionResult = {
+  notificationEmailError?: string
+  notificationEmailCount: number
   target: RotaRouteTarget
 }
+
+type CopyRotaBoardMode = "full" | "shifts-only"
+
+type CopyRotaBoardSkippedEmployee = {
+  employeeId: string
+  employeeName: string
+  reason: "missing" | "inactive" | "not-assigned"
+}
+
+type CopyRotaBoardResult =
+  | {
+      status: "success"
+      mode: CopyRotaBoardMode
+      overwritten: true
+      sourceWeekLabel: string
+      copiedShiftCount: number
+      copiedAssignmentCount: number
+      copiedNote: boolean
+      skippedEmployees: Array<CopyRotaBoardSkippedEmployee>
+    }
+  | {
+      status: "unavailable"
+      mode: CopyRotaBoardMode
+      reason: "no-source"
+    }
 
 type ExistingRotaRecord = {
   id: string
@@ -145,8 +178,17 @@ type RotaCreationPreview = {
   templates: Array<RotaTemplateSummary>
 }
 
+type RotaTemplateMutationResult = {
+  templateId: string
+}
+
+type ApplyRotaTemplateResult = {
+  success: true
+  shiftCount: number
+}
+
 type CreateDraftRotaRecordInput = {
-  organizationId: string
+  organizationId: string | null
   userId: string
   locationId: string
   locationSlug: string
@@ -158,12 +200,16 @@ type CreateDraftRotaRecordInput = {
 
 export type {
   AccessibleRotaLocation,
+  ApplyRotaTemplateResult,
   CreateDraftRotaRecordResult,
   CreateDraftRotaRecordInput,
   ExistingRotaRecord,
   ExistingRotaPreview,
   LatestDraftSummary,
   MembershipRole,
+  CopyRotaBoardMode,
+  CopyRotaBoardResult,
+  CopyRotaBoardSkippedEmployee,
   PublishRotaVersionResult,
   PreviousPublishedSummary,
   RotaRouteTarget,
@@ -173,4 +219,5 @@ export type {
   RotaListItem,
   RotaListPageData,
   RotaTemplateSummary,
+  RotaTemplateMutationResult,
 }

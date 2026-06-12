@@ -1,6 +1,8 @@
+import "@tanstack/react-start/server-only"
+
 import { Pool } from "pg"
 
-import { getRequiredEnv } from "@/lib/env"
+import { getRequiredEnv } from "@/lib/env.server"
 
 const globalForDatabase = globalThis as typeof globalThis & {
   shyftDatabasePool?: Pool

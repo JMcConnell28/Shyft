@@ -3,6 +3,8 @@ import { createServerFn } from "@tanstack/react-start"
 
 import type { RotaCreationPreview } from "@/features/rota/types"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
+import { getLocationRole, requireLocationPermission } from "@/lib/auth/has-location-permission"
+import { getDatabase } from "@/lib/db"
 import {
   createRotaDialogSchema,
   duplicateRotaSchema,
@@ -10,10 +12,9 @@ import {
   previewRotaCreationSchema,
   toIsoDate,
 } from "@/lib/rota-schemas"
-import { createSupabaseServerClient } from "@/lib/supabase"
+import { createSupabaseServerClient } from "@/lib/supabase.server"
 import {
   assertSupabaseSuccess,
-  getRequiredSupabaseRow,
 } from "@/lib/supabase-errors"
 
 import { ensureLocationAccessOrThrow } from "@/features/rota/server/access"
@@ -33,20 +34,24 @@ const previewRotaCreation = createServerFn({ method: "POST" })
       "@/features/rota/server/request-session"
     )
     const { session } = await requireVerifiedSessionOrThrow()
-    const organizationId = session.session.activeOrganizationId
-
-    if (!organizationId) {
-      throw new Error("Choose an organization before creating a rota.")
-    }
-
-    const role = await requireOrgPermission({
-      organizationId,
-      userId: session.user.id,
-      permissions: {
-        rota: ["create"],
-      },
-      errorMessage: "You do not have permission to create rotas.",
-    })
+    const organizationId = session.session.activeOrganizationId ?? null
+    const role = organizationId
+      ? await requireOrgPermission({
+          organizationId,
+          userId: session.user.id,
+          permissions: {
+            rota: ["create"],
+          },
+          errorMessage: "You do not have permission to create rotas.",
+        })
+      : await requireLocationPermission({
+          locationId: data.locationId,
+          userId: session.user.id,
+          permissions: {
+            rota: ["create"],
+          },
+          errorMessage: "You do not have permission to create rotas.",
+        })
 
     const normalizedWeekStart = normalizeWeekStart(data.weekStart)
     await ensureLocationAccessOrThrow(
@@ -84,20 +89,24 @@ const createRotaDraft = createServerFn({ method: "POST" })
       "@/features/rota/server/request-session"
     )
     const { session } = await requireVerifiedSessionOrThrow()
-    const organizationId = session.session.activeOrganizationId
-
-    if (!organizationId) {
-      throw new Error("Choose an organization before creating a rota.")
-    }
-
-    const role = await requireOrgPermission({
-      organizationId,
-      userId: session.user.id,
-      permissions: {
-        rota: ["create"],
-      },
-      errorMessage: "You do not have permission to create rotas.",
-    })
+    const organizationId = session.session.activeOrganizationId ?? null
+    const role = organizationId
+      ? await requireOrgPermission({
+          organizationId,
+          userId: session.user.id,
+          permissions: {
+            rota: ["create"],
+          },
+          errorMessage: "You do not have permission to create rotas.",
+        })
+      : await requireLocationPermission({
+          locationId: data.locationId,
+          userId: session.user.id,
+          permissions: {
+            rota: ["create"],
+          },
+          errorMessage: "You do not have permission to create rotas.",
+        })
     const normalizedWeekStart = normalizeWeekStart(data.weekStart)
     const { location } = await ensureLocationAccessOrThrow(
       organizationId,
@@ -105,10 +114,12 @@ const createRotaDraft = createServerFn({ method: "POST" })
       data.locationId,
       role,
     )
-    const orgSlug = await getOrganizationSlugById(organizationId)
+    const orgSlug = organizationId
+      ? await getOrganizationSlugById(organizationId)
+      : location.slug
 
     if (!orgSlug) {
-      throw new Error("We could not find that organization workspace.")
+      throw new Error("We could not find that workspace.")
     }
 
     return createDraftRotaRecord({
@@ -130,29 +141,27 @@ const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
       "@/features/rota/server/request-session"
     )
     const { session } = await requireVerifiedSessionOrThrow()
-    const organizationId = session.session.activeOrganizationId
-
-    if (!organizationId) {
-      throw new Error("Choose an organization before duplicating a rota.")
-    }
-
-    const role = await requireOrgPermission({
-      organizationId,
-      userId: session.user.id,
-      permissions: {
-        rota: ["create"],
-      },
-      errorMessage: "You do not have permission to duplicate rotas.",
-    })
+    const organizationId = session.session.activeOrganizationId ?? null
+    const role = organizationId
+      ? await requireOrgPermission({
+          organizationId,
+          userId: session.user.id,
+          permissions: {
+            rota: ["create"],
+          },
+          errorMessage: "You do not have permission to duplicate rotas.",
+        })
+      : null
     const supabase = createSupabaseServerClient()
-    const sourceResult = await supabase
+    const sourceQuery = supabase
       .from("rotas")
       .select(
         "location_id, week_start, note, shift_count, scheduled_hours, scheduled_staff_count",
       )
       .eq("id", data.rotaId)
-      .eq("organization_id", organizationId)
-      .maybeSingle()
+    const sourceResult = await (organizationId
+      ? sourceQuery.eq("organization_id", organizationId)
+      : sourceQuery.is("organization_id", null)).maybeSingle()
 
     assertSupabaseSuccess(sourceResult.error, "That rota could not be found.")
     const source = sourceResult.data
@@ -161,13 +170,17 @@ const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
       throw new Error("That rota could not be found.")
     }
 
+    const locationRole =
+      role ?? (await getLocationRole(source.location_id, session.user.id))
     const { location } = await ensureLocationAccessOrThrow(
       organizationId,
       session.user.id,
       source.location_id,
-      role,
+      locationRole,
     )
-    const orgSlug = await getOrganizationSlugById(organizationId)
+    const orgSlug = organizationId
+      ? await getOrganizationSlugById(organizationId)
+      : location.slug
 
     if (!orgSlug) {
       throw new Error("We could not find that organization workspace.")
@@ -191,32 +204,38 @@ const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
       }
     }
 
-    const duplicateInsertResult = await supabase
-      .from("rotas")
-      .insert({
-        organization_id: organizationId,
-        location_id: source.location_id,
-        week_start: nextWeekStart,
-        status: "draft",
-        note: source.note,
-        shift_count: source.shift_count,
-        scheduled_hours: coerceNumber(source.scheduled_hours),
-        scheduled_staff_count: source.scheduled_staff_count,
-        created_by: session.user.id,
-        source_type: "duplicate",
-        source_rota_id: data.rotaId,
-      })
-      .select("id")
-      .single()
+    const duplicateInsertResult = await getDatabase().query<{ id: string }>(
+      `insert into public.rotas (
+         organization_id,
+         location_id,
+         week_start,
+         status,
+         note,
+         shift_count,
+         scheduled_hours,
+         scheduled_staff_count,
+         created_by,
+         source_type,
+         source_rota_id
+       ) values ($1, $2, $3, 'draft', $4, $5, $6, $7, $8, 'duplicate', $9)
+       returning id`,
+      [
+        organizationId,
+        source.location_id,
+        nextWeekStart,
+        source.note,
+        source.shift_count,
+        coerceNumber(source.scheduled_hours),
+        source.scheduled_staff_count,
+        session.user.id,
+        data.rotaId,
+      ],
+    )
+    const duplicatedRota = duplicateInsertResult.rows[0]
 
-    assertSupabaseSuccess(
-      duplicateInsertResult.error,
-      "We could not duplicate that rota.",
-    )
-    const duplicatedRota = getRequiredSupabaseRow(
-      duplicateInsertResult.data,
-      "We could not duplicate that rota.",
-    )
+    if (!duplicatedRota) {
+      throw new Error("We could not duplicate that rota.")
+    }
 
     return {
       wasExisting: false,

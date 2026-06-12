@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 
 import type { Database } from "@/lib/database.types"
-import { getRequiredEnv, getRequiredPublicEnv } from "@/lib/env"
+import { getRequiredPublicEnv } from "@/lib/env"
 
 const supabaseUrl = getRequiredPublicEnv("VITE_SUPABASE_URL")
 const supabasePublishableKey = getRequiredPublicEnv(
@@ -22,12 +22,4 @@ const supabase = createClient<Database>(
   supabaseClientOptions,
 )
 
-function createSupabaseServerClient() {
-  return createClient<Database>(
-    getRequiredPublicEnv("VITE_SUPABASE_URL"),
-    getRequiredEnv("SUPABASE_SECRET_KEY"),
-    supabaseClientOptions,
-  )
-}
-
-export { createSupabaseServerClient, supabase }
+export { supabase }

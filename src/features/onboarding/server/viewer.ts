@@ -1,82 +1,224 @@
 import { createServerFn } from "@tanstack/react-start"
-import { getRequestHeaders } from "@tanstack/react-start/server"
+import { z } from "zod"
 
-import type { ViewerState } from "@/features/onboarding/types"
-import { auth } from "@/lib/auth"
+import type {
+  OrganizationSummary,
+  ViewerState,
+  WorkspaceSummary,
+} from "@/features/onboarding/types"
 import { isEmailVerificationSatisfied } from "@/lib/email-verification"
 import { organizationRouteParamsSchema } from "@/lib/onboarding-schemas"
 
 import {
+  getLocationBillingAccess,
+  getOrganizationBillingAccess,
+} from "@/features/billing/server/billing-accounts"
+import {
+  getLocationSummaryBySlug,
+  listLocationWorkspacesForUser,
   listOrganizationsForHeaders,
   setActiveOrganizationForHeaders,
 } from "@/features/onboarding/server/session"
-import { getActiveOrganizationState } from "@/features/onboarding/server/state"
+import { getOnboardingIntentForUser } from "@/features/onboarding/server/intent"
+import {
+  getActiveLocationState,
+  getActiveOrganizationState,
+} from "@/features/onboarding/server/state"
+import {
+  getAuthRequestHeaders,
+  readSessionFromRequestHeaders,
+} from "@/lib/auth-session.server"
+import type { AuthSession } from "@/lib/auth-session.server"
+
+function buildUser(session: AuthSession) {
+  return {
+    id: session.user.id,
+    name: session.user.name,
+    email: session.user.email,
+    emailVerified: isEmailVerificationSatisfied(session.user.emailVerified),
+  }
+}
+
+function organizationWorkspaces(
+  organizations: Array<OrganizationSummary>,
+): Array<WorkspaceSummary> {
+  return organizations.map((organization) => ({
+    id: organization.id,
+    name: organization.name,
+    slug: organization.slug,
+    type: "organization",
+    organizationId: organization.id,
+  }))
+}
 
 const getViewerState = createServerFn({ method: "GET" }).handler(
   async (): Promise<ViewerState | null> => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
+    const headers = getAuthRequestHeaders()
+    const session = await readSessionFromRequestHeaders()
 
     if (!session) {
       return null
     }
 
-    const organizations = await listOrganizationsForHeaders(headers)
+    const [organizations, locationWorkspaces, onboardingIntent] = await Promise.all([
+      listOrganizationsForHeaders(headers),
+      listLocationWorkspacesForUser(session.user.id),
+      getOnboardingIntentForUser(session.user.id),
+    ])
     const activeOrganizationId = session.session.activeOrganizationId ?? null
     const activeOrganization =
       organizations.find((organization) => organization.id === activeOrganizationId) ??
       null
+    const workspaces = [
+      ...locationWorkspaces,
+      ...organizationWorkspaces(organizations),
+    ]
+    const user = buildUser(session)
 
-    if (!activeOrganizationId || !activeOrganization) {
+    if (activeOrganizationId && activeOrganization) {
+      const activeState = await getActiveOrganizationState(activeOrganizationId)
+      const billing = await getOrganizationBillingAccess(activeOrganizationId)
+
       return {
-        user: {
-          id: session.user.id,
-          name: session.user.name,
-          email: session.user.email,
-          emailVerified: isEmailVerificationSatisfied(
-            session.user.emailVerified,
-          ),
-        },
+        user,
         activeOrganizationId,
         organizations,
-        activeOrganization: null,
-        onboarding: null,
-        locations: [],
-        staffGroups: [],
+        activeOrganization,
+        activeWorkspace: {
+          id: activeOrganization.id,
+          name: activeOrganization.name,
+          slug: activeOrganization.slug,
+          type: "organization",
+          organizationId: activeOrganization.id,
+        },
+        workspaces,
+        onboarding: activeState.onboarding,
+        trial: activeState.trial,
+        billing,
+        onboardingIntent,
+        locations: activeState.locations,
+        staffGroups: activeState.staffGroups,
       }
     }
 
-    const { onboarding, locations, staffGroups } =
-      await getActiveOrganizationState(activeOrganizationId)
+    const activeLocationWorkspace =
+      locationWorkspaces.find((workspace) => workspace.organizationId === null) ??
+      locationWorkspaces.at(0) ??
+      null
+
+    if (activeLocationWorkspace) {
+      const activeState = await getActiveLocationState(activeLocationWorkspace.id)
+      const billing = await getLocationBillingAccess(activeLocationWorkspace.id)
+
+      return {
+        user,
+        activeOrganizationId,
+        organizations,
+        activeOrganization: null,
+        activeWorkspace: activeLocationWorkspace,
+        workspaces,
+        onboarding: activeState.onboarding,
+        trial: activeState.trial,
+        billing,
+        onboardingIntent,
+        locations: activeState.locations,
+        staffGroups: activeState.staffGroups,
+      }
+    }
 
     return {
-      user: {
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
-        emailVerified: isEmailVerificationSatisfied(session.user.emailVerified),
-      },
+      user,
       activeOrganizationId,
       organizations,
-      activeOrganization,
-      onboarding,
-      locations,
-      staffGroups,
+      activeOrganization: null,
+      activeWorkspace: null,
+      workspaces,
+      onboarding: null,
+      trial: null,
+      billing: null,
+      onboardingIntent,
+      locations: [],
+      staffGroups: [],
     }
   },
 )
 
-const getViewerStateForOrganizationSlug = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => organizationRouteParamsSchema.parse(input))
+const getViewerStateForLocationSlug = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        locationSlug: organizationRouteParamsSchema.shape.orgSlug,
+      })
+      .parse(input),
+  )
   .handler(async ({ data }): Promise<ViewerState | null> => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
+    const headers = getAuthRequestHeaders()
+    const session = await readSessionFromRequestHeaders()
 
     if (!session) {
       return null
     }
 
-    const organizations = await listOrganizationsForHeaders(headers)
+    const [
+      organizations,
+      locationWorkspaces,
+      location,
+      onboardingIntent,
+    ] = await Promise.all([
+      listOrganizationsForHeaders(headers),
+      listLocationWorkspacesForUser(session.user.id),
+      getLocationSummaryBySlug(data.locationSlug),
+      getOnboardingIntentForUser(session.user.id),
+    ])
+
+    if (!location) {
+      return null
+    }
+
+    const activeWorkspace =
+      locationWorkspaces.find((workspace) => workspace.id === location.id) ?? null
+
+    if (!activeWorkspace) {
+      return null
+    }
+
+    const activeState = await getActiveLocationState(location.id)
+    const billing = await getLocationBillingAccess(location.id)
+
+    return {
+      user: buildUser(session),
+      activeOrganizationId: session.session.activeOrganizationId ?? null,
+      organizations,
+      activeOrganization: null,
+      activeWorkspace,
+      workspaces: [
+        ...locationWorkspaces,
+        ...organizationWorkspaces(organizations),
+      ],
+      onboarding: activeState.onboarding,
+      trial: activeState.trial,
+      billing,
+      onboardingIntent,
+      locations: activeState.locations,
+      staffGroups: activeState.staffGroups,
+    }
+  })
+
+const getViewerStateForOrganizationSlug = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => organizationRouteParamsSchema.parse(input))
+  .handler(async ({ data }): Promise<ViewerState | null> => {
+    const headers = getAuthRequestHeaders()
+    const session = await readSessionFromRequestHeaders()
+
+    if (!session) {
+      return null
+    }
+
+    const [organizations, locationWorkspaces, onboardingIntent] = await Promise.all([
+      listOrganizationsForHeaders(headers),
+      listLocationWorkspacesForUser(session.user.id),
+      getOnboardingIntentForUser(session.user.id),
+    ])
     const activeOrganization =
       organizations.find((organization) => organization.slug === data.orgSlug) ??
       null
@@ -89,23 +231,63 @@ const getViewerStateForOrganizationSlug = createServerFn({ method: "GET" })
       await setActiveOrganizationForHeaders(headers, activeOrganization.id)
     }
 
-    const { onboarding, locations, staffGroups } =
-      await getActiveOrganizationState(activeOrganization.id)
+    const activeState = await getActiveOrganizationState(activeOrganization.id)
+    const billing = await getOrganizationBillingAccess(activeOrganization.id)
 
     return {
-      user: {
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
-        emailVerified: isEmailVerificationSatisfied(session.user.emailVerified),
-      },
+      user: buildUser(session),
       activeOrganizationId: activeOrganization.id,
       organizations,
       activeOrganization,
-      onboarding,
-      locations,
-      staffGroups,
+      activeWorkspace: {
+        id: activeOrganization.id,
+        name: activeOrganization.name,
+        slug: activeOrganization.slug,
+        type: "organization",
+        organizationId: activeOrganization.id,
+      },
+      workspaces: [
+        ...locationWorkspaces,
+        ...organizationWorkspaces(organizations),
+      ],
+      onboarding: activeState.onboarding,
+      trial: activeState.trial,
+      billing,
+      onboardingIntent,
+      locations: activeState.locations,
+      staffGroups: activeState.staffGroups,
     }
   })
 
-export { getViewerState, getViewerStateForOrganizationSlug }
+const getViewerStateForWorkspaceSlug = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        workspaceSlug: organizationRouteParamsSchema.shape.orgSlug,
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }): Promise<ViewerState | null> => {
+    const locationViewer = await getViewerStateForLocationSlug({
+      data: {
+        locationSlug: data.workspaceSlug,
+      },
+    })
+
+    if (locationViewer) {
+      return locationViewer
+    }
+
+    return getViewerStateForOrganizationSlug({
+      data: {
+        orgSlug: data.workspaceSlug,
+      },
+    })
+  })
+
+export {
+  getViewerState,
+  getViewerStateForLocationSlug,
+  getViewerStateForOrganizationSlug,
+  getViewerStateForWorkspaceSlug,
+}

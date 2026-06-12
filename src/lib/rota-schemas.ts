@@ -8,6 +8,7 @@ export type {
 } from "@/features/rota/schemas/rota-schemas"
 export {
   createRotaDialogSchema,
+  deleteDraftRotaSchema,
   duplicateRotaSchema,
   getWeekRangeFromStart,
   isoDateSchema,
@@ -26,5 +27,6 @@ export {
   rotaStatusFilterSchema,
   rotaStatusSchema,
   toIsoDate,
+  unpublishRotaSchema,
   updateRotaNoteSchema,
 } from "@/features/rota/schemas/rota-schemas"

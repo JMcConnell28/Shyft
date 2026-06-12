@@ -2,90 +2,106 @@
 
 import * as React from "react"
 
-import {
-  placeholderAssignments,
-  placeholderDays,
-  placeholderEmployeeGroups,
-  placeholderEmployees,
-  placeholderLocations,
-  placeholderShifts,
-  placeholderZones,
-} from "@/features/rota/constants/placeholder-workspace"
 import type {
   CreateWorkspaceShiftInput,
   WorkspaceAssignment,
+  WorkspaceAssignmentMutationResult,
+  WorkspaceBoardData,
   WorkspaceEmployee,
   WorkspaceShift,
+  WorkspaceZone,
 } from "@/features/rota/types/workspace"
+import { formatMinutesAsHours } from "@/features/rota/utils/workspace-time"
 import {
-  formatMinutesAsHours,
+  DEFAULT_HOURLY_RATE_GBP,
+  formatCurrency,
+  getScheduledCostFromMinutes,
+} from "@/features/rota/utils/workspace-budget"
+import {
+  getShiftAbsoluteSegments,
   getShiftDurationMinutes,
-} from "@/features/rota/utils/workspace-time"
+  getShiftSortStart,
+} from "@/features/rota/utils/workspace-shifts"
+import {
+  buildWorkspaceInsights,
+  getZoneAppearance,
+} from "@/features/rota/utils/workspace-insights"
 
-function useRotaWorkspaceState() {
-  const [selectedLocationId, setSelectedLocationId] = React.useState(
-    placeholderLocations[0]?.id ?? "",
-  )
+function useRotaWorkspaceState({
+  boardData,
+  mode = "default",
+}: {
+  boardData: WorkspaceBoardData
+  mode?: "default" | "demo"
+}) {
+  const [meta, setMeta] = React.useState(boardData.meta)
   const [selectedZoneId, setSelectedZoneId] = React.useState("all")
   const [searchQuery, setSearchQuery] = React.useState("")
-  const [shiftsById, setShiftsById] = React.useState(() => mapById(placeholderShifts))
+  const [shiftsById, setShiftsById] = React.useState(() => mapById(boardData.shifts))
   const [assignmentsById, setAssignmentsById] = React.useState(() =>
-    mapById(placeholderAssignments),
+    mapById(boardData.assignments)
   )
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false)
 
-  const employeesById = React.useMemo(() => mapById(placeholderEmployees), [])
+  React.useEffect(() => {
+    setMeta(boardData.meta)
+    setShiftsById(mapById(boardData.shifts))
+    setAssignmentsById(mapById(boardData.assignments))
+    setHasUnsavedChanges(false)
+  }, [boardData])
+
+  const employeesById = React.useMemo(
+    () => mapById(boardData.employees),
+    [boardData.employees]
+  )
   const lowerSearchQuery = searchQuery.trim().toLowerCase()
 
   const visibleShiftIdsByDayId = React.useMemo(() => {
-    return placeholderDays.reduce<Record<string, string[]>>((map, day) => {
+    return boardData.days.reduce<Record<string, string[]>>((map, day) => {
       map[day.id] = Object.values(shiftsById)
         .filter((shift) => shift.dayId === day.id)
-        .filter((shift) => selectedZoneId === "all" || shift.zoneId === selectedZoneId)
+        .filter(
+          (shift) => selectedZoneId === "all" || shift.zoneId === selectedZoneId
+        )
+        .sort(
+          (left, right) =>
+            getShiftSortStart(left, boardData.location) -
+            getShiftSortStart(right, boardData.location)
+        )
         .map((shift) => shift.id)
 
       return map
     }, {})
-  }, [selectedZoneId, shiftsById])
+  }, [boardData.days, boardData.location, selectedZoneId, shiftsById])
 
   const assignmentIdsByShiftId = React.useMemo(() => {
-    return Object.values(assignmentsById).reduce<Record<string, string[]>>((map, assignment) => {
-      const list = map[assignment.shiftId] ?? []
-      list.push(assignment.id)
-      map[assignment.shiftId] = list
-      return map
-    }, {})
+    return Object.values(assignmentsById).reduce<Record<string, string[]>>(
+      (map, assignment) => {
+        const list = map[assignment.shiftId] ?? []
+        list.push(assignment.id)
+        map[assignment.shiftId] = list
+        return map
+      },
+      {}
+    )
   }, [assignmentsById])
 
-  const employeeMetricsById = React.useMemo(() => {
-    return Object.values(assignmentsById).reduce<
-      Record<string, { shiftCount: number; scheduledMinutes: number }>
-    >((map, assignment) => {
-      const shift = shiftsById[assignment.shiftId]
-
-      if (!shift) {
-        return map
-      }
-
-      const current = map[assignment.employeeId] ?? {
-        shiftCount: 0,
-        scheduledMinutes: 0,
-      }
-
-      current.shiftCount += 1
-      current.scheduledMinutes += getShiftDurationMinutes(
-        shift.startTime,
-        shift.endTime,
-      )
-      map[assignment.employeeId] = current
-
-      return map
-    }, {})
-  }, [assignmentsById, shiftsById])
+  const workspaceInsights = React.useMemo(
+    () =>
+      buildWorkspaceInsights({
+        assignmentsById,
+        days: boardData.days,
+        employeesById,
+        location: boardData.location,
+        shiftsById,
+      }),
+    [assignmentsById, boardData.days, boardData.location, employeesById, shiftsById]
+  )
 
   const employeeGroups = React.useMemo(() => {
-    return placeholderEmployeeGroups
+    return boardData.employeeGroups
       .map((group) => {
-        const employeeIds = placeholderEmployees
+        const employeeIds = boardData.employees
           .filter((employee) => employee.groupId === group.id)
           .filter((employee) => {
             if (!lowerSearchQuery) {
@@ -102,10 +118,10 @@ function useRotaWorkspaceState() {
         }
       })
       .filter((group) => group.employeeIds.length > 0 || !lowerSearchQuery)
-  }, [lowerSearchQuery])
+  }, [boardData.employeeGroups, boardData.employees, lowerSearchQuery])
 
   const daySummaries = React.useMemo(() => {
-    return placeholderDays.map((day) => {
+    return boardData.days.map((day) => {
       const totalMinutes = (visibleShiftIdsByDayId[day.id] ?? []).reduce(
         (minutes, shiftId) => {
           const assignmentIds = assignmentIdsByShiftId[shiftId] ?? []
@@ -117,82 +133,161 @@ function useRotaWorkspaceState() {
 
           return (
             minutes +
-            assignmentIds.length * getShiftDurationMinutes(shift.startTime, shift.endTime)
+            assignmentIds.length * getShiftDurationMinutes(shift, boardData.location)
           )
         },
-        0,
+        0
       )
 
       return {
         dayId: day.id,
+        totalCost: getScheduledCostFromMinutes(totalMinutes),
         totalMinutes,
         totalShifts: (visibleShiftIdsByDayId[day.id] ?? []).length,
       }
     })
-  }, [assignmentIdsByShiftId, shiftsById, visibleShiftIdsByDayId])
+  }, [
+    assignmentIdsByShiftId,
+    boardData.days,
+    boardData.location,
+    shiftsById,
+    visibleShiftIdsByDayId,
+  ])
 
   const totalScheduledMinutes = React.useMemo(() => {
     return daySummaries.reduce((sum, day) => sum + day.totalMinutes, 0)
   }, [daySummaries])
 
-  const assignEmployeeToShift = React.useCallback((employeeId: string, shiftId: string) => {
-    setAssignmentsById((currentAssignments) => {
-      const alreadyAssigned = Object.values(currentAssignments).some(
-        (assignment) =>
-          assignment.shiftId === shiftId && assignment.employeeId === employeeId,
-      )
+  const totalScheduledCost = React.useMemo(() => {
+    return daySummaries.reduce((sum, day) => sum + day.totalCost, 0)
+  }, [daySummaries])
 
-      if (alreadyAssigned) {
-        return currentAssignments
-      }
+  const getEmployee = React.useCallback(
+    (employeeId: string) =>
+      employeesById[employeeId] as WorkspaceEmployee | undefined,
+    [employeesById]
+  )
 
-      const nextAssignment: WorkspaceAssignment = {
-        id: createLocalId("assignment"),
-        employeeId,
-        shiftId,
-      }
+  const assignEmployeeToShift = React.useCallback(
+    async (
+      employeeId: string,
+      shiftId: string
+    ): Promise<WorkspaceAssignmentMutationResult> => {
+      let mutationResult: WorkspaceAssignmentMutationResult = { status: "success" }
 
-      return {
-        ...currentAssignments,
-        [nextAssignment.id]: nextAssignment,
-      }
-    })
-  }, [])
+      setAssignmentsById((currentAssignments) => {
+        const alreadyAssigned = Object.values(currentAssignments).some(
+          (assignment) =>
+            assignment.shiftId === shiftId && assignment.employeeId === employeeId
+        )
 
-  const moveAssignmentToShift = React.useCallback((assignmentId: string, shiftId: string) => {
-    setAssignmentsById((currentAssignments) => {
-      const assignment = currentAssignments[assignmentId]
+        if (alreadyAssigned) {
+          mutationResult = { status: "noop" }
+          return currentAssignments
+        }
 
-      if (!assignment || assignment.shiftId === shiftId) {
-        return currentAssignments
-      }
-
-      const alreadyAssigned = Object.values(currentAssignments).some(
-        (entry) =>
-          entry.id !== assignmentId &&
-          entry.shiftId === shiftId &&
-          entry.employeeId === assignment.employeeId,
-      )
-
-      if (alreadyAssigned) {
-        return currentAssignments
-      }
-
-      return {
-        ...currentAssignments,
-        [assignmentId]: {
-          ...assignment,
+        const overlapResult = getAssignmentOverlapResult({
+          assignmentsById: currentAssignments,
+          days: boardData.days,
+          employeeId,
+          employeesById,
+          location: boardData.location,
           shiftId,
-        },
-      }
-    })
-  }, [])
+          shiftsById,
+          zones: boardData.zones,
+        })
 
-  const removeAssignment = React.useCallback((assignmentId: string) => {
+        if (overlapResult) {
+          mutationResult = overlapResult
+          return currentAssignments
+        }
+
+        setHasUnsavedChanges(true)
+
+        const nextAssignment: WorkspaceAssignment = {
+          id: createLocalId("assignment"),
+          employeeId,
+          shiftId,
+        }
+
+        return {
+          ...currentAssignments,
+          [nextAssignment.id]: nextAssignment,
+        }
+      })
+
+      return mutationResult
+    },
+    [boardData.days, boardData.location, boardData.zones, employeesById, shiftsById]
+  )
+
+  const moveAssignmentToShift = React.useCallback(
+    async (
+      assignmentId: string,
+      shiftId: string
+    ): Promise<WorkspaceAssignmentMutationResult> => {
+      let mutationResult: WorkspaceAssignmentMutationResult = { status: "success" }
+
+      setAssignmentsById((currentAssignments) => {
+        const assignment = currentAssignments[assignmentId]
+
+        if (!assignment || assignment.shiftId === shiftId) {
+          mutationResult = { status: "noop" }
+          return currentAssignments
+        }
+
+        const alreadyAssigned = Object.values(currentAssignments).some(
+          (entry) =>
+            entry.id !== assignmentId &&
+            entry.shiftId === shiftId &&
+            entry.employeeId === assignment.employeeId
+        )
+
+        if (alreadyAssigned) {
+          mutationResult = { status: "noop" }
+          return currentAssignments
+        }
+
+        const overlapResult = getAssignmentOverlapResult({
+          assignmentsById: currentAssignments,
+          days: boardData.days,
+          employeeId: assignment.employeeId,
+          employeesById,
+          excludeAssignmentId: assignmentId,
+          location: boardData.location,
+          shiftId,
+          shiftsById,
+          zones: boardData.zones,
+        })
+
+        if (overlapResult) {
+          mutationResult = overlapResult
+          return currentAssignments
+        }
+
+        setHasUnsavedChanges(true)
+
+        return {
+          ...currentAssignments,
+          [assignmentId]: {
+            ...assignment,
+            shiftId,
+          },
+        }
+      })
+
+      return mutationResult
+    },
+    [boardData.days, boardData.location, boardData.zones, employeesById, shiftsById]
+  )
+
+  const removeAssignment = React.useCallback(async (assignmentId: string) => {
     setAssignmentsById((currentAssignments) => {
       if (!(assignmentId in currentAssignments)) {
         return currentAssignments
       }
+
+      setHasUnsavedChanges(true)
 
       const nextAssignments = { ...currentAssignments }
       delete nextAssignments[assignmentId]
@@ -200,12 +295,13 @@ function useRotaWorkspaceState() {
     })
   }, [])
 
-  const createShift = React.useCallback((input: CreateWorkspaceShiftInput) => {
+  const createShift = React.useCallback(async (input: CreateWorkspaceShiftInput) => {
     const nextShift: WorkspaceShift = {
       id: createLocalId("shift"),
       ...input,
     }
 
+    setHasUnsavedChanges(true)
     setShiftsById((currentShifts) => ({
       ...currentShifts,
       [nextShift.id]: nextShift,
@@ -214,36 +310,119 @@ function useRotaWorkspaceState() {
     return nextShift
   }, [])
 
-  const getEmployee = React.useCallback(
-    (employeeId: string) => employeesById[employeeId] as WorkspaceEmployee | undefined,
-    [employeesById],
+  const deleteShift = React.useCallback(
+    async (shiftId: string) => {
+      const shift = shiftsById[shiftId]
+
+      if (!shift) {
+        return {
+          status: "noop" as const,
+          removedAssignmentCount: 0,
+        }
+      }
+
+      const removedAssignmentIds = Object.values(assignmentsById)
+        .filter((assignment) => assignment.shiftId === shiftId)
+        .map((assignment) => assignment.id)
+
+      setHasUnsavedChanges(true)
+      setShiftsById((currentShifts) => {
+        const nextShifts = { ...currentShifts }
+        delete nextShifts[shiftId]
+        return nextShifts
+      })
+      setAssignmentsById((currentAssignments) => {
+        if (removedAssignmentIds.length === 0) {
+          return currentAssignments
+        }
+
+        const nextAssignments = { ...currentAssignments }
+
+        for (const assignmentId of removedAssignmentIds) {
+          delete nextAssignments[assignmentId]
+        }
+
+        return nextAssignments
+      })
+
+      return {
+        status: "success" as const,
+        removedAssignmentCount: removedAssignmentIds.length,
+      }
+    },
+    [assignmentsById, shiftsById]
   )
+
+  const markChangesSaved = React.useCallback(() => {
+    setHasUnsavedChanges(false)
+    setMeta((currentMeta) => ({
+      ...currentMeta,
+      hasUnpublishedChanges:
+        currentMeta.status === "published" ? true : currentMeta.hasUnpublishedChanges,
+    }))
+  }, [])
+
+  const setMetaNote = React.useCallback((note: string | null) => {
+    setMeta((currentMeta) => ({
+      ...currentMeta,
+      note,
+      hasUnpublishedChanges:
+        currentMeta.status === "published" ? true : currentMeta.hasUnpublishedChanges,
+    }))
+  }, [])
+
+  const markPublished = React.useCallback(() => {
+    setMeta((currentMeta) => ({
+      ...currentMeta,
+      status: "published",
+      publishedVersion: currentMeta.publishedVersion + 1,
+      hasUnpublishedChanges: false,
+      publishedSnapshotAvailable: true,
+    }))
+    setHasUnsavedChanges(false)
+  }, [])
 
   return {
     assignmentsById,
     assignmentIdsByShiftId,
+    assignEmployeeToShift,
     createShift,
+    dayInsightsById: workspaceInsights.dayInsightsById,
     daySummaries,
-    days: placeholderDays,
+    deleteShift,
+    days: boardData.days,
     employeeGroups,
-    employeeMetricsById,
+    employeeMetricsById: workspaceInsights.employeeMetricsById,
     employeesById,
+    formatCurrency,
     formatMinutesAsHours,
     getEmployee,
-    locations: placeholderLocations,
+    getZoneAppearance,
+    hasUnsavedChanges,
+    hourlyRateGbp: DEFAULT_HOURLY_RATE_GBP,
+    isDemo: mode === "demo",
+    locations: [boardData.location],
+    markChangesSaved,
+    meta,
+    markPublished,
     moveAssignmentToShift,
     removeAssignment,
     searchQuery,
-    selectedLocationId,
+    selectedLocation: boardData.location,
+    selectedLocationId: boardData.location.id,
     selectedZoneId,
     setSearchQuery,
-    setSelectedLocationId,
+    setMetaNote,
+    setSelectedLocationId: (_locationId: string) => undefined,
     setSelectedZoneId,
     shiftIdsByDayId: visibleShiftIdsByDayId,
+    shiftInsightsById: workspaceInsights.shiftInsightsById,
     shiftsById,
+    templates: boardData.templates,
+    totalScheduledCost,
     totalScheduledMinutes,
-    zones: placeholderZones,
-    assignEmployeeToShift,
+    unavailableEmployeeIdsByDayId: workspaceInsights.unavailableEmployeeIdsByDayId,
+    zones: boardData.zones,
   }
 }
 
@@ -261,6 +440,85 @@ function createLocalId(prefix: string) {
       : `${Date.now()}-${Math.round(Math.random() * 1000)}`
 
   return `${prefix}-${id}`
+}
+
+function getAssignmentOverlapResult({
+  assignmentsById,
+  days,
+  employeeId,
+  employeesById,
+  excludeAssignmentId,
+  location,
+  shiftId,
+  shiftsById,
+  zones,
+}: {
+  assignmentsById: Record<string, WorkspaceAssignment>
+  days: WorkspaceBoardData["days"]
+  employeeId: string
+  employeesById: Record<string, WorkspaceEmployee>
+  excludeAssignmentId?: string
+  location: WorkspaceBoardData["location"]
+  shiftId: string
+  shiftsById: Record<string, WorkspaceShift>
+  zones: WorkspaceZone[]
+}): WorkspaceAssignmentMutationResult | null {
+  const nextShift = shiftsById[shiftId]
+
+  if (!nextShift) {
+    return null
+  }
+
+  const hasOverlap = Object.values(assignmentsById).some((assignment) => {
+    if (assignment.employeeId !== employeeId) {
+      return false
+    }
+
+    if (excludeAssignmentId && assignment.id === excludeAssignmentId) {
+      return false
+    }
+
+    const existingShift = shiftsById[assignment.shiftId]
+
+    if (!existingShift) {
+      return false
+    }
+
+    const existingSegments = getShiftAbsoluteSegments(existingShift, {
+      days,
+      location,
+    })
+    const nextSegments = getShiftAbsoluteSegments(nextShift, {
+      days,
+      location,
+    })
+
+    return existingSegments.some((existingSegment) =>
+      nextSegments.some(
+        (nextSegment) =>
+          existingSegment.startMinutes < nextSegment.endMinutes &&
+          nextSegment.startMinutes < existingSegment.endMinutes
+      )
+    )
+  })
+
+  if (!hasOverlap) {
+    return null
+  }
+
+  const employeeName = employeesById[employeeId]?.name ?? "This team member"
+  const day = days.find((entry) => entry.id === nextShift.dayId)
+  const zoneName =
+    zones.find((entry) => entry.id === nextShift.zoneId)?.name ??
+    nextShift.zoneName ??
+    "this zone"
+
+  return {
+    status: "overlap",
+    employeeName,
+    dayLabel: day?.shortLabel ?? "that day",
+    zoneName,
+  }
 }
 
 export { useRotaWorkspaceState }

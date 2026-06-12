@@ -2,9 +2,15 @@ import * as React from "react"
 import { useServerFn } from "@tanstack/react-start"
 import { ChevronsUpDownIcon } from "lucide-react"
 
-import type { OrganizationSummary } from "@/features/onboarding/types"
+import type {
+  OrganizationSummary,
+  WorkspaceSummary,
+} from "@/features/onboarding/types"
 import { activateOrganization } from "@/lib/onboarding"
-import { getOrganizationAppPath } from "@/lib/organization-paths"
+import {
+  getWorkspaceAppPath,
+  type OrganizationAppRouteKey,
+} from "@/lib/organization-paths"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,17 +25,18 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-type WorkspaceRouteKey = "dashboard" | "rota"
-
-
 function WorkspaceSwitcher({
   organizations,
   activeOrganization,
+  workspaces,
+  activeWorkspace,
   routeKey,
 }: {
   organizations: Array<OrganizationSummary>
   activeOrganization: OrganizationSummary | null
-  routeKey: WorkspaceRouteKey
+  workspaces: Array<WorkspaceSummary>
+  activeWorkspace: WorkspaceSummary | null
+  routeKey: OrganizationAppRouteKey
 }) {
   const activateOrganizationFn = useServerFn(activateOrganization)
   const [isSwitchingOrganization, setIsSwitchingOrganization] =
@@ -41,8 +48,9 @@ function WorkspaceSwitcher({
     }
 
     const nextOrganization =
-      organizations.find((organization) => organization.id === organizationId) ??
-      null
+      organizations.find(
+        (organization) => organization.id === organizationId
+      ) ?? null
 
     setIsSwitchingOrganization(true)
     await activateOrganizationFn({
@@ -51,8 +59,17 @@ function WorkspaceSwitcher({
       },
     })
     window.location.href = nextOrganization
-      ? getOrganizationAppPath(nextOrganization.slug, routeKey)
+      ? getWorkspaceAppPath(nextOrganization.slug, routeKey)
       : "/dashboard"
+  }
+
+  function handleWorkspaceSwitch(workspace: WorkspaceSummary) {
+    if (workspace.type === "location") {
+      window.location.href = getWorkspaceAppPath(workspace.slug, routeKey)
+      return
+    }
+
+    void handleOrganizationSwitch(workspace.id)
   }
 
   return (
@@ -63,19 +80,23 @@ function WorkspaceSwitcher({
             render={
               <SidebarMenuButton
                 size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               />
             }
           >
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-              <span className="text-sm font-semibold">S</span>
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg p-1">
+              <img
+                src="/brand/rocketrota-logo.png"
+                alt="RocketRota"
+                className="size-full object-contain"
+              />
             </div>
             <div className="grid flex-1 overflow-hidden text-left text-xs leading-tight transition-[width,opacity] duration-200 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
               <span className="truncate font-medium">
-                {activeOrganization?.name ?? "Shyft"}
+                {activeWorkspace?.name ?? activeOrganization?.name ?? "RocketRota"}
               </span>
               <span className="truncate text-[11px] text-sidebar-foreground/70">
-                {activeOrganization?.slug ?? "Choose a workspace"}
+                {activeWorkspace?.slug ?? activeOrganization?.slug ?? "Choose a workspace"}
               </span>
             </div>
             <div className="ml-auto flex w-4 items-center justify-center overflow-hidden transition-[width,opacity] duration-200 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
@@ -90,7 +111,17 @@ function WorkspaceSwitcher({
           >
             <DropdownMenuGroup>
               <DropdownMenuLabel>Workspace</DropdownMenuLabel>
-              {organizations.map((organization) => (
+              {workspaces.length > 0 ? workspaces.map((workspace) => (
+                <DropdownMenuItem
+                  key={`${workspace.type}:${workspace.id}`}
+                  disabled={isSwitchingOrganization}
+                  onClick={() => {
+                    handleWorkspaceSwitch(workspace)
+                  }}
+                >
+                  {workspace.name}
+                </DropdownMenuItem>
+              )) : organizations.map((organization) => (
                 <DropdownMenuItem
                   key={organization.id}
                   disabled={isSwitchingOrganization}

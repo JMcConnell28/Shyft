@@ -52,7 +52,7 @@ describe("rota schemas", () => {
       location: undefined,
       page: 1,
       pageSize: 20,
-      range: "next-4-weeks",
+      range: "all",
       status: "all",
       to: undefined,
     })

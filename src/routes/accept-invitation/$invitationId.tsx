@@ -28,6 +28,7 @@ export const Route = createFileRoute("/accept-invitation/$invitationId")({
         search: {
           email: session.user.email,
           redirect: `/accept-invitation/${params.invitationId}`,
+          sent: false,
         },
       })
     }
@@ -39,10 +40,10 @@ export const Route = createFileRoute("/accept-invitation/$invitationId")({
   },
   head: () => ({
     meta: [
-      { title: "Accept Invitation | Shyft" },
+      { title: "Accept Invitation | RocketRota" },
       {
         name: "description",
-        content: "Accept a Better Auth organization invitation in Shyft.",
+        content: "Accept a Better Auth organization invitation in RocketRota.",
       },
     ],
   }),
@@ -81,7 +82,7 @@ function AcceptInvitationRoute() {
     <OnboardingShell
       badge="Organization invite"
       eyebrow="Accept invitation"
-      title="Join your organization on Shyft."
+      title="Join your organization on RocketRota."
       description="Manager and admin invites are handled through Better Auth. Once accepted, you will land in the right active workspace."
       progress={75}
     >

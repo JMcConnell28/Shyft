@@ -10,6 +10,9 @@ import type {
 type DraggableEmployeeCardProps = {
   employee: WorkspaceEmployee
   hoursLabel: string
+  contractHoursLabel?: string
+  hoursProgress?: number
+  scheduleStatus?: "under" | "balanced" | "over"
   shiftCount: number
   dragId: string
   dragData: WorkspaceDragData
@@ -20,6 +23,9 @@ type DraggableEmployeeCardProps = {
 function DraggableEmployeeCard({
   employee,
   hoursLabel,
+  contractHoursLabel,
+  hoursProgress,
+  scheduleStatus,
   shiftCount,
   dragId,
   dragData,
@@ -27,10 +33,17 @@ function DraggableEmployeeCard({
   variant = "pool",
 }: DraggableEmployeeCardProps) {
   return (
-    <DraggableItem dragId={dragId} dragData={dragData}>
+    <DraggableItem
+      dragId={dragId}
+      dragData={dragData}
+      dragStateClassName="opacity-35 scale-[0.98]"
+    >
       <EmployeeCard
         employee={employee}
         hoursLabel={hoursLabel}
+        contractHoursLabel={contractHoursLabel}
+        hoursProgress={hoursProgress}
+        scheduleStatus={scheduleStatus}
         shiftCount={shiftCount}
         layout={layout}
         variant={variant}

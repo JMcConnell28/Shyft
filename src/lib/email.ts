@@ -1,41 +1,65 @@
-import { getOptionalEnv, getRequiredEnv } from "@/lib/env"
+import "@tanstack/react-start/server-only"
+
+import type { ReactElement } from "react"
+import { Resend } from "resend"
+
+import { getOptionalEnv, getRequiredEnv } from "@/lib/env.server"
 
 type SendEmailOptions = {
   to: string
   subject: string
-  html: string
+  react: ReactElement
   text: string
+}
+
+const resendDevelopmentRecipient = "delivered@resend.dev"
+
+function getRecipient(to: string) {
+  const configuredTestRecipient = getOptionalEnv("RESEND_TEST_TO_EMAIL")
+
+  if (configuredTestRecipient) {
+    return configuredTestRecipient
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return resendDevelopmentRecipient
+  }
+
+  return to
+}
+
+function isDevelopmentEmailMode() {
+  return process.env.NODE_ENV !== "production"
 }
 
 async function sendTransactionalEmail({
   to,
   subject,
-  html,
+  react,
   text,
 }: SendEmailOptions) {
   const apiKey = getRequiredEnv("RESEND_API_KEY")
-  const from = getOptionalEnv("RESEND_FROM_EMAIL") ?? "Shyft <hello@shyft.local>"
+  const from =
+    getOptionalEnv("RESEND_FROM_EMAIL") ?? "RocketRota <onboarding@resend.dev>"
+  const resend = new Resend(apiKey)
+  const recipient = getRecipient(to)
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      subject,
-      html,
-      text,
-    }),
+  if (isDevelopmentEmailMode()) {
+    console.info(
+      `Development email routed to ${recipient}. Original recipient: ${to}. Subject: ${subject}`,
+    )
+  }
+
+  const { error } = await resend.emails.send({
+    from,
+    to: [recipient],
+    subject,
+    react,
+    text,
   })
 
-  if (!response.ok) {
-    const errorBody = await response.text()
-    throw new Error(
-      `Resend email delivery failed with ${response.status}: ${errorBody}`,
-    )
+  if (error) {
+    throw new Error(`Resend email delivery failed: ${error.message}`)
   }
 }
 

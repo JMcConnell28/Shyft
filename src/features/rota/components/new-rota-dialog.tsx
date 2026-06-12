@@ -56,11 +56,12 @@ type NewRotaDialogProps = {
   locations: Array<AccessibleRotaLocation>
   selectedLocation: AccessibleRotaLocation | null
   triggerLabel: string
-  triggerVariant?: "default" | "outline"
+  triggerVariant?: "default" | "outline" | "pill" | "raised"
   triggerClassName?: string
   triggerIcon?: "plus" | "template"
   disabled?: boolean
   defaultSourceType?: NewRotaSource
+  workspaceType?: "organization" | "location"
 }
 
 type PickerMode = "list" | "calendar"
@@ -74,6 +75,7 @@ function NewRotaDialog({
   triggerIcon = "plus",
   disabled = false,
   defaultSourceType = "blank",
+  workspaceType = "organization",
 }: NewRotaDialogProps) {
   const navigate = useNavigate()
   const [open, setOpen] = React.useState(false)
@@ -109,11 +111,26 @@ function NewRotaDialog({
         })
 
         await navigate({
-          to: "/o/$orgSlug/rota/$locationSlug/$rotaId",
-          params: result.target,
+          to:
+            workspaceType === "location"
+              ? "/w/$workspaceSlug/rota/$rotaId"
+              : "/w/$workspaceSlug/rota/$locationSlug/$rotaId",
+          params:
+            workspaceType === "location"
+              ? {
+                  workspaceSlug: result.target.locationSlug,
+                  rotaId: result.target.rotaId,
+                }
+              : {
+                  workspaceSlug: result.target.orgSlug,
+                  locationSlug: result.target.locationSlug,
+                  rotaId: result.target.rotaId,
+                },
         })
       } catch (submissionError) {
-        setError(getErrorMessage(submissionError, "We could not create that rota."))
+        setError(
+          getErrorMessage(submissionError, "We could not create that rota.")
+        )
       }
     },
   })
@@ -255,7 +272,6 @@ function NewRotaDialog({
           <Button
             type="button"
             variant={triggerVariant}
-            size="lg"
             className={cn("gap-2", triggerClassName)}
           />
         }

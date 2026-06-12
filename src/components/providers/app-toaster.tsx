@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast"
 function AppToaster() {
   return (
     <Toaster
-      position="top-center"
+      position="top-right"
       gutter={10}
       containerStyle={{
         inset: 16,

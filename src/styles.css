@@ -128,3 +128,56 @@
     @apply font-sans;
     }
 }
+
+@layer components {
+  .settings-content [class~="rounded-xl"][class~="border"] {
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 1px;
+    border-left-width: 0;
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .settings-content [class~="divide-y"][class~="rounded-xl"] {
+    border-right-width: 0;
+    border-left-width: 0;
+    border-radius: 0;
+  }
+
+  .settings-content input,
+  .settings-content select,
+  .settings-content textarea {
+    min-height: 2.75rem;
+  }
+
+  .settings-content .closing-time-input {
+    min-height: 2rem;
+  }
+
+  .settings-content [data-slot="card"] + [data-slot="card"] {
+    margin-top: 2rem;
+  }
+
+  .settings-content [data-slot="card-title"] {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .settings-content [data-slot="card-content"] > [class~="space-y-2"],
+  .settings-content [data-slot="card-content"] > [class~="space-y-3"] {
+    margin-top: 0;
+  }
+
+  @media (max-width: 767px) {
+    .settings-content [data-slot="card-header"] {
+      padding-top: 0;
+    }
+
+    .settings-content [class~="rounded-xl"][class~="border"] {
+      padding-right: 0 !important;
+      padding-left: 0 !important;
+    }
+  }
+}

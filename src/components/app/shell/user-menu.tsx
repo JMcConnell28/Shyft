@@ -1,5 +1,6 @@
 import * as React from "react"
 import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react"
+import { Link } from "@tanstack/react-router"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -20,10 +21,12 @@ import {
 function UserMenu({
   isSigningOut,
   onSignOut,
+  accountHref,
   user,
 }: {
   isSigningOut: boolean
   onSignOut: () => void
+  accountHref: string
   user: {
     name: string
     email: string
@@ -90,6 +93,9 @@ function UserMenu({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem render={<Link to={accountHref} />}>
+                Account
+              </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={isSigningOut}
                 onClick={() => {

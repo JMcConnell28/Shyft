@@ -1,15 +1,23 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
 import { LandingPage } from "@/components/app/landing-page"
+import { getHelpHostState } from "@/features/help-center/server/host"
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const { isHelpHost } = await getHelpHostState()
+
+    if (isHelpHost) {
+      throw redirect({ to: "/help" })
+    }
+  },
   head: () => ({
     meta: [
-      { title: "Northstar | TanStack Start Boilerplate" },
+      { title: "RocketRota | Rota management that launches productivity" },
       {
         name: "description",
         content:
-          "A polished landing page starter for a TanStack Start boilerplate with auth and dashboard foundations.",
+          "RocketRota helps teams build fair, efficient rotas with less admin and more clarity.",
       },
     ],
   }),

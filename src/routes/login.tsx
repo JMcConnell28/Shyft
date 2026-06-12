@@ -1,15 +1,15 @@
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { Link, createFileRoute, redirect } from "@tanstack/react-router"
 import { LockKeyholeIcon } from "lucide-react"
 
 import { AuthShell } from "@/components/app/auth-shell"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { TextFormField } from "@/components/forms/text-form-field"
+import { DemoLoginButton } from "@/features/demo/components/demo-login-button"
 import { authClient } from "@/lib/auth-client"
 import { getSession } from "@/lib/auth-server"
-import { isPublicDevelopmentEmailVerificationBypassed } from "@/lib/email-verification"
 import { createZodFieldValidator } from "@/lib/validation"
 import { emailSchema, passwordSchema } from "@/lib/onboarding-schemas"
 import { Badge } from "@/components/ui/badge"
@@ -41,11 +41,11 @@ export const Route = createFileRoute("/login")({
   },
   head: () => ({
     meta: [
-      { title: "Login | Shyft" },
+      { title: "Login | RocketRota" },
       {
         name: "description",
         content:
-          "Log in to your Shyft workspace.",
+          "Log in to your RocketRota workspace.",
       },
     ],
   }),
@@ -54,7 +54,6 @@ export const Route = createFileRoute("/login")({
 
 function LoginRoute() {
   const search = Route.useSearch()
-  const navigate = Route.useNavigate()
   const [error, setError] = React.useState<string | null>(null)
   const [isPasskeyPending, setIsPasskeyPending] = React.useState(false)
 
@@ -93,21 +92,6 @@ function LoginRoute() {
       })
 
       if (result.error) {
-        if (
-          !isPublicDevelopmentEmailVerificationBypassed() &&
-          typeof result.error.message === "string" &&
-          result.error.message.toLowerCase().includes("verify")
-        ) {
-          await navigate({
-            to: "/verify-email",
-            search: {
-              email: value.email,
-              redirect: search.redirect,
-            },
-          })
-          return
-        }
-
         setError(result.error.message ?? "Unable to sign in.")
         return
       }
@@ -150,7 +134,7 @@ function LoginRoute() {
       badge="Welcome back"
       eyebrow="Sign in"
       title="Sign in to manage schedules, staff, and venues."
-      description="Access your Shyft workspace to publish rotas, review changes, and keep your team aligned."
+      description="Access your RocketRota workspace to publish rotas, review changes, and keep your team aligned."
       alternateLabel="Need an account?"
       alternateHref="/sign-up"
     >
@@ -160,9 +144,9 @@ function LoginRoute() {
             <LockKeyholeIcon className="size-3" />
             Secure workspace access
           </Badge>
-          <CardTitle className="mt-2 text-2xl">Sign in to Shyft</CardTitle>
+          <CardTitle className="mt-2 text-2xl">Sign in to RocketRota</CardTitle>
           <CardDescription>
-            Sign in with your account, then continue into your active Shyft
+            Sign in with your account, then continue into your active RocketRota
             workspace or invitation flow.
           </CardDescription>
         </CardHeader>
@@ -207,7 +191,7 @@ function LoginRoute() {
                   type="password"
                   placeholder="Enter your password"
                   autoComplete="current-password webauthn"
-                  description="Your Shyft account is scoped to your organization workspace."
+                  description="Your RocketRota account is scoped to your organization workspace."
                   required
                 />
               )}
@@ -217,6 +201,17 @@ function LoginRoute() {
           <FormErrorMessage message={error} />
 
           <div className="space-y-3">
+            <div className="flex justify-end">
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto px-0"
+                nativeButton={false}
+                render={<Link to="/forgot-password" />}
+              >
+                Forgot password?
+              </Button>
+            </div>
             <FormSubmitButton
               className="w-full"
               isSubmitting={form.state.isSubmitting || isPasskeyPending}
@@ -224,6 +219,10 @@ function LoginRoute() {
             >
               Sign in
             </FormSubmitButton>
+            <DemoLoginButton
+              disabled={form.state.isSubmitting || isPasskeyPending}
+              onError={setError}
+            />
             <Button
               variant="outline"
               size="lg"

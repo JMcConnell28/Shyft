@@ -2,14 +2,16 @@ import { describe, expect, it } from "vitest"
 
 import {
   extractInviteDestination,
+  locationSetupSchema,
   normalizeOrganizationSlug,
   normalizeZoneName,
+  signUpSchema,
 } from "@/features/onboarding/schemas/onboarding-schemas"
 
 describe("onboarding schemas", () => {
   it("normalizes organization slugs into a clean path segment", () => {
     expect(normalizeOrganizationSlug(" The Red Lion Soho!! ")).toBe(
-      "the-red-lion-soho",
+      "the-red-lion-soho"
     )
   })
 
@@ -22,8 +24,8 @@ describe("onboarding schemas", () => {
   it("extracts staff join tokens from full URLs and raw tokens", () => {
     expect(
       extractInviteDestination(
-        "https://app.shyft.local/join/abc123def456ghi789",
-      ),
+        "https://app.rocketrota.local/join/abc123def456ghi789"
+      )
     ).toEqual({
       to: "/join/abc123def456ghi789",
     })
@@ -35,9 +37,68 @@ describe("onboarding schemas", () => {
 
   it("extracts organization invitation paths", () => {
     expect(
-      extractInviteDestination("/accept-invitation/invitation_123"),
+      extractInviteDestination("/accept-invitation/invitation_123")
     ).toEqual({
       to: "/accept-invitation/invitation_123",
     })
+  })
+
+  it("captures first and last names separately during signup", () => {
+    expect(
+      signUpSchema.safeParse({
+        firstName: "Jane",
+        lastName: "Smith",
+        email: "jane@example.com",
+        password: "password123",
+      }).success
+    ).toBe(true)
+  })
+
+  it("accepts fixed-location setup with at least one area", () => {
+    expect(
+      locationSetupSchema.safeParse({
+        businessType: "hospitality",
+        planningMode: "fixed_location",
+        locationName: "The Crown",
+        zoneNames: ["Bar"],
+        worksiteName: "",
+      }).success
+    ).toBe(true)
+  })
+
+  it("rejects fixed-location setup without areas", () => {
+    expect(
+      locationSetupSchema.safeParse({
+        businessType: "retail",
+        planningMode: "fixed_location",
+        locationName: "Main Street Shop",
+        zoneNames: [],
+        worksiteName: "",
+      }).success
+    ).toBe(false)
+  })
+
+  it("accepts variable-location setup without a first worksite", () => {
+    expect(
+      locationSetupSchema.safeParse({
+        businessType: "cleaning",
+        planningMode: "variable_location",
+        locationName: "North London Cleaning",
+        zoneNames: [],
+        worksiteName: "",
+      }).success
+    ).toBe(true)
+  })
+
+  it("rejects mismatched business type and planning mode", () => {
+    expect(
+      locationSetupSchema.safeParse({
+        businessType: "security",
+        planningMode: "fixed_location",
+        locationName: "City Security",
+        zoneNames: ["Post"],
+        worksiteName: "",
+      }).success
+    ).toBe(false)
   })
 })

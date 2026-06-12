@@ -1,20 +1,26 @@
 import { Button } from "@/components/ui/button"
 
-type FormSubmitButtonProps = {
+type FormSubmitButtonProps = React.ComponentProps<typeof Button> & {
   children: React.ReactNode
   isSubmitting?: boolean
   submittingText?: string
-  className?: string
 }
 
 function FormSubmitButton({
   children,
   isSubmitting = false,
   submittingText,
-  className,
+  disabled,
+  type = "submit",
+  ...props
 }: FormSubmitButtonProps) {
   return (
-    <Button className={className} type="submit" disabled={isSubmitting} size="lg">
+    <Button
+      {...props}
+      type={type}
+      disabled={disabled || isSubmitting}
+      size={props.size ?? "lg"}
+    >
       {isSubmitting ? submittingText ?? children : children}
     </Button>
   )

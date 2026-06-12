@@ -21,6 +21,7 @@ export const Route = createFileRoute("/_authed/_verified")({
         search: {
           email: viewer.user.email,
           redirect: location.href,
+          sent: false,
         },
       })
     }

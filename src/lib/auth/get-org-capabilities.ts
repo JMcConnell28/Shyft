@@ -14,6 +14,8 @@ type OrganizationCapabilities = {
   canPublishRota: boolean
   canManageRota: boolean
   canViewRotaCosts: boolean
+  canManageTimeClock: boolean
+  canManageSettings: boolean
   canManageLocations: boolean
   canInviteTeamMembers: boolean
   canManageTeamMembers: boolean
@@ -43,6 +45,12 @@ function getOrgCapabilitiesForRole(
   const canViewRotaCosts = hasOrgPermissionForRole(role, {
     rota: ["viewCosts"],
   })
+  const canManageTimeClock = hasOrgPermissionForRole(role, {
+    shift: ["update"],
+  })
+  const canManageSettings = hasOrgPermissionForRole(role, {
+    location: ["update"],
+  })
   const canManageLocations = hasOrgPermissionForRole(role, {
     location: ["create"],
   })
@@ -63,6 +71,8 @@ function getOrgCapabilitiesForRole(
     canPublishRota,
     canManageRota: canCreateRota || canUpdateRota || canPublishRota,
     canViewRotaCosts,
+    canManageTimeClock,
+    canManageSettings,
     canManageLocations,
     canInviteTeamMembers,
     canManageTeamMembers,

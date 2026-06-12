@@ -7,6 +7,15 @@ const verifiedRouteApi = getRouteApi("/_authed/_verified")
 
 export const Route = createFileRoute("/_authed/_verified/dashboard")({
   beforeLoad: ({ context }) => {
+    if (!context.viewer.activeWorkspace && context.viewer.organizations.length === 0) {
+      throw redirect({
+        to:
+          context.viewer.onboardingIntent === "join"
+            ? "/onboarding/join"
+            : "/onboarding/setup",
+      })
+    }
+
     const redirectTarget = getOrganizationAppRedirect(context.viewer, "dashboard")
 
     if (!redirectTarget) {
@@ -17,10 +26,10 @@ export const Route = createFileRoute("/_authed/_verified/dashboard")({
   },
   head: () => ({
     meta: [
-      { title: "Dashboard | Shyft" },
+      { title: "Dashboard | RocketRota" },
       {
         name: "description",
-        content: "Your active Shyft workspace and organization dashboard.",
+        content: "Your active RocketRota workspace and organization dashboard.",
       },
     ],
   }),

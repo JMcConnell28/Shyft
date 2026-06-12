@@ -1,8 +1,8 @@
-# Shyft Product Requirements
+# RocketRota Product Requirements
 
 ## 1. Product Summary
 
-Shyft is a rota management web application for hospitality teams and other shift-based businesses that need to build, publish, and adjust weekly schedules quickly. The product should reduce time spent creating rotas, improve staff visibility over shifts, and give managers better control over labour cost, coverage, availability, and change handling.
+RocketRota is a rota management web application for hospitality teams and other shift-based businesses that need to build, publish, and adjust weekly schedules quickly. The product should reduce time spent creating rotas, improve staff visibility over shifts, and give managers better control over labour cost, coverage, availability, and change handling.
 
 The first release should focus on a practical scheduling workflow for small to medium multi-role teams:
 
@@ -29,7 +29,7 @@ Teams in hospitality often manage rotas with spreadsheets, messaging apps, and m
 - Multi-site businesses struggle to standardize the process.
 - Teams that share staff across sister venues struggle to control who can be assigned where.
 
-Shyft should centralize this into one workflow with clear permissions, live updates, and an opinionated weekly scheduling experience.
+RocketRota should centralize this into one workflow with clear permissions, live updates, and an opinionated weekly scheduling experience.
 
 ## 3. Product Goals
 
@@ -67,7 +67,7 @@ These can be added later, but they should not delay an MVP aimed at weekly rota 
 
 ## 6A. Operating Model
 
-Shyft should support the following structure:
+RocketRota should support the following structure:
 
 - An `organization` represents the business.
 - A `location` represents a venue or premises owned by that organization.
@@ -102,7 +102,7 @@ This lets one business manage several venues while still building rotas at the r
 
 ### 7.0 Core Feature: Weekly Rota Builder
 
-The core feature of Shyft is a rota creation and distribution system designed primarily for desktop managers, while still working well on mobile for lighter staff-facing actions and limited management tasks.
+The core feature of RocketRota is a rota creation and distribution system designed primarily for desktop managers, while still working well on mobile for lighter staff-facing actions and limited management tasks.
 
 Product intent for this feature:
 
@@ -549,7 +549,7 @@ Audit requirements for permissions:
 
 ## 12. Initial Tech Stack
 
-This stack reflects the direction we are committing to for the first version of Shyft.
+This stack reflects the direction we are committing to for the first version of RocketRota.
 
 ### Frontend
 
@@ -740,7 +740,7 @@ These are the main decisions we should answer before implementation gets deep:
 
 ## 17A. Pricing And Billing Direction
 
-The commercial model should support selling Shyft as a SaaS product.
+The commercial model should support selling RocketRota as a SaaS product.
 
 Initial pricing approach:
 
@@ -768,7 +768,7 @@ Product implications:
 Given the current starter state, a sensible next step is:
 
 - Keep the existing marketing/auth/dashboard shells as the basis for the product.
-- Re-theme the product around Shyft and rota operations.
+- Re-theme the product around RocketRota and rota operations.
 - Add Better Auth for authentication and organization-aware membership.
 - Add Supabase for relational data and tenant-safe policies.
 - Add Resend for transactional email flows.

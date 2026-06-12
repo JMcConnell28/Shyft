@@ -15,30 +15,38 @@ import {
 } from "@/features/rota/server/lookups"
 import { formatUpdatedAt } from "@/features/rota/utils/week-utils"
 import { getMembershipRole } from "@/features/rota/server/membership"
+import { getLocationRole } from "@/lib/auth/has-location-permission"
 
 async function getRotaDetailPageData({
   organizationId,
+  locationId,
   orgSlug,
   userId,
   locationSlug,
   weekStart,
   rotaId,
 }: {
-  organizationId: string
-  orgSlug: string
+  organizationId?: string
+  locationId?: string
+  orgSlug?: string
   userId: string
   locationSlug: string
   weekStart?: string
   rotaId: string
 }): Promise<RotaDetailPageData | null> {
-  const role = await getMembershipRole(organizationId, userId)
+  const workspaceOrganizationId = organizationId ?? null
+  const role = workspaceOrganizationId
+    ? await getMembershipRole(workspaceOrganizationId, userId)
+    : locationId
+      ? await getLocationRole(locationId, userId)
+      : null
   const capabilities = getOrgCapabilitiesForRole(role)
 
   if (!capabilities.canViewRota) {
     return null
   }
 
-  const locations = await listAccessibleLocations(organizationId, userId, role)
+  const locations = await listAccessibleLocations(workspaceOrganizationId, userId, role)
   const selectedLocation =
     locations.find((location) => location.slug === locationSlug) ?? null
 
@@ -47,7 +55,7 @@ async function getRotaDetailPageData({
   }
 
   let detailRecord = await getRotaDetailRecord(
-    organizationId,
+    workspaceOrganizationId,
     selectedLocation.id,
     rotaId,
     userId
@@ -65,7 +73,7 @@ async function getRotaDetailPageData({
     )
 
     detailRecord = await getRotaDetailRecord(
-      organizationId,
+      workspaceOrganizationId,
       selectedLocation.id,
       rotaId,
       userId
@@ -74,15 +82,15 @@ async function getRotaDetailPageData({
 
   const refreshedLocations =
     detailRecord?.status === "published"
-      ? await listAccessibleLocations(organizationId, userId, role)
+      ? await listAccessibleLocations(workspaceOrganizationId, userId, role)
       : locations
   const nextSelectedLocation =
     refreshedLocations.find((location) => location.slug === locationSlug) ??
     selectedLocation
   const [templates, previousPublished] = await Promise.all([
-    getTemplatesForLocation(organizationId, nextSelectedLocation.id),
+    getTemplatesForLocation(workspaceOrganizationId, nextSelectedLocation.id),
     getPreviousPublishedForLocation(
-      organizationId,
+      workspaceOrganizationId,
       nextSelectedLocation.id,
       detailRecord?.weekStart ?? normalizeWeekStart(weekStart ?? new Date())
     ),
@@ -92,8 +100,10 @@ async function getRotaDetailPageData({
   const weekRange = getWeekRangeFromStart(resolvedWeekStart)
 
   return {
-    orgSlug,
-    organizationId,
+    orgSlug: orgSlug ?? locationSlug,
+    organizationId: workspaceOrganizationId ?? nextSelectedLocation.id,
+    workspaceType: workspaceOrganizationId ? "organization" : "location",
+    locationWorkspaceSlug: workspaceOrganizationId ? undefined : locationSlug,
     capabilities,
     locations: refreshedLocations,
     selectedLocation: nextSelectedLocation,

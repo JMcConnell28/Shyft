@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/invite")({
   beforeLoad: ({ context }) => {
     const viewer = context.viewer
 
-    if (!viewer.activeOrganization) {
+    if (!viewer.activeOrganization && !viewer.activeWorkspace) {
       throw redirect({ to: "/dashboard" })
     }
 
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/invite")({
   },
   head: () => ({
     meta: [
-      { title: "Invite Your Team | Shyft" },
+      { title: "Invite Your Team | RocketRota" },
       {
         name: "description",
         content:
