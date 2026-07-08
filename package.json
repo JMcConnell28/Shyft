@@ -19,7 +19,7 @@
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
     "supabase:types": "supabase gen types typescript --local > src/lib/database.types.ts",
-    "supabase:link:prod": "supabase link --project-ref txcleqsbnblbkuihndyc",
+    "supabase:link:prod": "supabase link --project-ref your-project-ref",
     "supabase:push:prod": "supabase db push"
   },
   "dependencies": {
