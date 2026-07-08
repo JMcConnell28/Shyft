@@ -2,6 +2,7 @@ export {
   acceptInviteSchema,
   acceptOrganizationInvitationSchema,
   activateOrganizationSchema,
+  dateOfBirthSchema,
   emailSchema,
   firstNameSchema,
   extractInviteDestination,

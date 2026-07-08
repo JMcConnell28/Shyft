@@ -1,4 +1,6 @@
 import { ensureLocationAccessOrThrow } from "@/features/rota/server/access"
+import { isRotaWeekBeforeCurrentWeek } from "@/features/rota/utils/week-utils"
+import { requireLocationPaidWriteAccess } from "@/features/billing/server/entitlements"
 import { requireVerifiedSessionOrThrow } from "@/features/rota/server/request-session"
 import { requireLocationPermission } from "@/lib/auth/has-location-permission"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
@@ -54,10 +56,15 @@ async function requireRotaWriteAccess({
 
   const rota = getRequiredSupabaseRow(
     rotaResult.data as WritableRota | null,
-    "That rota could not be found.",
+    "That rota could not be found."
   )
   const permissions = permissionByAction[permission]
   const organizationId = rota.organization_id
+
+  if (isRotaWeekBeforeCurrentWeek(rota.week_start)) {
+    throw new Error("Past rotas are locked and can no longer be edited.")
+  }
+
   const role = organizationId
     ? await requireOrgPermission({
         organizationId,
@@ -75,8 +82,9 @@ async function requireRotaWriteAccess({
     organizationId,
     session.user.id,
     rota.location_id,
-    role,
+    role
   )
+  await requireLocationPaidWriteAccess(rota.location_id)
 
   return {
     location,

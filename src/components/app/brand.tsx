@@ -4,7 +4,7 @@ function BrandMark({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex size-9 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-sm ring-1 ring-border/70",
+        "flex size-9 items-center justify-center overflow-hidden rounded-xl bg-white p-1",
         className
       )}
     >

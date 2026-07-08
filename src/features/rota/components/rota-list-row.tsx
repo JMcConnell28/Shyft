@@ -1,12 +1,14 @@
 import { Link } from "@tanstack/react-router"
 import {
   ArrowUpRightIcon,
-  DotIcon,
-  PencilIcon,
+  CalendarDaysIcon,
+  Clock3Icon,
+  MapPinIcon,
   MoreHorizontalIcon,
+  PencilIcon,
+  UsersRoundIcon,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -14,12 +16,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getStatusVariant } from "@/features/rota/utils/formatting"
+import {
+  rotaListActionButtonClassName,
+  rotaListInteractiveSurfaceClassName,
+} from "@/features/rota/constants/rota-list-styles"
+import { cn } from "@/lib/utils"
 
 type RotaListRowData = {
   id: string
   locationName: string
   locationSlug: string
+  weekStart: string
   weekLabel: string
   status: "draft" | "published"
   createdBy: string
@@ -55,7 +62,8 @@ function RotaListRow({
   isDeletingDraft: boolean
   isUnpublishing: boolean
 }) {
-  const canOpenPublishedView = row.status === "published"
+  const opensPublishedView = row.status === "published"
+  const canOpenRota = opensPublishedView || !canEdit
   const routeParams =
     workspaceType === "location"
       ? {
@@ -69,145 +77,179 @@ function RotaListRow({
         }
 
   return (
-    <article className="grid gap-2 px-4 py-2.5 text-sm transition-colors hover:bg-muted/10 md:grid-cols-[minmax(13rem,1.35fr)_minmax(7rem,0.75fr)_7rem_5rem_minmax(8rem,0.85fr)_8rem] md:items-center sm:px-5">
-      <div className="min-w-0">
-        <div className="flex min-w-0 items-center gap-1.5">
-          {row.isUnread ? (
-            <span className="inline-flex shrink-0 items-center text-rose-500">
-              <DotIcon className="-mx-1 size-6" />
-            </span>
-          ) : null}
-          <h2 className="truncate text-sm font-semibold tracking-tight">
+    <article
+      className={cn(
+        rotaListInteractiveSurfaceClassName,
+        "p-4",
+        row.isUnread && "border-blue-200"
+      )}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {row.isUnread ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
+                <span className="size-2 rounded-full bg-blue-600" />
+                Unread
+              </span>
+            ) : null}
+            <StatusBadge row={row} />
+          </div>
+
+          <h2 className="mt-3 truncate text-lg leading-tight font-semibold tracking-[-0.02em] text-neutral-950">
             {row.weekLabel}
           </h2>
-        </div>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">
-          Updated {row.updatedAt}
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 md:contents">
-        <div className="min-w-0 md:p-0">
-          <span className="mr-1 text-[10px] font-medium tracking-[0.08em] text-muted-foreground uppercase md:hidden">
-            Created by
-          </span>
-          <span className="truncate text-xs text-foreground md:block md:text-sm">
-            {row.createdBy}
-          </span>
-        </div>
-
-        <div className="min-w-0 md:p-0">
-          <span className="mr-1 text-[10px] font-medium tracking-[0.08em] text-muted-foreground uppercase md:hidden">
-            Status
-          </span>
-          <div className="inline-flex flex-wrap items-center gap-1.5 align-middle md:flex">
-            <Badge variant={getStatusVariant(row.status)}>
-              {row.status === "published" ? "Published" : "Draft"}
-            </Badge>
-            {row.status === "published" && row.hasUnpublishedChanges ? (
-              <Badge
-                variant="outline"
-                className="border-amber-200/80 bg-amber-50 text-amber-700"
-              >
-                Changes not live
-              </Badge>
-            ) : null}
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-neutral-500">
+            <span className="inline-flex items-center gap-1.5">
+              <MapPinIcon className="size-3.5 text-blue-600" />
+              {row.locationName}
+            </span>
+            <span>Updated {row.updatedAt}</span>
           </div>
         </div>
 
-        <div className="min-w-0 md:p-0">
-          <span className="mr-1 text-[10px] font-medium tracking-[0.08em] text-muted-foreground uppercase md:hidden">
-            Shifts
-          </span>
-          <span className="text-xs text-foreground md:block md:text-sm">
-            {row.shiftCount}
-          </span>
-        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {canOpenRota ? (
+            <Button
+              size="sm"
+              variant="base"
+              className={rotaListActionButtonClassName}
+              nativeButton={false}
+              render={
+                <Link
+                  to={
+                    opensPublishedView && workspaceType === "location"
+                      ? "/w/$workspaceSlug/rota/$rotaId/view"
+                      : opensPublishedView
+                        ? "/w/$workspaceSlug/rota/$locationSlug/$rotaId/view"
+                        : workspaceType === "location"
+                          ? "/w/$workspaceSlug/rota/$rotaId"
+                          : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
+                  }
+                  params={routeParams}
+                />
+              }
+            >
+              Open
+              <ArrowUpRightIcon className="size-3.5" />
+            </Button>
+          ) : null}
 
-        <div className="min-w-0 md:p-0">
-          <span className="mr-1 text-[10px] font-medium tracking-[0.08em] text-muted-foreground uppercase md:hidden">
-            Location
-          </span>
-          <span className="truncate text-xs text-foreground md:block md:text-sm">
-            {row.locationName}
-          </span>
+          {canEdit ? (
+            <Button
+              size="sm"
+              variant="base"
+              className={rotaListActionButtonClassName}
+              nativeButton={false}
+              render={
+                <Link
+                  to={
+                    workspaceType === "location"
+                      ? "/w/$workspaceSlug/rota/$rotaId"
+                      : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
+                  }
+                  params={routeParams}
+                />
+              }
+            >
+              <PencilIcon className="size-3.5" />
+              Edit
+            </Button>
+          ) : null}
+
+          {canEdit ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    size="sm"
+                    variant="base"
+                    type="button"
+                    className="h-8 w-9 text-neutral-900"
+                  />
+                }
+              >
+                <MoreHorizontalIcon className="size-4" />
+                <span className="sr-only">Rota actions</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                {row.status === "published" ? (
+                  <DropdownMenuItem
+                    disabled={isUnpublishing}
+                    onClick={() => onUnpublish(row.id)}
+                  >
+                    {isUnpublishing ? "Unpublishing..." : "Unpublish rota"}
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    disabled={isDeletingDraft}
+                    onClick={() => onDeleteDraft(row.id)}
+                  >
+                    {isDeletingDraft ? "Deleting..." : "Delete draft"}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
         </div>
       </div>
 
-      <div className="flex shrink-0 flex-wrap items-center gap-2 md:justify-end">
-        {canOpenPublishedView ? (
-          <Button
-            size="sm"
-            variant="pill"
-            className="gap-2"
-            nativeButton={false}
-            render={
-              <Link
-                to={
-                  workspaceType === "location"
-                    ? "/w/$workspaceSlug/rota/$rotaId/view"
-                    : "/w/$workspaceSlug/rota/$locationSlug/$rotaId/view"
-                }
-                params={routeParams}
-              />
-            }
-          >
-            Open
-            <ArrowUpRightIcon className="hidden size-3.5 sm:block" />
-          </Button>
-        ) : null}
-        {canEdit ? (
-          <Button
-            size="sm"
-            variant="pill"
-            className="gap-2"
-            nativeButton={false}
-            render={
-              <Link
-                to={
-                  workspaceType === "location"
-                    ? "/w/$workspaceSlug/rota/$rotaId"
-                    : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
-                }
-                params={routeParams}
-              />
-            }
-          >
-            <span className="sr-only sm:not-sr-only">Edit</span>
-            <PencilIcon className="size-3.5" />
-          </Button>
-        ) : null}
-        {canEdit ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button size="sm" variant="pill" type="button">
-                  <MoreHorizontalIcon className="size-3.5" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end" className="w-44">
-              {row.status === "published" ? (
-                <DropdownMenuItem
-                  disabled={isUnpublishing}
-                  onClick={() => onUnpublish(row.id)}
-                >
-                  {isUnpublishing ? "Unpublishing..." : "Unpublish rota"}
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  disabled={isDeletingDraft}
-                  onClick={() => onDeleteDraft(row.id)}
-                >
-                  {isDeletingDraft ? "Deleting..." : "Delete draft"}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : null}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <MetricPill icon={CalendarDaysIcon}>{row.shiftCount} shifts</MetricPill>
+        <MetricPill icon={UsersRoundIcon}>
+          {row.scheduledStaffCount} staff
+        </MetricPill>
+        <MetricPill icon={Clock3Icon}>
+          {row.scheduledHours.toFixed(1)}h
+        </MetricPill>
+      </div>
+
+      <div className="mt-3 truncate text-xs font-medium text-neutral-500">
+        {row.status === "published" && row.publishedBy ? (
+          <span>Published by {row.publishedBy}</span>
+        ) : (
+          <span>Created by {row.createdBy}</span>
+        )}
       </div>
     </article>
+  )
+}
+
+function StatusBadge({ row }: { row: RotaListRowData }) {
+  return (
+    <>
+      <span
+        className={cn(
+          "rounded-full px-2.5 py-1 text-[11px] font-semibold",
+          row.status === "published"
+            ? "bg-emerald-50 text-emerald-700"
+            : "bg-blue-50 text-blue-700"
+        )}
+      >
+        {row.status === "published" ? "Published" : "Draft"}
+      </span>
+      {row.status === "published" && row.hasUnpublishedChanges ? (
+        <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+          Changes not live
+        </span>
+      ) : null}
+    </>
+  )
+}
+
+function MetricPill({
+  children,
+  icon: Icon,
+}: {
+  children: React.ReactNode
+  icon: typeof CalendarDaysIcon
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-[10px] border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600">
+      <Icon className="size-3 text-blue-600" />
+      {children}
+    </span>
   )
 }
 

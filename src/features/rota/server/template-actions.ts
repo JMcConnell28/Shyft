@@ -263,8 +263,8 @@ async function copyRotaShiftsIntoTemplate(
      select
        $2,
        (shift.day_date::date - rota.week_start::date)::integer,
-       shift.zone_id,
-       shift.zone_name_snapshot,
+       case when zone.id is null then null else shift.zone_id end,
+       coalesce(zone.name, shift.zone_name_snapshot),
        shift.shift_type,
        shift.start_time,
        shift.end_time,
@@ -276,6 +276,9 @@ async function copyRotaShiftsIntoTemplate(
        )::integer
      from public.rota_shifts shift
      join public.rotas rota on rota.id = shift.rota_id
+     left join public.zones zone
+       on zone.id = shift.zone_id
+      and zone.deleted_at is null
      where shift.rota_id = $1
        and (shift.day_date::date - rota.week_start::date) between 0 and 6
      returning id`,
@@ -322,8 +325,8 @@ async function replaceRotaShiftsFromTemplate(
        $1,
        $2,
        ($3::date + template_shift.day_offset),
-       template_shift.zone_id,
-       template_shift.zone_name_snapshot,
+       case when zone.id is null then null else template_shift.zone_id end,
+       coalesce(zone.name, template_shift.zone_name_snapshot),
        template_shift.shift_type,
        template_shift.start_time,
        template_shift.end_time,
@@ -331,6 +334,9 @@ async function replaceRotaShiftsFromTemplate(
        template_shift.split_second_start_time,
        template_shift.split_second_end_time
      from public.rota_template_shifts template_shift
+     left join public.zones zone
+       on zone.id = template_shift.zone_id
+      and zone.deleted_at is null
      where template_shift.template_id = $4
      order by template_shift.day_offset asc, template_shift.sort_order asc
      returning id`,

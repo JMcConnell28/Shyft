@@ -6,6 +6,7 @@ const devRoleOverrideOptions = [
   "owner",
   "admin",
   "manager",
+  "supervisor",
   "employee",
 ] as const satisfies ReadonlyArray<OrganizationRole>
 

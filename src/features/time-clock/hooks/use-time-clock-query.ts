@@ -5,12 +5,13 @@ import { useServerFn } from "@tanstack/react-start"
 
 import { timeClockQueryKeys } from "@/features/time-clock/query-keys"
 import {
+  getAdminClockTagsPageData,
   getClockSettingsPageData,
   getEmployeeClockPageData,
   getManagerClockPageData,
 } from "@/features/time-clock/server-fns"
 
-function useEmployeeClockQuery(input: { token: string; userId: string }) {
+function useEmployeeClockQuery(input: { scanSessionId: string; userId: string }) {
   const getEmployeeClockPageDataFn = useServerFn(getEmployeeClockPageData)
 
   return useQuery({
@@ -19,7 +20,17 @@ function useEmployeeClockQuery(input: { token: string; userId: string }) {
   })
 }
 
+function useAdminClockTagsQuery(input: { userId: string }) {
+  const getAdminClockTagsPageDataFn = useServerFn(getAdminClockTagsPageData)
+
+  return useQuery({
+    queryKey: timeClockQueryKeys.adminTags(input),
+    queryFn: () => getAdminClockTagsPageDataFn({ data: input }),
+  })
+}
+
 function useManagerClockQuery(input: {
+  date?: string
   organizationId?: string
   locationId?: string
   userId: string
@@ -47,6 +58,7 @@ function useClockSettingsQuery(input: {
 }
 
 export {
+  useAdminClockTagsQuery,
   useClockSettingsQuery,
   useEmployeeClockQuery,
   useManagerClockQuery,

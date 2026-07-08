@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowRightIcon, LogInIcon } from "lucide-react"
+import { ArrowRightIcon, LayoutDashboardIcon, LogInIcon } from "lucide-react"
 
 import { navigationFeatures } from "@/features/marketing/content"
 import {
@@ -20,9 +20,13 @@ import { cn } from "@/lib/utils"
 
 function MarketingHeader({
   activePage = "home",
+  isAuthenticated = false,
 }: {
   activePage?: "home" | "pricing" | "features"
+  isAuthenticated?: boolean
 }) {
+  const AuthButtonIcon = isAuthenticated ? LayoutDashboardIcon : LogInIcon
+
   return (
     <header className="flex items-center justify-between gap-4 py-3 sm:py-4">
       <Link to="/" className="flex items-center gap-3">
@@ -119,15 +123,15 @@ function MarketingHeader({
 
       <div className="flex items-center gap-3">
         <Link
-          to="/login"
-          search={{ redirect: "/dashboard" }}
+          to={isAuthenticated ? "/dashboard" : "/login"}
+          search={isAuthenticated ? undefined : { redirect: "/dashboard" }}
           className={cn(
             buttonVariants({ variant: "pill", size: "lg" }),
             marketingLoginButtonClassName,
           )}
         >
-          <LogInIcon className="size-4" />
-          Log in
+          <AuthButtonIcon className="size-4" />
+          {isAuthenticated ? "Dashboard" : "Log in"}
         </Link>
         <Link
           to="/sign-up"

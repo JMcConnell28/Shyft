@@ -4,6 +4,7 @@ import type {
   WorkspaceSplitShift,
   WorkspaceStandardShift,
 } from "@/features/rota/types/workspace"
+import { DEFAULT_MINIMUM_WAGE_PENCE } from "@/features/staff-groups/utils/minimum-wage"
 
 const demoDays = [
   ["monday", "2026-06-08", "Mon", "8", "Jun"],
@@ -20,15 +21,23 @@ const demoCloseTimes = demoDays.reduce<Record<string, string>>((map, [id]) => {
   return map
 }, {})
 
-const demoCloseNextDay = demoDays.reduce<Record<string, boolean>>((map, [id]) => {
-  map[id] = id === "friday" || id === "saturday"
-  return map
-}, {})
+const demoCloseNextDay = demoDays.reduce<Record<string, boolean>>(
+  (map, [id]) => {
+    map[id] = id === "friday" || id === "saturday"
+    return map
+  },
+  {}
+)
 
 const demoRotaBoardData = {
   meta: {
     rotaId: "demo-rota-current-week",
     status: "draft",
+    canManage: true,
+    canEdit: true,
+    organizationId: null,
+    userId: "demo-user",
+    workspaceType: "location",
     note: "Opening\n- Daily manager handover at 10:45\n\nEvents\n- Live music Friday and Saturday from 20:00",
     weekStart: "2026-06-08",
     weekEnd: "2026-06-14",
@@ -36,6 +45,7 @@ const demoRotaBoardData = {
     publishedVersion: 0,
     hasUnpublishedChanges: false,
     publishedSnapshotAvailable: false,
+    budgetPence: 475000,
   },
   location: {
     id: "demo-location",
@@ -195,6 +205,13 @@ function employee(
     groupId,
     groupColor,
     weeklyHours,
+    compensation:
+      groupId === "management"
+        ? { type: "salary" as const, weeklySalaryPence: 85000 }
+        : {
+            type: "hourly" as const,
+            hourlyRatePence: DEFAULT_MINIMUM_WAGE_PENCE,
+          },
   }
 }
 

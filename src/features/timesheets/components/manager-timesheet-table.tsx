@@ -33,41 +33,46 @@ function ManagerTimesheetTable({
   input: TimesheetScopeInput
   timesheet: ManagerTimesheet
 }) {
-  const [selectedEntry, setSelectedEntry] = React.useState<TimesheetEntry | null>(
-    null,
-  )
+  const [selectedEntry, setSelectedEntry] =
+    React.useState<TimesheetEntry | null>(null)
 
   return (
     <>
-      <Card className="hidden border-border/70 shadow-sm lg:block">
-        <CardHeader>
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-sm">Team hours</CardTitle>
-            <Badge variant="outline">
-              {formatHours(timesheet.payableMinutes)} payable
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
+      <div className="hidden p-4 lg:block">
+        <div className="overflow-hidden rounded-[12px] border border-[#dfe5f0] bg-white">
+          <Table className="text-[#11245a]">
             <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-48">Employee</TableHead>
+              <TableRow className="border-[#edf0f6] bg-[#fbfcff] hover:bg-[#fbfcff]">
+                <TableHead className="min-w-48 text-[11px] font-semibold tracking-[0.08em] text-[#7a86a4] uppercase">
+                  Employee
+                </TableHead>
                 {timesheet.employees[0]?.days.map((day) => (
-                  <TableHead key={day.date} className="min-w-36 text-center">
+                  <TableHead
+                    key={day.date}
+                    className="min-w-36 text-center text-[11px] font-semibold tracking-[0.08em] text-[#7a86a4] uppercase"
+                  >
                     <span className="block">{day.dayLabel}</span>
-                    <span className="text-muted-foreground">{day.dateLabel}</span>
+                    <span className="font-medium tracking-normal text-[#7a86a4] normal-case">
+                      {day.dateLabel}
+                    </span>
                   </TableHead>
                 ))}
-                <TableHead className="text-right">Payable</TableHead>
+                <TableHead className="text-right text-[11px] font-semibold tracking-[0.08em] text-[#7a86a4] uppercase">
+                  Payable
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {timesheet.employees.map((employee) => (
-                <TableRow key={employee.employeeId}>
+                <TableRow
+                  key={employee.employeeId}
+                  className="border-[#edf0f6] hover:bg-[#fbfcff]"
+                >
                   <TableCell className="align-top">
-                    <p className="font-medium">{employee.employeeName}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="font-semibold text-[#11245a]">
+                      {employee.employeeName}
+                    </p>
+                    <p className="mt-1 text-xs font-medium text-[#7a86a4]">
                       {employee.locations.join(", ") || "No location"}
                     </p>
                   </TableCell>
@@ -76,23 +81,28 @@ function ManagerTimesheetTable({
                       <DayCell day={day} onEdit={setSelectedEntry} />
                     </TableCell>
                   ))}
-                  <TableCell className="text-right align-top font-semibold">
+                  <TableCell className="text-right align-top font-semibold text-[#11245a]">
                     {formatHours(employee.payableMinutes)}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="space-y-3 lg:hidden">
         {timesheet.employees.map((employee) => (
-          <Card key={employee.employeeId} className="border-border/70 shadow-sm">
+          <Card
+            key={employee.employeeId}
+            className="border-border/70 shadow-sm"
+          >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <CardTitle className="text-sm">{employee.employeeName}</CardTitle>
+                  <CardTitle className="text-sm">
+                    {employee.employeeName}
+                  </CardTitle>
                   <p className="text-xs text-muted-foreground">
                     {employee.locations.join(", ") || "No location"}
                   </p>
@@ -104,12 +114,17 @@ function ManagerTimesheetTable({
             </CardHeader>
             <CardContent className="space-y-3">
               {employee.days.map((day) => (
-                <div key={day.date} className="rounded-lg border border-border/70 p-3">
+                <div
+                  key={day.date}
+                  className="rounded-lg border border-border/70 p-3"
+                >
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-sm font-medium">
                       {day.dayLabel} {day.dateLabel}
                     </p>
-                    <Badge variant="outline">{formatHours(day.payableMinutes)}</Badge>
+                    <Badge variant="outline">
+                      {formatHours(day.payableMinutes)}
+                    </Badge>
                   </div>
                   <DayCell day={day} onEdit={setSelectedEntry} />
                 </div>
@@ -140,7 +155,7 @@ function DayCell({
   onEdit: (entry: TimesheetEntry) => void
 }) {
   if (day.entries.length === 0) {
-    return <p className="text-center text-xs text-muted-foreground">-</p>
+    return <p className="text-center text-xs font-medium text-[#9aa4bb]">-</p>
   }
 
   return (
@@ -165,9 +180,9 @@ function DayCell({
 
 function CellMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-muted/30 px-1.5 py-1">
-      <p className="text-muted-foreground">{label}</p>
-      <p className="font-medium">{value}</p>
+    <div className="rounded-[8px] border border-[#edf0f6] bg-[#fbfcff] px-1.5 py-1">
+      <p className="font-medium text-[#7a86a4]">{label}</p>
+      <p className="font-semibold text-[#11245a]">{value}</p>
     </div>
   )
 }
@@ -185,19 +200,19 @@ function EntryButton({
     <Button
       variant="outline"
       size="sm"
-      className="h-auto w-full justify-between gap-2 px-2 py-1.5 text-left"
+      className="h-auto w-full justify-between gap-2 rounded-[9px] border-[#dfe5f0] bg-white px-2 py-1.5 text-left shadow-none hover:bg-[#fbfcff]"
       disabled={!isEditable}
       onClick={() => onEdit(entry)}
     >
       <span className="min-w-0">
-        <span className="block truncate text-xs font-medium">
+        <span className="block truncate text-xs font-semibold text-[#11245a]">
           {entry.zoneName ?? "Unmatched"}
         </span>
-        <span className="block text-[11px] text-muted-foreground">
+        <span className="block text-[11px] font-medium text-[#7a86a4]">
           {entry.clockedInAt
             ? `${formatTime(entry.clockedInAt)} - ${formatTime(entry.clockedOutAt)}`
             : `${formatTime(entry.scheduledStartAt)} - ${formatTime(
-                entry.scheduledEndAt,
+                entry.scheduledEndAt
               )}`}
         </span>
       </span>

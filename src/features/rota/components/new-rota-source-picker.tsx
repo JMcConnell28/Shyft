@@ -1,36 +1,46 @@
 "use client"
 
+import {
+  CheckCircle2Icon,
+  CopyPlusIcon,
+  FileIcon,
+  LayoutGridIcon,
+} from "lucide-react"
 import type { ComponentType } from "react"
-import { CopyPlusIcon, FileStackIcon, PlusIcon } from "lucide-react"
 
-import type { RotaCreationPreview } from "@/features/rota/types"
 import type { NewRotaSource } from "@/features/rota/schemas/rota-schemas"
-import { Field, FieldContent, FieldError, FieldLabel } from "@/components/ui/field"
+import type { RotaCreationPreview } from "@/features/rota/types"
 import { cn } from "@/lib/utils"
 
-const sourceOptions: Array<{
+type SourceOption = {
   value: NewRotaSource
   title: string
   description: string
   icon: ComponentType<{ className?: string }>
-}> = [
+  tone: string
+}
+
+const sourceOptions: Array<SourceOption> = [
   {
     value: "blank",
     title: "Blank rota",
-    description: "Start fresh with an empty draft for the selected week.",
-    icon: PlusIcon,
+    description: "Start fresh",
+    icon: FileIcon,
+    tone: "bg-[#eaf0ff] text-[#0069ff]",
   },
   {
     value: "previous-week",
-    title: "Copy previous week",
-    description: "Reuse the latest published rota for this location as a base.",
+    title: "Copy last week",
+    description: "Use latest published",
     icon: CopyPlusIcon,
+    tone: "bg-[#e1f8eb] text-[#00a84f]",
   },
   {
     value: "template",
     title: "Use template",
-    description: "Start from one of your saved rota templates.",
-    icon: FileStackIcon,
+    description: "Apply a saved pattern",
+    icon: LayoutGridIcon,
+    tone: "bg-[#f2e6ff] text-[#8d48ec]",
   },
 ]
 
@@ -48,12 +58,11 @@ function NewRotaSourcePicker({
   error?: string
 }) {
   const availableTemplates = preview?.templates ?? []
-  const previousPublishedLabel = preview?.previousPublished?.weekLabel ?? null
 
   return (
-    <Field>
-      <FieldLabel>Start from</FieldLabel>
-      <FieldContent className="grid gap-2">
+    <section>
+      <h3 className="text-xs font-semibold text-[#7a86a4]">Start with</h3>
+      <div className="mt-1.5 grid grid-cols-3 gap-2">
         {sourceOptions.map((option) => {
           const isDisabled =
             (option.value === "previous-week" &&
@@ -62,6 +71,8 @@ function NewRotaSourcePicker({
             (option.value === "template" &&
               !isPreviewPending &&
               availableTemplates.length === 0)
+          const isSelected = value === option.value
+          const Icon = option.icon
 
           return (
             <button
@@ -74,33 +85,42 @@ function NewRotaSourcePicker({
               }}
               disabled={isDisabled}
               className={cn(
-                "flex items-start gap-3 rounded-xl border px-3 py-3 text-left transition-colors",
-                value === option.value
-                  ? "border-primary bg-primary/5 text-foreground"
-                  : "border-border/70 bg-background hover:bg-muted/30",
-                isDisabled && "cursor-not-allowed opacity-50",
+                "relative flex min-h-[4.25rem] w-full items-center gap-2 rounded-[10px] border bg-[#fbfcff] px-2.5 text-left transition-colors hover:border-[#b8c3d9] hover:bg-white",
+                isSelected
+                  ? "border-[#0069ff] bg-white text-[#11245a] ring-1 ring-[#0069ff]"
+                  : "border-[#dfe5f0] text-[#11245a]",
+                isDisabled && "cursor-not-allowed opacity-45"
               )}
             >
-              <div className="mt-0.5 rounded-lg bg-muted p-2">
-                <option.icon className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-sm font-medium">{option.title}</div>
-                <div className="mt-1 text-xs text-muted-foreground">
+              {isSelected ? (
+                <CheckCircle2Icon className="absolute top-1.5 right-1.5 size-3.5 fill-[#0069ff] text-white" />
+              ) : null}
+              <span
+                className={cn(
+                  "flex size-8 shrink-0 items-center justify-center rounded-[9px]",
+                  option.tone
+                )}
+              >
+                <Icon className="size-4" />
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-xs leading-tight font-bold">
+                  {option.title}
+                </span>
+                <span className="mt-1 block truncate text-[10px] leading-none font-medium text-[#7a86a4]">
                   {option.description}
-                </div>
-                {option.value === "previous-week" && previousPublishedLabel ? (
-                  <div className="mt-2 text-[11px] font-medium text-foreground/70">
-                    Source: {previousPublishedLabel}
-                  </div>
-                ) : null}
-              </div>
+                </span>
+              </span>
             </button>
           )
         })}
-        <FieldError>{error}</FieldError>
-      </FieldContent>
-    </Field>
+      </div>
+      {error ? (
+        <p className="mt-1.5 px-1 text-xs font-medium text-destructive">
+          {error}
+        </p>
+      ) : null}
+    </section>
   )
 }
 

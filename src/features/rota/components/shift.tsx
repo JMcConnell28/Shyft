@@ -57,10 +57,6 @@ function Shift({
     disabled: readOnly,
   })
 
-  if (!shift) {
-    return null
-  }
-
   const zone = zones.find((entry) => entry.id === shift.zoneId)
   const zoneLabel = zone?.name ?? shift.zoneName ?? "Shift"
   const timeLines = getShiftDisplayLines(shift)
@@ -78,19 +74,19 @@ function Shift({
   const shiftCard = (
     <div
       className={cn(
-        "rounded-md border border-border/70 bg-background px-2 py-1.5 shadow-sm transition-colors",
+        "space-y-0.5",
         !readOnly && droppable.isOver
-          ? "border-primary bg-primary/5"
+          ? "border-[#0069ff] bg-[#eef3ff]"
           : undefined,
         !readOnly && isTouchInput ? "cursor-pointer" : undefined
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex w-full items-center justify-between">
+      <div className="flex h-7 w-full items-center justify-between rounded-sm border border-[#edf0f6] bg-card p-2 shadow-xs transition-colors">
+        <div className="flex h-full w-full items-center justify-between">
           <div
             className={cn(
-              "min-w-0 text-[11px] font-semibold text-foreground",
-              timeLines.length > 1 ? "space-y-0.5" : "truncate"
+              "min-w-0 text-[10px] font-extrabold tracking-[-0.015em] text-[#11245a]",
+              timeLines.length > 1 ? "" : "truncate"
             )}
           >
             {timeLines.map((line) => (
@@ -100,16 +96,16 @@ function Shift({
             ))}
           </div>
           {readOnly ? (
-            <p className="mt-0.5 text-[10px] text-muted-foreground">
+            <p className="mt-0.5 text-[10px] font-bold text-[#61709a]">
               {zoneLabel}
             </p>
           ) : isTouchInput ? (
-            <p className="mt-0.5 text-[10px] text-muted-foreground">
+            <p className="mt-0.5 text-[10px] font-bold text-[#61709a]">
               {zoneLabel}
             </p>
           ) : (
             <div className="relative ml-2 flex min-w-0 items-center justify-end">
-              <p className="mt-0.5 truncate text-[10px] text-muted-foreground transition-opacity group-focus-within/shift:opacity-0 group-hover/shift:opacity-0">
+              <p className="mt-0.5 truncate text-[10px] font-semibold text-[#61709a] transition-opacity group-focus-within/shift:opacity-0 group-hover/shift:opacity-0">
                 {zoneLabel}
               </p>
               <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
@@ -138,6 +134,38 @@ function Shift({
             </div>
           )}
         </div>
+      </div>
+
+      <div className="flex w-full flex-col items-center justify-center">
+        {assignmentIds.length === 0 ? (
+          <p className="text-[10px] font-medium text-[#7a86a4]">
+            No one assigned yet
+          </p>
+        ) : (
+          assignmentIds.map((assignmentId) => {
+            const assignment = assignmentsById[assignmentId]
+            const employee = getEmployee(assignment.employeeId)
+
+            if (!employee) {
+              return null
+            }
+
+            return readOnly ? (
+              <AssignedEmployeeName key={assignment.id} employee={employee} />
+            ) : (
+              <DraggableAssignedEmployeeName
+                key={assignment.id}
+                employee={employee}
+                dragId={`assignment-${assignment.id}`}
+                dragData={{
+                  type: "assignment",
+                  assignmentId: assignment.id,
+                  employeeId: assignment.employeeId,
+                }}
+              />
+            )
+          })
+        )}
       </div>
     </div>
   )
@@ -175,40 +203,6 @@ function Shift({
         ) : (
           <div className="group/shift">{shiftCard}</div>
         )}
-
-        <div className="mb-3 flex w-full flex-col items-center space-y-0.5">
-          {assignmentIds.length === 0 ? (
-            <p className="px-1 text-[10px] text-muted-foreground">
-              No one assigned yet
-            </p>
-          ) : (
-            assignmentIds.map((assignmentId) => {
-              const assignment = assignmentsById[assignmentId]
-              const employee = assignment
-                ? getEmployee(assignment.employeeId)
-                : undefined
-
-              if (!assignment || !employee) {
-                return null
-              }
-
-              return readOnly ? (
-                <AssignedEmployeeName key={assignment.id} employee={employee} />
-              ) : (
-                <DraggableAssignedEmployeeName
-                  key={assignment.id}
-                  employee={employee}
-                  dragId={`assignment-${assignment.id}`}
-                  dragData={{
-                    type: "assignment",
-                    assignmentId: assignment.id,
-                    employeeId: assignment.employeeId,
-                  }}
-                />
-              )
-            })
-          )}
-        </div>
       </div>
 
       <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>

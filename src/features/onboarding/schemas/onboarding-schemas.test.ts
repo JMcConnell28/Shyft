@@ -48,10 +48,26 @@ describe("onboarding schemas", () => {
       signUpSchema.safeParse({
         firstName: "Jane",
         lastName: "Smith",
+        dateOfBirth: "1998-04-12",
         email: "jane@example.com",
         password: "password123",
       }).success
     ).toBe(true)
+  })
+
+  it("rejects signup when date of birth is in the future", () => {
+    const futureDate = new Date()
+    futureDate.setUTCFullYear(futureDate.getUTCFullYear() + 1)
+
+    expect(
+      signUpSchema.safeParse({
+        firstName: "Jane",
+        lastName: "Smith",
+        dateOfBirth: futureDate.toISOString().slice(0, 10),
+        email: "jane@example.com",
+        password: "password123",
+      }).success
+    ).toBe(false)
   })
 
   it("accepts fixed-location setup with at least one area", () => {

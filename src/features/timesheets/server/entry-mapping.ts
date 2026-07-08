@@ -26,11 +26,16 @@ function mapEntryRows(input: {
 function mapEntryRow(row: TimeEntryRow, now: Date): TimesheetEntry {
   return {
     id: row.id,
-    actualMinutes: getMinutesBetween(row.clocked_in_at, row.clocked_out_at, now),
+    actualMinutes: getMinutesBetween(
+      row.clocked_in_at,
+      row.clocked_out_at,
+      now
+    ),
     clockedInAt: row.clocked_in_at,
     clockedOutAt: row.clocked_out_at,
     employeeId: row.employee_id,
     employeeName: row.employee_name,
+    employeePayrollId: row.employee_payroll_id,
     locationId: row.location_id,
     locationName: row.location_name,
     notes: row.notes,
@@ -38,7 +43,7 @@ function mapEntryRow(row: TimeEntryRow, now: Date): TimesheetEntry {
     payableMinutes: getMinutesBetween(
       row.payable_start_at ?? row.clocked_in_at,
       row.payable_end_at ?? row.clocked_out_at,
-      now,
+      now
     ),
     payableStartAt: row.payable_start_at ?? row.clocked_in_at,
     publishedShiftId: row.rota_published_shift_id,
@@ -48,7 +53,7 @@ function mapEntryRow(row: TimeEntryRow, now: Date): TimesheetEntry {
     scheduledMinutes: getMinutesBetween(
       row.scheduled_start_at,
       row.scheduled_end_at,
-      now,
+      now
     ),
     scheduledStartAt: row.scheduled_start_at,
     shiftSegment: row.shift_segment,
@@ -86,7 +91,7 @@ function getScheduledEntriesWithoutClockEntry(input: {
 
 function mapScheduledEntry(
   shift: ScheduledShiftRow,
-  segment: ReturnType<typeof toShiftMatch>["segments"][number],
+  segment: ReturnType<typeof toShiftMatch>["segments"][number]
 ): TimesheetEntry {
   return {
     id: null,
@@ -95,6 +100,7 @@ function mapScheduledEntry(
     clockedOutAt: null,
     employeeId: shift.employee_id,
     employeeName: shift.employee_name,
+    employeePayrollId: shift.employee_payroll_id,
     locationId: shift.location_id,
     locationName: shift.location_name,
     notes: null,
@@ -108,7 +114,7 @@ function mapScheduledEntry(
     scheduledMinutes: getMinutesBetween(
       segment.startsAt.toISOString(),
       segment.endsAt.toISOString(),
-      new Date(),
+      new Date()
     ),
     scheduledStartAt: segment.startsAt.toISOString(),
     shiftSegment: segment.key,
@@ -124,7 +130,7 @@ function compareEntries(left: TimesheetEntry, right: TimesheetEntry) {
 
 function getSortValue(entry: TimesheetEntry) {
   return new Date(
-    entry.scheduledStartAt ?? entry.clockedInAt ?? "1970-01-01T00:00:00.000Z",
+    entry.scheduledStartAt ?? entry.clockedInAt ?? "1970-01-01T00:00:00.000Z"
   ).getTime()
 }
 

@@ -5,6 +5,9 @@ import {
   syncBillingSubscriptionQuantities,
 } from "@/features/billing/server/subscriptions"
 import { getDatabase } from "@/lib/db"
+import { processDueAddonCancellations } from "@/features/billing/server/addons"
+import { finalizeEndedBillingPeriods } from "@/features/billing/server/usage"
+import { processDueBillingTransfers } from "@/features/billing/server/transfers"
 
 type BillingReconciliationAccountRow = {
   id: string
@@ -35,7 +38,7 @@ async function listBillingAccountsForReconciliation() {
             stripe_customer_id
      from public.billing_accounts
      where stripe_customer_id is not null
-     order by created_at asc`,
+     order by created_at asc`
   )
 
   return result.rows
@@ -45,7 +48,7 @@ async function createBillingReconciliationRun() {
   const result = await getDatabase().query<{ id: string }>(
     `insert into public.billing_reconciliation_runs (status)
      values ('running')
-     returning id`,
+     returning id`
   )
   const runId = result.rows.at(0)?.id
 
@@ -85,7 +88,7 @@ async function updateBillingReconciliationRun(input: {
       input.result.syncedQuantityCount,
       input.result.failedAccountCount,
       errorMessage,
-    ],
+    ]
   )
 }
 
@@ -105,20 +108,24 @@ async function failBillingReconciliationRun(input: {
          finished_at = timezone('utc', now()),
          updated_at = timezone('utc', now())
      where id = $1`,
-    [input.runId, errorMessage],
+    [input.runId, errorMessage]
   )
 }
 
 async function reconcileBillingAccount(
-  account: BillingReconciliationAccountRow,
+  account: BillingReconciliationAccountRow
 ): Promise<BillingReconciliationAccountResult> {
   try {
     const subscriptions = await refreshStripeSubscriptionsForBillingAccount({
       billingAccountId: account.id,
       stripeCustomerId: account.stripe_customer_id,
     })
-    const syncedQuantitySubscription =
-      await syncBillingSubscriptionQuantities(account.id)
+    await finalizeEndedBillingPeriods(account.id)
+    await processDueAddonCancellations(account.id)
+    await processDueBillingTransfers(account.id)
+    const syncedQuantitySubscription = await syncBillingSubscriptionQuantities(
+      account.id
+    )
 
     return {
       billingAccountId: account.id,
@@ -142,18 +149,19 @@ async function reconcileBillingAccount(
 }
 
 function summarizeReconciliationResults(
-  accounts: Array<BillingReconciliationAccountResult>,
+  accounts: Array<BillingReconciliationAccountResult>
 ) {
   return {
     accounts,
     checkedAccountCount: accounts.length,
-    failedAccountCount: accounts.filter((account) => account.status === "failed")
-      .length,
+    failedAccountCount: accounts.filter(
+      (account) => account.status === "failed"
+    ).length,
     syncedQuantityCount: accounts.filter((account) => account.quantitySynced)
       .length,
     syncedSubscriptionCount: accounts.reduce(
       (total, account) => total + account.subscriptionCount,
-      0,
+      0
     ),
   }
 }
@@ -163,7 +171,9 @@ async function reconcileAllBillingAccounts(): Promise<BillingReconciliationResul
 
   try {
     const accounts = await listBillingAccountsForReconciliation()
-    const accountResults = await Promise.all(accounts.map(reconcileBillingAccount))
+    const accountResults = await Promise.all(
+      accounts.map(reconcileBillingAccount)
+    )
     const summary = summarizeReconciliationResults(accountResults)
 
     await updateBillingReconciliationRun({
@@ -182,7 +192,4 @@ async function reconcileAllBillingAccounts(): Promise<BillingReconciliationResul
 }
 
 export { reconcileAllBillingAccounts }
-export type {
-  BillingReconciliationAccountResult,
-  BillingReconciliationResult,
-}
+export type { BillingReconciliationAccountResult, BillingReconciliationResult }

@@ -3,18 +3,20 @@ import { createServerFn } from "@tanstack/react-start"
 import {
   assignEmployeeStaffGroupInputSchema,
   bulkAssignEmployeeStaffGroupInputSchema,
+  bulkSetEmployeeCompensationInputSchema,
   createStaffGroupInputSchema,
   deleteStaffGroupInputSchema,
   getStaffGroupSettingsInputSchema,
-  renameStaffGroupInputSchema,
   removeEmployeeFromWorkspaceInputSchema,
+  renameStaffGroupInputSchema,
   setEmployeeActiveInputSchema,
+  setEmployeeCompensationInputSchema,
   setStaffGroupColorInputSchema,
 } from "@/features/staff-groups/schemas/staff-group-schemas"
 
 const getStaffGroupSettingsPageData = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    getStaffGroupSettingsInputSchema.parse(input),
+    getStaffGroupSettingsInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/staff-groups/server/queries")
@@ -37,7 +39,7 @@ const renameStaffGroup = createServerFn({ method: "POST" })
 
 const setStaffGroupColor = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    setStaffGroupColorInputSchema.parse(input),
+    setStaffGroupColorInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/staff-groups/server/actions")
@@ -53,7 +55,7 @@ const deleteStaffGroup = createServerFn({ method: "POST" })
 
 const assignEmployeeStaffGroup = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    assignEmployeeStaffGroupInputSchema.parse(input),
+    assignEmployeeStaffGroupInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/staff-groups/server/actions")
@@ -62,7 +64,7 @@ const assignEmployeeStaffGroup = createServerFn({ method: "POST" })
 
 const bulkAssignEmployeeStaffGroup = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    bulkAssignEmployeeStaffGroupInputSchema.parse(input),
+    bulkAssignEmployeeStaffGroupInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/staff-groups/server/actions")
@@ -70,17 +72,33 @@ const bulkAssignEmployeeStaffGroup = createServerFn({ method: "POST" })
   })
 
 const setEmployeeActiveStatus = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    setEmployeeActiveInputSchema.parse(input),
-  )
+  .inputValidator((input: unknown) => setEmployeeActiveInputSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/staff-groups/server/actions")
     return module.setEmployeeActiveStatus(data)
   })
 
+const setEmployeeCompensation = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    setEmployeeCompensationInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/staff-groups/server/actions")
+    return module.setEmployeeCompensation(data)
+  })
+
+const bulkSetEmployeeCompensation = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    bulkSetEmployeeCompensationInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/staff-groups/server/actions")
+    return module.bulkSetEmployeeCompensation(data)
+  })
+
 const removeEmployeeFromWorkspace = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    removeEmployeeFromWorkspaceInputSchema.parse(input),
+    removeEmployeeFromWorkspaceInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/staff-groups/server/actions")
@@ -90,11 +108,13 @@ const removeEmployeeFromWorkspace = createServerFn({ method: "POST" })
 export {
   assignEmployeeStaffGroup,
   bulkAssignEmployeeStaffGroup,
+  bulkSetEmployeeCompensation,
   createStaffGroup,
   deleteStaffGroup,
   getStaffGroupSettingsPageData,
   renameStaffGroup,
   removeEmployeeFromWorkspace,
   setEmployeeActiveStatus,
+  setEmployeeCompensation,
   setStaffGroupColor,
 }

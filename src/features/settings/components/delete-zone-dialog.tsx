@@ -41,8 +41,8 @@ function DeleteZoneDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete {zoneName}?</AlertDialogTitle>
           <AlertDialogDescription>
-            This removes the zone from this location. Saved rotas that still use it
-            will block deletion until those shifts are moved or removed.
+            This removes the zone from future planning. Existing shifts and past
+            rotas will keep showing the zone name they were saved with.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

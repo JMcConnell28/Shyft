@@ -12,11 +12,11 @@ import {
   buildSubscriptionLineItems,
   getBillingPricingQuantities,
 } from "@/features/billing/server/pricing"
+import { getBillingCurrency, getStripe } from "@/features/billing/server/stripe"
 import {
-  getBillingCurrency,
-  getStripe,
-} from "@/features/billing/server/stripe"
-import { buildAppUrl, getSafeAppReturnPath } from "@/features/billing/server/urls"
+  buildAppUrl,
+  getSafeAppReturnPath,
+} from "@/features/billing/server/urls"
 import {
   findOpenStripeSubscriptionForBillingAccount,
   getOpenBillingSubscription,
@@ -124,12 +124,14 @@ async function getUsableStripeCustomerId(input: {
 }
 
 function isDeletedStripeCustomer(
-  customer: Stripe.Customer | Stripe.DeletedCustomer,
+  customer: Stripe.Customer | Stripe.DeletedCustomer
 ): customer is Stripe.DeletedCustomer {
   return "deleted" in customer && customer.deleted === true
 }
 
-async function createSubscriptionCheckoutSession(input: CheckoutWorkspaceInput) {
+async function createSubscriptionCheckoutSession(
+  input: CheckoutWorkspaceInput
+) {
   const stripe = getStripe()
   const billingAccount = input.organizationId
     ? await ensureOrganizationBillingAccount({
@@ -145,12 +147,12 @@ async function createSubscriptionCheckoutSession(input: CheckoutWorkspaceInput) 
     user: input.user,
   })
   const existingDatabaseSubscription = await getOpenBillingSubscription(
-    billingAccount.id,
+    billingAccount.id
   )
 
   if (existingDatabaseSubscription) {
     throw new Error(
-      "This workspace already has a subscription. Use Manage billing to update it.",
+      "This workspace already has a subscription. Use Manage billing to update it."
     )
   }
 
@@ -162,7 +164,7 @@ async function createSubscriptionCheckoutSession(input: CheckoutWorkspaceInput) 
 
   if (existingStripeSubscription) {
     throw new Error(
-      "This workspace already has a subscription. Use Manage billing to update it.",
+      "This workspace already has a subscription. Use Manage billing to update it."
     )
   }
 
@@ -188,8 +190,10 @@ async function createSubscriptionCheckoutSession(input: CheckoutWorkspaceInput) 
         locationId: input.locationId ?? "",
         locationQuantity: String(quantities.locationQuantity),
         activeEmployeeQuantity: String(quantities.activeEmployeeQuantity),
-        billableEmployeeQuantity: String(quantities.activeEmployeeQuantity),
+        includedEmployeeQuantity: String(quantities.includedEmployeeQuantity),
+        billableEmployeeQuantity: String(quantities.extraEmployeeQuantity),
         extraEmployeeQuantity: String(quantities.extraEmployeeQuantity),
+        timeAttendanceEmployeeQuantity: String(quantities.timeAttendanceQuantity),
       },
     }
   const session = await stripe.checkout.sessions.create({
@@ -197,6 +201,9 @@ async function createSubscriptionCheckoutSession(input: CheckoutWorkspaceInput) 
     customer: stripeCustomerId,
     client_reference_id: billingAccount.id,
     payment_method_collection: "always",
+    billing_address_collection: "required",
+    tax_id_collection: { enabled: true },
+    automatic_tax: { enabled: true },
     submit_type: "subscribe",
     line_items: buildSubscriptionLineItems(quantities),
     metadata: {
@@ -205,15 +212,19 @@ async function createSubscriptionCheckoutSession(input: CheckoutWorkspaceInput) 
       locationId: input.locationId ?? "",
       locationQuantity: String(quantities.locationQuantity),
       activeEmployeeQuantity: String(quantities.activeEmployeeQuantity),
-      billableEmployeeQuantity: String(quantities.activeEmployeeQuantity),
+      includedEmployeeQuantity: String(quantities.includedEmployeeQuantity),
+      billableEmployeeQuantity: String(quantities.extraEmployeeQuantity),
       extraEmployeeQuantity: String(quantities.extraEmployeeQuantity),
+      timeAttendanceEmployeeQuantity: String(quantities.timeAttendanceQuantity),
     },
     subscription_data: {
       ...subscriptionData,
     },
-    success_url: buildAppUrl("/billing/success?session_id={CHECKOUT_SESSION_ID}"),
+    success_url: buildAppUrl(
+      "/billing/success?session_id={CHECKOUT_SESSION_ID}"
+    ),
     cancel_url: buildAppUrl(
-      getSafeAppReturnPath(input.returnPath, "/billing/expired"),
+      getSafeAppReturnPath(input.returnPath, "/billing/expired")
     ),
   })
 
@@ -254,9 +265,11 @@ async function createPaymentMethodSetupCheckoutSession(input: {
           "Your card will be saved now. Your first payment is taken when your RocketRota trial ends.",
       },
     },
-    success_url: buildAppUrl("/billing/success?session_id={CHECKOUT_SESSION_ID}"),
+    success_url: buildAppUrl(
+      "/billing/success?session_id={CHECKOUT_SESSION_ID}"
+    ),
     cancel_url: buildAppUrl(
-      getSafeAppReturnPath(input.input.returnPath, "/billing/expired"),
+      getSafeAppReturnPath(input.input.returnPath, "/billing/expired")
     ),
   })
 

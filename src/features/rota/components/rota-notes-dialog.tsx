@@ -1,9 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { CircleDotIcon, LoaderCircleIcon, NotepadTextIcon, PlusIcon } from "lucide-react"
+import {
+  CircleDotIcon,
+  LoaderCircleIcon,
+  NotepadTextIcon,
+  PlusIcon,
+} from "lucide-react"
 
-import { buildNotePromptTemplate, rotaNotePrompts } from "@/features/rota/constants/note-prompts"
+import {
+  buildNotePromptTemplate,
+  rotaNotePrompts,
+} from "@/features/rota/constants/note-prompts"
+import { rotaToolbarButtonClassName } from "@/features/rota/constants/rota-toolbar-styles"
 import { useUpdateRotaNote } from "@/features/rota/hooks/use-update-rota-note"
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
 import { Button } from "@/components/ui/button"
@@ -34,7 +43,11 @@ import { showSuccessToast } from "@/lib/toast"
 const MAX_NOTE_LENGTH = 500
 
 function RotaNotesDialog({ mode = "default" }: { mode?: "default" | "demo" }) {
-  return mode === "demo" ? <DemoRotaNotesDialog /> : <ConnectedRotaNotesDialog />
+  return mode === "demo" ? (
+    <DemoRotaNotesDialog />
+  ) : (
+    <ConnectedRotaNotesDialog />
+  )
 }
 
 function ConnectedRotaNotesDialog() {
@@ -53,9 +66,10 @@ function ConnectedRotaNotesDialog() {
 function DemoRotaNotesDialog() {
   const { meta, setMetaNote } = useRotaWorkspace()
 
-  async function saveDemoNote(note: string) {
+  function saveDemoNote(note: string) {
     setMetaNote(note.trim() || null)
     showSuccessToast("Demo notes updated.")
+    return Promise.resolve()
   }
 
   return (
@@ -140,25 +154,29 @@ function RotaNotesDialogContent({
               size="icon"
               aria-label="Staff notes"
               className={cn(
-                "md:h-7 md:w-auto md:gap-2 md:px-2",
+                rotaToolbarButtonClassName,
                 hasSavedNote
                   ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                  : undefined,
+                  : undefined
               )}
             />
           }
         >
           <NotepadTextIcon data-icon="inline-start" />
-          <span className="hidden md:inline">Notes</span>
-          {hasSavedNote ? <CircleDotIcon className="size-3.5 fill-current" /> : null}
+          <span className="hidden group-data-[toolbar-more=true]/toolbar-more:inline md:inline">
+            Notes
+          </span>
+          {hasSavedNote ? (
+            <CircleDotIcon className="size-3.5 fill-current" />
+          ) : null}
         </DialogTrigger>
         <DialogContent className="max-w-xl gap-5 p-0">
           <div className="space-y-5 p-4">
             <DialogHeader>
               <DialogTitle>Staff notes</DialogTitle>
               <DialogDescription>
-                Add one weekly note for staff. These notes appear on the published
-                rota view for employees.
+                Add one weekly note for staff. These notes appear on the
+                published rota view for employees.
               </DialogDescription>
             </DialogHeader>
 
@@ -205,14 +223,16 @@ function RotaNotesDialogContent({
                 value={draftNote}
                 onChange={(event) => setDraftNote(event.target.value)}
                 maxLength={MAX_NOTE_LENGTH}
-                placeholder={"Opening\n- Keyholder starts at 8am\n\nEntertainment\n- Live music from 9pm"}
+                placeholder={
+                  "Opening\n- Keyholder starts at 8am\n\nEntertainment\n- Live music from 9pm"
+                }
                 className="min-h-56 text-sm md:text-sm"
               />
               <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
                 <span>Keep it concise and useful for the week ahead.</span>
                 <span
                   className={cn(
-                    remainingCharacters <= 60 ? "text-foreground" : undefined,
+                    remainingCharacters <= 60 ? "text-foreground" : undefined
                   )}
                 >
                   {draftNote.length}/{MAX_NOTE_LENGTH}
@@ -238,7 +258,10 @@ function RotaNotesDialogContent({
               }}
             >
               {isSaving ? (
-                <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />
+                <LoaderCircleIcon
+                  data-icon="inline-start"
+                  className="animate-spin"
+                />
               ) : null}
               Save notes
             </Button>
@@ -251,7 +274,8 @@ function RotaNotesDialogContent({
           <AlertDialogHeader>
             <AlertDialogTitle>Discard note changes?</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved staff note edits. Closing now will lose those changes.
+              You have unsaved staff note edits. Closing now will lose those
+              changes.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

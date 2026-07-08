@@ -1,6 +1,10 @@
 import { createServerFn } from "@tanstack/react-start"
 
+import { clockScanSearchSchema } from "@/features/time-clock/schemas/clock-scan-schemas"
 import {
+  adminUserInputSchema,
+  approveTimeEntryAsRecordedInputSchema,
+  generateAdminClockTagSetupInputSchema,
   getClockSettingsPageInputSchema,
   getEmployeeClockPageInputSchema,
   getManagerClockPageInputSchema,
@@ -16,6 +20,29 @@ const getEmployeeClockPageData = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const module = await import("@/features/time-clock/server/queries")
     return module.getEmployeeClockPageData(data)
+  })
+
+const getClockScanPageData = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => clockScanSearchSchema.parse(input))
+  .handler(async ({ data }) => {
+    const module = await import("@/features/time-clock/server/ntag-clock-test")
+    return module.getClockScanPageData(data)
+  })
+
+const getAdminClockTagsPageData = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => adminUserInputSchema.parse(input))
+  .handler(async ({ data }) => {
+    const module = await import("@/features/time-clock/server/admin-tags")
+    return module.getAdminClockTagsPageData(data)
+  })
+
+const generateAdminClockTagSetup = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    generateAdminClockTagSetupInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/time-clock/server/admin-tags")
+    return module.generateAdminClockTagSetup(data)
   })
 
 const submitEmployeeClock = createServerFn({ method: "POST" })
@@ -45,6 +72,15 @@ const managerClockOverride = createServerFn({ method: "POST" })
     return module.managerClockOverride(data)
   })
 
+const approveTimeEntryAsRecorded = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    approveTimeEntryAsRecordedInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/time-clock/server/actions")
+    return module.approveTimeEntryAsRecorded(data)
+  })
+
 const getClockSettingsPageData = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     getClockSettingsPageInputSchema.parse(input),
@@ -64,6 +100,10 @@ const updateClockSettings = createServerFn({ method: "POST" })
   })
 
 export {
+  approveTimeEntryAsRecorded,
+  generateAdminClockTagSetup,
+  getAdminClockTagsPageData,
+  getClockScanPageData,
   getClockSettingsPageData,
   getEmployeeClockPageData,
   getManagerClockPageData,

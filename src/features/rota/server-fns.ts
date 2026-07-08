@@ -15,7 +15,11 @@ import {
   deleteDraftRota,
   unpublishRota,
 } from "@/features/rota/server/lifecycle-actions"
-import { publishRotaVersion, updateRotaNote } from "@/features/rota/server/update-actions"
+import {
+  publishRotaVersion,
+  updateRotaBudget,
+  updateRotaNote,
+} from "@/features/rota/server/update-actions"
 import {
   assignRotaShiftEmployee,
   copyRotaBoard,
@@ -32,7 +36,7 @@ import {
 
 const getHasUnreadRotaUpdates = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    getHasUnreadRotaUpdatesInputSchema.parse(input),
+    getHasUnreadRotaUpdatesInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/rota/server/access")
@@ -40,7 +44,9 @@ const getHasUnreadRotaUpdates = createServerFn({ method: "POST" })
   })
 
 const getRotaListPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => getRotaListPageDataInputSchema.parse(input))
+  .inputValidator((input: unknown) =>
+    getRotaListPageDataInputSchema.parse(input)
+  )
   .handler(async ({ data }) => {
     const module = await import("@/features/rota/server/list")
     return module.getRotaListPageData(data)
@@ -48,7 +54,7 @@ const getRotaListPageData = createServerFn({ method: "POST" })
 
 const getRotaDetailPageData = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    getRotaDetailPageDataInputSchema.parse(input),
+    getRotaDetailPageDataInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/rota/server/detail")
@@ -57,7 +63,7 @@ const getRotaDetailPageData = createServerFn({ method: "POST" })
 
 const getRotaWorkspaceData = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    getRotaWorkspaceDataInputSchema.parse(input),
+    getRotaWorkspaceDataInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/rota/server/workspace-read")
@@ -85,4 +91,5 @@ export {
   saveRotaWorkspace,
   unpublishRota,
   updateRotaNote,
+  updateRotaBudget,
 }

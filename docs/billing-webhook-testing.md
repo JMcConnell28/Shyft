@@ -16,16 +16,16 @@ Forward Stripe webhooks:
 stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
-Copy the `whsec_...` value into `.env.local`:
+Copy the webhook signing secret into `.env.local`:
 
 ```txt
-STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_WEBHOOK_SECRET=replace-with-stripe-webhook-secret
 ```
 
 Required Stripe env vars:
 
 ```txt
-STRIPE_SECRET_KEY=sk_test_...
+STRIPE_SECRET_KEY=replace-with-stripe-secret-key
 STRIPE_LOCATION_PRICE_ID=price_...
 STRIPE_EXTRA_EMPLOYEE_PRICE_ID=price_...
 BETTER_AUTH_URL=http://localhost:3000

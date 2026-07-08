@@ -2,13 +2,21 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 
 import { LandingPage } from "@/components/app/landing-page"
 import { getHelpHostState } from "@/features/help-center/server/host"
+import { getSession } from "@/lib/auth-server"
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const { isHelpHost } = await getHelpHostState()
+    const [{ isHelpHost }, session] = await Promise.all([
+      getHelpHostState(),
+      getSession(),
+    ])
 
     if (isHelpHost) {
       throw redirect({ to: "/help" })
+    }
+
+    return {
+      isAuthenticated: Boolean(session),
     }
   },
   head: () => ({
@@ -25,5 +33,7 @@ export const Route = createFileRoute("/")({
 })
 
 function App() {
-  return <LandingPage />
+  const { isAuthenticated } = Route.useLoaderData()
+
+  return <LandingPage isAuthenticated={isAuthenticated} />
 }

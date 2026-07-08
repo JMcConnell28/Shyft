@@ -4,6 +4,7 @@ import type { PublishedShiftCandidate } from "@/features/time-clock/utils/shift-
 type ScheduledShiftRow = PublishedShiftCandidate & {
   employee_id: string
   employee_name: string
+  employee_payroll_id: string | null
   location_id: string
   location_name: string
   rota_id: string
@@ -15,6 +16,7 @@ type TimeEntryRow = {
   clocked_out_at: string | null
   employee_id: string
   employee_name: string
+  employee_payroll_id: string | null
   id: string
   location_id: string
   location_name: string
@@ -35,6 +37,7 @@ type TimeEntryRow = {
 type TimesheetEmployeeRow = {
   employee_id: string
   employee_name: string
+  employee_payroll_id: string | null
   location_name: string
 }
 

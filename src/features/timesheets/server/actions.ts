@@ -2,7 +2,7 @@ import type { PoolClient } from "pg"
 
 import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import type { UpdateTimesheetEntryInput } from "@/features/timesheets/types"
-import { withClockTransaction } from "@/features/time-clock/server/shared"
+import { getDatabase } from "@/lib/db"
 
 type EditableEntryRow = {
   clocked_in_at: string
@@ -23,13 +23,31 @@ async function updateTimesheetEntry(input: UpdateTimesheetEntryInput) {
     throw new Error("You do not have permission to edit timesheets.")
   }
 
-  return withClockTransaction((client) =>
+  return withTimesheetTransaction((client) =>
     updateTimesheetEntryInTransaction(client, {
       ...input,
       scopedLocationIds: scope.locationIds,
       userId: scope.userId,
     }),
   )
+}
+
+async function withTimesheetTransaction<T>(
+  run: (client: PoolClient) => Promise<T>,
+) {
+  const client = await getDatabase().connect()
+
+  try {
+    await client.query("BEGIN")
+    const result = await run(client)
+    await client.query("COMMIT")
+    return result
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
+  }
 }
 
 async function updateTimesheetEntryInTransaction(

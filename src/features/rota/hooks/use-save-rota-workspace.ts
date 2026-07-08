@@ -78,6 +78,7 @@ function useSaveRotaWorkspace() {
 
   const isRateLimited = cooldownUntil > now
   const canSave =
+    meta.canEdit &&
     (meta.status === "draft" || meta.status === "published") &&
     hasUnsavedChanges &&
     !saveMutation.isPending &&
@@ -85,6 +86,7 @@ function useSaveRotaWorkspace() {
 
   async function save(options?: { bypassRateLimit?: boolean }) {
     const canSaveNow =
+      meta.canEdit &&
       (meta.status === "draft" || meta.status === "published") &&
       hasUnsavedChanges &&
       !saveMutation.isPending &&
@@ -102,7 +104,9 @@ function useSaveRotaWorkspace() {
     isSaving: saveMutation.isPending,
     save,
     saveBlockedReason:
-      hasUnsavedChanges
+      !meta.canEdit
+        ? "Past rotas are locked and can no longer be edited."
+        : hasUnsavedChanges
         ? isRateLimited
           ? "Saving is cooling down for a moment."
           : null

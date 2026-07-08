@@ -1,6 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 
-import { SetupChoicePage } from "@/features/onboarding/components/setup-choice-page"
 import { getExistingOrganizationRedirect } from "@/features/onboarding/utils/viewer-route-redirects"
 
 export const Route = createFileRoute("/_authed/_verified/onboarding/setup")({
@@ -10,6 +9,8 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/setup")({
     if (redirectTarget) {
       throw redirect({ href: redirectTarget })
     }
+
+    throw redirect({ to: "/onboarding/org" })
   },
   head: () => ({
     meta: [
@@ -20,5 +21,5 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/setup")({
       },
     ],
   }),
-  component: SetupChoicePage,
+  component: () => null,
 })

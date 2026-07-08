@@ -2,12 +2,19 @@
 
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
+import {
+  Building2Icon,
+  CalendarClockIcon,
+  Clock3Icon,
+  HashIcon,
+} from "lucide-react"
 
 import type { LocationSettingsItem } from "@/features/settings/types"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CreateLocationDialog } from "@/features/settings/components/create-location-dialog"
 import { WeeklyClosingTimes } from "@/features/settings/components/weekly-closing-times"
 import { useLocationSettingsQuery } from "@/features/settings/hooks/use-location-settings-query"
+import { useLocationSettingsMutations } from "@/features/settings/hooks/use-location-settings-mutations"
 import { useUpdateLocationSettings } from "@/features/settings/hooks/use-update-location-settings"
 
 function LocationsSettingsPage({
@@ -24,6 +31,12 @@ function LocationsSettingsPage({
     locationId,
     userId,
   })
+  const mutations = useLocationSettingsMutations({
+    organizationId,
+    locationId,
+    userId,
+  })
+  const canCreateLocation = Boolean(organizationId)
 
   if (settingsQuery.isPending) {
     return <LocationsSettingsState message="Loading location settings..." />
@@ -35,10 +48,37 @@ function LocationsSettingsPage({
     )
   }
 
+  if (settingsQuery.data.locations.length === 0) {
+    return (
+      <div className="space-y-4 text-[#11245a]">
+        {canCreateLocation ? (
+          <LocationsManagementPanel
+            locationCount={0}
+            pending={mutations.createMutation.isPending}
+            onCreate={async (values) => {
+              await mutations.createMutation.mutateAsync(values)
+            }}
+          />
+        ) : null}
+        <LocationsSettingsState message="No manageable locations found." />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-[#11245a]">
+      {canCreateLocation ? (
+        <LocationsManagementPanel
+          locationCount={settingsQuery.data.locations.length}
+          pending={mutations.createMutation.isPending}
+          onCreate={async (values) => {
+            await mutations.createMutation.mutateAsync(values)
+          }}
+        />
+      ) : null}
+
       {settingsQuery.data.locations.map((location) => (
-        <LocationSettingsCard
+        <LocationSettingsForm
           key={location.id}
           location={location}
           organizationId={organizationId}
@@ -50,7 +90,34 @@ function LocationsSettingsPage({
   )
 }
 
-function LocationSettingsCard({
+function LocationsManagementPanel({
+  locationCount,
+  pending,
+  onCreate,
+}: {
+  locationCount: number
+  pending: boolean
+  onCreate: React.ComponentProps<typeof CreateLocationDialog>["onSubmit"]
+}) {
+  return (
+    <section className="rounded-xl bg-white p-4 shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-extrabold tracking-[-0.035em]">
+            Locations
+          </h2>
+          <p className="mt-1 text-sm font-semibold text-[#61709a]">
+            {locationCount} location{locationCount === 1 ? "" : "s"} in this
+            organisation.
+          </p>
+        </div>
+        <CreateLocationDialog pending={pending} onSubmit={onCreate} />
+      </div>
+    </section>
+  )
+}
+
+function LocationSettingsForm({
   location,
   organizationId,
   workspaceLocationId,
@@ -88,90 +155,147 @@ function LocationSettingsCard({
       estimatedClosingTime: location.estimatedClosingTime,
       estimatedClosingTimeNextDay: location.estimatedClosingTimeNextDay,
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    form,
     location.daySettings,
     location.estimatedClosingTime,
     location.estimatedClosingTimeNextDay,
   ])
 
   return (
-    <Card className="border-border/70 bg-background/95 shadow-sm">
-      <CardHeader className="gap-1">
-        <CardTitle className="text-sm">{location.name}</CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Weekly close times are used first. The fallback only applies when a
-          day has not been configured yet.
+    <form
+      className="space-y-4"
+      onSubmit={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        void form.handleSubmit()
+      }}
+    >
+      <LocationDetailsPanel location={location} />
+
+      <form.Subscribe selector={(state) => state.values}>
+        {(values) => (
+          <>
+            <WeeklyClosingTimes
+              days={values.daySettings}
+              fallbackTime={values.estimatedClosingTime}
+              fallbackNextDay={values.estimatedClosingTimeNextDay}
+              onFallbackTimeChange={(estimatedClosingTime) =>
+                form.setFieldValue("estimatedClosingTime", estimatedClosingTime)
+              }
+              onFallbackNextDayChange={(estimatedClosingTimeNextDay) =>
+                form.setFieldValue(
+                  "estimatedClosingTimeNextDay",
+                  estimatedClosingTimeNextDay
+                )
+              }
+              onApplyFallback={() => {
+                form.setFieldValue("daySettings", (current) =>
+                  current.map((entry) => ({
+                    ...entry,
+                    closeTime: values.estimatedClosingTime,
+                    closeTimeNextDay: values.estimatedClosingTimeNextDay,
+                  }))
+                )
+              }}
+              onDayChange={(index, nextValue) => {
+                form.setFieldValue("daySettings", (current) =>
+                  current.map((entry, entryIndex) =>
+                    entryIndex === index ? { ...entry, ...nextValue } : entry
+                  )
+                )
+              }}
+            />
+
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                className="h-10 rounded-xl px-4 text-sm font-extrabold"
+                disabled={
+                  !hasLocationSettingsChanges(location, values) ||
+                  form.state.isSubmitting ||
+                  isSaving
+                }
+              >
+                {isSaving || form.state.isSubmitting
+                  ? "Saving..."
+                  : "Save changes"}
+              </Button>
+            </div>
+          </>
+        )}
+      </form.Subscribe>
+    </form>
+  )
+}
+
+function LocationDetailsPanel({
+  location,
+}: {
+  location: LocationSettingsItem
+}) {
+  return (
+    <section className="rounded-xl bg-white p-4 shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
+      <div>
+        <h2 className="text-lg font-extrabold tracking-[-0.035em]">
+          Location details
+        </h2>
+        <p className="mt-1 text-sm font-semibold text-[#61709a]">
+          Review your location information.
         </p>
-      </CardHeader>
+      </div>
 
-      <CardContent>
-        <form
-          className="space-y-4"
-          onSubmit={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            void form.handleSubmit()
-          }}
-        >
-          <form.Subscribe selector={(state) => state.values}>
-            {(values) => (
-              <WeeklyClosingTimes
-                days={values.daySettings}
-                fallbackTime={values.estimatedClosingTime}
-                fallbackNextDay={values.estimatedClosingTimeNextDay}
-                onFallbackTimeChange={(estimatedClosingTime) =>
-                  form.setFieldValue(
-                    "estimatedClosingTime",
-                    estimatedClosingTime
-                  )
-                }
-                onFallbackNextDayChange={(estimatedClosingTimeNextDay) =>
-                  form.setFieldValue(
-                    "estimatedClosingTimeNextDay",
-                    estimatedClosingTimeNextDay
-                  )
-                }
-                onApplyFallback={() => {
-                  form.setFieldValue("daySettings", (current) =>
-                    current.map((entry) => ({
-                      ...entry,
-                      closeTime: values.estimatedClosingTime,
-                      closeTimeNextDay: values.estimatedClosingTimeNextDay,
-                    }))
-                  )
-                }}
-                onDayChange={(index, nextValue) => {
-                  form.setFieldValue("daySettings", (current) =>
-                    current.map((entry, entryIndex) =>
-                      entryIndex === index ? { ...entry, ...nextValue } : entry
-                    )
-                  )
-                }}
-              />
-            )}
-          </form.Subscribe>
+      <div className="mt-4 divide-y divide-[#edf0f6]">
+        <LocationDetailRow
+          icon={Building2Icon}
+          label="Location name"
+          value={location.name}
+        />
+        <LocationDetailRow
+          icon={HashIcon}
+          label="URL slug"
+          value={location.slug}
+        />
+        <LocationDetailRow
+          icon={Clock3Icon}
+          label="Default close"
+          value={`${location.estimatedClosingTime}${
+            location.estimatedClosingTimeNextDay ? " next day" : ""
+          }`}
+        />
+        <LocationDetailRow
+          icon={CalendarClockIcon}
+          label="Configured days"
+          value={`${location.daySettings.length} days`}
+        />
+      </div>
+    </section>
+  )
+}
 
-          <form.Subscribe selector={(state) => state.values}>
-            {(values) => (
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={
-                    !hasLocationSettingsChanges(location, values) ||
-                    form.state.isSubmitting ||
-                    isSaving
-                  }
-                >
-                  Save location
-                </Button>
-              </div>
-            )}
-          </form.Subscribe>
-        </form>
-      </CardContent>
-    </Card>
+function LocationDetailRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Building2Icon
+  label: string
+  value: string
+}) {
+  return (
+    <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 py-3 first:pt-0 last:pb-0">
+      <span className="flex size-10 items-center justify-center rounded-xl bg-[#eef3ff] text-[#0069ff]">
+        <Icon className="size-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-extrabold text-[#11245a]">
+          {label}
+        </span>
+        <span className="mt-0.5 block truncate text-sm font-semibold text-[#61709a]">
+          {value}
+        </span>
+      </span>
+    </div>
   )
 }
 
@@ -200,10 +324,6 @@ function hasLocationSettingsChanges(
   return values.daySettings.some((daySetting, index) => {
     const initialDaySetting = location.daySettings[index]
 
-    if (!initialDaySetting) {
-      return true
-    }
-
     return (
       daySetting.weekday !== initialDaySetting.weekday ||
       daySetting.closeTime !== initialDaySetting.closeTime ||
@@ -214,14 +334,9 @@ function hasLocationSettingsChanges(
 
 function LocationsSettingsState({ message }: { message: string }) {
   return (
-    <Card className="border-border/70 bg-background/95 shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-sm">Locations</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{message}</p>
-      </CardContent>
-    </Card>
+    <section className="rounded-xl bg-white p-4 text-sm font-semibold text-[#61709a] shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
+      {message}
+    </section>
   )
 }
 

@@ -5,6 +5,7 @@ import {
   updateGeneralSettingsInputSchema,
 } from "@/features/settings/schemas/general-settings-schemas"
 import {
+  createLocationInputSchema,
   getLocationSettingsInputSchema,
   updateLocationSettingsInputSchema,
 } from "@/features/settings/schemas/location-settings-schemas"
@@ -42,6 +43,13 @@ const getLocationSettingsPageData = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const module = await import("@/features/settings/server/location-queries")
     return module.getLocationSettingsPageData(data)
+  })
+
+const createLocation = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => createLocationInputSchema.parse(input))
+  .handler(async ({ data }) => {
+    const module = await import("@/features/settings/server/location-actions")
+    return module.createLocation(data)
   })
 
 const updateLocationSettings = createServerFn({ method: "POST" })
@@ -144,6 +152,7 @@ const deleteRotaTemplate = createServerFn({ method: "POST" })
   })
 
 export {
+  createLocation,
   createOrganizationFromLocation,
   createZone,
   deleteRotaTemplate,

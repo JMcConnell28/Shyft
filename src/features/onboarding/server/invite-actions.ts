@@ -40,6 +40,7 @@ import {
   getEmployeeFallbackStaffGroup,
   isEmployeeStaffGroup,
 } from "@/features/staff-groups/server/shared"
+import { getMinimumWagePenceForDateOfBirth } from "@/features/staff-groups/utils/minimum-wage"
 
 const createStaffInviteLink = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => staffInviteSelectionSchema.parse(input))
@@ -92,11 +93,11 @@ const createStaffInviteLink = createServerFn({ method: "POST" })
 
     assertSupabaseSuccess(
       locationResult.error,
-      "We could not verify that location.",
+      "We could not verify that location."
     )
     assertSupabaseSuccess(
       staffGroupResult.error,
-      "We could not verify that staff group.",
+      "We could not verify that staff group."
     )
 
     if (!locationResult.data || !staffGroupResult.data) {
@@ -113,7 +114,7 @@ const createStaffInviteLink = createServerFn({ method: "POST" })
 
     assertSupabaseSuccess(
       disableResult.error,
-      "We could not refresh the existing invite link.",
+      "We could not refresh the existing invite link."
     )
 
     const token = randomUUID().replace(/-/g, "")
@@ -134,7 +135,7 @@ const createStaffInviteLink = createServerFn({ method: "POST" })
         token,
         expiresAt.toISOString(),
         session.user.id,
-      ],
+      ]
     )
 
     if (organizationId) {
@@ -196,7 +197,10 @@ const getActiveStaffInviteLink = createServerFn({ method: "GET" }).handler(
           .select(
             "location_id, default_staff_group_id, token, expires_at, created_at"
           )
-          .eq(organizationId ? "organization_id" : "location_id", organizationId ?? standaloneLocationId!)
+          .eq(
+            organizationId ? "organization_id" : "location_id",
+            organizationId ?? standaloneLocationId!
+          )
           .is("disabled_at", null)
           .or(`expires_at.is.null,expires_at.gt.${now}`)
           .order("created_at", { ascending: false })
@@ -205,12 +209,18 @@ const getActiveStaffInviteLink = createServerFn({ method: "GET" }).handler(
         supabase
           .from("locations")
           .select("id, name")
-          .eq(organizationId ? "organization_id" : "id", organizationId ?? standaloneLocationId!)
+          .eq(
+            organizationId ? "organization_id" : "id",
+            organizationId ?? standaloneLocationId!
+          )
           .order("created_at", { ascending: true }),
         supabase
           .from("staff_groups")
           .select("id, name, slug, is_default")
-          .eq(organizationId ? "organization_id" : "location_id", organizationId ?? standaloneLocationId!)
+          .eq(
+            organizationId ? "organization_id" : "location_id",
+            organizationId ?? standaloneLocationId!
+          )
           .order("name", { ascending: true }),
       ])
 
@@ -236,18 +246,18 @@ const getActiveStaffInviteLink = createServerFn({ method: "GET" }).handler(
         isFallback: isEmployeeStaffGroup(group),
         employeeCount: 0,
         color: "slate",
-      })),
+      }))
     )
     const activeInvite = activeInviteResult.data
     const activeLocation = activeInvite
-      ? (locationsResult.data ?? []).find(
+      ? ((locationsResult.data ?? []).find(
           (location) => location.id === activeInvite.location_id
-        ) ?? null
+        ) ?? null)
       : null
     const activeStaffGroup = activeInvite
-      ? (staffGroupsResult.data ?? []).find(
+      ? ((staffGroupsResult.data ?? []).find(
           (group) => group.id === activeInvite.default_staff_group_id
-        ) ?? null
+        ) ?? null)
       : null
 
     return {
@@ -274,7 +284,7 @@ const getActiveStaffInviteLink = createServerFn({ method: "GET" }).handler(
 
 const inviteOrganizationMemberByEmail = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    organizationMemberInviteSchema.parse(input),
+    organizationMemberInviteSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const { headers, session } = await requireVerifiedSessionOrThrow()
@@ -312,14 +322,14 @@ const getStaffInvitePreview = createServerFn({ method: "GET" })
     const inviteResult = await supabase
       .from("staff_invite_links")
       .select(
-        "organization_id, location_id, default_staff_group_id, expires_at, disabled_at",
+        "organization_id, location_id, default_staff_group_id, expires_at, disabled_at"
       )
       .eq("token", data.token)
       .maybeSingle()
 
     assertSupabaseSuccess(
       inviteResult.error,
-      "We could not load that invite link.",
+      "We could not load that invite link."
     )
     const invite = inviteResult.data
 
@@ -327,37 +337,38 @@ const getStaffInvitePreview = createServerFn({ method: "GET" })
       return null
     }
 
-    const [organizationResult, locationResult, staffGroupResult] = await Promise.all([
-      invite.organization_id
-        ? supabase
-            .from("organization")
-            .select("name")
-            .eq("id", invite.organization_id)
-            .maybeSingle()
-        : Promise.resolve({ data: null, error: null }),
-      supabase
-        .from("locations")
-        .select("name")
-        .eq("id", invite.location_id)
-        .maybeSingle(),
-      supabase
-        .from("staff_groups")
-        .select("name")
-        .eq("id", invite.default_staff_group_id)
-        .maybeSingle(),
-    ])
+    const [organizationResult, locationResult, staffGroupResult] =
+      await Promise.all([
+        invite.organization_id
+          ? supabase
+              .from("organization")
+              .select("name")
+              .eq("id", invite.organization_id)
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+        supabase
+          .from("locations")
+          .select("name")
+          .eq("id", invite.location_id)
+          .maybeSingle(),
+        supabase
+          .from("staff_groups")
+          .select("name")
+          .eq("id", invite.default_staff_group_id)
+          .maybeSingle(),
+      ])
 
     assertSupabaseSuccess(
       organizationResult.error,
-      "We could not load the organization for that invite.",
+      "We could not load the organization for that invite."
     )
     assertSupabaseSuccess(
       locationResult.error,
-      "We could not load the location for that invite.",
+      "We could not load the location for that invite."
     )
     assertSupabaseSuccess(
       staffGroupResult.error,
-      "We could not load the staff group for that invite.",
+      "We could not load the staff group for that invite."
     )
 
     if (!locationResult.data || !staffGroupResult.data) {
@@ -371,7 +382,8 @@ const getStaffInvitePreview = createServerFn({ method: "GET" })
 
     return {
       organizationId: invite.organization_id,
-      organizationName: organizationResult.data?.name ?? locationResult.data.name,
+      organizationName:
+        organizationResult.data?.name ?? locationResult.data.name,
       locationName: locationResult.data.name,
       staffGroupName: staffGroupResult.data.name,
       expiresAt: toIsoString(invite.expires_at),
@@ -388,14 +400,14 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
     const inviteResult = await supabase
       .from("staff_invite_links")
       .select(
-        "organization_id, location_id, default_staff_group_id, expires_at, disabled_at",
+        "organization_id, location_id, default_staff_group_id, expires_at, disabled_at"
       )
       .eq("token", data.token)
       .maybeSingle()
 
     assertSupabaseSuccess(
       inviteResult.error,
-      "We could not load that invite link.",
+      "We could not load that invite link."
     )
     const invite = inviteResult.data
 
@@ -407,11 +419,20 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
       throw new Error("That invite link has been turned off.")
     }
 
-    if (invite.expires_at && new Date(invite.expires_at).getTime() <= Date.now()) {
+    if (
+      invite.expires_at &&
+      new Date(invite.expires_at).getTime() <= Date.now()
+    ) {
       throw new Error("That invite link has expired.")
     }
 
     if (invite.organization_id) {
+      await assertCanAcceptOrganizationStaffInvite({
+        organizationId: invite.organization_id,
+        locationId: invite.location_id,
+        userId: session.user.id,
+      })
+
       const membershipResult = await supabase
         .from("member")
         .select("id")
@@ -421,7 +442,7 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
 
       assertSupabaseSuccess(
         membershipResult.error,
-        "We could not verify your organization membership.",
+        "We could not verify your organization membership."
       )
 
       if (!membershipResult.data) {
@@ -435,36 +456,46 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
 
         assertSupabaseSuccess(
           membershipInsertResult.error,
-          "We could not join you to that organization.",
+          "We could not join you to that organization."
         )
       }
 
       await setActiveOrganizationForHeaders(headers, invite.organization_id)
     } else {
-      await getDatabase().query(
+      await assertCanAcceptLocationStaffInvite({
+        locationId: invite.location_id,
+        userId: session.user.id,
+      })
+
+      const membershipInsertResult = await getDatabase().query(
         `insert into public.location_memberships (
            location_id,
            user_id,
            role
          ) values ($1, $2, 'employee')
          on conflict (location_id, user_id)
-         do update set role = excluded.role,
-                       updated_at = timezone('utc', now())`,
-        [invite.location_id, session.user.id],
+         do nothing`,
+        [invite.location_id, session.user.id]
       )
+
+      if (membershipInsertResult.rowCount !== 1) {
+        throw new Error("You are already part of this location.")
+      }
     }
 
     const employeeLookupQuery = supabase
       .from("employees")
       .select("id")
       .eq("user_id", session.user.id)
-    const employeeLookupResult = await (invite.organization_id
-      ? employeeLookupQuery.eq("organization_id", invite.organization_id)
-      : employeeLookupQuery.eq("location_id", invite.location_id)).maybeSingle()
+    const employeeLookupResult = await (
+      invite.organization_id
+        ? employeeLookupQuery.eq("organization_id", invite.organization_id)
+        : employeeLookupQuery.eq("location_id", invite.location_id)
+    ).maybeSingle()
 
     assertSupabaseSuccess(
       employeeLookupResult.error,
-      "We could not load your employee record.",
+      "We could not load your employee record."
     )
 
     const employeePayload = {
@@ -493,13 +524,32 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
 
     assertSupabaseSuccess(
       employeeResult.error,
-      "We could not attach you to this workplace.",
+      "We could not attach you to this workplace."
     )
 
     const employeeId = getRequiredSupabaseRow(
       employeeResult.data,
-      "We could not attach you to this workplace.",
+      "We could not attach you to this workplace."
     ).id
+
+    const hourlyRatePence = await getMinimumWagePenceForUser(session.user.id)
+
+    await getDatabase().query(
+      `insert into public.employee_compensation (
+         employee_id,
+         organization_id,
+         location_id,
+         pay_type,
+         hourly_rate_pence
+       ) values ($1, $2, $3, 'hourly', $4)
+       on conflict (employee_id) do nothing`,
+      [
+        employeeId,
+        invite.organization_id,
+        invite.organization_id ? null : invite.location_id,
+        hourlyRatePence,
+      ]
+    )
 
     const assignmentResult = await supabase
       .from("employee_location_assignments")
@@ -513,12 +563,12 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
         },
         {
           onConflict: "employee_id,location_id",
-        },
+        }
       )
 
     assertSupabaseSuccess(
       assignmentResult.error,
-      "We could not enable that workplace assignment.",
+      "We could not enable that workplace assignment."
     )
     await syncBillingAfterStaffInvite({
       organizationId: invite.organization_id,
@@ -558,9 +608,83 @@ async function syncBillingAfterStaffInvite(input: {
   }
 }
 
+async function assertCanAcceptOrganizationStaffInvite(input: {
+  organizationId: string
+  locationId: string
+  userId: string
+}) {
+  const membershipResult = await getDatabase().query<{ role: string }>(
+    `select role
+     from public."member"
+     where "organizationId" = $1
+       and "userId" = $2
+     limit 1`,
+    [input.organizationId, input.userId]
+  )
+  const membershipRole = membershipResult.rows.at(0)?.role ?? null
+
+  if (membershipRole && !isEmployeeOnlyRole(membershipRole)) {
+    throw new Error(
+      "You already have elevated access to this organisation. Staff invite links are only for employees."
+    )
+  }
+
+  const assignmentResult = await getDatabase().query<{ id: string }>(
+    `select assignment.id
+     from public.employees employee
+     join public.employee_location_assignments assignment
+       on assignment.employee_id = employee.id
+     where employee.organization_id = $1
+       and employee.user_id = $2
+       and assignment.location_id = $3
+       and assignment.is_enabled = true
+       and assignment.disabled_at is null
+     limit 1`,
+    [input.organizationId, input.userId, input.locationId]
+  )
+
+  if (assignmentResult.rows.length > 0) {
+    throw new Error("You are already part of this location.")
+  }
+}
+
+async function assertCanAcceptLocationStaffInvite(input: {
+  locationId: string
+  userId: string
+}) {
+  const membershipResult = await getDatabase().query<{ role: string }>(
+    `select role
+     from public.location_memberships
+     where location_id = $1
+       and user_id = $2
+     limit 1`,
+    [input.locationId, input.userId]
+  )
+  const membershipRole = membershipResult.rows.at(0)?.role ?? null
+
+  if (!membershipRole) {
+    return
+  }
+
+  if (membershipRole === "employee") {
+    throw new Error("You are already part of this location.")
+  }
+
+  throw new Error(
+    "You already have elevated access to this location. Staff invite links are only for employees."
+  )
+}
+
+function isEmployeeOnlyRole(role: string) {
+  return role
+    .split(",")
+    .map((entry) => entry.trim())
+    .every((entry) => entry === "employee")
+}
+
 const acceptOrganizationInvitation = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    acceptOrganizationInvitationSchema.parse(input),
+    acceptOrganizationInvitationSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const { headers } = await requireVerifiedSessionOrThrow()
@@ -573,7 +697,7 @@ const acceptOrganizationInvitation = createServerFn({ method: "POST" })
 
     assertSupabaseSuccess(
       invitationResult.error,
-      "We could not load that invitation.",
+      "We could not load that invitation."
     )
     const organizationId = invitationResult.data?.organizationId ?? null
 
@@ -606,10 +730,22 @@ async function getFirstLocationMembershipId(userId: string) {
      where user_id = $1
      order by created_at asc
      limit 1`,
-    [userId],
+    [userId]
   )
 
   return result.rows.at(0)?.location_id ?? null
+}
+
+async function getMinimumWagePenceForUser(userId: string) {
+  const result = await getDatabase().query<{ dateOfBirth: string | null }>(
+    `select "dateOfBirth"
+     from public."user"
+     where id = $1
+     limit 1`,
+    [userId]
+  )
+
+  return getMinimumWagePenceForDateOfBirth(result.rows.at(0)?.dateOfBirth)
 }
 
 async function getLocationSlugById(locationId: string) {
@@ -618,7 +754,7 @@ async function getLocationSlugById(locationId: string) {
      from public.locations
      where id = $1
      limit 1`,
-    [locationId],
+    [locationId]
   )
 
   return result.rows.at(0) ?? null
@@ -632,4 +768,3 @@ export {
   getStaffInvitePreview,
   inviteOrganizationMemberByEmail,
 }
-

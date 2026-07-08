@@ -17,7 +17,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { dismissDashboardWelcome } from "@/features/dashboard/server-fns"
 import {
@@ -83,14 +82,14 @@ function DashboardWelcomeModal({
         if (!nextOpen) void dismiss()
       }}
     >
-      <DialogTrigger
+      {/* <DialogTrigger
         render={
           <Button type="button" variant="outline" size="sm">
             <RocketIcon />
             Welcome tour
           </Button>
         }
-      />
+      /> */}
       <DialogContent className="overflow-hidden p-0 sm:max-w-xl">
         <div className="bg-primary px-5 py-5 text-primary-foreground sm:px-6">
           <div className="flex size-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">

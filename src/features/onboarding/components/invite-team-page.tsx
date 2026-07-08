@@ -284,9 +284,10 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
                       options={[
                         { label: "Admin", value: "admin" },
                         { label: "Manager", value: "manager" },
+                        { label: "Supervisor", value: "supervisor" },
                         { label: "Employee", value: "employee" },
                       ]}
-                      description="Admins manage the organization, managers can run rota workflows, and employees stay read-only."
+                      description="Managers can build rotas. Supervisors can oversee rotas, timesheets, and attendance without editing schedules."
                     />
                   )}
                 </memberInviteForm.Field>

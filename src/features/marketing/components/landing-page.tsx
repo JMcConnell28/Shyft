@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-function LandingPage() {
+function LandingPage({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   return (
     <div className="bg-[#f8fbff] text-[#12285c]">
       <section className="relative overflow-hidden">
@@ -28,7 +28,7 @@ function LandingPage() {
         <div className="absolute inset-x-0 top-0 h-80 bg-linear-to-b from-white/70 via-transparent to-transparent" />
 
         <div className="relative mx-auto flex min-h-svh w-full max-w-[1280px] flex-col px-4 pb-16 pt-5 sm:px-6 lg:px-8">
-          <MarketingHeader activePage="home" />
+          <MarketingHeader activePage="home" isAuthenticated={isAuthenticated} />
           <LandingHero />
           <LandingRotaDemo />
         </div>

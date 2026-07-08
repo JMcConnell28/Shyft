@@ -5,14 +5,18 @@ import { Link } from "@tanstack/react-router"
 import {
   ArrowUpRightIcon,
   CalendarRangeIcon,
-  DotIcon,
   MapPinIcon,
   TriangleAlertIcon,
 } from "lucide-react"
 
+import type {
+  RotaPageSize,
+  RotaRangeFilter,
+  RotaStatusFilter,
+} from "@/features/rota/schemas/rota-schemas"
+import type { RotaListPageData } from "@/features/rota/types"
 import { NewRotaDialog } from "@/components/app/new-rota-dialog"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,25 +28,12 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import { Separator } from "@/components/ui/separator"
+import { MobileRotaList } from "@/features/rota/components/mobile-rota-list"
 import { RotaListFilters } from "@/features/rota/components/rota-list-filters"
 import { RotaListRow } from "@/features/rota/components/rota-list-row"
 import { useDeleteDraftRota } from "@/features/rota/hooks/use-delete-draft-rota"
 import { useUnpublishRota } from "@/features/rota/hooks/use-unpublish-rota"
-import type {
-  RotaPageSize,
-  RotaRangeFilter,
-  RotaStatusFilter,
-} from "@/features/rota/schemas/rota-schemas"
-import type { RotaListPageData } from "@/features/rota/types"
+import { isRotaWeekBeforeCurrentWeek } from "@/features/rota/utils/week-utils"
 import { rotaPageSizeValues } from "@/lib/rota-schemas"
 
 type RotaListPageProps = {
@@ -90,100 +81,132 @@ function RotaListPage({
     data.pagination.page * data.pagination.pageSize,
     data.pagination.totalItems
   )
+  const canEditRota = React.useCallback(
+    (weekStart: string) =>
+      canEditRotas && !isRotaWeekBeforeCurrentWeek(weekStart),
+    [canEditRotas]
+  )
 
   return (
     <div className="flex flex-1 flex-col overflow-x-hidden">
-      <div className="flex flex-col gap-3 border-b border-border/60 px-4 py-3 sm:px-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex min-w-0 flex-col gap-2">
-            <h2 className="text-md font-semibold tracking-tight">Rotas</h2>
+      <MobileRotaList
+        data={data}
+        canCreateRota={canCreateRota}
+        canEditRotas={canEditRotas}
+        isDeletingDraft={(rotaId) =>
+          deleteDraftMutation.isPending &&
+          deleteDraftMutation.variables.rotaId === rotaId
+        }
+        isUnpublishing={(rotaId) =>
+          unpublishMutation.isPending &&
+          unpublishMutation.variables.rotaId === rotaId
+        }
+        onDeleteDraft={(rotaId, weekLabel) => {
+          setPendingLifecycleAction({
+            rotaId,
+            type: "delete-draft",
+            weekLabel,
+          })
+        }}
+        onLocationChange={onLocationChange}
+        onPageSizeChange={onPageSizeChange}
+        onRangeChange={onRangeChange}
+        onStatusChange={onStatusChange}
+        onUnpublish={(rotaId, weekLabel) => {
+          setPendingLifecycleAction({
+            rotaId,
+            type: "unpublish",
+            weekLabel,
+          })
+        }}
+      />
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">
-                {data.selectedLocation?.name ?? "No location selected"}
-              </span>
-              {compactOverview.map((item) => (
-                <span key={item} className="inline-flex items-center gap-1">
-                  <DotIcon className="-mx-1 size-4 text-muted-foreground/70" />
-                  {item}
-                </span>
-              ))}
+      <div className="hidden flex-1 flex-col overflow-x-hidden bg-[#f7f8fb] text-[#11245a] md:flex">
+        <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-5 py-5">
+          <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-[2.4rem] leading-none font-extrabold tracking-[-0.055em]">
+                Rotas
+              </h1>
+              <p className="mt-2 text-sm font-semibold text-[#61709a]">
+                {data.selectedLocation?.name ?? "Choose a location"}
+              </p>
+
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {compactOverview.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-[#61709a] ring-1 ring-[#e7eaf2]"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            {data.latestDraft && canEditRotas ? (
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <span>Latest draft</span>
-                <span className="font-medium text-foreground">
-                  {data.latestDraft.weekLabel}
-                </span>
-                <span>Updated {data.latestDraft.updatedAt}</span>
-                <Button
-                  size="sm"
-                  variant="pill"
-                  nativeButton={false}
-                  render={
-                    <Link
-                      to={
-                        data.workspaceType === "location"
-                          ? "/w/$workspaceSlug/rota/$rotaId"
-                          : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
-                      }
-                      params={
-                        data.workspaceType === "location"
-                          ? {
-                              workspaceSlug:
-                                data.locationWorkspaceSlug ??
-                                data.latestDraft.locationSlug,
-                              rotaId: data.latestDraft.id,
-                            }
-                          : {
-                              workspaceSlug: data.orgSlug,
-                              locationSlug: data.latestDraft.locationSlug,
-                              rotaId: data.latestDraft.id,
-                            }
-                      }
-                    />
-                  }
-                  className="gap-2"
-                >
-                  Resume draft
-                  <ArrowUpRightIcon className="size-3.5" />
-                </Button>
+            {canCreateRota ? (
+              <div className="flex flex-wrap gap-2">
+                <NewRotaDialog
+                  locations={data.locations}
+                  selectedLocation={data.selectedLocation}
+                  triggerLabel="New rota"
+                  triggerIcon="plus"
+                  disabled={!canCreateRota}
+                  defaultSourceType="blank"
+                  workspaceType={data.workspaceType}
+                />
               </div>
             ) : null}
-          </div>
+          </section>
 
-          {canCreateRota ? (
-            <div className="flex flex-wrap gap-2">
-              <NewRotaDialog
-                locations={data.locations}
-                selectedLocation={data.selectedLocation}
-                triggerLabel="Use template"
-                triggerVariant="pill"
-                triggerIcon="template"
-                disabled={!canCreateRota}
-                defaultSourceType="template"
-                workspaceType={data.workspaceType}
-              />
-              <NewRotaDialog
-                locations={data.locations}
-                selectedLocation={data.selectedLocation}
-                triggerLabel="New rota"
-                triggerVariant="raised"
-                triggerClassName="border-sky-700 bg-sky-600 focus-visible:border-sky-800 focus-visible:ring-sky-500/30 hover:bg-sky-700"
-                triggerIcon="plus"
-                disabled={!canCreateRota}
-                defaultSourceType="blank"
-                workspaceType={data.workspaceType}
-              />
-            </div>
+          {data.latestDraft && canEditRota(data.latestDraft.weekStart) ? (
+            <section className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-neutral-200 bg-white px-4 py-3 shadow-sm">
+              <div className="min-w-0">
+                <p className="text-[11px] font-extrabold tracking-[0.08em] text-[#7a86a4] uppercase">
+                  Latest draft
+                </p>
+                <p className="mt-1 truncate text-sm font-extrabold text-[#11245a]">
+                  {data.latestDraft.weekLabel}
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-[#7a86a4]">
+                  Updated {data.latestDraft.updatedAt}
+                </p>
+              </div>
+              <Button
+                variant="base"
+                nativeButton={false}
+                render={
+                  <Link
+                    to={
+                      data.workspaceType === "location"
+                        ? "/w/$workspaceSlug/rota/$rotaId"
+                        : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
+                    }
+                    params={
+                      data.workspaceType === "location"
+                        ? {
+                            workspaceSlug:
+                              data.locationWorkspaceSlug ??
+                              data.latestDraft.locationSlug,
+                            rotaId: data.latestDraft.id,
+                          }
+                        : {
+                            workspaceSlug: data.orgSlug,
+                            locationSlug: data.latestDraft.locationSlug,
+                            rotaId: data.latestDraft.id,
+                          }
+                    }
+                  />
+                }
+                className="h-9 gap-1.5 text-xs font-extrabold text-[#0069ff] hover:bg-[#f7f8fb] hover:text-[#0069ff] focus-visible:ring-[#0069ff] active:bg-[#e6f0ff] active:text-[#0069ff]"
+              >
+                Resume draft
+                <ArrowUpRightIcon className="size-3.5" />
+              </Button>
+            </section>
           ) : null}
-        </div>
-      </div>
 
-      <div className="p-4 sm:p-5">
-        <Card className="overflow-hidden border-border/70 bg-background/95 shadow-sm">
-          <CardContent className="p-0">
+          <section className="rounded-[22px] bg-white shadow-[0_8px_24px_rgba(30,50,96,0.05)] ring-1 ring-[#e7eaf2]">
             <RotaListFilters
               locations={data.locations}
               selectedLocationId={data.selectedLocation?.id}
@@ -201,133 +224,105 @@ function RotaListPage({
               onPageSizeChange={onPageSizeChange}
               onCustomRangeChange={onCustomRangeChange}
             />
+          </section>
 
-            {!data.selectedLocation ? (
-              <div className="p-4 sm:p-5">
-                <Empty className="border border-dashed border-border/70 bg-muted/10 py-10">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <MapPinIcon className="size-4" />
-                    </EmptyMedia>
-                    <EmptyTitle>No rota access yet</EmptyTitle>
-                    <EmptyDescription>
-                      Your account is in this organization, but you do not
-                      currently have access to any locations with rota
-                      visibility.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
+          {!data.selectedLocation ? (
+            <DesktopEmptyState
+              icon={MapPinIcon}
+              title="No rota access yet"
+              message="Your account is in this organization, but you do not currently have access to any locations with rota visibility."
+            />
+          ) : data.rows.length === 0 ? (
+            <DesktopEmptyState
+              icon={CalendarRangeIcon}
+              title="No rotas match these filters"
+              message={
+                canCreateRota
+                  ? `Start the first week for ${data.selectedLocation.name} or adjust the filters to bring older weeks back into view.`
+                  : "There are no published rotas available for the selected period."
+              }
+              action={
+                canCreateRota ? (
+                  <NewRotaDialog
+                    locations={data.locations}
+                    selectedLocation={data.selectedLocation}
+                    triggerLabel="Create rota"
+                    triggerIcon="plus"
+                    triggerClassName="h-10 rounded-2xl border-0 bg-[#00a84f] px-4 text-sm font-extrabold text-white shadow-[0_10px_22px_rgba(0,168,79,0.18)] hover:bg-[#009647]"
+                    defaultSourceType="blank"
+                    workspaceType={data.workspaceType}
+                  />
+                ) : null
+              }
+            />
+          ) : (
+            <section className="space-y-2.5">
+              {data.rows.map((row) => (
+                <RotaListRow
+                  key={row.id}
+                  canEdit={canEditRota(row.weekStart)}
+                  orgSlug={data.orgSlug}
+                  workspaceType={data.workspaceType}
+                  locationWorkspaceSlug={data.locationWorkspaceSlug}
+                  row={row}
+                  isDeletingDraft={
+                    deleteDraftMutation.isPending &&
+                    deleteDraftMutation.variables.rotaId === row.id
+                  }
+                  isUnpublishing={
+                    unpublishMutation.isPending &&
+                    unpublishMutation.variables.rotaId === row.id
+                  }
+                  onDeleteDraft={(rotaId) => {
+                    setPendingLifecycleAction({
+                      rotaId,
+                      type: "delete-draft",
+                      weekLabel: row.weekLabel,
+                    })
+                  }}
+                  onUnpublish={(rotaId) => {
+                    setPendingLifecycleAction({
+                      rotaId,
+                      type: "unpublish",
+                      weekLabel: row.weekLabel,
+                    })
+                  }}
+                />
+              ))}
+
+              <div className="flex flex-col gap-3 rounded-[18px] bg-white px-4 py-3 shadow-[0_8px_24px_rgba(30,50,96,0.04)] ring-1 ring-[#e7eaf2] sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs font-semibold text-[#7a86a4]">
+                  Showing {firstVisibleItem} to {lastVisibleItem} of{" "}
+                  {data.pagination.totalItems} rotas
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    type="button"
+                    variant="pill"
+                    className="h-8 rounded-xl border-[#e1e7f2] bg-white px-3 text-xs font-extrabold text-[#0069ff] shadow-none"
+                    onClick={() => onPageChange(data.pagination.page - 1)}
+                    disabled={data.pagination.page <= 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    size="sm"
+                    type="button"
+                    variant="pill"
+                    className="h-8 rounded-xl border-[#e1e7f2] bg-white px-3 text-xs font-extrabold text-[#0069ff] shadow-none"
+                    onClick={() => onPageChange(data.pagination.page + 1)}
+                    disabled={
+                      data.pagination.page >= data.pagination.totalPages
+                    }
+                  >
+                    Next
+                  </Button>
+                </div>
               </div>
-            ) : data.rows.length === 0 ? (
-              <div className="p-4 sm:p-5">
-                <Empty className="border border-dashed border-border/70 bg-muted/10 py-10">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <CalendarRangeIcon className="size-4" />
-                    </EmptyMedia>
-                    <EmptyTitle>No rotas match these filters</EmptyTitle>
-                    <EmptyDescription>
-                      {canCreateRota
-                        ? `Start the first week for ${data.selectedLocation.name} or adjust the filters to bring older weeks back into view.`
-                        : "There are no published rotas available for the selected period."}
-                    </EmptyDescription>
-                  </EmptyHeader>
-                  {canCreateRota ? (
-                    <EmptyContent>
-                      <NewRotaDialog
-                        locations={data.locations}
-                        selectedLocation={data.selectedLocation}
-                        triggerLabel="Create rota"
-                        triggerVariant="default"
-                        triggerIcon="plus"
-                        triggerClassName="w-full sm:w-auto"
-                        defaultSourceType="blank"
-                        workspaceType={data.workspaceType}
-                      />
-                    </EmptyContent>
-                  ) : null}
-                </Empty>
-              </div>
-            ) : (
-              <>
-                <div className="hidden border-b border-border/60 bg-muted/20 px-4 py-2 text-[11px] font-medium text-muted-foreground sm:px-5 md:grid md:grid-cols-[minmax(13rem,1.35fr)_minmax(7rem,0.75fr)_7rem_5rem_minmax(8rem,0.85fr)_8rem] md:items-center">
-                  <span>Week range</span>
-                  <span>Created by</span>
-                  <span>Status</span>
-                  <span>Shifts</span>
-                  <span>Location</span>
-                  <span className="text-right">Actions</span>
-                </div>
-
-                <div className="divide-y divide-border/60">
-                  {data.rows.map((row) => (
-                    <RotaListRow
-                      key={row.id}
-                      canEdit={canEditRotas}
-                      orgSlug={data.orgSlug}
-                      workspaceType={data.workspaceType}
-                      locationWorkspaceSlug={data.locationWorkspaceSlug}
-                      row={row}
-                      isDeletingDraft={
-                        deleteDraftMutation.isPending &&
-                        deleteDraftMutation.variables?.rotaId === row.id
-                      }
-                      isUnpublishing={
-                        unpublishMutation.isPending &&
-                        unpublishMutation.variables?.rotaId === row.id
-                      }
-                      onDeleteDraft={(rotaId) => {
-                        setPendingLifecycleAction({
-                          rotaId,
-                          type: "delete-draft",
-                          weekLabel: row.weekLabel,
-                        })
-                      }}
-                      onUnpublish={(rotaId) => {
-                        setPendingLifecycleAction({
-                          rotaId,
-                          type: "unpublish",
-                          weekLabel: row.weekLabel,
-                        })
-                      }}
-                    />
-                  ))}
-                </div>
-
-                <Separator />
-
-                <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                  <p className="text-xs text-muted-foreground">
-                    Showing {firstVisibleItem} to {lastVisibleItem} of{" "}
-                    {data.pagination.totalItems} rotas
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      type="button"
-                      variant="pill"
-                      onClick={() => onPageChange(data.pagination.page - 1)}
-                      disabled={data.pagination.page <= 1}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      size="sm"
-                      type="button"
-                      variant="pill"
-                      onClick={() => onPageChange(data.pagination.page + 1)}
-                      disabled={
-                        data.pagination.page >= data.pagination.totalPages
-                      }
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+            </section>
+          )}
+        </div>
       </div>
 
       <AlertDialog
@@ -401,6 +396,33 @@ function RotaListPage({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  )
+}
+
+function DesktopEmptyState({
+  action,
+  icon: Icon,
+  message,
+  title,
+}: {
+  action?: React.ReactNode
+  icon: typeof CalendarRangeIcon
+  message: string
+  title: string
+}) {
+  return (
+    <div className="rounded-[22px] border border-dashed border-[#dfe5f0] bg-white px-6 py-12 text-center shadow-[0_8px_24px_rgba(30,50,96,0.05)]">
+      <span className="mx-auto flex size-11 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#0069ff]">
+        <Icon className="size-5" />
+      </span>
+      <h2 className="mt-4 text-base font-extrabold tracking-[-0.025em] text-[#11245a]">
+        {title}
+      </h2>
+      <p className="mx-auto mt-1.5 max-w-md text-sm font-medium text-[#61709a]">
+        {message}
+      </p>
+      {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
     </div>
   )
 }

@@ -12,10 +12,15 @@ import {
   getBillingPricingQuantities,
 } from "@/features/billing/server/pricing"
 import {
-  getExtraEmployeePriceId,
-  getLocationPriceId,
+  getCoreBasePriceId,
+  getCoreExtraEmployeePriceId,
+  getOptionalCoreExtraEmployeePriceId,
+  getOptionalTimeAttendanceEmployeePriceId,
   getStripe,
 } from "@/features/billing/server/stripe"
+import {
+  syncSubscriptionUsagePeriods,
+} from "@/features/billing/server/usage"
 import { ensureWorkspaceTrial } from "@/features/billing/server/trials"
 import { getDatabase } from "@/lib/db"
 
@@ -37,14 +42,18 @@ function getFirstSubscriptionItem(subscription: Stripe.Subscription) {
   return subscription.items.data.at(0) ?? null
 }
 
-function getBillingAccountIdFromSubscription(subscription: Stripe.Subscription) {
+function getBillingAccountIdFromSubscription(
+  subscription: Stripe.Subscription
+) {
   return subscription.metadata.billingAccountId || null
 }
 
 function getBillingAccountIdFromCheckoutSession(
-  session: Stripe.Checkout.Session,
+  session: Stripe.Checkout.Session
 ) {
-  return session.metadata?.billingAccountId || session.client_reference_id || null
+  return (
+    session.metadata?.billingAccountId || session.client_reference_id || null
+  )
 }
 
 async function findBillingAccountIdByStripeCustomer(stripeCustomerId: string) {
@@ -53,10 +62,31 @@ async function findBillingAccountIdByStripeCustomer(stripeCustomerId: string) {
      from public.billing_accounts
      where stripe_customer_id = $1
      limit 1`,
-    [stripeCustomerId],
+    [stripeCustomerId]
   )
 
   return result.rows.at(0)?.id ?? null
+}
+
+async function syncStripeCustomerTaxState(customer: Stripe.Customer) {
+  const taxIds = await getStripe().customers.listTaxIds(customer.id, {
+    limit: 100,
+  })
+
+  await getDatabase().query(
+    `update public.billing_accounts
+     set stripe_tax_exempt = $2,
+         stripe_tax_id_count = $3,
+         billing_address_country = $4,
+         updated_at = timezone('utc', now())
+     where stripe_customer_id = $1`,
+    [
+      customer.id,
+      customer.tax_exempt,
+      taxIds.data.length,
+      customer.address?.country ?? null,
+    ]
+  )
 }
 
 async function upsertStripeSubscription(subscription: Stripe.Subscription) {
@@ -66,7 +96,7 @@ async function upsertStripeSubscription(subscription: Stripe.Subscription) {
       : subscription.customer.id
   const billingAccountId =
     getBillingAccountIdFromSubscription(subscription) ??
-    await findBillingAccountIdByStripeCustomer(customerId)
+    (await findBillingAccountIdByStripeCustomer(customerId))
 
   if (!billingAccountId) {
     throw new Error("Webhook subscription is missing a billing account.")
@@ -74,12 +104,12 @@ async function upsertStripeSubscription(subscription: Stripe.Subscription) {
 
   const firstItem = getFirstSubscriptionItem(subscription)
   const hasPastDueStartedAtColumn = await hasBillingSubscriptionColumn(
-    "past_due_started_at",
+    "past_due_started_at"
   )
 
   if (hasPastDueStartedAtColumn) {
     await getDatabase().query(
-    `insert into public.billing_subscriptions (
+      `insert into public.billing_subscriptions (
        billing_account_id,
        stripe_subscription_id,
        stripe_customer_id,
@@ -113,18 +143,18 @@ async function upsertStripeSubscription(subscription: Stripe.Subscription) {
                      else null
                    end,
                    updated_at = timezone('utc', now())`,
-    [
-      billingAccountId,
-      subscription.id,
-      customerId,
-      firstItem?.price.id ?? null,
-      subscription.status,
-      firstItem?.quantity ?? 1,
-      toDate(firstItem?.current_period_start),
-      toDate(firstItem?.current_period_end),
-      subscription.cancel_at_period_end,
-      subscription.status === "past_due" ? new Date() : null,
-    ],
+      [
+        billingAccountId,
+        subscription.id,
+        customerId,
+        firstItem?.price.id ?? null,
+        subscription.status,
+        firstItem?.quantity ?? 1,
+        toDate(firstItem?.current_period_start),
+        toDate(firstItem?.current_period_end),
+        subscription.cancel_at_period_end,
+        subscription.status === "past_due" ? new Date() : null,
+      ]
     )
   } else {
     await getDatabase().query(
@@ -159,7 +189,7 @@ async function upsertStripeSubscription(subscription: Stripe.Subscription) {
         toDate(firstItem?.current_period_start),
         toDate(firstItem?.current_period_end),
         subscription.cancel_at_period_end,
-      ],
+      ]
     )
   }
 
@@ -169,8 +199,70 @@ async function upsertStripeSubscription(subscription: Stripe.Subscription) {
          stripe_customer_id = coalesce(stripe_customer_id, $3),
          updated_at = timezone('utc', now())
      where id = $1`,
-    [billingAccountId, subscription.status, customerId],
+    [billingAccountId, subscription.status, customerId]
   )
+
+  await syncSubscriptionItems({ billingAccountId, subscription })
+  await syncSubscriptionUsagePeriods({ billingAccountId, subscription })
+}
+
+function getSubscriptionItemType(priceId: string) {
+  if (priceId === getCoreBasePriceId()) return "core_base"
+  if (priceId === getOptionalCoreExtraEmployeePriceId()) {
+    return "core_extra_employee"
+  }
+  if (priceId === getOptionalTimeAttendanceEmployeePriceId()) {
+    return "time_attendance_employee"
+  }
+  return "legacy"
+}
+
+async function syncSubscriptionItems(input: {
+  billingAccountId: string
+  subscription: Stripe.Subscription
+}) {
+  const result = await getDatabase().query<{ id: string }>(
+    `select id from public.billing_subscriptions where stripe_subscription_id = $1`,
+    [input.subscription.id]
+  )
+  const billingSubscriptionId = result.rows.at(0)?.id
+
+  if (!billingSubscriptionId) {
+    throw new Error("Could not normalize the Stripe subscription items.")
+  }
+
+  await getDatabase().query(
+    `delete from billing_private.billing_subscription_items
+     where billing_subscription_id = $1
+       and not (stripe_subscription_item_id = any($2::text[]))`,
+    [
+      billingSubscriptionId,
+      input.subscription.items.data.map((item) => item.id),
+    ]
+  )
+
+  for (const item of input.subscription.items.data) {
+    await getDatabase().query(
+      `insert into billing_private.billing_subscription_items (
+         billing_subscription_id, stripe_subscription_item_id, stripe_price_id,
+         item_type, quantity, is_metered
+       ) values ($1, $2, $3, $4, $5, $6)
+       on conflict (stripe_subscription_item_id)
+       do update set stripe_price_id = excluded.stripe_price_id,
+                     item_type = excluded.item_type,
+                     quantity = excluded.quantity,
+                     is_metered = excluded.is_metered,
+                     updated_at = timezone('utc', now())`,
+      [
+        billingSubscriptionId,
+        item.id,
+        item.price.id,
+        getSubscriptionItemType(item.price.id),
+        item.quantity ?? null,
+        item.price.recurring?.usage_type === "metered",
+      ]
+    )
+  }
 }
 
 async function hasBillingSubscriptionColumn(columnName: string) {
@@ -189,7 +281,7 @@ async function hasBillingSubscriptionColumn(columnName: string) {
          and table_name = 'billing_subscriptions'
          and column_name = $1
      )`,
-    [columnName],
+    [columnName]
   )
   const exists = result.rows.at(0)?.exists ?? false
 
@@ -222,7 +314,7 @@ async function upsertStripeCheckoutSession(session: Stripe.Checkout.Session) {
        set stripe_customer_id = coalesce(stripe_customer_id, $2),
            updated_at = timezone('utc', now())
        where id = $1`,
-      [billingAccountId, stripeCustomerId],
+      [billingAccountId, stripeCustomerId]
     )
   }
 
@@ -326,7 +418,7 @@ async function createTrialSubscriptionForSavedPaymentMethod(input: {
   }
 
   const existingDatabaseSubscription = await getOpenBillingSubscription(
-    input.billingAccountId,
+    input.billingAccountId
   )
 
   if (existingDatabaseSubscription) {
@@ -353,14 +445,17 @@ async function createTrialSubscriptionForSavedPaymentMethod(input: {
     customer: input.stripeCustomerId,
     default_payment_method: input.stripePaymentMethodId,
     items: buildSubscriptionItems(quantities),
+    automatic_tax: { enabled: true },
     metadata: {
       billingAccountId: input.billingAccountId,
       organizationId: input.organizationId ?? "",
       locationId: input.locationId ?? "",
       locationQuantity: String(quantities.locationQuantity),
       activeEmployeeQuantity: String(quantities.activeEmployeeQuantity),
-      billableEmployeeQuantity: String(quantities.activeEmployeeQuantity),
+      includedEmployeeQuantity: String(quantities.includedEmployeeQuantity),
+      billableEmployeeQuantity: String(quantities.extraEmployeeQuantity),
       extraEmployeeQuantity: String(quantities.extraEmployeeQuantity),
+      timeAttendanceEmployeeQuantity: String(quantities.timeAttendanceQuantity),
       createdFrom: "saved_payment_method",
     },
     ...(trialEnd ? { trial_end: trialEnd } : {}),
@@ -382,9 +477,10 @@ async function syncCheckoutSessionForBillingAccount(input: {
   billingAccountId: string
 }) {
   const session = await getStripe().checkout.sessions.retrieve(
-    input.checkoutSessionId,
+    input.checkoutSessionId
   )
-  const sessionBillingAccountId = getBillingAccountIdFromCheckoutSession(session)
+  const sessionBillingAccountId =
+    getBillingAccountIdFromCheckoutSession(session)
 
   if (sessionBillingAccountId !== input.billingAccountId) {
     throw new Error("That checkout session does not belong to this workspace.")
@@ -404,7 +500,7 @@ async function getOpenBillingSubscription(billingAccountId: string) {
        and status = any($2::text[])
      order by created_at desc
      limit 1`,
-    [billingAccountId, Array.from(openSubscriptionStatuses)],
+    [billingAccountId, Array.from(openSubscriptionStatuses)]
   )
 
   return result.rows.at(0) ?? null
@@ -454,7 +550,7 @@ async function refreshStripeSubscriptionsForBillingAccount(input: {
        set status = 'incomplete',
            updated_at = timezone('utc', now())
        where id = $1`,
-      [input.billingAccountId],
+      [input.billingAccountId]
     )
   }
 
@@ -470,7 +566,7 @@ async function syncBillingSubscriptionQuantities(billingAccountId: string) {
 
   const stripe = getStripe()
   const subscription = await stripe.subscriptions.retrieve(
-    openSubscription.stripe_subscription_id,
+    openSubscription.stripe_subscription_id
   )
 
   if (!openSubscriptionStatuses.has(subscription.status)) {
@@ -479,56 +575,105 @@ async function syncBillingSubscriptionQuantities(billingAccountId: string) {
   }
 
   const quantities = await getBillingPricingQuantities(billingAccountId)
-  const locationPriceId = getLocationPriceId()
-  const locationItem = findSubscriptionItem(subscription, locationPriceId)
+  const coreBasePriceId = getCoreBasePriceId()
+  const coreBaseItem = findSubscriptionItem(subscription, coreBasePriceId)
 
-  if (!locationItem) {
-    throw new Error("Stripe subscription is missing the location price item.")
-  }
-
-  if (locationItem.quantity !== quantities.locationQuantity) {
-    await stripe.subscriptionItems.update(locationItem.id, {
-      quantity: quantities.locationQuantity,
-      proration_behavior: "create_prorations",
+  if (!coreBaseItem) {
+    await stripe.subscriptionItems.create({
+      subscription: subscription.id,
+      price: coreBasePriceId,
+      quantity: 1,
+      proration_behavior: "none",
+      metadata: {
+        billingAccountId,
+        billingItemType: "core_base",
+      },
+    })
+  } else if (coreBaseItem.quantity !== 1) {
+    await stripe.subscriptionItems.update(coreBaseItem.id, {
+      quantity: 1,
+      proration_behavior: "none",
     })
   }
 
-  const extraEmployeePriceId = getExtraEmployeePriceId()
+  const extraEmployeePriceId = getCoreExtraEmployeePriceId()
   const extraEmployeeItem = findSubscriptionItem(
     subscription,
-    extraEmployeePriceId,
+    extraEmployeePriceId
   )
+  await syncLicensedSubscriptionItem({
+    billingAccountId,
+    item: extraEmployeeItem,
+    itemType: "core_extra_employee",
+    priceId: extraEmployeePriceId,
+    quantity: quantities.extraEmployeeQuantity,
+    subscriptionId: subscription.id,
+  })
 
-  if (quantities.extraEmployeeQuantity > 0) {
-    if (extraEmployeeItem) {
-      if (extraEmployeeItem.quantity !== quantities.extraEmployeeQuantity) {
-        await stripe.subscriptionItems.update(extraEmployeeItem.id, {
-          quantity: quantities.extraEmployeeQuantity,
-          proration_behavior: "create_prorations",
-        })
-      }
-    } else {
-      await stripe.subscriptionItems.create({
-        subscription: subscription.id,
-        price: extraEmployeePriceId,
-        quantity: quantities.extraEmployeeQuantity,
-        proration_behavior: "create_prorations",
-        metadata: {
-          billingAccountId,
-          billingItemType: "extra_employee",
-        },
-      })
-    }
-  } else if (extraEmployeeItem) {
-    await stripe.subscriptionItems.del(extraEmployeeItem.id, {
-      proration_behavior: "create_prorations",
+  const timeAttendancePriceId = getOptionalTimeAttendanceEmployeePriceId()
+  const timeAttendanceItem = timeAttendancePriceId
+    ? findSubscriptionItem(subscription, timeAttendancePriceId)
+    : null
+
+  if (timeAttendancePriceId) {
+    await syncLicensedSubscriptionItem({
+      billingAccountId,
+      item: timeAttendanceItem,
+      itemType: "time_attendance_employee",
+      priceId: timeAttendancePriceId,
+      quantity: quantities.timeAttendanceQuantity,
+      subscriptionId: subscription.id,
     })
   }
 
-  const updatedSubscription = await stripe.subscriptions.retrieve(subscription.id)
+  const updatedSubscription = await stripe.subscriptions.retrieve(
+    subscription.id
+  )
   await upsertStripeSubscription(updatedSubscription)
 
   return updatedSubscription
+}
+
+async function syncLicensedSubscriptionItem(input: {
+  billingAccountId: string
+  item: Stripe.SubscriptionItem | null
+  itemType: "core_extra_employee" | "time_attendance_employee"
+  priceId: string
+  quantity: number
+  subscriptionId: string
+}) {
+  const stripe = getStripe()
+
+  if (input.quantity > 0) {
+    if (input.item) {
+      if (input.item.quantity !== input.quantity) {
+        await stripe.subscriptionItems.update(input.item.id, {
+          quantity: input.quantity,
+          proration_behavior: "create_prorations",
+        })
+      }
+
+      return
+    }
+
+    await stripe.subscriptionItems.create({
+      subscription: input.subscriptionId,
+      price: input.priceId,
+      quantity: input.quantity,
+      proration_behavior: "always_invoice",
+      metadata: {
+        billingAccountId: input.billingAccountId,
+        billingItemType: input.itemType,
+      },
+    })
+    return
+  }
+
+  if (input.item) {
+    await stripe.subscriptionItems.del(input.item.id, {
+      proration_behavior: "create_prorations",
+    })
+  }
 }
 
 async function getBillingAccountLocationCount(billingAccountId: string) {
@@ -536,7 +681,7 @@ async function getBillingAccountLocationCount(billingAccountId: string) {
     `select count(*)::text
      from public.locations
      where billing_account_id = $1`,
-    [billingAccountId],
+    [billingAccountId]
   )
 
   return Number(result.rows.at(0)?.count ?? 0)
@@ -561,7 +706,7 @@ async function syncBillingAccountAfterCoverageChange(billingAccountId: string) {
       metadata: {
         coverageEndedAt: new Date().toISOString(),
       },
-    },
+    }
   )
 
   await upsertStripeSubscription(subscription)
@@ -595,9 +740,11 @@ async function syncWorkspaceBillingSubscriptionQuantities(input: {
 
 function findSubscriptionItem(
   subscription: Stripe.Subscription,
-  priceId: string,
+  priceId: string
 ) {
-  return subscription.items.data.find((item) => item.price.id === priceId) ?? null
+  return (
+    subscription.items.data.find((item) => item.price.id === priceId) ?? null
+  )
 }
 
 export {
@@ -609,6 +756,7 @@ export {
   syncBillingSubscriptionQuantities,
   syncCheckoutSessionForBillingAccount,
   syncSubscriptionFromInvoice,
+  syncStripeCustomerTaxState,
   syncWorkspaceBillingSubscriptionQuantities,
   upsertStripeCheckoutSession,
   upsertStripeSubscription,

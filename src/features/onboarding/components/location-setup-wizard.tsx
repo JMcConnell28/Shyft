@@ -3,6 +3,7 @@ import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react"
 
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   fixedProgress,
   getBusinessTypeOption,
@@ -51,6 +52,8 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
   const [worksiteChoice, setWorksiteChoice] =
     React.useState<WorksiteChoice>("skip")
   const [worksiteName, setWorksiteName] = React.useState("")
+  const [includeOwnerAsEmployee, setIncludeOwnerAsEmployee] =
+    React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
@@ -132,6 +135,7 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
         planningMode === "variable_location" && worksiteChoice === "add"
           ? worksiteName
           : "",
+      includeOwnerAsEmployee,
     } satisfies LocationSetupInput
 
     const parsed = locationSetupSchema.safeParse(payload)
@@ -207,13 +211,28 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
             />
           ) : null}
           {step === "summary" ? (
-            <SummaryStep
-              businessLabel={businessOption?.label ?? "Team"}
-              planningMode={planningMode}
-              workspaceName={workspaceName}
-              zoneNames={selectedZoneNames}
-              worksiteName={worksiteChoice === "add" ? worksiteName : ""}
-            />
+            <>
+              <SummaryStep
+                businessLabel={businessOption?.label ?? "Team"}
+                planningMode={planningMode}
+                workspaceName={workspaceName}
+                zoneNames={selectedZoneNames}
+                worksiteName={worksiteChoice === "add" ? worksiteName : ""}
+              />
+              <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border/70 p-3">
+                <Checkbox
+                  className="mt-0.5"
+                  checked={includeOwnerAsEmployee}
+                  onCheckedChange={(checked) =>
+                    setIncludeOwnerAsEmployee(checked === true)
+                  }
+                />
+                <span className="text-xs leading-5 text-muted-foreground">
+                  Add me as a schedulable employee so I can appear on rotas and
+                  clock in. Leave this off if you only manage the team.
+                </span>
+              </label>
+            </>
           ) : null}
         </div>
 

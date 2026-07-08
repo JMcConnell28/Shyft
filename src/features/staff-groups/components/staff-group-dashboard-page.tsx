@@ -75,78 +75,71 @@ function StaffGroupDashboardPage({
     mutations.setColorMutation.isPending ||
     mutations.deleteMutation.isPending ||
     mutations.assignMutation.isPending ||
-    mutations.bulkAssignMutation.isPending ||
-    mutations.setActiveMutation.isPending ||
-    mutations.removeEmployeeMutation.isPending
+    mutations.bulkAssignMutation.isPending
 
   return (
-    <Tabs defaultValue="staff" className="gap-6">
-      <TabsList
-        variant="line"
-        className="h-auto w-full justify-start gap-5 border-b border-border/70 p-0"
-      >
-        <TabsTrigger value="staff" className="flex-none px-0 pb-3">
-          <UsersIcon />
-          Staff
-          <span className="text-muted-foreground">
-            {settingsQuery.data.employees.length}
-          </span>
-        </TabsTrigger>
-        <TabsTrigger value="groups" className="flex-none px-0 pb-3">
-          <Layers3Icon />
-          Groups
-          <span className="text-muted-foreground">
-            {settingsQuery.data.groups.length}
-          </span>
-        </TabsTrigger>
-      </TabsList>
+    <div className="space-y-4 text-[#11245a]">
+      <Tabs defaultValue="team" className="gap-4">
+        <TabsList
+          variant="line"
+          className="h-auto w-full justify-start gap-5 border-b border-[#dfe5f0] p-0"
+        >
+          <TabsTrigger value="team" className="flex-none px-0 pb-3">
+            <UsersIcon />
+            Team
+            <span className="text-muted-foreground">
+              {settingsQuery.data.employees.length}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="groups" className="flex-none px-0 pb-3">
+            <Layers3Icon />
+            Groups
+            <span className="text-muted-foreground">
+              {settingsQuery.data.groups.length}
+            </span>
+          </TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="staff">
-        <StaffTable
-          employees={settingsQuery.data.employees}
-          groups={settingsQuery.data.groups}
-          pending={isBusy}
-          scopeLabel={organizationId ? "organisation" : "location"}
-          onAssign={async (employeeId, groupId) => {
-            await mutations.assignMutation.mutateAsync({ employeeId, groupId })
-          }}
-          onBulkAssign={async (employeeIds, groupId) => {
-            await mutations.bulkAssignMutation.mutateAsync({
-              employeeIds,
-              groupId,
-            })
-          }}
-          onSetActive={async (employeeId, isActive) => {
-            await mutations.setActiveMutation.mutateAsync({
-              employeeId,
-              isActive,
-            })
-          }}
-          onRemove={async (employeeId) => {
-            await mutations.removeEmployeeMutation.mutateAsync(employeeId)
-          }}
-        />
-      </TabsContent>
+        <TabsContent value="team">
+          <StaffTable
+            employees={settingsQuery.data.employees}
+            groups={settingsQuery.data.groups}
+            pending={isBusy}
+            onAssign={async (employeeId, groupId) => {
+              await mutations.assignMutation.mutateAsync({
+                employeeId,
+                groupId,
+              })
+            }}
+            onBulkAssign={async (employeeIds, groupId) => {
+              await mutations.bulkAssignMutation.mutateAsync({
+                employeeIds,
+                groupId,
+              })
+            }}
+          />
+        </TabsContent>
 
-      <TabsContent value="groups">
-        <StaffGroupListCard
-          groups={settingsQuery.data.groups}
-          isBusy={isBusy}
-          onCreate={async (values) => {
-            await mutations.createMutation.mutateAsync(values)
-          }}
-          onRename={async (groupId, name) => {
-            await mutations.renameMutation.mutateAsync({ groupId, name })
-          }}
-          onSetColor={async (groupId, color) => {
-            await mutations.setColorMutation.mutateAsync({ groupId, color })
-          }}
-          onDelete={async (groupId) => {
-            await mutations.deleteMutation.mutateAsync(groupId)
-          }}
-        />
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="groups">
+          <StaffGroupListCard
+            groups={settingsQuery.data.groups}
+            isBusy={isBusy}
+            onCreate={async (values) => {
+              await mutations.createMutation.mutateAsync(values)
+            }}
+            onRename={async (groupId, name) => {
+              await mutations.renameMutation.mutateAsync({ groupId, name })
+            }}
+            onSetColor={async (groupId, color) => {
+              await mutations.setColorMutation.mutateAsync({ groupId, color })
+            }}
+            onDelete={async (groupId) => {
+              await mutations.deleteMutation.mutateAsync(groupId)
+            }}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
 

@@ -12,6 +12,10 @@ import type {
 } from "@/lib/rota-schemas"
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  rotaListInputClassName,
+  rotaListSelectClassName,
+} from "@/features/rota/constants/rota-list-styles"
 
 type RotaListFilterLocation = {
   id: string
@@ -67,18 +71,20 @@ function RotaListFilters({
   onCustomRangeChange: (value: { from?: string; to?: string }) => void
 }) {
   return (
-    <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/85 sm:px-5">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-2">
-          <ListFilterIcon className="size-3.5" />
+    <div className="flex flex-col gap-3 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium text-neutral-500">
+        <span className="inline-flex items-center gap-2 font-medium text-neutral-700">
+          <ListFilterIcon className="size-3.5 text-blue-600" />
           Newest weeks first
         </span>
-        <span>{totalItems} rotas</span>
+        <span className="rounded-[10px] border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600">
+          {totalItems} rotas
+        </span>
       </div>
 
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_8rem]">
         <label className="relative">
-          <MapPinIcon className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <MapPinIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-3.5 -translate-y-1/2 text-blue-600" />
           <NativeSelect
             value={selectedLocationId ?? ""}
             onChange={(event) => {
@@ -90,7 +96,7 @@ function RotaListFilters({
                 onLocationChange(location.slug)
               }
             }}
-            className="w-full [&_select]:pl-7"
+            className={`${rotaListSelectClassName} [&_select]:pl-8`}
             disabled={locations.length === 0}
           >
             {locations.length === 0 ? (
@@ -105,13 +111,13 @@ function RotaListFilters({
         </label>
 
         <label className="relative">
-          <CalendarRangeIcon className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <CalendarRangeIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-3.5 -translate-y-1/2 text-blue-600" />
           <NativeSelect
             value={range}
             onChange={(event) =>
               onRangeChange(event.target.value as RotaRangeFilter)
             }
-            className="w-full [&_select]:pl-7"
+            className={`${rotaListSelectClassName} [&_select]:pl-8`}
           >
             {rangeOptions.map((option) => (
               <NativeSelectOption key={option.value} value={option.value}>
@@ -127,7 +133,7 @@ function RotaListFilters({
             onChange={(event) =>
               onStatusChange(event.target.value as RotaStatusFilter)
             }
-            className="w-full"
+            className={rotaListSelectClassName}
           >
             {statusOptions.map((option) => (
               <NativeSelectOption key={option.value} value={option.value}>
@@ -138,13 +144,13 @@ function RotaListFilters({
         ) : null}
 
         <label className="relative">
-          <Rows3Icon className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Rows3Icon className="pointer-events-none absolute top-1/2 left-3 z-10 size-3.5 -translate-y-1/2 text-blue-600" />
           <NativeSelect
             value={String(pageSize)}
             onChange={(event) =>
               onPageSizeChange(Number(event.target.value) as RotaPageSize)
             }
-            className="w-full [&_select]:pl-7"
+            className={`${rotaListSelectClassName} [&_select]:pl-8`}
           >
             {pageSizeOptions.map((size) => (
               <NativeSelectOption key={size} value={String(size)}>
@@ -159,6 +165,7 @@ function RotaListFilters({
         <div className="grid gap-2 md:grid-cols-2 xl:max-w-md">
           <Input
             type="date"
+            className={rotaListInputClassName}
             value={from ?? ""}
             onChange={(event) =>
               onCustomRangeChange({
@@ -169,6 +176,7 @@ function RotaListFilters({
           />
           <Input
             type="date"
+            className={rotaListInputClassName}
             value={to ?? ""}
             onChange={(event) =>
               onCustomRangeChange({

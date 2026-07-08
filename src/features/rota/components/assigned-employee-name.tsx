@@ -16,15 +16,18 @@ function AssignedEmployeeName({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 truncate rounded-sm px-1 text-[11px] leading-4 text-foreground/85 transition-colors hover:bg-muted hover:text-foreground",
+        "flex w-full min-w-0 items-center justify-center gap-1.5 truncate rounded-md px-0.5 py-0.5 text-[11px] leading-4 font-semibold text-[#11245a] transition-colors",
         isDragging
-          ? "cursor-grab touch-none select-none active:cursor-grabbing"
+          ? "cursor-grab touch-none select-none hover:bg-muted active:cursor-grabbing"
           : undefined
       )}
     >
       <span
         aria-hidden="true"
-        className={cn("h-1.5 w-1.5 shrink-0 rounded-full", groupAppearance.dotClassName)}
+        className={cn(
+          "h-1.5 w-1.5 shrink-0 rounded-full",
+          groupAppearance.dotClassName
+        )}
       />
       <span className="truncate">{employee.name}</span>
     </div>

@@ -1,5 +1,6 @@
 type DashboardShiftSummary = {
   id: string
+  date: string
   dateLabel: string
   dayLabel: string
   locationName: string

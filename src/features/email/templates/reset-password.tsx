@@ -19,13 +19,23 @@ function ResetPasswordEmail({ resetUrl, userName }: ResetPasswordEmailProps) {
         Use this secure link to choose a new password for your {appName}
         account.
       </Text>
-      <Button href={resetUrl} style={button}>
+      <Button
+        href={resetUrl}
+        rel="noopener noreferrer"
+        style={button}
+        target="_blank"
+      >
         Reset password
       </Button>
       <Text style={{ ...text, marginTop: "22px" }}>
-        If the button does not work, open this link:
+        If the button does not work, copy and paste this link into a new tab:
         <br />
-        <Link href={resetUrl} style={link}>
+        <Link
+          href={resetUrl}
+          rel="noopener noreferrer"
+          style={link}
+          target="_blank"
+        >
           {resetUrl}
         </Link>
       </Text>

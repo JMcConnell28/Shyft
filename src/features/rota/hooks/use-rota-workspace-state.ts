@@ -13,14 +13,16 @@ import type {
 } from "@/features/rota/types/workspace"
 import { formatMinutesAsHours } from "@/features/rota/utils/workspace-time"
 import {
-  DEFAULT_HOURLY_RATE_GBP,
   formatCurrency,
-  getScheduledCostFromMinutes,
+  getScheduledCostSummaries,
+  getScheduledShiftCostSummaries,
+  getScheduledZoneCostSummaries,
 } from "@/features/rota/utils/workspace-budget"
+import { buildBudgetInsights } from "@/features/rota/utils/budget-insights"
 import {
+  compareShiftsByTime,
   getShiftAbsoluteSegments,
-  getShiftDurationMinutes,
-  getShiftSortStart,
+  shiftsHaveMatchingTimes,
 } from "@/features/rota/utils/workspace-shifts"
 import {
   buildWorkspaceInsights,
@@ -37,7 +39,9 @@ function useRotaWorkspaceState({
   const [meta, setMeta] = React.useState(boardData.meta)
   const [selectedZoneId, setSelectedZoneId] = React.useState("all")
   const [searchQuery, setSearchQuery] = React.useState("")
-  const [shiftsById, setShiftsById] = React.useState(() => mapById(boardData.shifts))
+  const [shiftsById, setShiftsById] = React.useState(() =>
+    mapById(boardData.shifts)
+  )
   const [assignmentsById, setAssignmentsById] = React.useState(() =>
     mapById(boardData.assignments)
   )
@@ -63,16 +67,23 @@ function useRotaWorkspaceState({
         .filter(
           (shift) => selectedZoneId === "all" || shift.zoneId === selectedZoneId
         )
-        .sort(
-          (left, right) =>
-            getShiftSortStart(left, boardData.location) -
-            getShiftSortStart(right, boardData.location)
+        .sort((left, right) =>
+          compareShiftsByTime(left, right, boardData.location)
         )
         .map((shift) => shift.id)
 
       return map
     }, {})
   }, [boardData.days, boardData.location, selectedZoneId, shiftsById])
+
+  const allShiftIdsByDayId = React.useMemo(() => {
+    return boardData.days.reduce<Record<string, string[]>>((map, day) => {
+      map[day.id] = Object.values(shiftsById)
+        .filter((shift) => shift.dayId === day.id)
+        .map((shift) => shift.id)
+      return map
+    }, {})
+  }, [boardData.days, shiftsById])
 
   const assignmentIdsByShiftId = React.useMemo(() => {
     return Object.values(assignmentsById).reduce<Record<string, string[]>>(
@@ -95,7 +106,13 @@ function useRotaWorkspaceState({
         location: boardData.location,
         shiftsById,
       }),
-    [assignmentsById, boardData.days, boardData.location, employeesById, shiftsById]
+    [
+      assignmentsById,
+      boardData.days,
+      boardData.location,
+      employeesById,
+      shiftsById,
+    ]
   )
 
   const employeeGroups = React.useMemo(() => {
@@ -121,46 +138,114 @@ function useRotaWorkspaceState({
   }, [boardData.employeeGroups, boardData.employees, lowerSearchQuery])
 
   const daySummaries = React.useMemo(() => {
-    return boardData.days.map((day) => {
-      const totalMinutes = (visibleShiftIdsByDayId[day.id] ?? []).reduce(
-        (minutes, shiftId) => {
-          const assignmentIds = assignmentIdsByShiftId[shiftId] ?? []
-          const shift = shiftsById[shiftId]
-
-          if (!shift) {
-            return minutes
-          }
-
-          return (
-            minutes +
-            assignmentIds.length * getShiftDurationMinutes(shift, boardData.location)
-          )
-        },
-        0
-      )
-
-      return {
-        dayId: day.id,
-        totalCost: getScheduledCostFromMinutes(totalMinutes),
-        totalMinutes,
-        totalShifts: (visibleShiftIdsByDayId[day.id] ?? []).length,
-      }
+    return getScheduledCostSummaries({
+      allShiftIdsByDayId,
+      assignmentIdsByShiftId,
+      assignmentsById,
+      days: boardData.days,
+      employeesById,
+      location: boardData.location,
+      shiftIdsByDayId: visibleShiftIdsByDayId,
+      shiftsById,
     })
   }, [
     assignmentIdsByShiftId,
+    assignmentsById,
+    allShiftIdsByDayId,
     boardData.days,
     boardData.location,
+    employeesById,
     shiftsById,
     visibleShiftIdsByDayId,
   ])
 
+  const weekSummaries = React.useMemo(() => {
+    return getScheduledCostSummaries({
+      assignmentIdsByShiftId,
+      assignmentsById,
+      days: boardData.days,
+      employeesById,
+      location: boardData.location,
+      shiftIdsByDayId: allShiftIdsByDayId,
+      shiftsById,
+    })
+  }, [
+    allShiftIdsByDayId,
+    assignmentIdsByShiftId,
+    assignmentsById,
+    boardData.days,
+    boardData.location,
+    employeesById,
+    shiftsById,
+  ])
+
+  const zoneSummaries = React.useMemo(() => {
+    return getScheduledZoneCostSummaries({
+      assignmentIdsByShiftId,
+      assignmentsById,
+      days: boardData.days,
+      employeesById,
+      location: boardData.location,
+      shiftIdsByDayId: allShiftIdsByDayId,
+      shiftsById,
+      zones: boardData.zones,
+    })
+  }, [
+    allShiftIdsByDayId,
+    assignmentIdsByShiftId,
+    assignmentsById,
+    boardData.days,
+    boardData.location,
+    boardData.zones,
+    employeesById,
+    shiftsById,
+  ])
+
+  const shiftCostSummaries = React.useMemo(() => {
+    return getScheduledShiftCostSummaries({
+      assignmentIdsByShiftId,
+      assignmentsById,
+      days: boardData.days,
+      employeesById,
+      location: boardData.location,
+      shiftIdsByDayId: allShiftIdsByDayId,
+      shiftsById,
+      zones: boardData.zones,
+    })
+  }, [
+    allShiftIdsByDayId,
+    assignmentIdsByShiftId,
+    assignmentsById,
+    boardData.days,
+    boardData.location,
+    boardData.zones,
+    employeesById,
+    shiftsById,
+  ])
+
+  const budgetInsights = React.useMemo(() => {
+    return buildBudgetInsights({
+      budgetPence: meta.budgetPence,
+      days: boardData.days,
+      daySummaries: weekSummaries,
+      shiftSummaries: shiftCostSummaries,
+      zoneSummaries,
+    })
+  }, [
+    boardData.days,
+    meta.budgetPence,
+    shiftCostSummaries,
+    weekSummaries,
+    zoneSummaries,
+  ])
+
   const totalScheduledMinutes = React.useMemo(() => {
-    return daySummaries.reduce((sum, day) => sum + day.totalMinutes, 0)
-  }, [daySummaries])
+    return weekSummaries.reduce((sum, day) => sum + day.totalMinutes, 0)
+  }, [weekSummaries])
 
   const totalScheduledCost = React.useMemo(() => {
-    return daySummaries.reduce((sum, day) => sum + day.totalCost, 0)
-  }, [daySummaries])
+    return weekSummaries.reduce((sum, day) => sum + day.totalCost, 0)
+  }, [weekSummaries])
 
   const getEmployee = React.useCallback(
     (employeeId: string) =>
@@ -173,12 +258,15 @@ function useRotaWorkspaceState({
       employeeId: string,
       shiftId: string
     ): Promise<WorkspaceAssignmentMutationResult> => {
-      let mutationResult: WorkspaceAssignmentMutationResult = { status: "success" }
+      let mutationResult: WorkspaceAssignmentMutationResult = {
+        status: "success",
+      }
 
       setAssignmentsById((currentAssignments) => {
         const alreadyAssigned = Object.values(currentAssignments).some(
           (assignment) =>
-            assignment.shiftId === shiftId && assignment.employeeId === employeeId
+            assignment.shiftId === shiftId &&
+            assignment.employeeId === employeeId
         )
 
         if (alreadyAssigned) {
@@ -218,7 +306,13 @@ function useRotaWorkspaceState({
 
       return mutationResult
     },
-    [boardData.days, boardData.location, boardData.zones, employeesById, shiftsById]
+    [
+      boardData.days,
+      boardData.location,
+      boardData.zones,
+      employeesById,
+      shiftsById,
+    ]
   )
 
   const moveAssignmentToShift = React.useCallback(
@@ -226,7 +320,9 @@ function useRotaWorkspaceState({
       assignmentId: string,
       shiftId: string
     ): Promise<WorkspaceAssignmentMutationResult> => {
-      let mutationResult: WorkspaceAssignmentMutationResult = { status: "success" }
+      let mutationResult: WorkspaceAssignmentMutationResult = {
+        status: "success",
+      }
 
       setAssignmentsById((currentAssignments) => {
         const assignment = currentAssignments[assignmentId]
@@ -278,7 +374,13 @@ function useRotaWorkspaceState({
 
       return mutationResult
     },
-    [boardData.days, boardData.location, boardData.zones, employeesById, shiftsById]
+    [
+      boardData.days,
+      boardData.location,
+      boardData.zones,
+      employeesById,
+      shiftsById,
+    ]
   )
 
   const removeAssignment = React.useCallback(async (assignmentId: string) => {
@@ -295,20 +397,33 @@ function useRotaWorkspaceState({
     })
   }, [])
 
-  const createShift = React.useCallback(async (input: CreateWorkspaceShiftInput) => {
-    const nextShift: WorkspaceShift = {
-      id: createLocalId("shift"),
-      ...input,
-    }
+  const createShift = React.useCallback(
+    async (input: CreateWorkspaceShiftInput) => {
+      const nextShift: WorkspaceShift = {
+        id: createLocalId("shift"),
+        ...input,
+      }
 
-    setHasUnsavedChanges(true)
-    setShiftsById((currentShifts) => ({
-      ...currentShifts,
-      [nextShift.id]: nextShift,
-    }))
+      const hasMatchingShift = Object.values(shiftsById).some((shift) =>
+        shiftsHaveMatchingTimes(shift, nextShift, boardData.location)
+      )
 
-    return nextShift
-  }, [])
+      if (hasMatchingShift) {
+        throw new Error(
+          "A shift with the same start and finish already exists on that day."
+        )
+      }
+
+      setHasUnsavedChanges(true)
+      setShiftsById((currentShifts) => ({
+        ...currentShifts,
+        [nextShift.id]: nextShift,
+      }))
+
+      return nextShift
+    },
+    [boardData.location, shiftsById]
+  )
 
   const deleteShift = React.useCallback(
     async (shiftId: string) => {
@@ -358,7 +473,9 @@ function useRotaWorkspaceState({
     setMeta((currentMeta) => ({
       ...currentMeta,
       hasUnpublishedChanges:
-        currentMeta.status === "published" ? true : currentMeta.hasUnpublishedChanges,
+        currentMeta.status === "published"
+          ? true
+          : currentMeta.hasUnpublishedChanges,
     }))
   }, [])
 
@@ -367,8 +484,14 @@ function useRotaWorkspaceState({
       ...currentMeta,
       note,
       hasUnpublishedChanges:
-        currentMeta.status === "published" ? true : currentMeta.hasUnpublishedChanges,
+        currentMeta.status === "published"
+          ? true
+          : currentMeta.hasUnpublishedChanges,
     }))
+  }, [])
+
+  const setBudgetPence = React.useCallback((budgetPence: number | null) => {
+    setMeta((currentMeta) => ({ ...currentMeta, budgetPence }))
   }, [])
 
   const markPublished = React.useCallback(() => {
@@ -386,6 +509,7 @@ function useRotaWorkspaceState({
     assignmentsById,
     assignmentIdsByShiftId,
     assignEmployeeToShift,
+    budgetInsights,
     createShift,
     dayInsightsById: workspaceInsights.dayInsightsById,
     daySummaries,
@@ -399,7 +523,6 @@ function useRotaWorkspaceState({
     getEmployee,
     getZoneAppearance,
     hasUnsavedChanges,
-    hourlyRateGbp: DEFAULT_HOURLY_RATE_GBP,
     isDemo: mode === "demo",
     locations: [boardData.location],
     markChangesSaved,
@@ -413,16 +536,20 @@ function useRotaWorkspaceState({
     selectedZoneId,
     setSearchQuery,
     setMetaNote,
+    setBudgetPence,
     setSelectedLocationId: (_locationId: string) => undefined,
     setSelectedZoneId,
     shiftIdsByDayId: visibleShiftIdsByDayId,
     shiftInsightsById: workspaceInsights.shiftInsightsById,
+    shiftCostSummaries,
     shiftsById,
     templates: boardData.templates,
     totalScheduledCost,
     totalScheduledMinutes,
-    unavailableEmployeeIdsByDayId: workspaceInsights.unavailableEmployeeIdsByDayId,
+    unavailableEmployeeIdsByDayId:
+      workspaceInsights.unavailableEmployeeIdsByDayId,
     zones: boardData.zones,
+    zoneSummaries,
   }
 }
 

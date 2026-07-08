@@ -1,28 +1,27 @@
+import "@tanstack/react-start/server-only"
+
+import type { WorkspaceTrial } from "@/features/billing/types"
 import { FREE_TRIAL_DAYS } from "@/features/onboarding/constants"
 import { getDatabase } from "@/lib/db"
-import type { WorkspaceTrial } from "@/features/billing/types"
 
 type WorkspaceTrialRow = {
   scope: "organization" | "location"
   organization_id: string | null
   location_id: string | null
-  status: "trialing" | "active" | "expired" | "canceled"
   trial_started_at: Date | string
   trial_ends_at: Date | string
 }
 
-function toIsoString(value: Date | string) {
-  return new Date(value).toISOString()
-}
-
 function mapWorkspaceTrial(row: WorkspaceTrialRow): WorkspaceTrial {
+  const trialEndsAt = new Date(row.trial_ends_at)
+
   return {
     scope: row.scope,
     organizationId: row.organization_id,
     locationId: row.location_id,
-    status: row.status,
-    trialStartedAt: toIsoString(row.trial_started_at),
-    trialEndsAt: toIsoString(row.trial_ends_at),
+    status: trialEndsAt.getTime() > Date.now() ? "trialing" : "expired",
+    trialStartedAt: new Date(row.trial_started_at).toISOString(),
+    trialEndsAt: trialEndsAt.toISOString(),
   }
 }
 
@@ -30,84 +29,100 @@ async function ensureWorkspaceTrial(input: {
   organizationId?: string | null
   locationId?: string | null
 }) {
-  const database = getDatabase()
-  const now = new Date()
-  const trialEndsAt = new Date(now)
-  trialEndsAt.setDate(trialEndsAt.getDate() + FREE_TRIAL_DAYS)
+  const result = input.locationId
+    ? await getDatabase().query<WorkspaceTrialRow>(
+        `select
+           'location'::text as scope,
+           location.organization_id,
+           entitlement.location_id,
+           entitlement.trial_started_at,
+           entitlement.trial_ends_at
+         from billing_private.location_entitlements entitlement
+         join public.locations location on location.id = entitlement.location_id
+         where entitlement.location_id = $1`,
+        [input.locationId]
+      )
+    : input.organizationId
+      ? await ensureOrganizationWorkspaceTrial(input.organizationId)
+      : null
+  const trial = result?.rows.at(0)
 
-  if (input.organizationId) {
-    const result = await database.query<WorkspaceTrialRow>(
-      `insert into public.workspace_trials (
+  if (!trial?.trial_started_at || !trial.trial_ends_at) {
+    throw new Error("We could not load the workspace trial.")
+  }
+
+  return mapWorkspaceTrial(trial)
+}
+
+async function ensureOrganizationWorkspaceTrial(organizationId: string) {
+  return getDatabase().query<WorkspaceTrialRow>(
+    `with trial_source as (
+       select
+         organization_row."id" as organization_id,
+         coalesce(
+           existing_trial.trial_started_at,
+           onboarding_state.trial_started_at,
+           organization_row."createdAt",
+           timezone('utc', now())
+         ) as trial_started_at,
+         coalesce(
+           existing_trial.trial_ends_at,
+           onboarding_state.trial_ends_at,
+           organization_row."createdAt" + interval '14 days',
+           timezone('utc', now()) + interval '14 days'
+         ) as trial_ends_at
+       from public."organization" organization_row
+       left join public.workspace_trials existing_trial
+         on existing_trial.organization_id = organization_row."id"
+       left join public.organization_onboarding_states onboarding_state
+         on onboarding_state.organization_id = organization_row."id"
+       where organization_row."id" = $1
+       limit 1
+     ),
+     ensured_trial as (
+       insert into public.workspace_trials (
          scope,
          organization_id,
          status,
          trial_started_at,
          trial_ends_at
-       ) values ('organization', $1, 'trialing', $2, $3)
+       )
+       select
+         'organization',
+         trial_source.organization_id,
+         case
+           when trial_source.trial_ends_at <= timezone('utc', now()) then 'expired'
+           else 'trialing'
+         end,
+         trial_source.trial_started_at,
+         trial_source.trial_ends_at
+       from trial_source
        on conflict (organization_id)
        where organization_id is not null
-       do update set status = case
-                              when public.workspace_trials.status = 'trialing'
-                               and public.workspace_trials.trial_ends_at <= timezone('utc', now())
-                              then 'expired'
-                              else public.workspace_trials.status
-                            end,
-                     updated_at = timezone('utc', now())
-       returning scope,
-                 organization_id,
-                 location_id,
-                 status,
-                 trial_started_at,
-                 trial_ends_at`,
-      [input.organizationId, now, trialEndsAt],
-    )
-
-    const trial = result.rows[0]
-
-    if (!trial) {
-      throw new Error("We could not load the workspace trial.")
-    }
-
-    return mapWorkspaceTrial(trial)
-  }
-
-  if (!input.locationId) {
-    throw new Error("Choose a workspace.")
-  }
-
-  const result = await database.query<WorkspaceTrialRow>(
-    `insert into public.workspace_trials (
-       scope,
-       location_id,
-       status,
-       trial_started_at,
-       trial_ends_at
-     ) values ('location', $1, 'trialing', $2, $3)
-     on conflict (location_id)
-     where location_id is not null
-     do update set status = case
-                            when public.workspace_trials.status = 'trialing'
-                             and public.workspace_trials.trial_ends_at <= timezone('utc', now())
-                            then 'expired'
-                            else public.workspace_trials.status
-                          end,
-                   updated_at = timezone('utc', now())
-     returning scope,
-               organization_id,
-               location_id,
-               status,
-               trial_started_at,
-               trial_ends_at`,
-    [input.locationId, now, trialEndsAt],
+       do update set updated_at = public.workspace_trials.updated_at
+       returning
+         scope,
+         organization_id,
+         location_id,
+         trial_started_at,
+         trial_ends_at
+     )
+     select
+       'organization'::text as scope,
+       ensured_trial.organization_id,
+       null::uuid as location_id,
+       coalesce(min(entitlement.trial_started_at), ensured_trial.trial_started_at) as trial_started_at,
+       coalesce(min(entitlement.trial_ends_at), ensured_trial.trial_ends_at) as trial_ends_at
+     from ensured_trial
+     left join public.locations location
+       on location.organization_id = ensured_trial.organization_id
+     left join billing_private.location_entitlements entitlement
+       on entitlement.location_id = location.id
+     group by ensured_trial.organization_id,
+              ensured_trial.trial_started_at,
+              ensured_trial.trial_ends_at`,
+    [organizationId]
   )
-
-  const trial = result.rows[0]
-
-  if (!trial) {
-    throw new Error("We could not load the workspace trial.")
-  }
-
-  return mapWorkspaceTrial(trial)
 }
 
 async function setWorkspaceTrialForDevelopment(input: {
@@ -117,50 +132,38 @@ async function setWorkspaceTrialForDevelopment(input: {
 }) {
   const now = new Date()
   const trialEndsAt = new Date(now)
-
-  if (input.state === "expired") {
-    trialEndsAt.setDate(trialEndsAt.getDate() - 1)
-  } else if (input.state === "ending-soon") {
-    trialEndsAt.setDate(trialEndsAt.getDate() + 2)
-  } else {
-    trialEndsAt.setDate(trialEndsAt.getDate() + FREE_TRIAL_DAYS)
-  }
-
-  const status = input.state === "expired" ? "expired" : "trialing"
-
-  await ensureWorkspaceTrial(input)
-
-  const result = await getDatabase().query<WorkspaceTrialRow>(
-    `update public.workspace_trials
-     set status = $3,
-         trial_started_at = case when $4::boolean then $5 else trial_started_at end,
-         trial_ends_at = $6,
-         updated_at = timezone('utc', now())
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
-       and (($2::uuid is null and location_id is null) or location_id = $2::uuid)
-     returning scope,
-               organization_id,
-               location_id,
-               status,
-               trial_started_at,
-               trial_ends_at`,
-    [
-      input.organizationId ?? null,
-      input.locationId ?? null,
-      status,
-      input.state === "reset",
-      now,
-      trialEndsAt,
-    ],
+  trialEndsAt.setUTCDate(
+    trialEndsAt.getUTCDate() +
+      (input.state === "expired"
+        ? -1
+        : input.state === "ending-soon"
+          ? 2
+          : FREE_TRIAL_DAYS)
   )
 
-  const trial = result.rows[0]
-
-  if (!trial) {
-    throw new Error("We could not update the workspace trial.")
+  if (input.locationId) {
+    await getDatabase().query(
+      `update billing_private.location_entitlements
+       set trial_started_at = case when $2 then $3 else trial_started_at end,
+           trial_ends_at = $4,
+           updated_at = timezone('utc', now())
+       where location_id = $1`,
+      [input.locationId, input.state === "reset", now, trialEndsAt]
+    )
+  } else if (input.organizationId) {
+    await getDatabase().query(
+      `update billing_private.location_entitlements entitlement
+       set trial_started_at = case when $2 then $3 else entitlement.trial_started_at end,
+           trial_ends_at = $4,
+           updated_at = timezone('utc', now())
+       from public.locations location
+       where location.id = entitlement.location_id
+         and location.organization_id = $1`,
+      [input.organizationId, input.state === "reset", now, trialEndsAt]
+    )
   }
 
-  return mapWorkspaceTrial(trial)
+  return ensureWorkspaceTrial(input)
 }
 
 export { ensureWorkspaceTrial, setWorkspaceTrialForDevelopment }

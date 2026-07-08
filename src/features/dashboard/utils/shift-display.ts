@@ -1,7 +1,9 @@
 import type { DashboardShiftSummary } from "@/features/dashboard/types"
 
-function formatShiftCount(count: number) {
-  return `${count} shift${count === 1 ? "" : "s"}`
+type ShiftDateParts = {
+  day: string
+  dayNumber: string
+  month: string
 }
 
 function getDashboardGreeting(date = new Date()) {
@@ -30,21 +32,17 @@ function getRotaViewPath(input: {
   return `/w/${input.workspaceSlug}/rota/${input.shift.locationSlug}/${input.shift.rotaId}/view`
 }
 
-function getUserInitials(name: string) {
-  const initials = name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase()
+function getShiftDateParts(dateValue: string): ShiftDateParts {
+  const date = new Date(`${dateValue}T00:00:00`)
 
-  return initials || "RR"
+  return {
+    day: new Intl.DateTimeFormat("en-GB", { weekday: "short" }).format(date),
+    dayNumber: new Intl.DateTimeFormat("en-GB", { day: "2-digit" }).format(
+      date
+    ),
+    month: new Intl.DateTimeFormat("en-GB", { month: "short" }).format(date),
+  }
 }
 
-export {
-  formatShiftCount,
-  getDashboardGreeting,
-  getRotaViewPath,
-  getUserInitials,
-}
+export { getDashboardGreeting, getRotaViewPath, getShiftDateParts }
+export type { ShiftDateParts }

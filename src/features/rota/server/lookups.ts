@@ -31,6 +31,19 @@ async function getOrganizationSlugById(organizationId: string) {
   return result.data?.slug ?? null
 }
 
+async function getLocationOrganizationId(locationId: string) {
+  const supabase = createSupabaseServerClient()
+  const result = await supabase
+    .from("locations")
+    .select("organization_id")
+    .eq("id", locationId)
+    .maybeSingle()
+
+  assertSupabaseSuccess(result.error, "We could not load that location.")
+
+  return result.data?.organization_id ?? null
+}
+
 async function getTemplatesForLocation(
   organizationId: string | null,
   locationId: string
@@ -56,7 +69,7 @@ async function getTemplatesForLocation(
        )
      group by template.id, template.name, template.description
      order by lower(template.name) asc`,
-    [locationId, organizationId],
+    [locationId, organizationId]
   )
 
   return result.rows.map((template) => ({
@@ -81,9 +94,11 @@ async function getPreviousPublishedForLocation(
     .lt("week_start", weekStart)
     .order("week_start", { ascending: false })
     .limit(1)
-  const result = await (organizationId
-    ? query.eq("organization_id", organizationId)
-    : query.is("organization_id", null)).maybeSingle()
+  const result = await (
+    organizationId
+      ? query.eq("organization_id", organizationId)
+      : query.is("organization_id", null)
+  ).maybeSingle()
 
   assertSupabaseSuccess(
     result.error,
@@ -114,19 +129,20 @@ async function findExistingRotaByWeek(
   locationId: string,
   weekStart: string
 ): Promise<ExistingRotaRecord | null> {
-  const supabase = createSupabaseServerClient()
-  const query = supabase
-    .from("rotas")
-    .select("id")
-    .eq("location_id", locationId)
-    .eq("week_start", weekStart)
-  const result = await (organizationId
-    ? query.eq("organization_id", organizationId)
-    : query.is("organization_id", null)).maybeSingle()
-
-  assertSupabaseSuccess(result.error, "We could not load that rota.")
-
-  const row = result.data
+  const result = await getDatabase().query<{ id: string }>(
+    `select id
+     from public.rotas
+     where location_id = $1
+       and week_start = $2
+       and (
+         ($3::text is not null and organization_id = $3::text)
+         or ($3::text is null and organization_id is null)
+       )
+     order by updated_at desc, created_at desc
+     limit 1`,
+    [locationId, weekStart, organizationId]
+  )
+  const row = result.rows.at(0)
 
   if (!row) {
     return null
@@ -179,9 +195,11 @@ async function getRotaDetailRecord(
     )
     .eq("location_id", locationId)
     .eq("id", rotaId)
-  const result = await (organizationId
-    ? query.eq("organization_id", organizationId)
-    : query.is("organization_id", null)).maybeSingle()
+  const result = await (
+    organizationId
+      ? query.eq("organization_id", organizationId)
+      : query.is("organization_id", null)
+  ).maybeSingle()
 
   assertSupabaseSuccess(result.error, "We could not load that rota.")
 
@@ -192,6 +210,7 @@ async function getRotaDetailRecord(
 
 export {
   findExistingRotaByWeek,
+  getLocationOrganizationId,
   getOrganizationSlugById,
   getPreviousPublishedForLocation,
   getRotaDetailRecord,

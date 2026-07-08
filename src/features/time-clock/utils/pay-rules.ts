@@ -3,8 +3,10 @@ type ClockPayRuleSettings = {
   earlyStartReviewMinutes: number
   forgottenClockOutAlertMinutes: number
   hardReviewAfterMinutes: number
+  lateClockInGraceMinutes: number
   lateClockOutGraceMinutes: number
   lateFinishReviewMinutes: number
+  lateStartReviewMinutes: number
 }
 
 type ScheduledClockWindow = {

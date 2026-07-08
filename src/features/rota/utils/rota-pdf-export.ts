@@ -15,7 +15,10 @@ import type {
   RotaPdfExportOptions,
 } from "@/features/rota/types/rota-pdf"
 import { getStaffGroupColorAppearance } from "@/features/staff-groups/constants/staff-group-colors"
-import { formatCurrency, getScheduledCostFromMinutes } from "@/features/rota/utils/workspace-budget"
+import {
+  formatCurrency,
+  getScheduledCostSummaries,
+} from "@/features/rota/utils/workspace-budget"
 import {
   getShiftDisplayLines,
   getShiftDurationMinutes,
@@ -74,7 +77,8 @@ function buildZonePage(
     .filter((shift) => shift.zoneId === input.zone.id)
     .sort(
       (left, right) =>
-        getShiftSortStart(left, input.location) - getShiftSortStart(right, input.location)
+        getShiftSortStart(left, input.location) -
+        getShiftSortStart(right, input.location)
     )
 
   const days = input.days.map((day) => ({
@@ -86,16 +90,21 @@ function buildZonePage(
       .map((shift) => ({
         employees: (input.assignmentIdsByShiftId[shift.id] ?? [])
           .map((assignmentId) => input.assignmentsById[assignmentId])
-          .filter((assignment): assignment is WorkspaceAssignment => Boolean(assignment))
+          .filter((assignment): assignment is WorkspaceAssignment =>
+            Boolean(assignment)
+          )
           .map((assignment) => input.employeesById[assignment.employeeId])
-          .filter((employee): employee is WorkspaceEmployee => Boolean(employee))
+          .filter((employee): employee is WorkspaceEmployee =>
+            Boolean(employee)
+          )
           .sort((left, right) => left.name.localeCompare(right.name))
           .map((employee) => {
             const group = input.employeeGroups.find(
               (entry) => entry.id === employee.groupId
             )
-            const groupColorHex = getStaffGroupColorAppearance(employee.groupColor)
-              .pdfHexColor
+            const groupColorHex = getStaffGroupColorAppearance(
+              employee.groupColor
+            ).pdfHexColor
             const badgeText = getGroupBadgeText(
               group?.name ?? "Team",
               input.employeeGroups
@@ -139,11 +148,40 @@ function buildZonePage(
 
     return sum + assignedCount * getShiftDurationMinutes(shift, input.location)
   }, 0)
+  const zoneShiftIds = new Set(zoneShiftEntries.map((shift) => shift.id))
+  const shiftIdsByDayId = input.days.reduce<Record<string, string[]>>(
+    (map, day) => {
+      map[day.id] = Object.values(input.shiftsById)
+        .filter((shift) => shift.dayId === day.id && zoneShiftIds.has(shift.id))
+        .map((shift) => shift.id)
+      return map
+    },
+    {}
+  )
+  const allShiftIdsByDayId = input.days.reduce<Record<string, string[]>>(
+    (map, day) => {
+      map[day.id] = Object.values(input.shiftsById)
+        .filter((shift) => shift.dayId === day.id)
+        .map((shift) => shift.id)
+      return map
+    },
+    {}
+  )
+  const totalCost = getScheduledCostSummaries({
+    allShiftIdsByDayId,
+    assignmentIdsByShiftId: input.assignmentIdsByShiftId,
+    assignmentsById: input.assignmentsById,
+    days: input.days,
+    employeesById: input.employeesById,
+    location: input.location,
+    shiftIdsByDayId,
+    shiftsById: input.shiftsById,
+  }).reduce((sum, day) => sum + day.totalCost, 0)
 
   return {
     days,
     legend,
-    totalCostLabel: formatCurrency(getScheduledCostFromMinutes(totalMinutes)),
+    totalCostLabel: formatCurrency(totalCost),
     totalHoursLabel: formatMinutesAsHours(totalMinutes),
     totalShiftCount: zoneShiftEntries.length,
     zoneId: input.zone.id,
@@ -152,18 +190,12 @@ function buildZonePage(
 }
 
 function getGroupBadgeText(groupName: string, allGroupNames: string[]) {
-  const words = groupName
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
+  const words = groupName.trim().split(/\s+/).filter(Boolean)
 
   const primary = words[0]?.[0]?.toUpperCase() ?? "T"
   const hasCollision =
     allGroupNames.filter((name) => {
-      const comparisonWords = name
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean)
+      const comparisonWords = name.trim().split(/\s+/).filter(Boolean)
 
       return (comparisonWords[0]?.[0]?.toUpperCase() ?? "T") === primary
     }).length > 1

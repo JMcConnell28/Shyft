@@ -15,7 +15,26 @@ type StaffGroupSettingsEmployee = {
   email: string | null
   status: "active" | "inactive"
   groupId: string | null
+  compensation:
+    | {
+        type: "hourly"
+        hourlyRatePence: number
+      }
+    | {
+        type: "salary"
+        weeklySalaryPence: number
+      }
 }
+
+type EmployeeCompensationInput =
+  | {
+      type: "hourly"
+      hourlyRatePence: number
+    }
+  | {
+      type: "salary"
+      weeklySalaryPence: number
+    }
 
 type StaffGroupSettingsPageData = {
   groups: Array<StaffGroupSettingsGroup>
@@ -26,4 +45,5 @@ export type {
   StaffGroupSettingsEmployee,
   StaffGroupSettingsGroup,
   StaffGroupSettingsPageData,
+  EmployeeCompensationInput,
 }

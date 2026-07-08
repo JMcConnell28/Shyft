@@ -21,7 +21,10 @@ import {
   getUserNameMap,
   getZoneCountByLocationIds,
 } from "@/features/rota/server/related-data"
-import { getTemplatesForLocation } from "@/features/rota/server/lookups"
+import {
+  getLocationOrganizationId,
+  getTemplatesForLocation,
+} from "@/features/rota/server/lookups"
 import {
   buildWeekLabel,
   coerceNumber,
@@ -90,21 +93,28 @@ async function getRotaListPageData({
   userId: string
   search: RotaListSearch
 }): Promise<RotaListPageData> {
-  const workspaceOrganizationId = organizationId ?? null
-  const role = workspaceOrganizationId
-    ? await getMembershipRole(workspaceOrganizationId, userId)
-    : locationId
-      ? await getLocationRole(locationId, userId)
-      : null
+  const isOrganizationWorkspace = Boolean(organizationId)
+  const workspaceOrganizationId =
+    organizationId ??
+    (locationId ? await getLocationOrganizationId(locationId) : null)
+  const role =
+    isOrganizationWorkspace && workspaceOrganizationId
+      ? await getMembershipRole(workspaceOrganizationId, userId)
+      : locationId
+        ? await getLocationRole(locationId, userId)
+        : null
   const capabilities = getOrgCapabilitiesForRole(role)
-  const publishedOnly = !capabilities.canManageRota
+  const canViewWorkingRotas =
+    capabilities.canManageRota || capabilities.canManageTimeClock
+  const publishedOnly = !canViewWorkingRotas
   const effectiveSearch = publishedOnly
     ? { ...search, status: "published" as const }
     : search
   const locations = await listAccessibleLocations(
     workspaceOrganizationId,
     userId,
-    role
+    role,
+    locationId
   )
   const hasUnreadRotaUpdates = locations.some(
     (location) => location.hasUnreadPublished
@@ -197,7 +207,7 @@ async function getRotaListPageData({
   return {
     orgSlug: orgSlug ?? locationSlug ?? "",
     organizationId: workspaceOrganizationId ?? selectedLocation.id,
-    workspaceType: workspaceOrganizationId ? "organization" : "location",
+    workspaceType: isOrganizationWorkspace ? "organization" : "location",
     locationWorkspaceSlug: locationSlug,
     capabilities,
     locations,

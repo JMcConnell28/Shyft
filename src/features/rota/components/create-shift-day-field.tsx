@@ -24,7 +24,7 @@ function CreateShiftDayField({ field, days }: CreateShiftDayFieldProps) {
       <FieldLabel>Day</FieldLabel>
       <FieldContent className="gap-2">
         <ToggleGroup
-          variant={"outline"}
+          variant="outline"
           spacing={2}
           value={
             typeof field.state.value === "string" &&
@@ -40,7 +40,7 @@ function CreateShiftDayField({ field, days }: CreateShiftDayFieldProps) {
               field.handleChange(nextValue)
             }
           }}
-          className="grid w-full grid-cols-7 gap-1.5"
+          className="grid w-full grid-cols-4 gap-1.5 sm:grid-cols-7"
         >
           {days.map((day) => {
             return (
@@ -50,16 +50,11 @@ function CreateShiftDayField({ field, days }: CreateShiftDayFieldProps) {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "min-h-12 w-full cursor-pointer flex-col gap-0 rounded-lg border-border/70 bg-background px-1 py-1.5 text-center hover:bg-muted/40 aria-pressed:border-primary/60 aria-pressed:bg-primary/10 aria-pressed:text-primary aria-pressed:shadow-sm aria-pressed:shadow-primary/10"
+                  "min-h-9 w-full cursor-pointer rounded-lg border-[#e2e7f0] bg-white px-1 py-1.5 text-center text-xs font-bold text-[#11245a] shadow-none hover:border-[#c8cfdd] hover:bg-[#f8faff] aria-pressed:border-[#b8c3d9] aria-pressed:bg-[#f5f7fb] aria-pressed:text-[#11245a] aria-pressed:shadow-[0_6px_14px_rgba(30,50,96,0.07)]"
                 )}
                 aria-label={`${day.shortLabel} ${day.dayNumber} ${day.monthLabel}`}
               >
-                <span className="text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-                  {day.shortLabel}
-                </span>
-                <span className="mt-1 text-xs font-semibold">
-                  {day.dayNumber}
-                </span>
+                {day.shortLabel}
               </ToggleGroupItem>
             )
           })}

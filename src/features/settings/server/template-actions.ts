@@ -15,7 +15,7 @@ async function renameRotaTemplate(
   input: TemplateWorkspaceInput & {
     templateId: string
     name: string
-  },
+  }
 ) {
   await requireTemplateSettingsPermission(input)
   const client = await getDatabase().connect()
@@ -33,7 +33,7 @@ async function renameRotaTemplate(
        set name = $2,
            updated_at = timezone('utc', now())
        where id = $1`,
-      [input.templateId, input.name.trim()],
+      [input.templateId, input.name.trim()]
     )
     await client.query("COMMIT")
   } catch (error) {
@@ -47,7 +47,7 @@ async function renameRotaTemplate(
 async function deleteRotaTemplate(
   input: TemplateWorkspaceInput & {
     templateId: string
-  },
+  }
 ) {
   await requireTemplateSettingsPermission(input)
   const client = await getDatabase().connect()
@@ -69,7 +69,7 @@ async function deleteRotaTemplate(
 
 async function getTemplateForSettingsOrThrow(
   client: PoolClient,
-  input: TemplateWorkspaceInput & { templateId: string },
+  input: TemplateWorkspaceInput & { templateId: string }
 ) {
   const result = await client.query<{
     id: string
@@ -80,14 +80,10 @@ async function getTemplateForSettingsOrThrow(
      where id = $1
        and (
          ($2::text is not null and organization_id = $2::text)
-         or (
-           $2::text is null
-           and organization_id is null
-           and location_id = $3::uuid
-         )
+         or ($3::uuid is not null and location_id = $3::uuid)
        )
      limit 1`,
-    [input.templateId, input.organizationId ?? null, input.locationId ?? null],
+    [input.templateId, input.organizationId ?? null, input.locationId ?? null]
   )
   const template = result.rows[0]
 
@@ -98,7 +94,9 @@ async function getTemplateForSettingsOrThrow(
   return template
 }
 
-async function requireTemplateSettingsPermission(input: TemplateWorkspaceInput) {
+async function requireTemplateSettingsPermission(
+  input: TemplateWorkspaceInput
+) {
   if (input.organizationId) {
     await requireOrgPermission({
       organizationId: input.organizationId,

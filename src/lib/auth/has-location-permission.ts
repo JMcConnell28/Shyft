@@ -2,7 +2,15 @@ import type { OrganizationPermissionRequest } from "@/lib/auth/has-org-permissio
 import { roles, type OrganizationRole } from "@/lib/auth/permissions"
 import { getDatabase } from "@/lib/db"
 
-type LocationRole = Extract<OrganizationRole, "owner" | "admin" | "manager" | "employee">
+const locationRoleValues = [
+  "owner",
+  "admin",
+  "manager",
+  "supervisor",
+  "employee",
+] as const
+
+type LocationRole = Extract<OrganizationRole, (typeof locationRoleValues)[number]>
 
 async function getLocationRole(
   locationId: string,
@@ -18,11 +26,11 @@ async function getLocationRole(
   )
   const role = result.rows.at(0)?.role
 
-  if (role !== "owner" && role !== "admin" && role !== "manager" && role !== "employee") {
+  if (!locationRoleValues.includes(role as LocationRole)) {
     return null
   }
 
-  return role
+  return role as LocationRole
 }
 
 function hasLocationPermissionForRole(

@@ -1,9 +1,19 @@
 import { createServerFn } from "@tanstack/react-start"
 
 import {
+  sageTimesheetExportInputSchema,
   timesheetScopeSchema,
   updateTimesheetEntryInputSchema,
 } from "@/features/timesheets/schemas/timesheet-schemas"
+
+const getSageTimesheetExportData = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    sageTimesheetExportInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/timesheets/server/sage-export")
+    return module.getSageTimesheetExportData(data)
+  })
 
 const getTimesheetPageData = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => timesheetScopeSchema.parse(input))
@@ -14,11 +24,15 @@ const getTimesheetPageData = createServerFn({ method: "POST" })
 
 const updateTimesheetEntry = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    updateTimesheetEntryInputSchema.parse(input),
+    updateTimesheetEntryInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/timesheets/server/actions")
     return module.updateTimesheetEntry(data)
   })
 
-export { getTimesheetPageData, updateTimesheetEntry }
+export {
+  getSageTimesheetExportData,
+  getTimesheetPageData,
+  updateTimesheetEntry,
+}

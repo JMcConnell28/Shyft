@@ -2,13 +2,13 @@
 
 import { AlertTriangleIcon } from "lucide-react"
 
-import { CheckoutButton } from "@/features/billing/components/checkout-button"
-import { TrialTestingControls } from "@/features/billing/components/trial-testing-controls"
-import { hasPaidWorkspaceAccess } from "@/features/billing/utils/billing-access"
 import type {
   WorkspaceBillingState,
   WorkspaceTrial,
 } from "@/features/billing/types"
+import { CheckoutButton } from "@/features/billing/components/checkout-button"
+import { TrialTestingControls } from "@/features/billing/components/trial-testing-controls"
+import { hasPaidWorkspaceAccess } from "@/features/billing/utils/billing-access"
 import { getTrialDisplayState } from "@/features/billing/utils/trial-state"
 
 function TrialBanner({
@@ -26,10 +26,16 @@ function TrialBanner({
 
   const hasOpenSubscription = hasPaidWorkspaceAccess(billing)
   const hasSavedPaymentMethod = billing?.hasSavedPaymentMethod ?? false
+  const isExpiredWithoutPaidAccess = trialState.isExpired && !hasOpenSubscription
+
+  if (hasSavedPaymentMethod && !isExpiredWithoutPaidAccess) {
+    return null
+  }
 
   if (
     !hasOpenSubscription &&
     !hasSavedPaymentMethod &&
+    !isExpiredWithoutPaidAccess &&
     !trialState.isEndingSoon &&
     !import.meta.env.DEV
   ) {
@@ -43,31 +49,38 @@ function TrialBanner({
           <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
           <div className="space-y-1">
             <p className="text-sm font-medium">
-              {hasSavedPaymentMethod && !hasOpenSubscription
+              {isExpiredWithoutPaidAccess
+                ? "Your trial has expired."
+                : hasSavedPaymentMethod && !hasOpenSubscription
                 ? "Payment method saved."
                 : hasOpenSubscription
-                ? "Payment method saved."
+                  ? "Payment method saved."
                 : trialState.isEndingSoon
                   ? `Your trial ends in ${trialState.daysRemaining} day${trialState.daysRemaining === 1 ? "" : "s"}.`
                   : `Trial active: ${trialState.daysRemaining} day${trialState.daysRemaining === 1 ? "" : "s"} remaining.`}
             </p>
             <p className="text-xs text-amber-900/80">
-              {hasSavedPaymentMethod && !hasOpenSubscription
+              {isExpiredWithoutPaidAccess
+                ? "Choose a plan to restore rota editing, publishing, and workspace changes."
+                : hasSavedPaymentMethod && !hasOpenSubscription
                 ? "Your first payment will be taken when the trial ends."
                 : hasOpenSubscription
-                ? "Your subscription will start automatically when the trial ends."
+                  ? "Your subscription will start automatically when the trial ends."
                 : "Add billing before the trial ends to keep rota access uninterrupted."}
             </p>
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <TrialTestingControls trial={trialState} />
-          {!hasOpenSubscription && !hasSavedPaymentMethod ? (
+          {!hasOpenSubscription &&
+          (!hasSavedPaymentMethod || isExpiredWithoutPaidAccess) ? (
             <CheckoutButton
               organizationId={trialState.organizationId}
               locationId={trialState.locationId}
             >
-              Choose plan
+              {isExpiredWithoutPaidAccess
+                ? "Reactivate workspace"
+                : "Choose plan"}
             </CheckoutButton>
           ) : null}
         </div>

@@ -5,7 +5,7 @@ import Stripe from "stripe"
 import { getAppBaseUrl } from "@/lib/app-url.server"
 import { getOptionalEnv, getRequiredEnv } from "@/lib/env.server"
 
-const stripeApiVersion = "2025-11-17.clover"
+const stripeApiVersion = "2026-02-25.clover"
 
 const globalForStripe = globalThis as typeof globalThis & {
   shyftStripeClient?: Stripe
@@ -20,19 +20,31 @@ function getStripe() {
         appInfo: {
           name: "RocketRota",
         },
-      },
+      }
     )
   }
 
   return globalForStripe.shyftStripeClient
 }
 
-function getLocationPriceId() {
-  return getRequiredEnv("STRIPE_LOCATION_PRICE_ID")
+function getCoreBasePriceId() {
+  return getRequiredEnv("STRIPE_CORE_BASE_PRICE_ID")
 }
 
-function getExtraEmployeePriceId() {
-  return getRequiredEnv("STRIPE_EXTRA_EMPLOYEE_PRICE_ID")
+function getCoreExtraEmployeePriceId() {
+  return getRequiredEnv("STRIPE_CORE_EXTRA_EMPLOYEE_PRICE_ID")
+}
+
+function getOptionalCoreExtraEmployeePriceId() {
+  return getOptionalEnv("STRIPE_CORE_EXTRA_EMPLOYEE_PRICE_ID")
+}
+
+function getTimeAttendanceEmployeePriceId() {
+  return getRequiredEnv("STRIPE_TIME_ATTENDANCE_EMPLOYEE_PRICE_ID")
+}
+
+function getOptionalTimeAttendanceEmployeePriceId() {
+  return getOptionalEnv("STRIPE_TIME_ATTENDANCE_EMPLOYEE_PRICE_ID")
 }
 
 function getBillingCurrency() {
@@ -42,8 +54,11 @@ function getBillingCurrency() {
 export {
   getAppBaseUrl,
   getBillingCurrency,
-  getExtraEmployeePriceId,
-  getLocationPriceId,
+  getCoreBasePriceId,
+  getCoreExtraEmployeePriceId,
+  getOptionalCoreExtraEmployeePriceId,
+  getOptionalTimeAttendanceEmployeePriceId,
   getStripe,
+  getTimeAttendanceEmployeePriceId,
   stripeApiVersion,
 }

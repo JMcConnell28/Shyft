@@ -3,7 +3,6 @@
 import * as React from "react"
 import { FileDown, LoaderCircle } from "lucide-react"
 
-import { useExportRotaPdf } from "@/features/rota/hooks/use-export-rota-pdf"
 import type { RotaPdfStatKey } from "@/features/rota/types/rota-pdf"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -16,6 +15,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { rotaToolbarButtonClassName } from "@/features/rota/constants/rota-toolbar-styles"
+import { useExportRotaPdf } from "@/features/rota/hooks/use-export-rota-pdf"
 
 const statOptions: Array<{
   key: RotaPdfStatKey
@@ -42,11 +43,9 @@ const statOptions: Array<{
 function RotaExportDialog() {
   const { canExport, exportPdf, isExporting } = useExportRotaPdf()
   const [open, setOpen] = React.useState(false)
-  const [visibleStats, setVisibleStats] = React.useState<RotaPdfStatKey[]>([
-    "scheduledHours",
-    "labourCost",
-    "shiftCount",
-  ])
+  const [visibleStats, setVisibleStats] = React.useState<Array<RotaPdfStatKey>>(
+    ["scheduledHours", "labourCost", "shiftCount"]
+  )
 
   function toggleStat(statKey: RotaPdfStatKey, checked: boolean) {
     setVisibleStats((current) => {
@@ -74,12 +73,14 @@ function RotaExportDialog() {
             size="icon"
             disabled={!canExport}
             aria-label="Export rota"
-            className="md:h-7 md:w-auto md:gap-2 md:px-2"
+            className={rotaToolbarButtonClassName}
           />
         }
       >
         <FileDown data-icon="inline-start" />
-        <span className="hidden md:inline">Export</span>
+        <span className="hidden group-data-[toolbar-more=true]/toolbar-more:inline md:inline">
+          Export
+        </span>
       </DialogTrigger>
       <DialogContent className="max-w-md gap-5 p-0">
         <div className="space-y-5 p-4">
@@ -134,7 +135,11 @@ function RotaExportDialog() {
           >
             Cancel
           </Button>
-          <Button type="button" disabled={isExporting} onClick={() => void handleExport()}>
+          <Button
+            type="button"
+            disabled={isExporting}
+            onClick={() => void handleExport()}
+          >
             {isExporting ? (
               <LoaderCircle data-icon="inline-start" className="animate-spin" />
             ) : (

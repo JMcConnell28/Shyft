@@ -28,6 +28,45 @@ const passwordSchema = z
   .min(8, "Password must be at least 8 characters.")
   .max(128, "Password is too long.")
 
+const isoDateSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a valid date.")
+
+const dateOfBirthSchema = isoDateSchema.superRefine((value, context) => {
+  const dateOfBirth = new Date(`${value}T00:00:00.000Z`)
+  const today = new Date()
+  const earliestDateOfBirth = new Date(
+    Date.UTC(
+      today.getUTCFullYear() - 120,
+      today.getUTCMonth(),
+      today.getUTCDate()
+    )
+  )
+
+  if (Number.isNaN(dateOfBirth.getTime())) {
+    context.addIssue({
+      code: "custom",
+      message: "Enter a valid date of birth.",
+    })
+    return
+  }
+
+  if (dateOfBirth > today) {
+    context.addIssue({
+      code: "custom",
+      message: "Date of birth cannot be in the future.",
+    })
+  }
+
+  if (dateOfBirth < earliestDateOfBirth) {
+    context.addIssue({
+      code: "custom",
+      message: "Enter a realistic date of birth.",
+    })
+  }
+})
+
 const organizationNameSchema = z
   .string()
   .trim()
@@ -94,6 +133,7 @@ const organizationMemberInviteSchema = z.object({
 const signUpSchema = z.object({
   firstName: firstNameSchema,
   lastName: lastNameSchema,
+  dateOfBirth: dateOfBirthSchema,
   email: emailSchema,
   password: passwordSchema,
 })
@@ -137,6 +177,7 @@ const locationSetupSchema = z
       .max(80, "Worksite name is too long.")
       .optional()
       .default(""),
+    includeOwnerAsEmployee: z.boolean().default(false),
   })
   .superRefine((value, context) => {
     const isFixedBusiness = fixedBusinessTypes.includes(
@@ -273,6 +314,7 @@ export {
   acceptInviteSchema,
   acceptOrganizationInvitationSchema,
   activateOrganizationSchema,
+  dateOfBirthSchema,
   emailSchema,
   firstNameSchema,
   extractInviteDestination,

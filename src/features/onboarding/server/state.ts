@@ -54,7 +54,8 @@ async function getActiveOrganizationState(organizationId: string) {
     supabase
       .from("zones")
       .select("id", { count: "exact", head: true })
-      .eq("organization_id", organizationId),
+      .eq("organization_id", organizationId)
+      .is("deleted_at", null),
     supabase
       .from("staff_invite_links")
       .select("expires_at")
@@ -186,6 +187,7 @@ async function getActiveLocationState(locationId: string) {
       `select id
        from public.zones
        where location_id = $1
+         and deleted_at is null
        limit 1`,
       [locationId],
     ),
@@ -313,17 +315,19 @@ async function upsertOnboardingState(
   const now = new Date()
   const defaultTrialEndsAt = new Date(now)
   defaultTrialEndsAt.setDate(defaultTrialEndsAt.getDate() + FREE_TRIAL_DAYS)
+  const trialStartedAt = existingRow?.trial_started_at ?? now.toISOString()
+  const trialEndsAt =
+    values.trialEndsAt?.toISOString() ??
+    existingRow?.trial_ends_at ??
+    defaultTrialEndsAt.toISOString()
 
   const { error } = await supabase
     .from("organization_onboarding_states")
     .upsert(
       {
         organization_id: organizationId,
-        trial_started_at: existingRow?.trial_started_at ?? now.toISOString(),
-        trial_ends_at:
-          values.trialEndsAt?.toISOString() ??
-          existingRow?.trial_ends_at ??
-          defaultTrialEndsAt.toISOString(),
+        trial_started_at: trialStartedAt,
+        trial_ends_at: trialEndsAt,
         last_step:
           values.lastStep ??
           (existingRow?.last_step as OnboardingStep | undefined) ??
@@ -338,6 +342,46 @@ async function upsertOnboardingState(
     )
 
   assertSupabaseSuccess(error, "We could not save the onboarding state.")
+
+  await upsertOrganizationTrialState({
+    organizationId,
+    trialStartedAt,
+    trialEndsAt,
+  })
+}
+
+async function upsertOrganizationTrialState(input: {
+  organizationId: string
+  trialStartedAt: string
+  trialEndsAt: string
+}) {
+  await getDatabase().query(
+    `insert into public.workspace_trials (
+       scope,
+       organization_id,
+       location_id,
+       status,
+       trial_started_at,
+       trial_ends_at
+     ) values (
+       'organization',
+       $1,
+       null,
+       case when $3::timestamptz <= timezone('utc', now()) then 'expired' else 'trialing' end,
+       $2,
+       $3
+     )
+     on conflict (organization_id)
+     where organization_id is not null
+     do update set status = case
+                              when excluded.trial_ends_at <= timezone('utc', now()) then 'expired'
+                              else 'trialing'
+                            end,
+                   trial_started_at = excluded.trial_started_at,
+                   trial_ends_at = excluded.trial_ends_at,
+                   updated_at = timezone('utc', now())`,
+    [input.organizationId, input.trialStartedAt, input.trialEndsAt]
+  )
 }
 
 async function createUniqueLocationSlug(

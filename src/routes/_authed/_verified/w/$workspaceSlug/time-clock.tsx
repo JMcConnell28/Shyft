@@ -5,10 +5,18 @@ import { ManagerTimeClockPage } from "@/features/time-clock/components/manager-t
 import { getManagerClockPageData } from "@/features/time-clock/server-fns"
 import { getWorkspaceDashboardPath } from "@/lib/organization-paths"
 
+type TimeClockSearch = {
+  date?: string
+}
+
 export const Route = createFileRoute(
-  "/_authed/_verified/w/$workspaceSlug/time-clock",
+  "/_authed/_verified/w/$workspaceSlug/time-clock"
 )({
-  loader: async ({ context }) => {
+  validateSearch: (search: Record<string, unknown>): TimeClockSearch => ({
+    date: typeof search.date === "string" ? search.date : undefined,
+  }),
+  loaderDeps: ({ search }) => ({ date: search.date }),
+  loader: async ({ context, deps }) => {
     const activeWorkspace = context.viewer.activeWorkspace
 
     if (!activeWorkspace) {
@@ -23,10 +31,12 @@ export const Route = createFileRoute(
       data:
         activeWorkspace.type === "organization"
           ? {
+              date: deps.date,
               organizationId: activeWorkspace.id,
               userId: context.viewer.user.id,
             }
           : {
+              date: deps.date,
               locationId: activeWorkspace.id,
               userId: context.viewer.user.id,
             },
@@ -40,6 +50,7 @@ export const Route = createFileRoute(
 function WorkspaceTimeClockRoute() {
   const { viewer } = Route.useRouteContext()
   const result = Route.useLoaderData()
+  const search = Route.useSearch()
   const activeWorkspace = viewer.activeWorkspace
 
   if (!activeWorkspace) {
@@ -50,7 +61,7 @@ function WorkspaceTimeClockRoute() {
     return (
       <AccessDeniedState
         dashboardHref={getWorkspaceDashboardPath(activeWorkspace.slug)}
-        description="The time clock is available to managers and workspace administrators."
+        description="The time clock is available to supervisors, managers, and workspace administrators."
       />
     )
   }
@@ -58,6 +69,7 @@ function WorkspaceTimeClockRoute() {
   return (
     <ManagerTimeClockPage
       initialData={result.data}
+      date={search.date}
       organizationId={
         activeWorkspace.type === "organization" ? activeWorkspace.id : undefined
       }
@@ -65,6 +77,7 @@ function WorkspaceTimeClockRoute() {
         activeWorkspace.type === "location" ? activeWorkspace.id : undefined
       }
       userId={viewer.user.id}
+      workspaceSlug={activeWorkspace.slug}
     />
   )
 }

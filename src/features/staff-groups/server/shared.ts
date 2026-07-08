@@ -208,23 +208,7 @@ async function ensureEmployeeStaffGroup(scope: StaffGroupScope) {
     null
 
   if (!employeeGroup) {
-    await getDatabase().query(
-      `insert into public.staff_groups (
-         organization_id,
-         location_id,
-         name,
-         slug,
-         is_default,
-         color
-       ) values ($1, $2, $3, $4, true, $5)`,
-      [
-        scope.organizationId,
-        scope.locationId,
-        EMPLOYEE_STAFF_GROUP_NAME,
-        EMPLOYEE_STAFF_GROUP_SLUG,
-        EMPLOYEE_STAFF_GROUP_COLOR,
-      ],
-    )
+    await upsertEmployeeStaffGroup(scope)
 
     return
   }
@@ -289,6 +273,54 @@ async function ensureEmployeeStaffGroup(scope: StaffGroupScope) {
   assertSupabaseSuccess(
     resetDefaultsResult.error,
     "We could not normalize the Employee staff group.",
+  )
+}
+
+async function upsertEmployeeStaffGroup(scope: StaffGroupScope) {
+  const values = [
+    scope.organizationId,
+    scope.locationId,
+    EMPLOYEE_STAFF_GROUP_NAME,
+    EMPLOYEE_STAFF_GROUP_SLUG,
+    EMPLOYEE_STAFF_GROUP_COLOR,
+  ]
+
+  if (scope.organizationId) {
+    await getDatabase().query(
+      `insert into public.staff_groups (
+         organization_id,
+         location_id,
+         name,
+         slug,
+         is_default,
+         color
+       ) values ($1, $2, $3, $4, true, $5)
+       on conflict (organization_id, slug) do update
+       set name = excluded.name,
+           is_default = true,
+           color = excluded.color,
+           updated_at = timezone('utc', now())`,
+      values,
+    )
+
+    return
+  }
+
+  await getDatabase().query(
+    `insert into public.staff_groups (
+       organization_id,
+       location_id,
+       name,
+       slug,
+       is_default,
+       color
+     ) values ($1, $2, $3, $4, true, $5)
+     on conflict (location_id, slug) where location_id is not null do update
+     set name = excluded.name,
+         is_default = true,
+         color = excluded.color,
+         updated_at = timezone('utc', now())`,
+    values,
   )
 }
 

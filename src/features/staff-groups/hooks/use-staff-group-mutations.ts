@@ -3,19 +3,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
+import type { EmployeeCompensationInput } from "@/features/staff-groups/types"
+import type {StaffGroupColor} from "@/features/staff-groups/constants/staff-group-colors";
 import { rotaQueryKeys } from "@/features/rota/query-keys"
 import { staffGroupQueryKeys } from "@/features/staff-groups/query-keys"
 import {
-  type StaffGroupColor,
-} from "@/features/staff-groups/constants/staff-group-colors"
-import {
   assignEmployeeStaffGroup,
   bulkAssignEmployeeStaffGroup,
+  bulkSetEmployeeCompensation,
   createStaffGroup,
   deleteStaffGroup,
-  renameStaffGroup,
   removeEmployeeFromWorkspace,
+  renameStaffGroup,
   setEmployeeActiveStatus,
+  setEmployeeCompensation,
   setStaffGroupColor,
 } from "@/features/staff-groups/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
@@ -32,10 +33,12 @@ function useStaffGroupMutations(input: {
   const deleteStaffGroupFn = useServerFn(deleteStaffGroup)
   const assignEmployeeStaffGroupFn = useServerFn(assignEmployeeStaffGroup)
   const bulkAssignEmployeeStaffGroupFn = useServerFn(
-    bulkAssignEmployeeStaffGroup,
+    bulkAssignEmployeeStaffGroup
   )
   const setEmployeeActiveStatusFn = useServerFn(setEmployeeActiveStatus)
   const removeEmployeeFromWorkspaceFn = useServerFn(removeEmployeeFromWorkspace)
+  const setEmployeeCompensationFn = useServerFn(setEmployeeCompensation)
+  const bulkSetEmployeeCompensationFn = useServerFn(bulkSetEmployeeCompensation)
 
   async function invalidate() {
     await Promise.all([
@@ -147,7 +150,7 @@ function useStaffGroupMutations(input: {
   })
 
   const bulkAssignMutation = useMutation({
-    mutationFn: (variables: { employeeIds: string[]; groupId: string }) =>
+    mutationFn: (variables: { employeeIds: Array<string>; groupId: string }) =>
       bulkAssignEmployeeStaffGroupFn({
         data: {
           ...input,
@@ -157,7 +160,7 @@ function useStaffGroupMutations(input: {
     onSuccess: async (_, variables) => {
       await invalidate()
       showSuccessToast(
-        `${variables.employeeIds.length} team member${variables.employeeIds.length === 1 ? "" : "s"} moved.`,
+        `${variables.employeeIds.length} team member${variables.employeeIds.length === 1 ? "" : "s"} moved.`
       )
     },
     onError: (error) => {
@@ -178,7 +181,7 @@ function useStaffGroupMutations(input: {
     onSuccess: async (_, variables) => {
       await invalidate()
       showSuccessToast(
-        `Team member ${variables.isActive ? "activated" : "deactivated"}.`,
+        `Team member ${variables.isActive ? "activated" : "deactivated"}.`
       )
     },
     onError: (error) => {
@@ -207,6 +210,46 @@ function useStaffGroupMutations(input: {
     },
   })
 
+  const setCompensationMutation = useMutation({
+    mutationFn: (variables: {
+      employeeId: string
+      compensation: EmployeeCompensationInput
+    }) =>
+      setEmployeeCompensationFn({
+        data: { ...input, ...variables },
+      }),
+    onSuccess: async () => {
+      await invalidate()
+      showSuccessToast("Pay rate updated.")
+    },
+    onError: (error) => {
+      showErrorToast(error, {
+        fallbackMessage: "We could not update that pay rate.",
+      })
+    },
+  })
+
+  const bulkSetCompensationMutation = useMutation({
+    mutationFn: (variables: {
+      employeeIds: Array<string>
+      compensation: EmployeeCompensationInput
+    }) =>
+      bulkSetEmployeeCompensationFn({
+        data: { ...input, ...variables },
+      }),
+    onSuccess: async (_, variables) => {
+      await invalidate()
+      showSuccessToast(
+        `${variables.employeeIds.length} pay rate${variables.employeeIds.length === 1 ? "" : "s"} updated.`
+      )
+    },
+    onError: (error) => {
+      showErrorToast(error, {
+        fallbackMessage: "We could not update those pay rates.",
+      })
+    },
+  })
+
   return {
     createMutation,
     renameMutation,
@@ -214,8 +257,10 @@ function useStaffGroupMutations(input: {
     deleteMutation,
     assignMutation,
     bulkAssignMutation,
+    bulkSetCompensationMutation,
     removeEmployeeMutation,
     setActiveMutation,
+    setCompensationMutation,
   }
 }
 

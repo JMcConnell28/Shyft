@@ -3,7 +3,10 @@ import { createServerFn } from "@tanstack/react-start"
 
 import type { RotaCreationPreview } from "@/features/rota/types"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
-import { getLocationRole, requireLocationPermission } from "@/lib/auth/has-location-permission"
+import {
+  getLocationRole,
+  requireLocationPermission,
+} from "@/lib/auth/has-location-permission"
 import { getDatabase } from "@/lib/db"
 import {
   createRotaDialogSchema,
@@ -13,14 +16,14 @@ import {
   toIsoDate,
 } from "@/lib/rota-schemas"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
-import {
-  assertSupabaseSuccess,
-} from "@/lib/supabase-errors"
+import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 
 import { ensureLocationAccessOrThrow } from "@/features/rota/server/access"
+import { assertTrialRotaCreationAllowed } from "@/features/billing/server/trial-rota-limits"
 import { createDraftRotaRecord } from "@/features/rota/server/draft-actions"
 import {
   findExistingRotaByWeek,
+  getLocationOrganizationId,
   getOrganizationSlugById,
   getPreviousPublishedForLocation,
   getTemplatesForLocation,
@@ -30,14 +33,16 @@ import { coerceNumber } from "@/features/rota/utils/week-utils"
 const previewRotaCreation = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => previewRotaCreationSchema.parse(input))
   .handler(async ({ data }): Promise<RotaCreationPreview> => {
-    const { requireVerifiedSessionOrThrow } = await import(
-      "@/features/rota/server/request-session"
-    )
+    const { requireVerifiedSessionOrThrow } =
+      await import("@/features/rota/server/request-session")
     const { session } = await requireVerifiedSessionOrThrow()
-    const organizationId = session.session.activeOrganizationId ?? null
-    const role = organizationId
+    const sessionOrganizationId = session.session.activeOrganizationId ?? null
+    const organizationId =
+      sessionOrganizationId ??
+      (await getLocationOrganizationId(data.locationId))
+    const role = sessionOrganizationId
       ? await requireOrgPermission({
-          organizationId,
+          organizationId: sessionOrganizationId,
           userId: session.user.id,
           permissions: {
             rota: ["create"],
@@ -58,15 +63,19 @@ const previewRotaCreation = createServerFn({ method: "POST" })
       organizationId,
       session.user.id,
       data.locationId,
-      role,
+      role
     )
 
     const [existing, previousPublished, templates] = await Promise.all([
-      findExistingRotaByWeek(organizationId, data.locationId, normalizedWeekStart),
+      findExistingRotaByWeek(
+        organizationId,
+        data.locationId,
+        normalizedWeekStart
+      ),
       getPreviousPublishedForLocation(
         organizationId,
         data.locationId,
-        normalizedWeekStart,
+        normalizedWeekStart
       ),
       getTemplatesForLocation(organizationId, data.locationId),
     ])
@@ -85,14 +94,16 @@ const previewRotaCreation = createServerFn({ method: "POST" })
 const createRotaDraft = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => createRotaDialogSchema.parse(input))
   .handler(async ({ data }) => {
-    const { requireVerifiedSessionOrThrow } = await import(
-      "@/features/rota/server/request-session"
-    )
+    const { requireVerifiedSessionOrThrow } =
+      await import("@/features/rota/server/request-session")
     const { session } = await requireVerifiedSessionOrThrow()
-    const organizationId = session.session.activeOrganizationId ?? null
-    const role = organizationId
+    const sessionOrganizationId = session.session.activeOrganizationId ?? null
+    const organizationId =
+      sessionOrganizationId ??
+      (await getLocationOrganizationId(data.locationId))
+    const role = sessionOrganizationId
       ? await requireOrgPermission({
-          organizationId,
+          organizationId: sessionOrganizationId,
           userId: session.user.id,
           permissions: {
             rota: ["create"],
@@ -112,7 +123,7 @@ const createRotaDraft = createServerFn({ method: "POST" })
       organizationId,
       session.user.id,
       data.locationId,
-      role,
+      role
     )
     const orgSlug = organizationId
       ? await getOrganizationSlugById(organizationId)
@@ -137,31 +148,22 @@ const createRotaDraft = createServerFn({ method: "POST" })
 const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => duplicateRotaSchema.parse(input))
   .handler(async ({ data }) => {
-    const { requireVerifiedSessionOrThrow } = await import(
-      "@/features/rota/server/request-session"
-    )
+    const { requireVerifiedSessionOrThrow } =
+      await import("@/features/rota/server/request-session")
     const { session } = await requireVerifiedSessionOrThrow()
-    const organizationId = session.session.activeOrganizationId ?? null
-    const role = organizationId
-      ? await requireOrgPermission({
-          organizationId,
-          userId: session.user.id,
-          permissions: {
-            rota: ["create"],
-          },
-          errorMessage: "You do not have permission to duplicate rotas.",
-        })
-      : null
+    const sessionOrganizationId = session.session.activeOrganizationId ?? null
     const supabase = createSupabaseServerClient()
     const sourceQuery = supabase
       .from("rotas")
       .select(
-        "location_id, week_start, note, shift_count, scheduled_hours, scheduled_staff_count",
+        "location_id, week_start, note, shift_count, scheduled_hours, scheduled_staff_count"
       )
       .eq("id", data.rotaId)
-    const sourceResult = await (organizationId
-      ? sourceQuery.eq("organization_id", organizationId)
-      : sourceQuery.is("organization_id", null)).maybeSingle()
+    const sourceResult = await (
+      sessionOrganizationId
+        ? sourceQuery.eq("organization_id", sessionOrganizationId)
+        : sourceQuery
+    ).maybeSingle()
 
     assertSupabaseSuccess(sourceResult.error, "That rota could not be found.")
     const source = sourceResult.data
@@ -170,13 +172,26 @@ const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
       throw new Error("That rota could not be found.")
     }
 
+    const organizationId =
+      sessionOrganizationId ??
+      (await getLocationOrganizationId(source.location_id))
+    const role = sessionOrganizationId
+      ? await requireOrgPermission({
+          organizationId: sessionOrganizationId,
+          userId: session.user.id,
+          permissions: {
+            rota: ["create"],
+          },
+          errorMessage: "You do not have permission to duplicate rotas.",
+        })
+      : null
     const locationRole =
       role ?? (await getLocationRole(source.location_id, session.user.id))
     const { location } = await ensureLocationAccessOrThrow(
       organizationId,
       session.user.id,
       source.location_id,
-      locationRole,
+      locationRole
     )
     const orgSlug = organizationId
       ? await getOrganizationSlugById(organizationId)
@@ -190,7 +205,7 @@ const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
     const existing = await findExistingRotaByWeek(
       organizationId,
       source.location_id,
-      nextWeekStart,
+      nextWeekStart
     )
 
     if (existing) {
@@ -203,6 +218,11 @@ const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
         },
       }
     }
+
+    await assertTrialRotaCreationAllowed({
+      organizationId,
+      locationId: source.location_id,
+    })
 
     const duplicateInsertResult = await getDatabase().query<{ id: string }>(
       `insert into public.rotas (
@@ -229,9 +249,9 @@ const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
         source.scheduled_staff_count,
         session.user.id,
         data.rotaId,
-      ],
+      ]
     )
-    const duplicatedRota = duplicateInsertResult.rows[0]
+    const duplicatedRota = duplicateInsertResult.rows.at(0)
 
     if (!duplicatedRota) {
       throw new Error("We could not duplicate that rota.")
@@ -248,4 +268,3 @@ const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
   })
 
 export { createRotaDraft, duplicateRotaToNextWeek, previewRotaCreation }
-

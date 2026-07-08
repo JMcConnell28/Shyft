@@ -216,13 +216,83 @@ async function updateLocationConnectionForClient(
     )
   }
 
-  const nextBillingAccountId =
+  const requestedBillingAccountId =
     input.billingMode === "organization"
       ? input.targetBillingAccountId
       : current.billing_account_id
 
-  if (!nextBillingAccountId) {
+  if (!requestedBillingAccountId) {
     throw new Error("Choose where billing should move.")
+  }
+
+  let nextBillingAccountId = requestedBillingAccountId
+  let transferEffectiveAt: Date | null = null
+
+  if (current.billing_account_id !== requestedBillingAccountId) {
+    const targetResult = await client.query<{
+      stripe_payment_method_id: string | null
+    }>(
+      `select stripe_payment_method_id
+       from public.billing_accounts
+       where id = $1`,
+      [requestedBillingAccountId],
+    )
+
+    if (!targetResult.rows.at(0)?.stripe_payment_method_id) {
+      throw new Error(
+        "The organization billing account needs a saved payment method before this transfer can be scheduled.",
+      )
+    }
+
+    const coverageResult = await client.query<{ effective_at: Date | null }>(
+      `select greatest(
+         coalesce(subscription.current_period_end, '-infinity'::timestamptz),
+         entitlement.trial_ends_at
+       ) as effective_at
+       from billing_private.location_entitlements entitlement
+       left join lateral (
+         select current_period_end
+         from public.billing_subscriptions
+         where billing_account_id = $2
+           and status in ('trialing', 'active', 'past_due')
+         order by created_at desc
+         limit 1
+       ) subscription on true
+       where entitlement.location_id = $1`,
+      [input.locationId, current.billing_account_id],
+    )
+    const effectiveAt = coverageResult.rows.at(0)?.effective_at ?? null
+
+    if (effectiveAt && effectiveAt.getTime() > Date.now()) {
+      transferEffectiveAt = effectiveAt
+      nextBillingAccountId = current.billing_account_id
+
+      await client.query(
+        `insert into billing_private.billing_transfers (
+           location_id,
+           source_billing_account_id,
+           target_billing_account_id,
+           status,
+           effective_at,
+           requested_by_user_id
+         ) values ($1, $2, $3, 'ready', $4, $5)
+         on conflict (location_id) where status in ('scheduled', 'ready')
+         do update set source_billing_account_id = excluded.source_billing_account_id,
+                       target_billing_account_id = excluded.target_billing_account_id,
+                       status = excluded.status,
+                       effective_at = excluded.effective_at,
+                       requested_by_user_id = excluded.requested_by_user_id,
+                       failure_reason = null,
+                       updated_at = timezone('utc', now())`,
+        [
+          input.locationId,
+          current.billing_account_id,
+          requestedBillingAccountId,
+          effectiveAt,
+          input.userId,
+        ],
+      )
+    }
   }
 
   await client.query(
@@ -274,14 +344,14 @@ async function updateLocationConnectionForClient(
         current.organization_id,
         input.targetOrganizationId,
         current.billing_account_id,
-        nextBillingAccountId,
+        requestedBillingAccountId,
         input.userId,
         input.billingMode,
       ],
     )
   }
 
-  if (current.billing_account_id !== nextBillingAccountId) {
+  if (current.billing_account_id !== requestedBillingAccountId) {
     await client.query(
       `insert into public.workspace_connection_events (
            event_type,
@@ -307,7 +377,7 @@ async function updateLocationConnectionForClient(
         current.organization_id,
         input.targetOrganizationId,
         current.billing_account_id,
-        nextBillingAccountId,
+        requestedBillingAccountId,
         input.userId,
         input.billingMode,
       ],
@@ -317,6 +387,7 @@ async function updateLocationConnectionForClient(
   return {
     nextBillingAccountId,
     previousBillingAccountId: current.billing_account_id,
+    transferEffectiveAt,
   }
 }
 
@@ -353,6 +424,7 @@ async function moveLocationToOrganization(input: {
 }): Promise<ConnectionActionResult> {
   const { session } = await requireVerifiedSessionOrThrow()
   const current = await getLocationTransferState(input.locationId)
+  const billingMode: BillingMode = "organization"
 
   await requireLocationConnectionPermission({
     locationId: input.locationId,
@@ -370,21 +442,21 @@ async function moveLocationToOrganization(input: {
   })
 
   const targetBillingAccount =
-    input.billingMode === "organization"
+    billingMode === "organization"
       ? await getOrCreateOrganizationBillingAccount({
           organizationId: input.targetOrganizationId,
           ownerUserId: session.user.id,
         })
       : null
   const result = await updateLocationConnection({
-    billingMode: input.billingMode,
+    billingMode,
     locationId: input.locationId,
     targetBillingAccountId: targetBillingAccount?.id ?? null,
     targetOrganizationId: input.targetOrganizationId,
     userId: session.user.id,
   })
   const stripeSyncWarning =
-    input.billingMode === "organization"
+    billingMode === "organization"
       ? await syncChangedBillingAccounts([
           result.previousBillingAccountId,
           result.nextBillingAccountId,
@@ -462,6 +534,7 @@ async function createOrganizationFromLocation(input: {
   const organizationId = randomUUID()
   const organizationName = input.name.trim()
   const organizationSlug = normalizeOrganizationSlug(input.slug)
+  const billingMode: BillingMode = "organization"
   let previousBillingAccountId: string | null = null
   let nextBillingAccountId: string | null = null
 
@@ -534,7 +607,7 @@ async function createOrganizationFromLocation(input: {
     )
 
     const targetBillingAccountId =
-      input.billingMode === "organization"
+      billingMode === "organization"
         ? await getOrCreateOrganizationBillingAccountForClient(client, {
             organizationId,
             ownerUserId: session.user.id,
@@ -542,7 +615,7 @@ async function createOrganizationFromLocation(input: {
         : null
 
     const billingChange = await updateLocationConnectionForClient(client, {
-      billingMode: input.billingMode,
+      billingMode,
       locationId: input.locationId,
       targetBillingAccountId,
       targetOrganizationId: organizationId,
@@ -561,7 +634,7 @@ async function createOrganizationFromLocation(input: {
   }
 
   const stripeSyncWarning =
-    input.billingMode === "organization"
+    billingMode === "organization"
       ? await syncChangedBillingAccounts([
           previousBillingAccountId,
           nextBillingAccountId,

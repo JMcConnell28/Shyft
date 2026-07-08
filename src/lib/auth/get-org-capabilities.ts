@@ -19,6 +19,7 @@ type OrganizationCapabilities = {
   canManageLocations: boolean
   canInviteTeamMembers: boolean
   canManageTeamMembers: boolean
+  canManageAnnouncements: boolean
 }
 
 function getOrgCapabilitiesForRole(
@@ -60,6 +61,9 @@ function getOrgCapabilitiesForRole(
   const canManageTeamMembers = hasOrgPermissionForRole(role, {
     member: ["create"],
   })
+  const canManageAnnouncements = hasOrgPermissionForRole(role, {
+    announcement: ["create"],
+  })
 
   return {
     role,
@@ -76,6 +80,7 @@ function getOrgCapabilitiesForRole(
     canManageLocations,
     canInviteTeamMembers,
     canManageTeamMembers,
+    canManageAnnouncements,
   }
 }
 

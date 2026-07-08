@@ -99,7 +99,7 @@ function mapShiftRowToWorkspaceShift(
     return {
       id: row.id,
       dayId,
-      zoneId: row.zone_id ?? `archived-zone:${row.id}`,
+      zoneId: row.zone_id ?? getDeletedZoneId(row.zone_name_snapshot),
       zoneName: row.zone_name_snapshot,
       shiftType: "standard",
       startTime: formatDbTime(row.start_time),
@@ -111,7 +111,7 @@ function mapShiftRowToWorkspaceShift(
     return {
       id: row.id,
       dayId,
-      zoneId: row.zone_id ?? `archived-zone:${row.id}`,
+      zoneId: row.zone_id ?? getDeletedZoneId(row.zone_name_snapshot),
       zoneName: row.zone_name_snapshot,
       shiftType: "closing",
       startTime: formatDbTime(row.start_time),
@@ -128,7 +128,7 @@ function mapShiftRowToWorkspaceShift(
     return {
       id: row.id,
       dayId,
-      zoneId: row.zone_id ?? `archived-zone:${row.id}`,
+      zoneId: row.zone_id ?? getDeletedZoneId(row.zone_name_snapshot),
       zoneName: row.zone_name_snapshot,
       shiftType: "split",
       segments: [
@@ -248,6 +248,16 @@ function getIsoDateForEquivalentWeekday(days: WorkspaceDay[], dayId: string) {
 
 function formatDbTime(value: string) {
   return value.slice(0, 5)
+}
+
+function getDeletedZoneId(zoneName: string) {
+  const normalizedName = zoneName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+
+  return `deleted-zone:${normalizedName || "zone"}`
 }
 
 function normalizeDateValue(value: string | Date) {

@@ -65,6 +65,30 @@ function getWorkspaceShellConfig(
     } satisfies WorkspaceShellConfig
   }
 
+  if (workspacePath.startsWith("/announcements")) {
+    return {
+      routeKey: "announcements",
+      title: "Announcements",
+      description: "Read and share team updates.",
+      backLink: {
+        href: getWorkspaceDashboardPath(workspace.slug),
+        label: "Back to dashboard",
+      },
+    } satisfies WorkspaceShellConfig
+  }
+
+  if (workspacePath.startsWith("/shift-swaps")) {
+    return {
+      routeKey: "shiftSwaps",
+      title: "Shift swaps",
+      description: "Request swaps, offer cover, and review approvals.",
+      backLink: {
+        href: getWorkspaceDashboardPath(workspace.slug),
+        label: "Back to dashboard",
+      },
+    } satisfies WorkspaceShellConfig
+  }
+
   if (workspacePath.startsWith("/time-clock")) {
     return {
       routeKey: "timeClock",

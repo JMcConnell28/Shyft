@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { getFieldError } from "@/lib/forms"
+import { cn } from "@/lib/utils"
 
 type TextFormFieldProps = {
   field: AnyFieldApi
@@ -18,6 +19,8 @@ type TextFormFieldProps = {
   autoComplete?: string
   description?: string
   required?: boolean
+  className?: string
+  inputClassName?: string
 }
 
 function TextFormField({
@@ -28,9 +31,11 @@ function TextFormField({
   autoComplete,
   description,
   required = false,
+  className,
+  inputClassName,
 }: TextFormFieldProps) {
   return (
-    <Field>
+    <Field className={className}>
       <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
       <FieldContent>
         <Input
@@ -43,8 +48,11 @@ function TextFormField({
           onChange={(event) => field.handleChange(event.target.value)}
           autoComplete={autoComplete}
           required={required}
+          className={cn(inputClassName)}
         />
-        {description ? <FieldDescription>{description}</FieldDescription> : null}
+        {description ? (
+          <FieldDescription>{description}</FieldDescription>
+        ) : null}
         <FieldError>{getFieldError(field)}</FieldError>
       </FieldContent>
     </Field>

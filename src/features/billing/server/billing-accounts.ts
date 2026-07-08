@@ -6,7 +6,7 @@ import type {
   WorkspaceBillingState,
 } from "@/features/billing/types"
 import {
-  INCLUDED_EMPLOYEES_PER_LOCATION,
+  INCLUDED_CORE_EMPLOYEES,
   getBillingPricingQuantities,
 } from "@/features/billing/server/pricing"
 import { PAST_DUE_GRACE_DAYS } from "@/features/billing/constants"
@@ -69,8 +69,10 @@ function mapBillingAccess(row: BillingAccessRow): WorkspaceBillingState {
       pastDueGraceEndsAt.getTime() > Date.now(),
     locationQuantity: 1,
     activeEmployeeQuantity: 0,
-    includedEmployeeQuantity: INCLUDED_EMPLOYEES_PER_LOCATION,
+    includedEmployeeQuantity: INCLUDED_CORE_EMPLOYEES,
     extraEmployeeQuantity: 0,
+    timeAttendanceQuantity: 0,
+    locations: [],
     hasActiveSubscription:
       subscriptionStatus !== null &&
       activeSubscriptionStatuses.has(subscriptionStatus),
@@ -79,7 +81,7 @@ function mapBillingAccess(row: BillingAccessRow): WorkspaceBillingState {
 }
 
 function parseSubscriptionStatus(
-  value: string | null,
+  value: string | null
 ): BillingSubscriptionStatus | null {
   return subscriptionStatuses.find((status) => status === value) ?? null
 }
@@ -96,6 +98,40 @@ async function ensureLocationBillingAccount(input: {
   ownerUserId?: string | null
 }) {
   const database = getDatabase()
+  const locationResult = await database.query<{
+    id: string
+    organization_id: string | null
+  }>(
+    `select id, organization_id
+     from public.locations
+     where id = $1
+     limit 1`,
+    [input.locationId]
+  )
+  const location = locationResult.rows.at(0)
+
+  if (!location) {
+    throw new Error("We could not find that location.")
+  }
+
+  if (location.organization_id) {
+    const account = await ensureOrganizationBillingAccount({
+      organizationId: location.organization_id,
+      ownerUserId: input.ownerUserId,
+    })
+
+    await database.query(
+      `update public.locations
+       set billing_account_id = $2,
+           updated_at = timezone('utc', now())
+       where id = $1
+         and billing_account_id is distinct from $2`,
+      [input.locationId, account.id]
+    )
+
+    return account
+  }
+
   const result = await database.query<BillingAccountRow>(
     `with location_row as (
        select id, organization_id, billing_account_id
@@ -131,7 +167,7 @@ async function ensureLocationBillingAccount(input: {
        (select billing_account_id from updated_location),
        (select billing_account_id from location_row)
      )`,
-    [input.locationId, input.ownerUserId ?? null],
+    [input.locationId, input.ownerUserId ?? null]
   )
 
   const account = result.rows.at(0)
@@ -171,12 +207,6 @@ async function ensureOrganizationBillingAccount(input: {
        union all
        select id from created_account
        limit 1
-     ),
-     updated_locations as (
-       update public.locations
-       set billing_account_id = (select id from chosen_account)
-       where organization_id = $1
-       returning id
      )
      select ba.id,
             ba.stripe_customer_id,
@@ -184,7 +214,7 @@ async function ensureOrganizationBillingAccount(input: {
             ba.payment_method_saved_at
      from public.billing_accounts ba
      where ba.id = (select id from chosen_account)`,
-    [input.organizationId, input.ownerUserId ?? null],
+    [input.organizationId, input.ownerUserId ?? null]
   )
 
   const account = result.rows.at(0)
@@ -205,7 +235,7 @@ async function setBillingAccountStripeCustomer(input: {
      set stripe_customer_id = $2,
          updated_at = timezone('utc', now())
      where id = $1`,
-    [input.billingAccountId, input.stripeCustomerId],
+    [input.billingAccountId, input.stripeCustomerId]
   )
 }
 
@@ -223,7 +253,7 @@ async function setBillingAccountPaymentMethod(input: {
                   end,
          updated_at = timezone('utc', now())
      where id = $1`,
-    [input.billingAccountId, input.stripePaymentMethodId],
+    [input.billingAccountId, input.stripePaymentMethodId]
   )
 }
 
@@ -232,17 +262,17 @@ async function getBillingAccountLocationQuantity(billingAccountId: string) {
     `select count(*)::text
      from public.locations
      where billing_account_id = $1`,
-    [billingAccountId],
+    [billingAccountId]
   )
 
   return Math.max(Number(result.rows.at(0)?.count ?? 0), 1)
 }
 
 async function getLocationBillingAccess(locationId: string) {
-  await ensureLocationBillingAccount({ locationId })
+  const account = await ensureLocationBillingAccount({ locationId })
 
   const hasPastDueStartedAtColumn = await hasBillingSubscriptionColumn(
-    "past_due_started_at",
+    "past_due_started_at"
   )
   const pastDueStartedAtSelect = hasPastDueStartedAtColumn
     ? "past_due_started_at"
@@ -256,7 +286,7 @@ async function getLocationBillingAccess(locationId: string) {
        subscription.status as subscription_status,
        subscription.past_due_started_at
      from public.locations l
-     join public.billing_accounts ba on ba.id = l.billing_account_id
+     join public.billing_accounts ba on ba.id = $2
      left join lateral (
        select status,
               ${pastDueStartedAtSelect}
@@ -266,7 +296,7 @@ async function getLocationBillingAccess(locationId: string) {
        limit 1
      ) subscription on true
      where l.id = $1`,
-    [locationId],
+    [locationId, account.id]
   )
 
   const row = result.rows.at(0)
@@ -283,7 +313,7 @@ async function getLocationBillingAccess(locationId: string) {
 
 async function getOrganizationBillingAccess(organizationId: string) {
   const hasPastDueStartedAtColumn = await hasBillingSubscriptionColumn(
-    "past_due_started_at",
+    "past_due_started_at"
   )
   const pastDueStartedAtSelect = hasPastDueStartedAtColumn
     ? "past_due_started_at"
@@ -297,7 +327,7 @@ async function getOrganizationBillingAccess(organizationId: string) {
      where scope = 'organization'
        and organization_id = $1
      limit 1`,
-    [organizationId],
+    [organizationId]
   )
   const account = accountResult.rows.at(0)
 
@@ -312,7 +342,7 @@ async function getOrganizationBillingAccess(organizationId: string) {
      where billing_account_id = $1
      order by created_at desc
      limit 1`,
-    [account.id],
+    [account.id]
   )
   const subscription = subscriptionResult.rows.at(0) ?? null
 
@@ -345,7 +375,7 @@ async function hasBillingSubscriptionColumn(columnName: string) {
          and table_name = 'billing_subscriptions'
          and column_name = $1
      )`,
-    [columnName],
+    [columnName]
   )
   const exists = result.rows.at(0)?.exists ?? false
 

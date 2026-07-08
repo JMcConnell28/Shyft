@@ -11,8 +11,10 @@ const rules: ClockPayRuleSettings = {
   earlyStartReviewMinutes: 15,
   forgottenClockOutAlertMinutes: 120,
   hardReviewAfterMinutes: 720,
+  lateClockInGraceMinutes: 5,
   lateClockOutGraceMinutes: 10,
   lateFinishReviewMinutes: 15,
+  lateStartReviewMinutes: 15,
 }
 
 const scheduledWindow = {

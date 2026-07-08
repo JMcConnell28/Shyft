@@ -29,6 +29,8 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
+import { PasskeyCard } from "@/features/account/components/passkey-card"
+import { PwaInstallCard } from "@/features/pwa/components/pwa-install-card"
 
 type AccountPageProps = {
   user: {
@@ -53,6 +55,8 @@ function AccountPage({ user }: AccountPageProps) {
         <ProfileCard user={user} />
         <PasswordCard />
         <PasswordResetCard email={user.email} />
+        <PasskeyCard />
+        <PwaInstallCard />
       </div>
     </div>
   )
@@ -121,7 +125,7 @@ function ProfileCard({ user }: AccountPageProps) {
     onError: (mutationError) => {
       const message = getErrorMessage(
         mutationError,
-        "We could not update your profile.",
+        "We could not update your profile."
       )
       setError(message)
       showErrorToast(mutationError, {
@@ -198,7 +202,7 @@ function PasswordCard() {
     onError: (mutationError) => {
       const message = getErrorMessage(
         mutationError,
-        "We could not change your password.",
+        "We could not change your password."
       )
       setError(message)
       showErrorToast(mutationError, {

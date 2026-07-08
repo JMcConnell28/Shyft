@@ -13,9 +13,9 @@ async function createZone(input: {
 
   const database = getDatabase()
   const normalizedName = input.name.trim()
-  await assertLocationExists(database, input)
+  const location = await getLocationForWorkspace(database, input)
   await assertUniqueZoneName(database, {
-    organizationId: input.organizationId ?? null,
+    organizationId: location.organizationId,
     locationId: input.locationId,
     name: normalizedName,
   })
@@ -41,10 +41,11 @@ async function createZone(input: {
          from public.zones z
          where (($1::text is null and z.organization_id is null) or z.organization_id = $1::text)
            and z.location_id = $2::uuid
+           and z.deleted_at is null
        )
      )
      returning id, location_id, name, sort_order`,
-    [input.organizationId ?? null, input.locationId, normalizedName],
+    [location.organizationId, input.locationId, normalizedName]
   )
 
   return {
@@ -79,9 +80,17 @@ async function updateZone(input: {
     `update public.zones
      set name = $3,
          updated_at = timezone('utc', now())
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
-       and id = $2::uuid`,
-    [input.organizationId ?? null, input.zoneId, normalizedName],
+     where id = $2::uuid
+       and (
+         ($1::text is not null and organization_id = $1::text)
+         or ($4::uuid is not null and location_id = $4::uuid)
+       )`,
+    [
+      input.organizationId ?? null,
+      input.zoneId,
+      normalizedName,
+      input.locationId ?? null,
+    ]
   )
 
   return {
@@ -105,36 +114,32 @@ async function deleteZone(input: {
   const zoneCountResult = await database.query<{ count: string }>(
     `select count(*)::text as count
      from public.zones
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
-       and location_id = $2::uuid`,
-    [input.organizationId ?? null, zone.locationId],
+     where (
+         ($1::text is not null and organization_id = $1::text)
+         or ($3::uuid is not null and location_id = $3::uuid)
+       )
+       and location_id = $2::uuid
+       and deleted_at is null`,
+    [input.organizationId ?? null, zone.locationId, input.locationId ?? null]
   )
 
   if (Number(zoneCountResult.rows[0]?.count ?? "0") <= 1) {
-    throw new Error("Each location needs at least one zone. Create another zone first.")
-  }
-
-  const usageResult = await database.query<{ used: boolean }>(
-    `select exists(
-       select 1
-       from public.rota_shifts
-       where (($1::text is null and organization_id is null) or organization_id = $1::text)
-         and zone_id = $2::uuid
-     ) as used`,
-    [input.organizationId ?? null, input.zoneId],
-  )
-
-  if (usageResult.rows[0]?.used) {
     throw new Error(
-      "This zone is still used in editable rotas. Move or remove those shifts before deleting it.",
+      "Each location needs at least one zone. Create another zone first."
     )
   }
 
   await database.query(
-    `delete from public.zones
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
-       and id = $2::uuid`,
-    [input.organizationId ?? null, input.zoneId],
+    `update public.zones
+     set deleted_at = timezone('utc', now()),
+         updated_at = timezone('utc', now())
+     where id = $2::uuid
+       and (
+         ($1::text is not null and organization_id = $1::text)
+         or ($3::uuid is not null and location_id = $3::uuid)
+       )
+       and deleted_at is null`,
+    [input.organizationId ?? null, input.zoneId, input.locationId ?? null]
   )
 
   return {
@@ -173,24 +178,36 @@ async function requireZonePermission(input: {
   })
 }
 
-async function assertLocationExists(
+async function getLocationForWorkspace(
   database: ReturnType<typeof getDatabase>,
   input: {
     organizationId?: string
     locationId: string
-  },
+  }
 ) {
-  const result = await database.query<{ id: string }>(
-    `select id
+  const result = await database.query<{
+    id: string
+    organization_id: string | null
+  }>(
+    `select id, organization_id
      from public.locations
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
-       and id = $2::uuid
+     where id = $2::uuid
+       and (
+         ($1::text is not null and organization_id = $1::text)
+         or $1::text is null
+       )
      limit 1`,
-    [input.organizationId ?? null, input.locationId],
+    [input.organizationId ?? null, input.locationId]
   )
+  const location = result.rows[0]
 
-  if (!result.rows[0]) {
+  if (!location) {
     throw new Error("Choose a valid location.")
+  }
+
+  return {
+    id: location.id,
+    organizationId: location.organization_id,
   }
 }
 
@@ -200,7 +217,7 @@ async function getZoneForWorkspace(
     organizationId?: string
     locationId?: string
     zoneId: string
-  },
+  }
 ) {
   const result = await database.query<{
     id: string
@@ -208,11 +225,15 @@ async function getZoneForWorkspace(
   }>(
     `select id, location_id
      from public.zones
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
+     where (
+         ($1::text is not null and organization_id = $1::text)
+         or ($2::uuid is not null and location_id = $2::uuid)
+       )
        and ($2::uuid is null or location_id = $2::uuid)
        and id = $3::uuid
+       and deleted_at is null
      limit 1`,
-    [input.organizationId ?? null, input.locationId ?? null, input.zoneId],
+    [input.organizationId ?? null, input.locationId ?? null, input.zoneId]
   )
 
   const zone = result.rows[0]
@@ -234,14 +255,18 @@ async function assertUniqueZoneName(
     locationId: string
     name: string
     excludeZoneId?: string
-  },
+  }
 ) {
   const result = await database.query<{ id: string }>(
     `select id
      from public.zones
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
+     where (
+         ($1::text is not null and organization_id = $1::text)
+         or ($2::uuid is not null and location_id = $2::uuid)
+       )
        and location_id = $2::uuid
        and lower(name) = lower($3)
+       and deleted_at is null
        and ($4::uuid is null or id <> $4::uuid)
      limit 1`,
     [
@@ -249,7 +274,7 @@ async function assertUniqueZoneName(
       input.locationId,
       input.name,
       input.excludeZoneId ?? null,
-    ],
+    ]
   )
 
   if (result.rows[0]) {

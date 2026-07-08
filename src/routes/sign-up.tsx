@@ -15,6 +15,7 @@ import { isPublicDevelopmentEmailVerificationBypassed } from "@/lib/email-verifi
 import { saveOnboardingIntent } from "@/lib/onboarding"
 import {
   emailSchema,
+  dateOfBirthSchema,
   firstNameSchema,
   lastNameSchema,
   passwordSchema,
@@ -67,6 +68,7 @@ function SignUpRoute() {
     defaultValues: {
       firstName: "",
       lastName: "",
+      dateOfBirth: "",
       email: "",
       password: "",
     },
@@ -85,6 +87,7 @@ function SignUpRoute() {
         name: fullName,
         email: parsed.data.email,
         password: parsed.data.password,
+        dateOfBirth: parsed.data.dateOfBirth,
         callbackURL: redirectTarget,
       })
 
@@ -171,6 +174,23 @@ function SignUpRoute() {
               )}
             </form.Field>
           </div>
+
+          <form.Field
+            name="dateOfBirth"
+            validators={{
+              onSubmit: createZodFieldValidator(dateOfBirthSchema),
+            }}
+          >
+            {(field) => (
+              <TextFormField
+                field={field}
+                label="Date of birth"
+                type="date"
+                autoComplete="bday"
+                required
+              />
+            )}
+          </form.Field>
 
           <form.Field
             name="email"

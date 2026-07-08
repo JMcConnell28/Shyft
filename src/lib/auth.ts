@@ -1,4 +1,5 @@
 import "@tanstack/react-start/server-only"
+import "reflect-metadata"
 
 import { betterAuth } from "better-auth"
 import { passkey } from "@better-auth/passkey"
@@ -8,6 +9,7 @@ import { tanstackStartCookies } from "better-auth/tanstack-start"
 import Stripe from "stripe"
 
 import { ac, roles } from "@/lib/auth/permissions"
+import { authUserAdditionalFields } from "@/lib/auth-fields"
 import { getDatabase } from "@/lib/db"
 import { isDevelopmentEmailVerificationBypassed } from "@/lib/email-verification"
 import { getOptionalEnv, getRequiredEnv } from "@/lib/env.server"
@@ -50,6 +52,9 @@ const auth = betterAuth({
   baseURL: authBaseUrl,
   secret: getRequiredEnv("BETTER_AUTH_SECRET"),
   database: getDatabase(),
+  user: {
+    additionalFields: authUserAdditionalFields,
+  },
   emailVerification: {
     sendOnSignUp: !isEmailVerificationBypassed,
     sendOnSignIn: !isEmailVerificationBypassed,

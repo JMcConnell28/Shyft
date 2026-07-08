@@ -88,6 +88,16 @@ const updateRotaNoteSchema = z.object({
     .default(""),
 })
 
+const updateRotaBudgetSchema = z.object({
+  rotaId: z.string().uuid("Choose a rota."),
+  budgetPence: z
+    .number()
+    .int()
+    .min(0, "Enter a budget of zero or more.")
+    .max(100_000_000, "Enter a budget below £1,000,000.")
+    .nullable(),
+})
+
 const rotaRouteParamsSchema = z.object({
   orgSlug: organizationSlugSchema,
   locationSlug: locationSlugSchema,
@@ -173,7 +183,7 @@ function getWeekRangeFromStart(weekStart: Date | string) {
     end,
     startLabel: format(normalizedStart, "d MMM"),
     endLabel: format(end, "d MMM yyyy"),
-    summaryLabel: `Week of ${format(normalizedStart, "d MMM")} - ${format(
+    summaryLabel: `${format(normalizedStart, "d MMM")} - ${format(
       end,
       "d MMM yyyy"
     )}`,
@@ -242,4 +252,5 @@ export {
   toIsoDate,
   unpublishRotaSchema,
   updateRotaNoteSchema,
+  updateRotaBudgetSchema,
 }

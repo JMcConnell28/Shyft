@@ -1,55 +1,46 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 
-import { EmployeeClockPage } from "@/features/time-clock/components/employee-clock-page"
-import { getEmployeeClockPageData } from "@/features/time-clock/server-fns"
-import { getViewerState } from "@/lib/onboarding"
+import { buttonVariants } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 
 export const Route = createFileRoute("/clock/$token")({
-  beforeLoad: async ({ location }) => {
-    const viewer = await getViewerState()
-
-    if (!viewer) {
-      throw redirect({
-        to: "/login",
-        search: {
-          redirect: location.href,
-        },
-      })
-    }
-
-    if (!viewer.user.emailVerified) {
-      throw redirect({
-        to: "/verify-email",
-        search: {
-          email: viewer.user.email,
-          redirect: location.href,
-          sent: false,
-        },
-      })
-    }
-
-    return { viewer }
-  },
-  loader: async ({ context, params }) =>
-    getEmployeeClockPageData({
-      data: {
-        token: params.token,
-        userId: context.viewer.user.id,
+  head: () => ({
+    meta: [
+      {
+        title: "Clock link expired | RocketRota",
       },
-    }),
-  component: ClockTokenRoute,
+    ],
+  }),
+  component: OldClockLinkRoute,
 })
 
-function ClockTokenRoute() {
-  const { viewer } = Route.useRouteContext()
-  const { token } = Route.useParams()
-  const data = Route.useLoaderData()
-
+function OldClockLinkRoute() {
   return (
-    <EmployeeClockPage
-      initialData={data}
-      token={token}
-      userId={viewer.user.id}
-    />
+    <div className="min-h-dvh bg-muted/20 px-4 py-5 text-foreground">
+      <main className="mx-auto flex min-h-[calc(100dvh-2.5rem)] max-w-md flex-col justify-center">
+        <Card className="border-border/70 bg-background shadow-sm">
+          <CardContent className="space-y-4 p-5">
+            <div>
+              <p className="text-sm font-semibold text-primary">RocketRota</p>
+              <h1 className="mt-2 text-xl font-semibold">
+                This clock link is no longer used
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Tap the NTAG 424 clock card again to create a fresh secure
+                clock session.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <a className={buttonVariants()} href="/dashboard">
+                Back to dashboard
+              </a>
+              <a className={buttonVariants({ variant: "outline" })} href="/help">
+                Get help
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    </div>
   )
 }

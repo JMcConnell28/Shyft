@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { ShiftOverviewCards } from "@/features/dashboard/components/shift-overview-cards"
 import { DashboardWelcomeModal } from "@/features/dashboard/components/dashboard-welcome-modal"
+import { getDashboardAnnouncements } from "@/features/announcements/server-fns"
 import {
   getDashboardShiftOverview,
   getDashboardWelcome,
@@ -17,7 +18,21 @@ export const Route = createFileRoute(
       throw new Error("An active workspace is required.")
     }
 
-    const [overview, welcome] = await Promise.all([
+    const announcementInput =
+      activeWorkspace.type === "organization"
+        ? {
+            organizationId: activeWorkspace.id,
+            userId: context.viewer.user.id,
+          }
+        : {
+            locationId: activeWorkspace.id,
+            userId: context.viewer.user.id,
+          }
+
+    const [announcements, overview, welcome] = await Promise.all([
+      getDashboardAnnouncements({
+        data: announcementInput,
+      }),
       getDashboardShiftOverview({
         data:
           activeWorkspace.type === "organization"
@@ -39,7 +54,7 @@ export const Route = createFileRoute(
       }),
     ])
 
-    return { overview, welcome }
+    return { announcements, overview, welcome }
   },
   head: () => ({
     meta: [
@@ -55,7 +70,7 @@ export const Route = createFileRoute(
 
 function DashboardWorkspaceRoute() {
   const context = Route.useRouteContext()
-  const { overview, welcome } = Route.useLoaderData()
+  const { announcements, overview, welcome } = Route.useLoaderData()
   const activeWorkspace = context.viewer.activeWorkspace
 
   if (!activeWorkspace) {
@@ -63,26 +78,18 @@ function DashboardWorkspaceRoute() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-5 p-0 md:p-5">
-      <div className="flex justify-end px-4 pt-3 md:items-start md:px-0 md:pt-0">
-        <div className="mr-auto hidden space-y-1 md:block">
-          <h2 className="text-base font-semibold tracking-tight">Dashboard</h2>
-          <p className="text-sm text-muted-foreground">
-            Your next shift and published shifts for this week.
-          </p>
-        </div>
-        <DashboardWelcomeModal
-          capabilities={context.capabilities}
-          initiallyOpen={welcome.shouldShow}
-          userName={context.viewer.user.name}
-          workspace={activeWorkspace}
-        />
-      </div>
+    <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
+      <DashboardWelcomeModal
+        capabilities={context.capabilities}
+        initiallyOpen={welcome.shouldShow}
+        userName={context.viewer.user.name}
+        workspace={activeWorkspace}
+      />
 
       <ShiftOverviewCards
+        announcements={announcements}
         mobileContext={{
           userName: context.viewer.user.name,
-          workspaceName: activeWorkspace.name,
           workspaceSlug: activeWorkspace.slug,
           workspaceType: activeWorkspace.type,
         }}

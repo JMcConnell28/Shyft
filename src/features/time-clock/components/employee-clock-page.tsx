@@ -1,94 +1,74 @@
 "use client"
 
 import * as React from "react"
-import { ClockIcon, MapPinIcon } from "lucide-react"
+import { ClockIcon, HelpCircleIcon, MapPinIcon } from "lucide-react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Spinner } from "@/components/ui/spinner"
+import { Card, CardContent } from "@/components/ui/card"
+import { HoldToConfirmButton } from "@/features/time-clock/components/hold-to-confirm-button"
 import { useLiveNow } from "@/features/time-clock/hooks/use-live-now"
 import { useEmployeeClockMutation } from "@/features/time-clock/hooks/use-time-clock-mutations"
 import { useEmployeeClockQuery } from "@/features/time-clock/hooks/use-time-clock-query"
 import type {
+  ClockReason,
   ClockShiftSegment,
+  EarlyClockInMode,
   EmployeeClockPageData,
-  GpsCoordinates,
 } from "@/features/time-clock/types"
 import {
   formatElapsedTime,
   getElapsedMilliseconds,
 } from "@/features/time-clock/utils/elapsed-time"
+import Title from "@/components/title"
+import { BrandMark } from "@/components/app/brand"
 
-type GpsState =
-  | { status: "idle"; coordinates: null }
-  | { status: "checking"; coordinates: null }
-  | { status: "ready"; coordinates: GpsCoordinates }
-  | { status: "error"; coordinates: null }
+const reasonOptions: Array<{ label: string; value: ClockReason }> = [
+  { label: "Asked to come in early", value: "asked_early" },
+  { label: "Asked to come in late", value: "asked_late" },
+  { label: "Covering a shift", value: "covering_shift" },
+  { label: "Transport delay", value: "transport_delay" },
+  { label: "Manager approved", value: "manager_approved" },
+  { label: "Other", value: "other" },
+]
 
 function EmployeeClockPage({
   initialData,
-  token,
+  scanSessionId,
   userId,
 }: {
   initialData: EmployeeClockPageData
-  token: string
+  scanSessionId: string
   userId: string
 }) {
-  const query = useEmployeeClockQuery({ token, userId })
+  const queryInput = { scanSessionId, userId }
+  const query = useEmployeeClockQuery(queryInput)
   const data = query.data ?? initialData
-  const mutation = useEmployeeClockMutation({ token, userId })
+  const mutation = useEmployeeClockMutation(queryInput)
   const liveNow = useLiveNow(Boolean(data.openEntry))
-  const [gps, setGps] = React.useState<GpsState>({
-    status: "idle",
-    coordinates: null,
-  })
+  const [earlyClockInMode, setEarlyClockInMode] =
+    React.useState<EarlyClockInMode>(
+      data.reviewPrompt.defaultMode ?? "scheduled"
+    )
+  const [reason, setReason] = React.useState<ClockReason | "">("")
+  const [showReasonError, setShowReasonError] = React.useState(false)
 
   React.useEffect(() => {
-    if (!data.isClockingEnabled || data.nextAction === "clock_out") {
-      return
+    if (mutation.isSuccess) {
+      const timeout = window.setTimeout(() => {
+        window.location.assign("/dashboard")
+      }, 2500)
+
+      return () => window.clearTimeout(timeout)
     }
+  }, [mutation.isSuccess])
 
-    if (!("geolocation" in navigator)) {
-      setGps({
-        status: "error",
-        coordinates: null,
-      })
-      return
-    }
-
-    setGps({
-      status: "checking",
-      coordinates: null,
-    })
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setGps({
-          status: "ready",
-          coordinates: {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracyMeters: position.coords.accuracy,
-          },
-        })
-      },
-      () => {
-        setGps({
-          status: "error",
-          coordinates: null,
-        })
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 15000,
-        timeout: 15000,
-      },
-    )
-  }, [data.isClockingEnabled, data.nextAction])
-
-  const canSubmit =
-    data.isClockingEnabled && !mutation.isPending
+  const requiresReason =
+    data.nextAction === "clock_in" &&
+    (data.reviewPrompt.isReasonRequired ||
+      data.reviewPrompt.kind === "unmatched" ||
+      data.reviewPrompt.kind === "late" ||
+      (data.reviewPrompt.kind === "early" && earlyClockInMode === "now"))
+  const canSubmit = data.isClockingEnabled && !mutation.isPending
   const isSplitClockIn =
     data.nextAction === "clock_in" && data.matchedShift?.shiftType === "split"
   const splitSegmentStates =
@@ -100,128 +80,223 @@ function EmployeeClockPage({
       : []
 
   function submitClock(shiftSegment?: ClockShiftSegment) {
+    if (requiresReason && !reason) {
+      setShowReasonError(true)
+      return
+    }
+
     mutation.mutate({
       action: data.nextAction,
-      gps:
-        data.nextAction === "clock_in" && gps.status === "ready"
-          ? gps.coordinates
-          : null,
+      earlyClockInMode:
+        data.nextAction === "clock_in" ? earlyClockInMode : undefined,
+      reason: reason || undefined,
       shiftSegment,
     })
   }
 
-  return (
-    <div className="min-h-dvh bg-[#f7f9ff] px-4 py-5 text-[#080d23]">
-      <main className="mx-auto flex min-h-[calc(100dvh-2.5rem)] max-w-md flex-col gap-4">
-        <header className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-[#075cff] text-white shadow-sm">
-            <ClockIcon className="size-5" />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{data.location.name}</p>
-            <p className="truncate text-xs text-[#687087]">{data.clockLabel}</p>
-          </div>
-        </header>
-
-        {data.setupMessage ? (
-          <Alert className="rounded-xl border-[#dbe3ff] bg-white">
-            <AlertTitle>{data.setupMessage}</AlertTitle>
-            <AlertDescription>
-              A manager can finish setup or use an override if you need to start
-              work now.
-            </AlertDescription>
-          </Alert>
-        ) : null}
-
-        <Card className="border-[#dbe3ff] bg-white shadow-[0_16px_40px_rgba(27,42,89,0.10)]">
-          <CardHeader>
-            <CardTitle className="text-base">Time clock</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+  if (mutation.isSuccess) {
+    return (
+      <ClockShell>
+        <Card className="border-border/70 bg-background shadow-sm">
+          <CardContent className="space-y-3 p-5 text-center">
+            <div className="mx-auto flex size-11 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <ClockIcon className="size-5" />
+            </div>
             <div>
-              <p className="text-xs font-medium uppercase text-[#687087]">
-                Team member
+              <h1 className="text-lg font-semibold">
+                {data.nextAction === "clock_in" ? "Clocked in" : "Clocked out"}
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Returning you to the dashboard.
               </p>
-              <p className="mt-1 text-xl font-semibold">{data.employee.name}</p>
             </div>
-
-            <div className="rounded-xl border border-[#dbe3ff] bg-[#f4f7ff] p-4">
-              <p className="text-xs font-medium uppercase text-[#687087]">
-                Current status
-              </p>
-              <p className="mt-1 text-lg font-semibold">
-                {data.openEntry ? "Clocked in" : "Not clocked in"}
-              </p>
-              {data.openEntry ? (
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <p className="text-xs text-[#687087]">
-                    Since {formatDateTime(data.openEntry.clockedInAt)}
-                  </p>
-                  <span className="rounded-lg bg-white px-2 py-1 font-mono text-sm font-semibold text-[#080d23]">
-                    {formatElapsedTime(
-                      getElapsedMilliseconds(
-                        data.openEntry.clockedInAt,
-                        liveNow,
-                      ),
-                    )}
-                  </span>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="rounded-xl border border-[#dbe3ff] bg-white p-4">
-              <div className="flex items-start gap-3">
-                <MapPinIcon className="mt-0.5 size-4 text-[#075cff]" />
-                <div>
-                  <p className="text-sm font-semibold">
-                    {data.matchedShift ? "Matched shift" : "No matched shift"}
-                  </p>
-                  <p className="mt-1 text-xs text-[#687087]">
-                    {data.matchedShift
-                      ? `${data.matchedShift.dateLabel}, ${data.matchedShift.timeLabel} - ${data.matchedShift.zoneName}`
-                      : "Clocking is allowed, but this entry will need manager review."}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {isSplitClockIn && data.matchedShift ? (
-              <div className="grid gap-2">
-                {splitSegmentStates.map(({ disabled, label, segment }) => {
-                  return (
-                    <Button
-                      key={segment.key}
-                      size="lg"
-                      className="h-auto min-h-14 w-full rounded-xl py-3 text-base"
-                      disabled={!canSubmit || disabled}
-                      onClick={() => submitClock(segment.key)}
-                    >
-                      {mutation.isPending ? <Spinner /> : null}
-                      <span className="flex flex-col items-center gap-0.5">
-                        <span>{label}</span>
-                        <span className="text-xs font-medium opacity-80">
-                          {segment.timeLabel}
-                        </span>
-                      </span>
-                    </Button>
-                  )
-                })}
-              </div>
-            ) : (
-              <Button
-                size="lg"
-                className="h-14 w-full rounded-xl text-base"
-                disabled={!canSubmit}
-                onClick={() => submitClock(data.matchedShift?.segments[0]?.key)}
-              >
-                {mutation.isPending ? <Spinner /> : null}
-                {data.nextAction === "clock_in" ? "Clock in" : "Clock out"}
-              </Button>
-            )}
           </CardContent>
         </Card>
+      </ClockShell>
+    )
+  }
+
+  return (
+    <ClockShell>
+      {data.setupMessage ? (
+        <Alert className="border-border/70 bg-background">
+          <AlertTitle>{data.setupMessage}</AlertTitle>
+          <AlertDescription>
+            Ask a manager for help if you need to start work now.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      <Card className="border-border/70 bg-background shadow-sm">
+        <CardContent className="space-y-5 p-5">
+          <section>
+            <p className="text-xs font-medium text-muted-foreground uppercase">
+              Team member
+            </p>
+            <p className="mt-1 text-xl font-semibold">{data.employee.name}</p>
+          </section>
+
+          <section className="rounded-lg border border-border/70 bg-muted/20 p-4">
+            <p className="text-xs font-medium text-muted-foreground uppercase">
+              Current status
+            </p>
+            <p className="mt-1 text-lg font-semibold">
+              {data.openEntry ? "Clocked in" : "Not clocked in"}
+            </p>
+            {data.openEntry ? (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <p className="text-xs text-muted-foreground">
+                  Since {formatDateTime(data.openEntry.clockedInAt)}
+                </p>
+                <span className="rounded-md bg-background px-2 py-1 font-mono text-sm font-semibold">
+                  {formatElapsedTime(
+                    getElapsedMilliseconds(data.openEntry.clockedInAt, liveNow)
+                  )}
+                </span>
+              </div>
+            ) : null}
+          </section>
+
+          <section className="rounded-lg border border-border/70 p-4">
+            <div className="flex items-start gap-3">
+              <MapPinIcon className="mt-0.5 size-4 text-primary" />
+              <div>
+                <p className="text-sm font-semibold">
+                  {data.matchedShift ? "Matched shift" : "No matched shift"}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {data.matchedShift
+                    ? `${data.matchedShift.dateLabel}, ${data.matchedShift.timeLabel} - ${data.matchedShift.zoneName}`
+                    : "This is allowed, but a manager will review it."}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {data.reviewPrompt.message ? (
+            <Alert className="border-border/70 bg-muted/20">
+              <AlertTitle>Review needed</AlertTitle>
+              <AlertDescription>{data.reviewPrompt.message}</AlertDescription>
+            </Alert>
+          ) : null}
+
+          {data.reviewPrompt.kind === "early" ? (
+            <fieldset className="space-y-2">
+              <legend className="text-xs font-medium text-muted-foreground uppercase">
+                Paid start
+              </legend>
+              <EarlyStartOption
+                checked={earlyClockInMode === "scheduled"}
+                label="Start paid time at scheduled start"
+                onChange={() => setEarlyClockInMode("scheduled")}
+              />
+              <EarlyStartOption
+                checked={earlyClockInMode === "now"}
+                label="Start paid time now"
+                onChange={() => setEarlyClockInMode("now")}
+              />
+            </fieldset>
+          ) : null}
+
+          {requiresReason ? (
+            <label className="space-y-1 text-xs font-medium">
+              <span>Reason</span>
+              <select
+                className="mb-2 h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
+                value={reason}
+                onChange={(event) => {
+                  setShowReasonError(false)
+                  setReason(event.target.value as ClockReason | "")
+                }}
+              >
+                <option value="">Choose a reason</option>
+                {reasonOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {showReasonError ? (
+                <span className="block text-xs text-destructive">
+                  Choose a reason to continue.
+                </span>
+              ) : null}
+            </label>
+          ) : null}
+
+          {isSplitClockIn && data.matchedShift ? (
+            <div className="grid gap-2">
+              {splitSegmentStates.map(({ disabled, label, segment }) => (
+                <HoldToConfirmButton
+                  key={segment.key}
+                  className="h-auto min-h-14 w-full py-3 text-base"
+                  disabled={!canSubmit || disabled}
+                  isPending={mutation.isPending}
+                  label={getHoldLabel(label, disabled)}
+                  subLabel={segment.timeLabel}
+                  onConfirm={() => submitClock(segment.key)}
+                />
+              ))}
+            </div>
+          ) : (
+            <HoldToConfirmButton
+              className="h-12 w-full text-base"
+              disabled={!canSubmit}
+              isPending={mutation.isPending}
+              label={`Hold to ${
+                data.nextAction === "clock_in" ? "clock in" : "clock out"
+              }`}
+              onConfirm={() => submitClock(data.matchedShift?.segments[0]?.key)}
+            />
+          )}
+
+          <a
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            href="/help"
+          >
+            <HelpCircleIcon className="size-4" />
+            Need help clocking in?
+          </a>
+        </CardContent>
+      </Card>
+    </ClockShell>
+  )
+}
+
+function ClockShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-dvh bg-muted/20 px-4 py-5 text-foreground">
+      <main className="mx-auto flex min-h-[calc(100dvh-2.5rem)] max-w-md flex-col gap-4">
+        <header className="flex items-center justify-center gap-3">
+          <BrandMark />
+          <Title />
+        </header>
+        {children}
       </main>
     </div>
+  )
+}
+
+function EarlyStartOption({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean
+  label: string
+  onChange: () => void
+}) {
+  return (
+    <label className="flex items-center gap-3 rounded-lg border border-border/70 px-3 py-2 text-sm">
+      <input
+        checked={checked}
+        className="size-4"
+        name="early-start-mode"
+        type="radio"
+        onChange={onChange}
+      />
+      <span>{label}</span>
+    </label>
   )
 }
 
@@ -264,6 +339,14 @@ function getSplitSegmentStates({
       segment,
     }
   })
+}
+
+function getHoldLabel(label: string, disabled: boolean) {
+  if (disabled) {
+    return label
+  }
+
+  return label.replace(/^Clock in/, "Hold to clock in")
 }
 
 function formatDateTime(value: string) {

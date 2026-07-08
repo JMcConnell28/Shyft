@@ -17,6 +17,8 @@ function usePublishRota() {
   const publishRotaVersionFn = useServerFn(publishRotaVersion)
   const {
     assignmentsById,
+    budgetInsights,
+    formatCurrency,
     hasUnsavedChanges,
     markChangesSaved,
     markPublished,
@@ -81,15 +83,38 @@ function usePublishRota() {
   })
 
   const canPublish =
+    meta.canEdit &&
     !mutation.isPending &&
     (meta.status === "draft" || meta.hasUnpublishedChanges || hasUnsavedChanges)
+
+  async function publishWithBudgetGuardrail() {
+    if (
+      budgetInsights.weeklyBudget !== null &&
+      budgetInsights.isOverBudget &&
+      typeof window !== "undefined"
+    ) {
+      const confirmed = window.confirm(
+        `This rota is ${formatCurrency(
+          budgetInsights.overBudgetAmount
+        )} over budget. Publish anyway?`
+      )
+
+      if (!confirmed) {
+        return
+      }
+    }
+
+    await mutation.mutateAsync()
+  }
 
   return {
     canPublish,
     isPublishing: mutation.isPending,
-    publish: mutation.mutateAsync,
+    publish: publishWithBudgetGuardrail,
     publishBlockedReason: mutation.isPending
       ? "Publishing is already in progress."
+      : !meta.canEdit
+        ? "Past rotas are locked and can no longer be edited."
       : meta.status === "published" && !meta.hasUnpublishedChanges && !hasUnsavedChanges
         ? "No unpublished changes to publish yet."
         : null,

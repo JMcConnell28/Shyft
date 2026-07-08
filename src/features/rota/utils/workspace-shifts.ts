@@ -73,6 +73,26 @@ function getShiftSortStart(
   return getShiftSegments(shift, location)[0]?.startMinutes ?? Number.MAX_SAFE_INTEGER
 }
 
+function getShiftSortEnd(shift: WorkspaceShift, location: WorkspaceLocation) {
+  const segments = getShiftSegments(shift, location)
+  return segments.at(-1)?.endMinutes ?? Number.MAX_SAFE_INTEGER
+}
+
+function compareShiftsByTime(
+  left: WorkspaceShift,
+  right: WorkspaceShift,
+  location: WorkspaceLocation
+) {
+  const startDifference =
+    getShiftSortStart(left, location) - getShiftSortStart(right, location)
+
+  if (startDifference !== 0) {
+    return startDifference
+  }
+
+  return getShiftSortEnd(left, location) - getShiftSortEnd(right, location)
+}
+
 function getShiftDisplayLines(shift: WorkspaceShift) {
   if (shift.shiftType === "standard") {
     return [`${shift.startTime} - ${shift.endTime}`]
@@ -119,6 +139,30 @@ function shiftsOverlap(
         rightSegment.startMinutes < leftSegment.endMinutes
     )
   )
+}
+
+function shiftsHaveMatchingTimes(
+  left: WorkspaceShift,
+  right: WorkspaceShift,
+  location: WorkspaceLocation
+) {
+  if (left.dayId !== right.dayId) {
+    return false
+  }
+
+  return (
+    getShiftTimeSignature(left, location) ===
+    getShiftTimeSignature(right, location)
+  )
+}
+
+function getShiftTimeSignature(
+  shift: WorkspaceShift,
+  location: WorkspaceLocation
+) {
+  return getShiftSegments(shift, location)
+    .map((segment) => `${segment.startMinutes}-${segment.endMinutes}`)
+    .join("|")
 }
 
 function getTimeMinutes(value: string) {
@@ -180,15 +224,18 @@ function normalizeShiftEnd(
 }
 
 export {
+  compareShiftsByTime,
   getShiftAbsoluteSegments,
   getShiftDisplayLines,
   getShiftDurationMinutes,
+  getShiftSortEnd,
   getShiftPrimaryStart,
   getShiftSegments,
   getShiftSortStart,
   getTimeMinutes,
   getWeekdayCloseTime,
   normalizeShiftEnd,
+  shiftsHaveMatchingTimes,
   shiftsOverlap,
 }
 export type { ResolvedWorkspaceShiftSegment }

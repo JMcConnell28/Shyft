@@ -10,6 +10,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
+import type { RotaTemplateSummary } from "@/features/rota/types"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,13 +50,13 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
+import { rotaToolbarButtonClassName } from "@/features/rota/constants/rota-toolbar-styles"
 import { rotaQueryKeys } from "@/features/rota/query-keys"
 import {
   applyRotaTemplateToRota,
   createRotaTemplateFromRota,
   overrideRotaTemplateFromRota,
 } from "@/features/rota/server-fns"
-import type { RotaTemplateSummary } from "@/features/rota/types"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
 type SaveCurrentRota = (options?: {
@@ -180,7 +181,7 @@ function RotaTemplateMenu({
               size="icon"
               aria-label="Templates"
               disabled={isBusy}
-              className="md:h-7 md:w-auto md:gap-2 md:px-2"
+              className={rotaToolbarButtonClassName}
             />
           }
         >
@@ -189,7 +190,9 @@ function RotaTemplateMenu({
           ) : (
             <ShapesIcon className="size-3.5" />
           )}
-          <span className="hidden md:inline">Templates</span>
+          <span className="hidden group-data-[toolbar-more=true]/toolbar-more:inline md:inline">
+            Templates
+          </span>
           <ChevronDown className="hidden size-3.5 md:block" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">

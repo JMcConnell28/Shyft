@@ -16,6 +16,14 @@ type TimesheetLocation = {
   name: string
 }
 
+type TimesheetExportableRota = {
+  id: string
+  label: string
+  locationId: string
+  locationName: string
+  weekStart: string
+}
+
 type TimesheetTotals = {
   actualMinutes: number
   openEntryCount: number
@@ -31,6 +39,7 @@ type TimesheetEntry = {
   clockedOutAt: string | null
   employeeId: string
   employeeName: string
+  employeePayrollId: string | null
   locationId: string
   locationName: string
   notes: string | null
@@ -76,11 +85,38 @@ type ManagerTimesheet = TimesheetTotals & {
 type TimesheetPageData = {
   canManage: boolean
   employeeTimesheet: EmployeeTimesheet
+  exportableRotas: TimesheetExportableRota[]
   locations: TimesheetLocation[]
   managerTimesheet: ManagerTimesheet | null
   weekEnd: string
   weekLabel: string
   weekStart: string
+}
+
+type SageTimesheetExportInput = {
+  organizationId?: string | null
+  locationId?: string
+  userId: string
+  rotaId: string
+}
+
+type SageTimesheetExportRow = {
+  employeeName: string
+  employeeReference: string
+  location: string
+  payElement: string
+  units: string
+  rate: string
+  amount: string
+  weekEnd: string
+  weekStart: string
+  notes: string
+}
+
+type SageTimesheetExportData = {
+  fileName: string
+  missingPayrollEmployees: string[]
+  rows: SageTimesheetExportRow[]
 }
 
 type UpdateTimesheetEntryInput = {
@@ -101,8 +137,12 @@ export type {
   EmployeeTimesheet,
   ManagerTimesheet,
   ManagerTimesheetEmployee,
+  SageTimesheetExportData,
+  SageTimesheetExportInput,
+  SageTimesheetExportRow,
   TimesheetDay,
   TimesheetEntry,
+  TimesheetExportableRota,
   TimesheetLocation,
   TimesheetPageData,
   TimesheetScopeInput,

@@ -14,7 +14,6 @@ import {
   getOrganizationBillingAccess,
 } from "@/features/billing/server/billing-accounts"
 import {
-  getLocationSummaryBySlug,
   listLocationWorkspacesForUser,
   listOrganizationsForHeaders,
   setActiveOrganizationForHeaders,
@@ -40,7 +39,7 @@ function buildUser(session: AuthSession) {
 }
 
 function organizationWorkspaces(
-  organizations: Array<OrganizationSummary>,
+  organizations: Array<OrganizationSummary>
 ): Array<WorkspaceSummary> {
   return organizations.map((organization) => ({
     id: organization.id,
@@ -60,36 +59,48 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
       return null
     }
 
-    const [organizations, locationWorkspaces, onboardingIntent] = await Promise.all([
-      listOrganizationsForHeaders(headers),
-      listLocationWorkspacesForUser(session.user.id),
-      getOnboardingIntentForUser(session.user.id),
-    ])
+    const [organizations, locationWorkspaces, onboardingIntent] =
+      await Promise.all([
+        listOrganizationsForHeaders(headers),
+        listLocationWorkspacesForUser(session.user.id),
+        getOnboardingIntentForUser(session.user.id),
+      ])
     const activeOrganizationId = session.session.activeOrganizationId ?? null
     const activeOrganization =
-      organizations.find((organization) => organization.id === activeOrganizationId) ??
-      null
+      organizations.find(
+        (organization) => organization.id === activeOrganizationId
+      ) ?? null
+    const selectedOrganization =
+      activeOrganization ?? organizations.at(0) ?? null
     const workspaces = [
       ...locationWorkspaces,
       ...organizationWorkspaces(organizations),
     ]
     const user = buildUser(session)
 
-    if (activeOrganizationId && activeOrganization) {
-      const activeState = await getActiveOrganizationState(activeOrganizationId)
-      const billing = await getOrganizationBillingAccess(activeOrganizationId)
+    if (selectedOrganization) {
+      if (activeOrganizationId !== selectedOrganization.id) {
+        await setActiveOrganizationForHeaders(headers, selectedOrganization.id)
+      }
+
+      const activeState = await getActiveOrganizationState(
+        selectedOrganization.id
+      )
+      const billing = await getOrganizationBillingAccess(
+        selectedOrganization.id
+      )
 
       return {
         user,
-        activeOrganizationId,
+        activeOrganizationId: selectedOrganization.id,
         organizations,
-        activeOrganization,
+        activeOrganization: selectedOrganization,
         activeWorkspace: {
-          id: activeOrganization.id,
-          name: activeOrganization.name,
-          slug: activeOrganization.slug,
+          id: selectedOrganization.id,
+          name: selectedOrganization.name,
+          slug: selectedOrganization.slug,
           type: "organization",
-          organizationId: activeOrganization.id,
+          organizationId: selectedOrganization.id,
         },
         workspaces,
         onboarding: activeState.onboarding,
@@ -102,12 +113,16 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
     }
 
     const activeLocationWorkspace =
-      locationWorkspaces.find((workspace) => workspace.organizationId === null) ??
+      locationWorkspaces.find(
+        (workspace) => workspace.organizationId === null
+      ) ??
       locationWorkspaces.at(0) ??
       null
 
     if (activeLocationWorkspace) {
-      const activeState = await getActiveLocationState(activeLocationWorkspace.id)
+      const activeState = await getActiveLocationState(
+        activeLocationWorkspace.id
+      )
       const billing = await getLocationBillingAccess(activeLocationWorkspace.id)
 
       return {
@@ -140,7 +155,7 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
       locations: [],
       staffGroups: [],
     }
-  },
+  }
 )
 
 const getViewerStateForLocationSlug = createServerFn({ method: "GET" })
@@ -149,7 +164,7 @@ const getViewerStateForLocationSlug = createServerFn({ method: "GET" })
       .object({
         locationSlug: organizationRouteParamsSchema.shape.orgSlug,
       })
-      .parse(input),
+      .parse(input)
   )
   .handler(async ({ data }): Promise<ViewerState | null> => {
     const headers = getAuthRequestHeaders()
@@ -159,31 +174,24 @@ const getViewerStateForLocationSlug = createServerFn({ method: "GET" })
       return null
     }
 
-    const [
-      organizations,
-      locationWorkspaces,
-      location,
-      onboardingIntent,
-    ] = await Promise.all([
-      listOrganizationsForHeaders(headers),
-      listLocationWorkspacesForUser(session.user.id),
-      getLocationSummaryBySlug(data.locationSlug),
-      getOnboardingIntentForUser(session.user.id),
-    ])
-
-    if (!location) {
-      return null
-    }
+    const [organizations, locationWorkspaces, onboardingIntent] =
+      await Promise.all([
+        listOrganizationsForHeaders(headers),
+        listLocationWorkspacesForUser(session.user.id),
+        getOnboardingIntentForUser(session.user.id),
+      ])
 
     const activeWorkspace =
-      locationWorkspaces.find((workspace) => workspace.id === location.id) ?? null
+      locationWorkspaces.find(
+        (workspace) => workspace.slug === data.locationSlug
+      ) ?? null
 
     if (!activeWorkspace) {
       return null
     }
 
-    const activeState = await getActiveLocationState(location.id)
-    const billing = await getLocationBillingAccess(location.id)
+    const activeState = await getActiveLocationState(activeWorkspace.id)
+    const billing = await getLocationBillingAccess(activeWorkspace.id)
 
     return {
       user: buildUser(session),
@@ -205,7 +213,9 @@ const getViewerStateForLocationSlug = createServerFn({ method: "GET" })
   })
 
 const getViewerStateForOrganizationSlug = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => organizationRouteParamsSchema.parse(input))
+  .inputValidator((input: unknown) =>
+    organizationRouteParamsSchema.parse(input)
+  )
   .handler(async ({ data }): Promise<ViewerState | null> => {
     const headers = getAuthRequestHeaders()
     const session = await readSessionFromRequestHeaders()
@@ -214,14 +224,16 @@ const getViewerStateForOrganizationSlug = createServerFn({ method: "GET" })
       return null
     }
 
-    const [organizations, locationWorkspaces, onboardingIntent] = await Promise.all([
-      listOrganizationsForHeaders(headers),
-      listLocationWorkspacesForUser(session.user.id),
-      getOnboardingIntentForUser(session.user.id),
-    ])
+    const [organizations, locationWorkspaces, onboardingIntent] =
+      await Promise.all([
+        listOrganizationsForHeaders(headers),
+        listLocationWorkspacesForUser(session.user.id),
+        getOnboardingIntentForUser(session.user.id),
+      ])
     const activeOrganization =
-      organizations.find((organization) => organization.slug === data.orgSlug) ??
-      null
+      organizations.find(
+        (organization) => organization.slug === data.orgSlug
+      ) ?? null
 
     if (!activeOrganization) {
       return null
@@ -265,7 +277,7 @@ const getViewerStateForWorkspaceSlug = createServerFn({ method: "GET" })
       .object({
         workspaceSlug: organizationRouteParamsSchema.shape.orgSlug,
       })
-      .parse(input),
+      .parse(input)
   )
   .handler(async ({ data }): Promise<ViewerState | null> => {
     const locationViewer = await getViewerStateForLocationSlug({

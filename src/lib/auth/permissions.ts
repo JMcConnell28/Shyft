@@ -20,6 +20,7 @@ const shiftActions = ["view", "create", "update", "delete", "assign"] as const
 const locationActions = ["view", "create", "update", "delete"] as const
 
 const teamMemberActions = ["view", "invite", "update", "remove"] as const
+const announcementActions = ["view", "create", "update", "archive"] as const
 
 const statements = {
   organization: organizationActions,
@@ -31,6 +32,7 @@ const statements = {
   shift: shiftActions,
   location: locationActions,
   teamMember: teamMemberActions,
+  announcement: announcementActions,
 } as const
 
 const ac = createAccessControl(statements)
@@ -45,6 +47,7 @@ const owner = ac.newRole({
   shift: [...shiftActions],
   location: [...locationActions],
   teamMember: [...teamMemberActions],
+  announcement: [...announcementActions],
 })
 
 const admin = ac.newRole({
@@ -57,6 +60,7 @@ const admin = ac.newRole({
   shift: [...shiftActions],
   location: ["view", "create", "update"],
   teamMember: [...teamMemberActions],
+  announcement: [...announcementActions],
 })
 
 const manager = ac.newRole({
@@ -69,6 +73,20 @@ const manager = ac.newRole({
   shift: [...shiftActions],
   location: ["view"],
   teamMember: ["view"],
+  announcement: [...announcementActions],
+})
+
+const supervisor = ac.newRole({
+  organization: ["view"],
+  member: ["view"],
+  invitation: ["read"],
+  team: ["view"],
+  ac: ["read"],
+  rota: ["view"],
+  shift: ["view", "update"],
+  location: ["view"],
+  teamMember: ["view"],
+  announcement: ["view"],
 })
 
 const employee = ac.newRole({
@@ -81,17 +99,24 @@ const employee = ac.newRole({
   shift: ["view"],
   location: ["view"],
   teamMember: ["view"],
+  announcement: ["view"],
 })
 
 const roles = {
   owner,
   admin,
   manager,
+  supervisor,
   employee,
   member: employee,
 } as const
 
-const assignableOrganizationRoles = ["admin", "manager", "employee"] as const
+const assignableOrganizationRoles = [
+  "admin",
+  "manager",
+  "supervisor",
+  "employee",
+] as const
 
 type OrganizationRole = keyof typeof roles
 type AssignableOrganizationRole = (typeof assignableOrganizationRoles)[number]

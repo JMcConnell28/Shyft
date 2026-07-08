@@ -27,7 +27,10 @@ function WorkspaceGeneralSettingsRoute() {
       activePath={pathname}
     >
       {activeWorkspace.type === "organization" ? (
-        <GeneralSettingsPage />
+        <GeneralSettingsPage
+          organizationId={activeWorkspace.id}
+          userId={viewer.user.id}
+        />
       ) : (
         <LocationsSettingsPage
           locationId={activeWorkspace.id}

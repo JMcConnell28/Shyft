@@ -5,25 +5,32 @@ import { useServerFn } from "@tanstack/react-start"
 
 import type {
   ClockAction,
+  ClockReason,
   ClockShiftSegment,
-  GpsCoordinates,
+  EarlyClockInMode,
 } from "@/features/time-clock/types"
 import { timeClockQueryKeys } from "@/features/time-clock/query-keys"
 import {
+  approveTimeEntryAsRecorded,
+  generateAdminClockTagSetup,
   managerClockOverride,
   submitEmployeeClock,
   updateClockSettings,
 } from "@/features/time-clock/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
-function useEmployeeClockMutation(input: { token: string; userId: string }) {
+function useEmployeeClockMutation(input: {
+  scanSessionId: string
+  userId: string
+}) {
   const queryClient = useQueryClient()
   const submitEmployeeClockFn = useServerFn(submitEmployeeClock)
 
   return useMutation({
     mutationFn: (variables: {
       action: ClockAction
-      gps?: GpsCoordinates | null
+      earlyClockInMode?: EarlyClockInMode
+      reason?: ClockReason
       shiftSegment?: ClockShiftSegment
     }) =>
       submitEmployeeClockFn({
@@ -37,7 +44,7 @@ function useEmployeeClockMutation(input: { token: string; userId: string }) {
         queryKey: timeClockQueryKeys.employee(input),
       })
       showSuccessToast(
-        variables.action === "clock_in" ? "Clocked in." : "Clocked out.",
+        variables.action === "clock_in" ? "Clocked in." : "Clocked out."
       )
     },
     onError: (error) => {
@@ -54,6 +61,7 @@ function useManagerClockMutations(input: {
   userId: string
 }) {
   const queryClient = useQueryClient()
+  const approveTimeEntryAsRecordedFn = useServerFn(approveTimeEntryAsRecorded)
   const managerClockOverrideFn = useServerFn(managerClockOverride)
 
   async function invalidate() {
@@ -81,12 +89,58 @@ function useManagerClockMutations(input: {
         showSuccessToast(
           variables.action === "clock_in"
             ? "Team member clocked in."
-            : "Team member clocked out.",
+            : "Team member clocked out."
         )
       },
       onError: (error) => {
         showErrorToast(error, {
           fallbackMessage: "We could not apply that override.",
+        })
+      },
+    }),
+    approveAsRecordedMutation: useMutation({
+      mutationFn: (variables: { entryId: string }) =>
+        approveTimeEntryAsRecordedFn({
+          data: {
+            ...input,
+            ...variables,
+          },
+        }),
+      onSuccess: async () => {
+        await invalidate()
+        showSuccessToast("Time entry approved.")
+      },
+      onError: (error) => {
+        showErrorToast(error, {
+          fallbackMessage: "We could not approve that entry.",
+        })
+      },
+    }),
+  }
+}
+
+function useAdminClockTagMutations(input: { userId: string }) {
+  const queryClient = useQueryClient()
+  const generateAdminClockTagSetupFn = useServerFn(generateAdminClockTagSetup)
+
+  return {
+    generateMutation: useMutation({
+      mutationFn: (variables: { locationId: string }) =>
+        generateAdminClockTagSetupFn({
+          data: {
+            ...input,
+            ...variables,
+          },
+        }),
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: timeClockQueryKeys.adminTags(input),
+        })
+        showSuccessToast("Tag setup generated.")
+      },
+      onError: (error) => {
+        showErrorToast(error, {
+          fallbackMessage: "We could not generate tag setup data.",
         })
       },
     }),
@@ -121,8 +175,10 @@ function useClockSettingsMutations(input: {
         earlyStartReviewMinutes: number
         forgottenClockOutAlertMinutes: number
         hardReviewAfterMinutes: number
+        lateClockInGraceMinutes: number
         lateClockOutGraceMinutes: number
         lateFinishReviewMinutes: number
+        lateStartReviewMinutes: number
       }) =>
         updateClockSettingsFn({
           data: {
@@ -144,6 +200,7 @@ function useClockSettingsMutations(input: {
 }
 
 export {
+  useAdminClockTagMutations,
   useClockSettingsMutations,
   useEmployeeClockMutation,
   useManagerClockMutations,

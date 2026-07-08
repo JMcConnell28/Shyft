@@ -3,16 +3,15 @@
 import * as React from "react"
 import { SearchIcon, UsersIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import { RemoveStaffMemberDialog } from "@/features/staff-groups/components/remove-staff-member-dialog"
-import { StaffTableRow } from "@/features/staff-groups/components/staff-table-row"
 import type {
   StaffGroupSettingsEmployee,
   StaffGroupSettingsGroup,
 } from "@/features/staff-groups/types"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { StaffTableRow } from "@/features/staff-groups/components/staff-table-row"
 
 const PAGE_SIZE = 20
 
@@ -20,27 +19,19 @@ function StaffTable({
   employees,
   groups,
   pending,
-  scopeLabel,
   onAssign,
   onBulkAssign,
-  onRemove,
-  onSetActive,
 }: {
-  employees: StaffGroupSettingsEmployee[]
-  groups: StaffGroupSettingsGroup[]
+  employees: Array<StaffGroupSettingsEmployee>
+  groups: Array<StaffGroupSettingsGroup>
   pending: boolean
-  scopeLabel: "location" | "organisation"
   onAssign: (employeeId: string, groupId: string) => Promise<void>
-  onBulkAssign: (employeeIds: string[], groupId: string) => Promise<void>
-  onRemove: (employeeId: string) => Promise<void>
-  onSetActive: (employeeId: string, isActive: boolean) => Promise<void>
+  onBulkAssign: (employeeIds: Array<string>, groupId: string) => Promise<void>
 }) {
   const [query, setQuery] = React.useState("")
   const [page, setPage] = React.useState(1)
-  const [selectedIds, setSelectedIds] = React.useState<string[]>([])
+  const [selectedIds, setSelectedIds] = React.useState<Array<string>>([])
   const [bulkGroupId, setBulkGroupId] = React.useState(groups[0]?.id ?? "")
-  const [employeeToRemove, setEmployeeToRemove] =
-    React.useState<StaffGroupSettingsEmployee | null>(null)
 
   const filteredEmployees = React.useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -88,19 +79,21 @@ function StaffTable({
   }
 
   return (
-    <div>
-      <div className="flex flex-col gap-3 border-b border-border/70 pb-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="overflow-hidden rounded-xl bg-white shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
+      <div className="flex flex-col gap-3 border-b border-[#edf0f6] p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold">Staff</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {employees.length} team member{employees.length === 1 ? "" : "s"}
+          <h2 className="text-lg font-extrabold tracking-[-0.035em] text-[#11245a]">
+            Team
+          </h2>
+          <p className="mt-1 text-sm font-semibold text-[#61709a]">
+            Assign employees to the groups used by the rota builder.
           </p>
         </div>
         <label className="relative w-full sm:max-w-64">
-          <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#7c87a8]" />
           <Input
-            className="pl-8"
-            placeholder="Search staff"
+            className="h-10 rounded-xl border-[#dfe5f0] bg-[#f8faff] pl-9 text-sm font-semibold shadow-none"
+            placeholder="Search team"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -108,12 +101,12 @@ function StaffTable({
       </div>
 
       {selectedIds.length > 0 ? (
-        <div className="flex flex-col gap-2 border-b border-border/70 bg-primary/5 px-3 py-3 sm:flex-row sm:items-center">
-          <span className="text-xs font-medium">
+        <div className="flex flex-col gap-2 border-b border-[#dfe7ff] bg-[#f5f8ff] px-4 py-3 sm:flex-row sm:items-center">
+          <span className="text-xs font-extrabold text-[#11245a]">
             {selectedIds.length} selected
           </span>
           <NativeSelect
-            className="w-full sm:ml-auto sm:w-48"
+            className="h-9 w-full rounded-lg border-[#cddcff] bg-white text-xs font-bold sm:ml-auto sm:w-48"
             value={bulkGroupId}
             onChange={(event) => setBulkGroupId(event.target.value)}
           >
@@ -140,34 +133,36 @@ function StaffTable({
 
       {employees.length === 0 ? (
         <div className="py-12 text-center">
-          <UsersIcon className="mx-auto size-5 text-muted-foreground" />
-          <p className="mt-3 text-sm font-medium">No staff yet</p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <UsersIcon className="mx-auto size-5 text-[#0069ff]" />
+          <p className="mt-3 text-sm font-extrabold text-[#11245a]">
+            No staff yet
+          </p>
+          <p className="mt-1 text-xs font-semibold text-[#61709a]">
             Invited team members will appear here.
           </p>
         </div>
       ) : filteredEmployees.length === 0 ? (
         <div className="py-12 text-center">
-          <SearchIcon className="mx-auto size-5 text-muted-foreground" />
-          <p className="mt-3 text-sm font-medium">No matching staff</p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <SearchIcon className="mx-auto size-5 text-[#0069ff]" />
+          <p className="mt-3 text-sm font-extrabold text-[#11245a]">
+            No matching staff
+          </p>
+          <p className="mt-1 text-xs font-semibold text-[#61709a]">
             Try a different name or email address.
           </p>
         </div>
       ) : (
         <>
-          <div className="hidden grid-cols-[2rem_minmax(11rem,1fr)_minmax(9rem,11rem)_5rem_2.5rem] items-center gap-3 border-b border-border/70 px-2 py-2 text-[11px] font-medium text-muted-foreground md:grid">
+          <div className="hidden grid-cols-[2rem_minmax(10rem,1fr)_minmax(10rem,12rem)] items-center gap-3 border-b border-[#edf0f6] px-4 py-2 text-[11px] font-bold text-[#61709a] md:grid">
             <Checkbox
               checked={allVisibleSelected}
               onCheckedChange={(checked) => toggleVisible(Boolean(checked))}
             />
             <span>Team member</span>
             <span>Group</span>
-            <span className="text-center">Active</span>
-            <span />
           </div>
 
-          <div className="divide-y divide-border/70">
+          <div className="divide-y divide-[#edf0f6]">
             {visibleEmployees.map((employee) => (
               <StaffTableRow
                 key={employee.id}
@@ -176,7 +171,6 @@ function StaffTable({
                 pending={pending}
                 selected={selectedSet.has(employee.id)}
                 onAssign={onAssign}
-                onRemove={() => setEmployeeToRemove(employee)}
                 onSelect={(checked) =>
                   setSelectedIds((current) =>
                     checked
@@ -184,12 +178,11 @@ function StaffTable({
                       : current.filter((id) => id !== employee.id)
                   )
                 }
-                onSetActive={onSetActive}
               />
             ))}
           </div>
 
-          <div className="flex items-center justify-between border-t border-border/70 pt-4 text-xs text-muted-foreground">
+          <div className="flex items-center justify-between border-t border-[#edf0f6] px-4 py-3 text-xs font-semibold text-[#61709a]">
             <span>
               {filteredEmployees.length} result
               {filteredEmployees.length === 1 ? "" : "s"}
@@ -220,14 +213,6 @@ function StaffTable({
           </div>
         </>
       )}
-
-      <RemoveStaffMemberDialog
-        employee={employeeToRemove}
-        pending={pending}
-        scopeLabel={scopeLabel}
-        onClose={() => setEmployeeToRemove(null)}
-        onConfirm={onRemove}
-      />
     </div>
   )
 }

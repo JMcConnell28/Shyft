@@ -55,6 +55,7 @@ async function getZoneCountByLocationIds(
     .from("zones")
     .select("location_id")
     .in("location_id", locationIds)
+    .is("deleted_at", null)
 
   assertSupabaseSuccess(result.error, "We could not load zone counts.")
 

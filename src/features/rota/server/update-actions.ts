@@ -2,7 +2,11 @@ import { createServerFn } from "@tanstack/react-start"
 
 import type { PublishRotaVersionResult } from "@/features/rota/types"
 import { getDatabase } from "@/lib/db"
-import { publishRotaSchema, updateRotaNoteSchema } from "@/lib/rota-schemas"
+import {
+  publishRotaSchema,
+  updateRotaBudgetSchema,
+  updateRotaNoteSchema,
+} from "@/lib/rota-schemas"
 import {
   assertSupabaseSuccess,
   getRequiredSupabaseRow,
@@ -11,6 +15,7 @@ import {
 import { getOrganizationSlugById } from "@/features/rota/server/lookups"
 import { sendRotaPublishedNotifications } from "@/features/rota/server/publish-notifications"
 import { requireRotaWriteAccess } from "@/features/rota/server/write-access"
+import { reapplyApprovedShiftSwapOverrides } from "@/features/shift-swaps/server/publish-overrides"
 
 const publishRotaVersion = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => publishRotaSchema.parse(input))
@@ -37,7 +42,9 @@ const publishRotaVersion = createServerFn({ method: "POST" })
               .from("rota_shifts")
               .select("id")
               .eq("rota_id", data.rotaId)
-          ).data?.map((shift) => shift.id) ?? ["00000000-0000-0000-0000-000000000000"]
+          ).data?.map((shift) => shift.id) ?? [
+            "00000000-0000-0000-0000-000000000000",
+          ]
         ),
     ])
 
@@ -61,15 +68,15 @@ const publishRotaVersion = createServerFn({ method: "POST" })
     )
 
     const insertedPublishedShifts = await insertPublishedShiftSnapshots({
+      locationId: context.location.id,
       organizationId: context.organizationId,
       rotaId: data.rotaId,
       shifts: workingShiftsResult.data ?? [],
     })
     const publishedShiftIdByWorkingShiftId = new Map(
       insertedPublishedShifts
-        .filter(
-          (shift): shift is { id: string; working_shift_id: string } =>
-            Boolean(shift.working_shift_id)
+        .filter((shift): shift is { id: string; working_shift_id: string } =>
+          Boolean(shift.working_shift_id)
         )
         .map((shift) => [shift.working_shift_id, shift.id])
     )
@@ -108,6 +115,12 @@ const publishRotaVersion = createServerFn({ method: "POST" })
       )
     }
 
+    await reapplyApprovedShiftSwapOverrides({
+      database: getDatabase(),
+      publishedShiftIdByWorkingShiftId,
+      rotaId: data.rotaId,
+    })
+
     const nextPublishedVersion = context.rota.published_version + 1
 
     const publishQuery = context.supabase
@@ -123,14 +136,19 @@ const publishRotaVersion = createServerFn({ method: "POST" })
       })
       .eq("id", data.rotaId)
       .select("id")
-    const publishResult = await (context.organizationId
-      ? publishQuery.eq("organization_id", context.organizationId)
-      : publishQuery.is("organization_id", null)).single()
+    const publishResult = await (
+      context.organizationId
+        ? publishQuery.eq("organization_id", context.organizationId)
+        : publishQuery.is("organization_id", null)
+    ).single()
 
-    assertSupabaseSuccess(publishResult.error, "We could not publish that rota.")
+    assertSupabaseSuccess(
+      publishResult.error,
+      "We could not publish that rota."
+    )
     getRequiredSupabaseRow(
       publishResult.data,
-      "We could not publish that rota.",
+      "We could not publish that rota."
     )
 
     const target = {
@@ -176,9 +194,48 @@ const updateRotaNote = createServerFn({ method: "POST" })
       ? noteQuery.eq("organization_id", context.organizationId)
       : noteQuery.is("organization_id", null))
 
-    assertSupabaseSuccess(noteResult.error, "We could not update that rota note.")
+    assertSupabaseSuccess(
+      noteResult.error,
+      "We could not update that rota note."
+    )
 
     return { success: true }
+  })
+
+const updateRotaBudget = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => updateRotaBudgetSchema.parse(input))
+  .handler(async ({ data }) => {
+    const context = await requireRotaWriteAccess({
+      rotaId: data.rotaId,
+      permission: "update",
+      errorMessage: "You do not have permission to update rota budgets.",
+    })
+    if (data.budgetPence === null) {
+      await getDatabase().query(
+        `delete from public.rota_budgets where rota_id = $1::uuid`,
+        [data.rotaId]
+      )
+    } else {
+      await getDatabase().query(
+        `insert into public.rota_budgets (
+           rota_id,
+           organization_id,
+           location_id,
+           budget_pence
+         ) values ($1, $2, $3, $4)
+         on conflict (rota_id)
+         do update set budget_pence = excluded.budget_pence,
+                       updated_at = timezone('utc', now())`,
+        [
+          data.rotaId,
+          context.organizationId,
+          context.location.id,
+          data.budgetPence,
+        ]
+      )
+    }
+
+    return { budgetPence: data.budgetPence }
   })
 
 async function getRequiredOrganizationSlug(organizationId: string) {
@@ -192,10 +249,12 @@ async function getRequiredOrganizationSlug(organizationId: string) {
 }
 
 async function insertPublishedShiftSnapshots({
+  locationId,
   organizationId,
   rotaId,
   shifts,
 }: {
+  locationId: string
   organizationId: string | null
   rotaId: string
   shifts: Array<{
@@ -213,8 +272,18 @@ async function insertPublishedShiftSnapshots({
 }) {
   const database = getDatabase()
   const inserted: Array<{ id: string; working_shift_id: string | null }> = []
+  const zoneNameById = await getActiveZoneNameById({
+    database,
+    locationId,
+    organizationId,
+    zoneIds: shifts
+      .map((shift) => shift.zone_id)
+      .filter((zoneId): zoneId is string => Boolean(zoneId)),
+  })
 
   for (const shift of shifts) {
+    const activeZoneName =
+      shift.zone_id === null ? undefined : zoneNameById.get(shift.zone_id)
     const result = await database.query<{
       id: string
       working_shift_id: string | null
@@ -239,15 +308,15 @@ async function insertPublishedShiftSnapshots({
         organizationId,
         shift.id,
         shift.day_date,
-        shift.zone_id,
-        shift.zone_name_snapshot,
+        activeZoneName === undefined ? null : shift.zone_id,
+        activeZoneName ?? shift.zone_name_snapshot,
         shift.shift_type,
         shift.start_time,
         shift.end_time,
         shift.end_kind,
         shift.split_second_start_time,
         shift.split_second_end_time,
-      ],
+      ]
     )
 
     const insertedShift = result.rows[0]
@@ -262,5 +331,35 @@ async function insertPublishedShiftSnapshots({
   return inserted
 }
 
-export { publishRotaVersion, updateRotaNote }
+async function getActiveZoneNameById({
+  database,
+  locationId,
+  organizationId,
+  zoneIds,
+}: {
+  database: ReturnType<typeof getDatabase>
+  locationId: string
+  organizationId: string | null
+  zoneIds: string[]
+}) {
+  if (zoneIds.length === 0) {
+    return new Map<string, string>()
+  }
 
+  const result = await database.query<{
+    id: string
+    name: string
+  }>(
+    `select id, name
+     from public.zones
+     where id = any($1::uuid[])
+       and location_id = $2::uuid
+       and (($3::text is null and organization_id is null) or organization_id = $3::text)
+       and deleted_at is null`,
+    [zoneIds, locationId, organizationId]
+  )
+
+  return new Map(result.rows.map((zone) => [zone.id, zone.name]))
+}
+
+export { publishRotaVersion, updateRotaBudget, updateRotaNote }

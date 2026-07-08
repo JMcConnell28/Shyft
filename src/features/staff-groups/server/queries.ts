@@ -1,10 +1,11 @@
+import type { StaffGroupSettingsPageData } from "@/features/staff-groups/types"
+import { getMinimumWagePenceForDateOfBirth } from "@/features/staff-groups/utils/minimum-wage"
 import { getDatabase } from "@/lib/db"
 
 import {
   listStaffGroupsWithCounts,
   requireManagedStaffGroupsContext,
 } from "@/features/staff-groups/server/shared"
-import type { StaffGroupSettingsPageData } from "@/features/staff-groups/types"
 
 type StaffGroupSettingsEmployeeRow = {
   id: string
@@ -12,6 +13,10 @@ type StaffGroupSettingsEmployeeRow = {
   email: string | null
   status: string
   staff_group_id: string | null
+  pay_type: string
+  hourly_rate_pence: number | null
+  weekly_salary_pence: number | null
+  dateOfBirth: string | null
 }
 
 async function listWorkspaceEmployees(input: {
@@ -20,11 +25,17 @@ async function listWorkspaceEmployees(input: {
 }) {
   if (input.organizationId) {
     const result = await getDatabase().query<StaffGroupSettingsEmployeeRow>(
-      `select id, full_name, email, status, staff_group_id
-       from public.employees
-       where organization_id = $1::text
-       order by full_name asc`,
-      [input.organizationId],
+      `select employee.id, employee.full_name, employee.email, employee.status,
+              employee.staff_group_id, compensation.pay_type,
+              compensation.hourly_rate_pence, compensation.weekly_salary_pence,
+              user_account."dateOfBirth"
+       from public.employees employee
+       left join public."user" user_account on user_account.id = employee.user_id
+       left join public.employee_compensation compensation
+         on compensation.employee_id = employee.id
+       where employee.organization_id = $1::text
+       order by employee.full_name asc`,
+      [input.organizationId]
     )
 
     return result.rows
@@ -35,9 +46,16 @@ async function listWorkspaceEmployees(input: {
             employee.full_name,
             employee.email,
             employee.status,
-            employee.staff_group_id
+            employee.staff_group_id,
+            compensation.pay_type,
+            compensation.hourly_rate_pence,
+            compensation.weekly_salary_pence,
+            user_account."dateOfBirth"
      from public.employee_location_assignments assignment
      join public.employees employee on employee.id = assignment.employee_id
+     left join public."user" user_account on user_account.id = employee.user_id
+     left join public.employee_compensation compensation
+       on compensation.employee_id = employee.id
      where assignment.location_id = $1::uuid
        and assignment.is_enabled = true
        and assignment.disabled_at is null
@@ -45,7 +63,7 @@ async function listWorkspaceEmployees(input: {
        and employee.organization_id is null
        and employee.location_id = $1::uuid
      order by employee.full_name asc`,
-    [input.locationId],
+    [input.locationId]
   )
 
   return result.rows
@@ -70,6 +88,18 @@ async function getStaffGroupSettingsPageData(input: {
       email: employee.email,
       status: employee.status === "inactive" ? "inactive" : "active",
       groupId: employee.staff_group_id,
+      compensation:
+        employee.pay_type === "salary"
+          ? {
+              type: "salary" as const,
+              weeklySalaryPence: employee.weekly_salary_pence ?? 0,
+            }
+          : {
+              type: "hourly" as const,
+              hourlyRatePence:
+                employee.hourly_rate_pence ??
+                getMinimumWagePenceForDateOfBirth(employee.dateOfBirth),
+            },
     })),
   }
 }

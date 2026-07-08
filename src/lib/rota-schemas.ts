@@ -29,4 +29,5 @@ export {
   toIsoDate,
   unpublishRotaSchema,
   updateRotaNoteSchema,
+  updateRotaBudgetSchema,
 } from "@/features/rota/schemas/rota-schemas"

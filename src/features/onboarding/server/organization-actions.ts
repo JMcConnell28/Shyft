@@ -11,10 +11,7 @@ import {
 import { auth } from "@/lib/auth"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 import { getDatabase } from "@/lib/db"
-import {
-  getLocationDashboardPath,
-  getOrganizationDashboardPath,
-} from "@/lib/organization-paths"
+import { getOrganizationDashboardPath } from "@/lib/organization-paths"
 
 import { FREE_TRIAL_DAYS } from "@/features/onboarding/constants"
 import {
@@ -28,6 +25,7 @@ import {
   upsertOnboardingState,
 } from "@/features/onboarding/server/state"
 import { sendWorkspaceWelcomeNotification } from "@/features/onboarding/server/workspace-welcome"
+import { getMinimumWagePenceForDateOfBirth } from "@/features/staff-groups/utils/minimum-wage"
 
 const resendVerificationEmail = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => verifyEmailSchema.parse(input))
@@ -44,7 +42,7 @@ const resendVerificationEmail = createServerFn({ method: "POST" })
 
 const checkOrganizationSlugAvailability = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    organizationSetupSchema.pick({ slug: true }).parse(input),
+    organizationSetupSchema.pick({ slug: true }).parse(input)
   )
   .handler(async ({ data }) => {
     const { headers } = await requireSessionOrThrow()
@@ -131,137 +129,7 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
     const worksiteName = data.worksiteName.trim()
 
     if (!organizationId) {
-      const locationSlug = await createUniqueLocationSlug(null, locationName)
-      const database = getDatabase()
-      const client = await database.connect()
-
-      try {
-        await client.query("BEGIN")
-
-        const locationResult = await client.query<{ id: string }>(
-          `insert into public.locations (
-             organization_id,
-             name,
-             slug,
-             business_type,
-             planning_mode
-           ) values (null, $1, $2, $3, $4)
-           returning id`,
-          [locationName, locationSlug, data.businessType, data.planningMode],
-        )
-        const locationId = locationResult.rows[0]?.id
-
-        if (!locationId) {
-          throw new Error("We could not save your first location.")
-        }
-
-        await client.query(
-          `insert into public.location_memberships (
-             location_id,
-             user_id,
-             role
-           ) values ($1, $2, 'owner')
-           on conflict (location_id, user_id)
-           do update set role = excluded.role,
-                         updated_at = timezone('utc', now())`,
-          [locationId, session.user.id],
-        )
-
-        const staffGroupResult = await client.query<{ id: string }>(
-          `insert into public.staff_groups (
-             location_id,
-             name,
-             slug,
-             is_default,
-             color
-           ) values ($1, 'Employee', 'employee', true, 'emerald')
-           on conflict (location_id, slug)
-           where location_id is not null
-           do update set is_default = true,
-                         updated_at = timezone('utc', now())
-           returning id`,
-          [locationId],
-        )
-        const staffGroupId = staffGroupResult.rows[0]?.id
-
-        if (!staffGroupId) {
-          throw new Error("We could not save your first staff group.")
-        }
-
-        const employeeResult = await client.query<{ id: string }>(
-          `insert into public.employees (
-             organization_id,
-             location_id,
-             user_id,
-             staff_group_id,
-             full_name,
-             email,
-             status
-           ) values (null, $1, $2, $3, $4, $5, 'active')
-           on conflict (location_id, user_id)
-           where location_id is not null and user_id is not null
-           do update set staff_group_id = excluded.staff_group_id,
-                         full_name = excluded.full_name,
-                         email = excluded.email,
-                         status = 'active',
-                         updated_at = timezone('utc', now())
-           returning id`,
-          [
-            locationId,
-            session.user.id,
-            staffGroupId,
-            session.user.name,
-            session.user.email,
-          ],
-        )
-        const employeeId = employeeResult.rows[0]?.id
-
-        if (!employeeId) {
-          throw new Error("We could not add you to the employee list.")
-        }
-
-        await client.query(
-          `insert into public.employee_location_assignments (
-             organization_id,
-             employee_id,
-             location_id,
-             is_enabled
-           ) values (null, $1, $2, true)
-           on conflict (employee_id, location_id)
-           do update set is_enabled = true,
-                         disabled_at = null`,
-          [employeeId, locationId],
-        )
-
-        await createInitialPlaces({
-          client,
-          organizationId: null,
-          locationId,
-          planningMode: data.planningMode,
-          zoneNames,
-          worksiteName,
-        })
-
-        await client.query("COMMIT")
-
-        await sendWorkspaceWelcomeNotification({
-          to: session.user.email,
-          dashboardPath: getLocationDashboardPath(locationSlug),
-          userName: session.user.name,
-          workspaceName: locationName,
-          workspaceType: "location",
-        })
-
-        return {
-          locationId,
-          redirectTo: getLocationDashboardPath(locationSlug),
-        }
-      } catch (error) {
-        await client.query("ROLLBACK")
-        throw error
-      } finally {
-        client.release()
-      }
+      throw new Error("Create an organisation before adding a location.")
     }
 
     await requireOrgPermission({
@@ -273,7 +141,10 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
       errorMessage: "You do not have permission to create locations.",
     })
 
-    const locationSlug = await createUniqueLocationSlug(organizationId, locationName)
+    const locationSlug = await createUniqueLocationSlug(
+      organizationId,
+      locationName
+    )
     const database = getDatabase()
     const client = await database.connect()
 
@@ -295,7 +166,7 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
           locationSlug,
           data.businessType,
           data.planningMode,
-        ],
+        ]
       )
       const locationId = locationResult.rows.at(0)?.id
 
@@ -312,6 +183,17 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
         worksiteName,
       })
 
+      if (data.includeOwnerAsEmployee) {
+        await createOwnerEmployeeForLocation({
+          client,
+          organizationId,
+          locationId,
+          userId: session.user.id,
+          userName: session.user.name,
+          userEmail: session.user.email,
+        })
+      }
+
       await client.query("COMMIT")
 
       await upsertOnboardingState(organizationId, {
@@ -319,7 +201,8 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
         completedAt: new Date(),
       })
 
-      const organization = await getRequiredOrganizationWorkspace(organizationId)
+      const organization =
+        await getRequiredOrganizationWorkspace(organizationId)
 
       await sendWorkspaceWelcomeNotification({
         to: session.user.email,
@@ -347,8 +230,106 @@ function getUniqueNames(names: string[]) {
       names
         .map((name) => name.trim())
         .filter(Boolean)
-        .map((name) => [name.toLowerCase(), name]),
-    ).values(),
+        .map((name) => [name.toLowerCase(), name])
+    ).values()
+  )
+}
+
+async function getUserDateOfBirth(client: PoolClient, userId: string) {
+  const result = await client.query<{ dateOfBirth: string | null }>(
+    `select "dateOfBirth"
+     from public."user"
+     where id = $1
+     limit 1`,
+    [userId]
+  )
+
+  return result.rows.at(0)?.dateOfBirth ?? null
+}
+
+async function createOwnerEmployeeForLocation({
+  client,
+  organizationId,
+  locationId,
+  userId,
+  userName,
+  userEmail,
+}: {
+  client: PoolClient
+  organizationId: string
+  locationId: string
+  userId: string
+  userName: string
+  userEmail: string
+}) {
+  const staffGroupResult = await client.query<{ id: string }>(
+    `select id
+     from public.staff_groups
+     where organization_id = $1
+       and (slug = 'employee' or slug = 'employees' or is_default = true)
+     order by is_default desc, created_at asc
+     limit 1`,
+    [organizationId]
+  )
+  const staffGroupId = staffGroupResult.rows.at(0)?.id
+
+  if (!staffGroupId) {
+    throw new Error("We could not find the default employee group.")
+  }
+
+  const employeeResult = await client.query<{ id: string }>(
+    `insert into public.employees (
+       organization_id,
+       location_id,
+       user_id,
+       staff_group_id,
+       full_name,
+       email,
+       status
+     ) values ($1, null, $2, $3, $4, $5, 'active')
+     on conflict (organization_id, user_id)
+     where user_id is not null
+     do update set staff_group_id = coalesce(employees.staff_group_id, excluded.staff_group_id),
+                   location_id = null,
+                   full_name = excluded.full_name,
+                   email = excluded.email,
+                   status = 'active',
+                   updated_at = timezone('utc', now())
+     returning id`,
+    [organizationId, userId, staffGroupId, userName, userEmail]
+  )
+  const employeeId = employeeResult.rows.at(0)?.id
+
+  if (!employeeId) {
+    throw new Error("We could not add you to the employee list.")
+  }
+
+  const dateOfBirth = await getUserDateOfBirth(client, userId)
+  const hourlyRatePence = getMinimumWagePenceForDateOfBirth(dateOfBirth)
+
+  await client.query(
+    `insert into public.employee_compensation (
+       employee_id,
+       organization_id,
+       location_id,
+       pay_type,
+       hourly_rate_pence
+     ) values ($1, $2, null, 'hourly', $3)
+     on conflict (employee_id) do nothing`,
+    [employeeId, organizationId, hourlyRatePence]
+  )
+
+  await client.query(
+    `insert into public.employee_location_assignments (
+       organization_id,
+       employee_id,
+       location_id,
+       is_enabled
+     ) values ($1, $2, $3, true)
+     on conflict (employee_id, location_id)
+     do update set is_enabled = true,
+                   disabled_at = null`,
+    [organizationId, employeeId, locationId]
   )
 }
 
@@ -380,8 +361,8 @@ async function createInitialPlaces({
            name,
            sort_order
          ) values ($1, $2, $3, $4)
-         on conflict (location_id, name) do nothing`,
-        [organizationId, locationId, zoneName, sortOrder],
+         on conflict (location_id, (lower(name))) where deleted_at is null do nothing`,
+        [organizationId, locationId, zoneName, sortOrder]
       )
     }
 
@@ -400,7 +381,7 @@ async function createInitialPlaces({
        sort_order
      ) values ($1, $2, $3, 0)
      on conflict do nothing`,
-    [organizationId, locationId, worksiteName],
+    [organizationId, locationId, worksiteName]
   )
 }
 
@@ -410,7 +391,7 @@ async function getRequiredOrganizationWorkspace(organizationId: string) {
      from public."organization"
      where "id" = $1
      limit 1`,
-    [organizationId],
+    [organizationId]
   )
   const organization = result.rows.at(0)
 
@@ -428,4 +409,3 @@ export {
   createOrganizationWithBootstrap,
   resendVerificationEmail,
 }
-

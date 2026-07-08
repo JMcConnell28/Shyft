@@ -693,6 +693,7 @@ async function getZoneForLocationOrThrow(
     .select("id, name")
     .eq("location_id", locationId)
     .eq("id", zoneId)
+    .is("deleted_at", null)
   const zoneResult = await (organizationId
     ? zoneQuery.eq("organization_id", organizationId)
     : zoneQuery.is("organization_id", null)).maybeSingle()
@@ -808,6 +809,7 @@ async function getAssignmentOverlapResult({
     .from("zones")
     .select("id, name")
     .eq("location_id", context.location.id)
+    .is("deleted_at", null)
   const [employeeResult, zonesResult, shiftsResult, assignmentsResult] = await Promise.all([
     (context.organizationId
       ? employeeQuery.eq("organization_id", context.organizationId)
@@ -1061,6 +1063,7 @@ async function getZoneSnapshotById(
     .from("zones")
     .select("id, name")
     .eq("location_id", context.location.id)
+    .is("deleted_at", null)
   const result = await (context.organizationId
     ? query.eq("organization_id", context.organizationId)
     : query.is("organization_id", null))

@@ -22,10 +22,10 @@ async function getRotaSettingsPageData(input: {
        from public.locations
        where (
          ($1::text is not null and organization_id = $1::text)
-         or ($1::text is null and organization_id is null and id = $2::uuid)
+         or ($2::uuid is not null and id = $2::uuid)
        )
        order by created_at asc, name asc`,
-      [input.organizationId ?? null, input.locationId ?? null],
+      [input.organizationId ?? null, input.locationId ?? null]
     ),
     database.query<{
       id: string
@@ -37,10 +37,11 @@ async function getRotaSettingsPageData(input: {
        from public.zones
        where (
          ($1::text is not null and organization_id = $1::text)
-         or ($1::text is null and organization_id is null and location_id = $2::uuid)
+         or ($2::uuid is not null and location_id = $2::uuid)
        )
+       and deleted_at is null
        order by location_id asc, sort_order asc, created_at asc, name asc`,
-      [input.organizationId ?? null, input.locationId ?? null],
+      [input.organizationId ?? null, input.locationId ?? null]
     ),
     database.query<{
       id: string
@@ -61,15 +62,18 @@ async function getRotaSettingsPageData(input: {
          on template_shift.template_id = template.id
        where (
          ($1::text is not null and template.organization_id = $1::text)
-         or ($1::text is null and template.organization_id is null and template.location_id = $2::uuid)
+         or ($2::uuid is not null and template.location_id = $2::uuid)
        )
        group by template.id, template.location_id, location.name, template.name
        order by location.name asc, lower(template.name) asc`,
-      [input.organizationId ?? null, input.locationId ?? null],
+      [input.organizationId ?? null, input.locationId ?? null]
     ),
   ])
 
-  const zonesByLocationId = new Map<string, RotaSettingsPageData["locations"][number]["zones"]>()
+  const zonesByLocationId = new Map<
+    string,
+    RotaSettingsPageData["locations"][number]["zones"]
+  >()
 
   for (const zone of zonesResult.rows) {
     const existingZones = zonesByLocationId.get(zone.location_id) ?? []

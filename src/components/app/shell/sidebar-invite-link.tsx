@@ -101,17 +101,28 @@ function SidebarInviteLink() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <SidebarMenu>
-        <SidebarMenuItem>
+      <SidebarMenu className="group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:items-center">
+        <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
           <DialogTrigger
             render={
               <SidebarMenuButton
+                size="lg"
                 tooltip="Invite staff"
-                className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                className="h-auto cursor-pointer items-center gap-3 rounded-xl border border-transparent data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:p-2! group-data-[collapsible=icon]:shadow-none max-md:rounded-[18px] max-md:border-[#cbd8ff] max-md:bg-[#f9fbff] max-md:px-3 max-md:py-2 max-md:text-[#071a54] max-md:shadow-[0_10px_24px_rgba(30,50,96,0.07)] max-md:data-[state=open]:bg-[#f3f6ff]"
               />
             }
           >
-            <UserPlus2Icon />
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#eef3ff] text-[#0069ff] group-data-[collapsible=icon]:size-4 group-data-[collapsible=icon]:rounded-none group-data-[collapsible=icon]:bg-transparent max-md:size-12 max-md:rounded-2xl">
+              <UserPlus2Icon className="size-5 group-data-[collapsible=icon]:size-4 max-md:size-7" />
+            </span>
+            <span className="min-w-0 flex-1 transition-[width,opacity] duration-200 ease-linear group-data-[collapsible=icon]:hidden">
+              <span className="block text-sm font-bold tracking-[-0.02em] max-md:text-[18px]">
+                Invites
+              </span>
+              <span className="mt-0.5 hidden text-xs leading-snug font-medium text-wrap text-[#5d6b94] max-md:block">
+                Invite your team with a reusable link.
+              </span>
+            </span>
           </DialogTrigger>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -148,7 +159,7 @@ function SidebarInviteLink() {
                     {inviteUrl}
                   </p>
                 </div>
-                {inviteQuery.data?.activeInvite ? (
+                {inviteQuery.data.activeInvite ? (
                   <div className="text-xs text-muted-foreground">
                     {inviteQuery.data.activeInvite.locationName} ·{" "}
                     {inviteQuery.data.activeInvite.staffGroupName}
@@ -162,7 +173,7 @@ function SidebarInviteLink() {
               </div>
             )}
 
-            {inviteQuery.data?.defaults ? (
+            {inviteQuery.data.defaults ? (
               <div className="text-xs text-muted-foreground">
                 Fresh links will use {inviteQuery.data.defaults.locationName}{" "}
                 and {inviteQuery.data.defaults.defaultStaffGroupName} by

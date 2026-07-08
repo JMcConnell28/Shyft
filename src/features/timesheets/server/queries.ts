@@ -6,15 +6,17 @@ import type {
 } from "@/features/timesheets/server/row-types"
 import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import type {
+  TimesheetExportableRota,
   TimesheetPageData,
   TimesheetScopeInput,
 } from "@/features/timesheets/types"
 import { getTimesheetWeek } from "@/features/timesheets/utils/timesheet-time"
+import { getCurrentWeekStart } from "@/features/rota/utils/week-utils"
 import type { TimesheetWeekDay } from "@/features/timesheets/utils/timesheet-time"
 import { getDatabase } from "@/lib/db"
 
 async function getTimesheetPageData(
-  input: TimesheetScopeInput,
+  input: TimesheetScopeInput
 ): Promise<TimesheetPageData> {
   const scope = await resolveTimesheetAccess(input)
   const week = getTimesheetWeek(input.weekStart)
@@ -23,6 +25,7 @@ async function getTimesheetPageData(
     return {
       canManage: false,
       employeeTimesheet: getEmptyEmployeeTimesheet(week.days),
+      exportableRotas: [],
       locations: [],
       managerTimesheet: null,
       weekEnd: week.weekEnd,
@@ -31,27 +34,39 @@ async function getTimesheetPageData(
     }
   }
 
-  const [employeeRows, managerEmployeeRows, scheduledRows, entryRows] =
-    await Promise.all([
-      listUserEmployees({
-        locationIds: scope.locationIds,
-        organizationId: scope.organizationId,
-        userId: scope.userId,
-      }),
-      scope.canManage
-        ? listTimesheetEmployees(scope.locationIds)
-        : Promise.resolve<TimesheetEmployeeRow[]>([]),
-      listScheduledShifts({
-        locationIds: scope.locationIds,
-        organizationId: scope.organizationId,
-        weekStart: week.weekStart,
-      }),
-      listTimeEntries({
-        locationIds: scope.locationIds,
-        organizationId: scope.organizationId,
-        weekStart: week.weekStart,
-      }),
-    ])
+  const [
+    employeeRows,
+    managerEmployeeRows,
+    scheduledRows,
+    entryRows,
+    exportableRotas,
+  ] = await Promise.all([
+    listUserEmployees({
+      locationIds: scope.locationIds,
+      organizationId: scope.organizationId,
+      userId: scope.userId,
+    }),
+    scope.canManage
+      ? listTimesheetEmployees(scope.locationIds)
+      : Promise.resolve<TimesheetEmployeeRow[]>([]),
+    listScheduledShifts({
+      locationIds: scope.locationIds,
+      organizationId: scope.organizationId,
+      weekStart: week.weekStart,
+    }),
+    listTimeEntries({
+      locationIds: scope.locationIds,
+      organizationId: scope.organizationId,
+      weekStart: week.weekStart,
+    }),
+    scope.canManage
+      ? listExportableRotas({
+          locationIds: scope.locationIds,
+          organizationId: scope.organizationId,
+          weekStart: week.weekStart,
+        })
+      : Promise.resolve<TimesheetExportableRota[]>([]),
+  ])
 
   const employeeIds = employeeRows.map((employee) => employee.employee_id)
   const employees = scope.canManage ? managerEmployeeRows : employeeRows
@@ -68,12 +83,57 @@ async function getTimesheetPageData(
   return {
     canManage: scope.canManage,
     employeeTimesheet: shaped.employeeTimesheet,
+    exportableRotas,
     locations: scope.locations,
     managerTimesheet: scope.canManage ? shaped.managerTimesheet : null,
     weekEnd: week.weekEnd,
     weekLabel: week.weekLabel,
     weekStart: week.weekStart,
   }
+}
+
+async function listExportableRotas(input: {
+  locationIds: string[]
+  organizationId: string | null
+  weekStart: string
+}) {
+  const result = await getDatabase().query<{
+    id: string
+    location_id: string
+    location_name: string
+    week_start: string
+  }>(
+    `select
+       rota.id,
+       rota.location_id,
+       location.name as location_name,
+       rota.week_start::text
+     from public.rotas rota
+     join public.locations location on location.id = rota.location_id
+     where rota.status = 'published'
+       and rota.location_id = any($1::uuid[])
+       and rota.week_start = $2::date
+       and rota.week_start < $4::date
+       and (
+         ($3::text is not null and rota.organization_id = $3::text)
+         or ($3::text is null and rota.organization_id is null)
+       )
+     order by location.name asc, rota.week_start asc`,
+    [
+      input.locationIds,
+      input.weekStart,
+      input.organizationId,
+      getCurrentWeekStart(),
+    ]
+  )
+
+  return result.rows.map<TimesheetExportableRota>((rota) => ({
+    id: rota.id,
+    label: `${rota.location_name} rota`,
+    locationId: rota.location_id,
+    locationName: rota.location_name,
+    weekStart: rota.week_start,
+  }))
 }
 
 async function listUserEmployees(input: {
@@ -85,6 +145,7 @@ async function listUserEmployees(input: {
     `select distinct
        employee.id as employee_id,
        employee.full_name as employee_name,
+       employee.payroll_id as employee_payroll_id,
        location.name as location_name
      from public.employees employee
      join public.employee_location_assignments assignment
@@ -100,7 +161,7 @@ async function listUserEmployees(input: {
          or ($3::text is null)
        )
      order by employee.full_name asc`,
-    [input.userId, input.locationIds, input.organizationId],
+    [input.userId, input.locationIds, input.organizationId]
   )
 
   return result.rows
@@ -111,6 +172,7 @@ async function listTimesheetEmployees(locationIds: string[]) {
     `select distinct
        employee.id as employee_id,
        employee.full_name as employee_name,
+       employee.payroll_id as employee_payroll_id,
        location.name as location_name
      from public.employee_location_assignments assignment
      join public.employees employee on employee.id = assignment.employee_id
@@ -120,7 +182,7 @@ async function listTimesheetEmployees(locationIds: string[]) {
        and assignment.is_enabled = true
        and assignment.disabled_at is null
      order by employee.full_name asc`,
-    [locationIds],
+    [locationIds]
   )
 
   return result.rows
@@ -136,6 +198,7 @@ async function listScheduledShifts(input: {
        shift.id,
        assignment.employee_id,
        employee.full_name as employee_name,
+       employee.payroll_id as employee_payroll_id,
        location.id as location_id,
        location.name as location_name,
        rota.id as rota_id,
@@ -163,7 +226,7 @@ async function listScheduledShifts(input: {
          or ($3::text is null)
        )
      order by employee.full_name asc, shift.day_date asc, shift.start_time asc`,
-    [input.locationIds, input.weekStart, input.organizationId],
+    [input.locationIds, input.weekStart, input.organizationId]
   )
 
   return result.rows
@@ -179,6 +242,7 @@ async function listTimeEntries(input: {
        entry.id,
        entry.employee_id,
        employee.full_name as employee_name,
+       employee.payroll_id as employee_payroll_id,
        entry.location_id,
        location.name as location_name,
        entry.rota_published_shift_id,
@@ -210,7 +274,7 @@ async function listTimeEntries(input: {
          or ($3::text is null)
        )
      order by employee.full_name asc, entry.clocked_in_at asc`,
-    [input.locationIds, input.weekStart, input.organizationId],
+    [input.locationIds, input.weekStart, input.organizationId]
   )
 
   return result.rows

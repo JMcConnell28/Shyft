@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "@tanstack/react-router"
 import { ArchiveXIcon, Settings, TriangleAlertIcon } from "lucide-react"
 
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
+import { rotaToolbarIconButtonClassName } from "@/features/rota/constants/rota-toolbar-styles"
 import { useDeleteDraftRota } from "@/features/rota/hooks/use-delete-draft-rota"
 import { useUnpublishRota } from "@/features/rota/hooks/use-unpublish-rota"
 import {
@@ -36,17 +37,20 @@ function RotaLifecycleMenu() {
     "delete-draft" | "unpublish" | null
   >(null)
 
-  if (meta.status !== "draft" && meta.status !== "published") {
-    return null
-  }
-
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="pill" size="icon">
+            <Button
+              variant="pill"
+              size="icon"
+              className={rotaToolbarIconButtonClassName}
+            >
               <Settings data-icon="inline-start" />
+              <span className="hidden group-data-[toolbar-more=true]/toolbar-more:inline">
+                Rota settings
+              </span>
             </Button>
           }
         />
@@ -58,7 +62,9 @@ function RotaLifecycleMenu() {
               onClick={() => setPendingAction("unpublish")}
             >
               <ArchiveXIcon className="size-4" />
-              {unpublishMutation.isPending ? "Unpublishing..." : "Unpublish rota"}
+              {unpublishMutation.isPending
+                ? "Unpublishing..."
+                : "Unpublish rota"}
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem
@@ -98,13 +104,17 @@ function RotaLifecycleMenu() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
-              disabled={deleteDraftMutation.isPending || unpublishMutation.isPending}
+              disabled={
+                deleteDraftMutation.isPending || unpublishMutation.isPending
+              }
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              disabled={deleteDraftMutation.isPending || unpublishMutation.isPending}
+              disabled={
+                deleteDraftMutation.isPending || unpublishMutation.isPending
+              }
               onClick={() => {
                 if (pendingAction === "unpublish") {
                   void unpublishMutation

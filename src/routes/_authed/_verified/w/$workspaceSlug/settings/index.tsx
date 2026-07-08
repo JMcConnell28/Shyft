@@ -5,7 +5,7 @@ import { LocationsSettingsPage } from "@/features/settings/components/locations-
 import { SettingsLayout } from "@/features/settings/components/settings-layout"
 
 export const Route = createFileRoute(
-  "/_authed/_verified/w/$workspaceSlug/settings/",
+  "/_authed/_verified/w/$workspaceSlug/settings/"
 )({
   component: WorkspaceSettingsRoute,
 })
@@ -29,7 +29,10 @@ function WorkspaceSettingsRoute() {
       activePath={pathname}
     >
       {activeWorkspace.type === "organization" ? (
-        <GeneralSettingsPage />
+        <GeneralSettingsPage
+          organizationId={activeWorkspace.id}
+          userId={viewer.user.id}
+        />
       ) : (
         <LocationsSettingsPage
           locationId={activeWorkspace.id}

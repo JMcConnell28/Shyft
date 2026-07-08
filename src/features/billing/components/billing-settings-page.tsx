@@ -12,8 +12,10 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckoutButton } from "@/features/billing/components/checkout-button"
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button"
+import { TimeAttendanceAddonButton } from "@/features/billing/components/time-attendance-addon-button"
 import { TrialTestingControls } from "@/features/billing/components/trial-testing-controls"
 import type {
+  OrganizationBillingLocationSummary,
   WorkspaceBillingState,
   WorkspaceTrial,
 } from "@/features/billing/types"
@@ -25,6 +27,7 @@ type BillingSettingsPageProps = {
   trial: WorkspaceTrial | null
   organizationId?: string | null
   locationId?: string | null
+  organizationLocations?: Array<OrganizationBillingLocationSummary>
 }
 
 function BillingSettingsPage({
@@ -32,6 +35,7 @@ function BillingSettingsPage({
   trial,
   organizationId,
   locationId,
+  organizationLocations = [],
 }: BillingSettingsPageProps) {
   const trialState = getTrialDisplayState(trial)
   const status = getBillingStatus({ billing, trial })
@@ -66,7 +70,7 @@ function BillingSettingsPage({
               icon={CreditCardIcon}
               label="Plan"
               value={getPlanValue(billing)}
-              description="£30 per location, monthly"
+              description="£25/month including your first 10 active employees"
             />
             <BillingMetric
               icon={ShieldCheckIcon}
@@ -90,9 +94,59 @@ function BillingSettingsPage({
               icon={ShieldCheckIcon}
               label="Extra employees"
               value={getExtraEmployeeValue(billing)}
-              description="£2 per employee above the included allowance"
+              description="£2.50 per active employee above the included allowance"
+            />
+            <BillingMetric
+              icon={CalendarClockIcon}
+              label="Time & Attendance"
+              value={`${billing?.timeAttendanceQuantity ?? 0} employees`}
+              description="£1 per active employee assigned to enabled locations"
             />
           </div>
+
+          {billing?.locations.length ? (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                Per-location estimate
+              </p>
+              {billing.locations.map((location) => (
+                <div
+                  key={location.locationId}
+                  className="flex flex-col gap-3 rounded-xl border border-border/70 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="text-sm font-medium">
+                      {location.locationName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {location.employeeHighWaterCount} active staff assigned
+                    </p>
+                  </div>
+                  {locationId === location.locationId ? (
+                    <TimeAttendanceAddonButton
+                      enabled={location.timeAttendanceEnabled}
+                      status={location.timeAttendanceStatus}
+                      cancelAt={location.timeAttendanceCancelAt}
+                      hardwareEntitlementAvailable={
+                        location.hardwareEntitlementAvailable
+                      }
+                      locationId={location.locationId}
+                    />
+                  ) : (
+                    <Badge variant="outline">
+                      {location.timeAttendanceEnabled
+                        ? "Time & Attendance"
+                        : "Core"}
+                    </Badge>
+                  )}
+                </div>
+              ))}
+              <p className="text-xs text-muted-foreground">
+                Employee quantities are synced from active schedulable staff.
+                Fixed fees are billed in advance. Plus VAT where applicable.
+              </p>
+            </div>
+          ) : null}
 
           <div className="rounded-xl border border-border/70 bg-muted/10 p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -126,6 +180,63 @@ function BillingSettingsPage({
           </div>
         </CardContent>
       </Card>
+
+      {organizationLocations.length > 0 ? (
+        <Card className="border-border/70 bg-background/95 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-sm">
+              Organization billing overview
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Locations are included with the organisation plan. Time &
+              Attendance can be enabled per location.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {organizationLocations.map((location) => (
+              <div
+                key={location.locationId}
+                className="rounded-xl border border-border/70 p-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium">
+                      {location.locationName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {location.payerLabel}
+                      {location.renewalDate
+                        ? ` · renews ${formatDate(location.renewalDate)}`
+                        : ""}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={
+                      location.accessState === "recovery"
+                        ? "destructive"
+                        : "outline"
+                    }
+                  >
+                    {location.accessState}
+                  </Badge>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {location.employeeHighWaterCount} active staff assigned
+                  {location.timeAttendanceStatus
+                    ? ` · Time & Attendance ${location.timeAttendanceStatus}`
+                    : ""}
+                </p>
+                {location.transfer ? (
+                  <p className="mt-2 text-xs font-medium text-primary">
+                    Billing transfer scheduled for{" "}
+                    {formatDate(location.transfer.effectiveAt)}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   )
 }
@@ -300,9 +411,9 @@ function getPaymentMethodDescription(billing: WorkspaceBillingState | null) {
 }
 
 function getPlanValue(billing: WorkspaceBillingState | null) {
-  const locationQuantity = billing?.locationQuantity ?? 1
+  const locationQuantity = billing?.locationQuantity ?? 0
 
-  return `${locationQuantity} location${locationQuantity === 1 ? "" : "s"}`
+  return `${locationQuantity} included location${locationQuantity === 1 ? "" : "s"}`
 }
 
 function getEmployeeValue(billing: WorkspaceBillingState | null) {
@@ -312,7 +423,7 @@ function getEmployeeValue(billing: WorkspaceBillingState | null) {
 function getEmployeeDescription(billing: WorkspaceBillingState | null) {
   const includedEmployeeQuantity = billing?.includedEmployeeQuantity ?? 10
 
-  return `${includedEmployeeQuantity} included, active plus scheduled this period`
+  return `${includedEmployeeQuantity} included; archived staff are excluded`
 }
 
 function getExtraEmployeeValue(billing: WorkspaceBillingState | null) {

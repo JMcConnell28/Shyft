@@ -36,7 +36,7 @@ async function resolveTimesheetAccess(input: {
     const location = await getLocation(input.locationId)
 
     return {
-      canManage: capabilities.canManageRota,
+      canManage: capabilities.canManageTimeClock,
       locationIds: [location.id],
       locations: [location],
       organizationId: input.organizationId ?? null,
@@ -57,7 +57,7 @@ async function resolveTimesheetAccess(input: {
   )
 
   return {
-    canManage: capabilities.canManageRota,
+    canManage: capabilities.canManageTimeClock,
     locationIds: locations.map((location) => location.id),
     locations: locations.map((location) => ({
       id: location.id,

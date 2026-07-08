@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
-  BASE_LOCATION_PRICE_GBP,
+  CORE_BASE_PRICE_GBP,
   EXTRA_EMPLOYEE_PRICE_GBP,
-  INCLUDED_EMPLOYEES_PER_LOCATION,
+  INCLUDED_CORE_EMPLOYEES,
+  TIME_ATTENDANCE_EMPLOYEE_PRICE_GBP,
   formatGbp,
 } from "@/features/marketing/utils/pricing"
 
@@ -24,7 +25,7 @@ function PricingPage() {
         />
         <div className="absolute inset-x-0 top-0 h-80 bg-linear-to-b from-white/70 via-transparent to-transparent" />
 
-        <div className="relative mx-auto w-full max-w-[1280px] px-4 pb-14 pt-5 sm:px-6 lg:px-8">
+        <div className="relative mx-auto w-full max-w-[1280px] px-4 pt-5 pb-14 sm:px-6 lg:px-8">
           <MarketingHeader activePage="pricing" />
 
           <div className="grid gap-10 pt-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:pt-16">
@@ -36,16 +37,17 @@ function PricingPage() {
                 Straightforward pricing for growing teams
               </Badge>
 
-              <h1 className="mt-6 text-balance text-5xl font-extrabold leading-[0.98] tracking-tight text-[#18316a] sm:text-6xl lg:text-[72px]">
+              <h1 className="mt-6 text-5xl leading-[0.98] font-extrabold tracking-tight text-balance text-[#18316a] sm:text-6xl lg:text-[72px]">
                 Simple pricing
                 <br />
                 that scales with you
               </h1>
 
               <p className="mt-6 max-w-[540px] text-lg leading-8 text-[#596f99]">
-                Pay {formatGbp(BASE_LOCATION_PRICE_GBP)} per location with{" "}
-                {INCLUDED_EMPLOYEES_PER_LOCATION} employees included, then just{" "}
+                Pay {formatGbp(CORE_BASE_PRICE_GBP)} per month including your
+                first {INCLUDED_CORE_EMPLOYEES} active employees, then{" "}
                 {formatGbp(EXTRA_EMPLOYEE_PRICE_GBP)} per extra employee.
+                Unlimited locations are included. Prices exclude VAT.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -54,7 +56,7 @@ function PricingPage() {
                   search={{ redirect: "/dashboard" }}
                   className={cn(
                     buttonVariants({ size: "lg" }),
-                    "h-14 rounded-2xl bg-[#2c69ff] px-7 text-sm font-semibold shadow-[0_16px_40px_rgba(44,105,255,0.26)] hover:bg-[#2259e3]",
+                    "h-14 rounded-2xl bg-[#2c69ff] px-7 text-sm font-semibold shadow-[0_16px_40px_rgba(44,105,255,0.26)] hover:bg-[#2259e3]"
                   )}
                 >
                   Start free trial
@@ -65,7 +67,7 @@ function PricingPage() {
                   search={{ redirect: "/dashboard" }}
                   className={cn(
                     buttonVariants({ variant: "pill", size: "lg" }),
-                    "h-14 rounded-2xl border-[#d9e4fb] bg-white px-7 text-sm font-semibold text-[#18316a] shadow-[0_10px_30px_rgba(18,40,92,0.06)]",
+                    "h-14 rounded-2xl border-[#d9e4fb] bg-white px-7 text-sm font-semibold text-[#18316a] shadow-[0_10px_30px_rgba(18,40,92,0.06)]"
                   )}
                 >
                   Log in
@@ -78,7 +80,10 @@ function PricingPage() {
                   "Perfect for single venues and multi-location groups.",
                   "Built to stay affordable as your team grows.",
                 ].map((item) => (
-                  <div key={item} className="flex items-center gap-3 text-sm text-[#5c729d]">
+                  <div
+                    key={item}
+                    className="flex items-center gap-3 text-sm text-[#5c729d]"
+                  >
                     <span className="inline-flex size-5 items-center justify-center rounded-full bg-[#e9f1ff] text-[#2c69ff]">
                       <CheckIcon className="size-3.5" />
                     </span>
@@ -105,21 +110,26 @@ function PricingPage() {
 
 function PricingExplainer() {
   return (
-    <section className="grid gap-4 lg:grid-cols-3">
+    <section className="grid gap-4 lg:grid-cols-4">
       <PricingCard
         eyebrow="Step 1"
-        title={`${formatGbp(BASE_LOCATION_PRICE_GBP)} per location`}
-        body="Every location gets its own rota workspace and includes up to 10 employees in the monthly base price."
+        title={`${formatGbp(CORE_BASE_PRICE_GBP)} base plan`}
+        body="Your organisation includes unlimited locations and the first 10 active schedulable employees."
       />
       <PricingCard
         eyebrow="Step 2"
-        title={`${INCLUDED_EMPLOYEES_PER_LOCATION} employees included`}
-        body="You can schedule your core team right away without worrying about usage-based surprises on every roster."
+        title={`${INCLUDED_CORE_EMPLOYEES} employees included`}
+        body="Archived staff and leavers do not count, so you only pay for people who can be scheduled."
       />
       <PricingCard
         eyebrow="Step 3"
         title={`${formatGbp(EXTRA_EMPLOYEE_PRICE_GBP)} per extra employee`}
-        body="When your team grows beyond the included allowance, you only pay for the extra people above the location allowance."
+        body="The core plan scales with active employee count across the organisation, not by location."
+      />
+      <PricingCard
+        eyebrow="Optional"
+        title={`${formatGbp(TIME_ATTENDANCE_EMPLOYEE_PRICE_GBP)} Time & Attendance`}
+        body="Enable clocking per location and pay per active employee assigned to enabled locations. One NFC stand is included per location."
       />
     </section>
   )
@@ -136,7 +146,7 @@ function PricingCard({
 }) {
   return (
     <div className="rounded-[28px] border border-[#dde8ff] bg-white px-6 py-6 shadow-[0_16px_40px_rgba(38,80,160,0.08)]">
-      <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[#2c69ff]">
+      <p className="text-sm font-extrabold tracking-[0.18em] text-[#2c69ff] uppercase">
         {eyebrow}
       </p>
       <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-[#18316a]">
@@ -151,7 +161,7 @@ function PricingFaq() {
   return (
     <section className="rounded-[30px] border border-[#e0eaff] bg-white px-6 py-7 shadow-[0_20px_60px_rgba(38,80,160,0.08)] sm:px-8">
       <div className="max-w-[620px]">
-        <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[#2c69ff]">
+        <p className="text-sm font-extrabold tracking-[0.18em] text-[#2c69ff] uppercase">
           Good to know
         </p>
         <h2 className="mt-4 text-4xl font-extrabold tracking-tight text-[#18316a]">
@@ -162,28 +172,22 @@ function PricingFaq() {
       <div className="mt-8 grid gap-4 lg:grid-cols-3">
         <FaqItem
           question="How are employees counted?"
-          answer="Employees are counted across your subscribed locations. Each location includes 10 employees before extra charges apply."
+          answer="We count active schedulable employees in the organisation. Archived staff and leavers are excluded."
         />
         <FaqItem
           question="What if I only have one small venue?"
-          answer="That is exactly what the base plan is for. One location with up to 10 employees stays at £30 per month."
+          answer="That is exactly what the base plan is for. Teams with up to 10 active employees stay at £25 per month, excluding VAT."
         />
         <FaqItem
           question="Can I grow without changing plan?"
-          answer="Yes. The pricing simply expands with you, so you do not need to jump between confusing packages."
+          answer="Yes. Add as many locations and zones as you need. Billing stays based on active employees."
         />
       </div>
     </section>
   )
 }
 
-function FaqItem({
-  question,
-  answer,
-}: {
-  question: string
-  answer: string
-}) {
+function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
     <div className="rounded-[24px] bg-[#f8fbff] px-5 py-5">
       <h3 className="text-lg font-extrabold tracking-tight text-[#18316a]">

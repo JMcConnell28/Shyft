@@ -6,6 +6,34 @@ type ClockSource = "employee_nfc" | "manager_override" | "adjustment"
 
 type ClockShiftSegment = "full" | "split_first" | "split_second"
 
+type ClockReason =
+  | "asked_early"
+  | "asked_late"
+  | "covering_shift"
+  | "transport_delay"
+  | "manager_approved"
+  | "other"
+
+type EarlyClockInMode = "scheduled" | "now"
+
+type ClockTagSetupData = {
+  id: string
+  aesKeyHex: string
+  label: string
+  lastSeenCounter: number
+  publicId: string
+}
+
+type AdminClockTagsPageData = {
+  locations: Array<{
+    id: string
+    name: string
+    organizationId: string | null
+    organizationName: string | null
+  }>
+  tags: Array<ClockTagSetupData & { locationId: string }>
+}
+
 type GpsCoordinates = {
   latitude: number
   longitude: number
@@ -27,8 +55,18 @@ type ClockShiftSummary = {
   zoneName: string
 }
 
+type ClockInReviewPrompt = {
+  defaultMode: EarlyClockInMode | null
+  isReasonRequired: boolean
+  kind: "early" | "late" | "none" | "unmatched"
+  message: string | null
+  scheduledStartAt: string | null
+}
+
 type EmployeeClockPageData = {
   clockLabel: string
+  scanSessionId: string
+  scanExpiresAt: string
   location: {
     id: string
     name: string
@@ -41,18 +79,32 @@ type EmployeeClockPageData = {
     id: string
     name: string
   }
-  completedShiftSegments: ClockShiftSegment[]
+  completedShiftSegments: Array<ClockShiftSegment>
   openEntry: {
     id: string
     clockedInAt: string
+    scheduledEndAt: string | null
+    scheduledStartAt: string | null
     shiftSegment: ClockShiftSegment
     status: ClockEntryStatus
   } | null
   matchedShift: ClockShiftSummary | null
+  reviewPrompt: ClockInReviewPrompt
   nextAction: ClockAction
   isClockingEnabled: boolean
   setupMessage: string | null
 }
+
+type ClockScanPageData =
+  | {
+      status: "ready"
+      clock: EmployeeClockPageData
+    }
+  | {
+      status: "error"
+      title: string
+      message: string
+    }
 
 type ManagerClockEmployee = {
   id: string
@@ -81,12 +133,29 @@ type ClockAttemptSummary = {
   gpsAccuracyMeters: number | null
 }
 
+type ManagerClockActivityEntry = {
+  id: string
+  employeeId: string
+  employeeName: string
+  locationId: string
+  locationName: string
+  zoneName: string | null
+  clockedInAt: string
+  clockedOutAt: string | null
+  isForgottenClockOutAlert: boolean
+  scheduledEndAt: string | null
+  source: ClockSource
+  status: ClockEntryStatus
+}
+
 type ManagerClockPageData = {
+  selectedDate: string
   locations: Array<{
     id: string
     name: string
   }>
   employees: Array<ManagerClockEmployee>
+  activityEntries: Array<ManagerClockActivityEntry>
   failedAttempts: Array<ClockAttemptSummary>
   reviewEntries: Array<{
     id: string
@@ -111,21 +180,31 @@ type ClockSettingsPageData = {
     earlyStartReviewMinutes: number
     forgottenClockOutAlertMinutes: number
     hardReviewAfterMinutes: number
+    lateClockInGraceMinutes: number
     lateClockOutGraceMinutes: number
     lateFinishReviewMinutes: number
+    lateStartReviewMinutes: number
+    ntagTags: Array<ClockTagSetupData>
   }>
 }
 
 export type {
+  AdminClockTagsPageData,
   ClockAction,
   ClockAttemptSummary,
   ClockEntryStatus,
+  ClockScanPageData,
   ClockSettingsPageData,
+  ClockInReviewPrompt,
+  ClockReason,
   ClockShiftSummary,
   ClockShiftSegment,
   ClockSource,
+  ClockTagSetupData,
+  EarlyClockInMode,
   EmployeeClockPageData,
   GpsCoordinates,
+  ManagerClockActivityEntry,
   ManagerClockEmployee,
   ManagerClockPageData,
 }

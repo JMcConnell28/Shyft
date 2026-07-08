@@ -264,6 +264,7 @@ async function listAssignedPublishedShifts(input: {
 function mapDashboardShiftRow(row: DashboardShiftRow): DashboardShiftSummary {
   return {
     id: row.id,
+    date: row.day_date,
     dateLabel: format(parseISO(row.day_date), "d MMM"),
     dayLabel: format(parseISO(row.day_date), "EEE"),
     locationName: row.location_name,

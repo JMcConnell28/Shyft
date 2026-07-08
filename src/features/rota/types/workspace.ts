@@ -13,6 +13,7 @@ type WorkspaceLocation = {
 
 type WorkspaceZone = {
   id: string
+  isDeleted?: boolean
   name: string
 }
 
@@ -24,12 +25,33 @@ type WorkspaceDay = {
   monthLabel: string
 }
 
+type WorkspaceEmployeeRotaNote = {
+  id: string
+  body: string
+  category: "general" | "skill" | "constraint" | "preference" | "warning"
+  isPinned: boolean
+  locationName: string | null
+  priority: "low" | "normal" | "high"
+  title: string
+  zoneName: string | null
+}
+
 type WorkspaceEmployee = {
   id: string
   name: string
   groupId: string
   groupColor: StaffGroupColor
   weeklyHours: number
+  compensation:
+    | {
+        type: "hourly"
+        hourlyRatePence: number
+      }
+    | {
+        type: "salary"
+        weeklySalaryPence: number
+      }
+  rotaNotes?: WorkspaceEmployeeRotaNote[]
 }
 
 type WorkspaceEmployeeGroup = {
@@ -121,6 +143,11 @@ type WorkspaceAssignmentMutationResult =
 type WorkspaceBoardMeta = {
   rotaId: string
   status: "draft" | "published"
+  canManage: boolean
+  canEdit: boolean
+  organizationId: string | null
+  userId: string
+  workspaceType: "location" | "organization"
   note: string | null
   weekStart: string
   weekEnd: string
@@ -128,6 +155,7 @@ type WorkspaceBoardMeta = {
   publishedVersion: number
   hasUnpublishedChanges: boolean
   publishedSnapshotAvailable: boolean
+  budgetPence: number | null
 }
 
 type WorkspaceBoardData = {
@@ -155,6 +183,7 @@ export type {
   WorkspaceDragData,
   WorkspaceEmployee,
   WorkspaceEmployeeGroup,
+  WorkspaceEmployeeRotaNote,
   WorkspaceShiftSegment,
   WorkspaceLocation,
   WorkspaceClosingShift,

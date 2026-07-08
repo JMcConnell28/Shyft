@@ -17,9 +17,11 @@ function DraggableAssignedEmployeeName({
   dragId: string
 }) {
   return (
-    <DraggableItem dragId={dragId} dragData={dragData}>
-      <AssignedEmployeeName employee={employee} isDragging />
-    </DraggableItem>
+    <div className="w-full min-w-0">
+      <DraggableItem dragId={dragId} dragData={dragData}>
+        <AssignedEmployeeName employee={employee} isDragging />
+      </DraggableItem>
+    </div>
   )
 }
 
