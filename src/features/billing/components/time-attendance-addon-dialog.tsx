@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Clock3Icon, PackageCheckIcon } from "lucide-react"
+import { Clock3Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -13,8 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import {
+  TimeAttendanceAddressFields,
+  emptyTimeAttendanceAddress,
+  toTimeAttendanceDeliveryAddress,
+} from "@/features/billing/components/time-attendance-address-fields"
 import {
   timeAttendanceDeliveryAddressSchema,
   type TimeAttendanceDeliveryAddress,
@@ -38,23 +41,25 @@ function TimeAttendanceAddonDialog({
   onSubmit: (address: TimeAttendanceDeliveryAddress) => void
 }) {
   const [confirmed, setConfirmed] = React.useState(false)
+  const [deliveryAddress, setDeliveryAddress] = React.useState(
+    emptyTimeAttendanceAddress
+  )
   const [postcodeMessage, setPostcodeMessage] = React.useState("")
   const showHardwareForm = hardwareEntitlementAvailable || isTestMode
 
   React.useEffect(() => {
     if (!isOpen) {
       setConfirmed(false)
+      setDeliveryAddress(emptyTimeAttendanceAddress)
       setPostcodeMessage("")
     }
   }, [isOpen])
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const deliveryAddress = getDeliveryAddress(
-      new FormData(event.currentTarget)
-    )
+    const address = toTimeAttendanceDeliveryAddress(deliveryAddress)
     const parsedDeliveryAddress =
-      timeAttendanceDeliveryAddressSchema.safeParse(deliveryAddress)
+      timeAttendanceDeliveryAddressSchema.safeParse(address)
     const postcodeIssue = parsedDeliveryAddress.success
       ? undefined
       : parsedDeliveryAddress.error.issues.find(
@@ -66,7 +71,7 @@ function TimeAttendanceAddonDialog({
       return
     }
 
-    onSubmit(deliveryAddress)
+    onSubmit(address)
   }
 
   return (
@@ -89,9 +94,11 @@ function TimeAttendanceAddonDialog({
 
           <div className="space-y-5 p-5 sm:p-6">
             {showHardwareForm ? (
-              <DeliveryAddressFields
-                locationId={locationId}
+              <TimeAttendanceAddressFields
+                idPrefix={`delivery-${locationId}`}
+                value={deliveryAddress}
                 postcodeMessage={postcodeMessage}
+                onChange={setDeliveryAddress}
                 onPostcodeChange={() => setPostcodeMessage("")}
               />
             ) : null}
@@ -104,7 +111,7 @@ function TimeAttendanceAddonDialog({
               <span className="text-xs leading-5 text-muted-foreground">
                 {isTestMode
                   ? "I confirm this is a test submission and understand that no billing or hardware records will change."
-                  : "I confirm that Time & Attendance will add £1 per month, plus VAT where applicable, for each active employee assigned to enabled locations. Paid activations are invoiced immediately on a prorated basis; trial activations begin billing when the core trial ends."}
+                  : "I confirm that Time & Attendance will add £1 per month, plus VAT where applicable, for each used employee in enabled locations. Usage is billed in arrears for each billing period."}
               </span>
             </label>
           </div>
@@ -132,122 +139,6 @@ function TimeAttendanceAddonDialog({
   )
 }
 
-function DeliveryAddressFields({
-  locationId,
-  onPostcodeChange,
-  postcodeMessage,
-}: {
-  locationId: string
-  onPostcodeChange: () => void
-  postcodeMessage: string
-}) {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-start gap-3 rounded-xl border border-border/70 bg-muted/30 p-4">
-        <PackageCheckIcon className="mt-0.5 size-4 shrink-0 text-primary" />
-        <p className="text-xs leading-5 text-muted-foreground">
-          Clock-in stations are coming soon outside Derry. For now, delivery is
-          available for BT47 and BT48 postcodes only.
-        </p>
-      </div>
-      <AddressField name="name" label="Recipient name" autoComplete="name" />
-      <AddressField
-        name="line1"
-        label="Address line 1"
-        autoComplete="address-line1"
-      />
-      <AddressField
-        name="line2"
-        label="Address line 2"
-        autoComplete="address-line2"
-        required={false}
-      />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <AddressField
-          name="city"
-          label="Town or city"
-          autoComplete="address-level2"
-        />
-        <AddressField
-          name="county"
-          label="County"
-          autoComplete="address-level1"
-          required={false}
-        />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <AddressField
-          name="postcode"
-          label="Postcode"
-          autoComplete="postal-code"
-          error={postcodeMessage}
-          onChange={onPostcodeChange}
-        />
-        <div className="space-y-2">
-          <Label htmlFor={`${locationId}-country`}>Country</Label>
-          <Input id={`${locationId}-country`} value="United Kingdom" disabled />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function AddressField({
-  autoComplete,
-  error,
-  label,
-  name,
-  onChange,
-  required = true,
-}: {
-  autoComplete: string
-  error?: string
-  label: string
-  name: string
-  onChange?: () => void
-  required?: boolean
-}) {
-  const errorId = `delivery-${name}-error`
-
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={`delivery-${name}`}>{label}</Label>
-      <Input
-        id={`delivery-${name}`}
-        name={name}
-        autoComplete={autoComplete}
-        aria-describedby={error ? errorId : undefined}
-        aria-invalid={error ? true : undefined}
-        required={required}
-        maxLength={120}
-        onChange={onChange}
-      />
-      {error ? (
-        <p id={errorId} className="text-xs leading-5 text-destructive">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  )
-}
-
-function getDeliveryAddress(formData: FormData): TimeAttendanceDeliveryAddress {
-  const value = (name: string) => {
-    const field = formData.get(name)
-    return typeof field === "string" ? field.trim() : ""
-  }
-
-  return {
-    name: value("name"),
-    line1: value("line1"),
-    line2: value("line2") || undefined,
-    city: value("city"),
-    county: value("county") || undefined,
-    postcode: value("postcode"),
-    country: "GB",
-  }
-}
-
 function getDescription(input: {
   hardwareEntitlementAvailable: boolean
   isTestMode: boolean
@@ -256,8 +147,8 @@ function getDescription(input: {
     return "This repeats the complete setup form without changing billing, Stripe, or hardware records."
   }
   return input.hardwareEntitlementAvailable
-    ? "Time & Attendance adds £1 per active employee assigned to enabled locations, plus VAT where applicable. Your first activation includes one standard NFC clock-in stand with BT47 or BT48 delivery."
-    : "Time & Attendance adds £1 per active employee assigned to enabled locations, plus VAT where applicable. This location has already used its included hardware entitlement, so another stand is not included."
+    ? "Time & Attendance adds £1 per used employee in enabled locations, plus VAT where applicable. Your first activation includes one standard NFC clock-in stand where delivery is available."
+    : "Time & Attendance adds £1 per used employee in enabled locations, plus VAT where applicable. This location has already used its included hardware entitlement, so another stand is not included."
 }
 
 export { TimeAttendanceAddonDialog }

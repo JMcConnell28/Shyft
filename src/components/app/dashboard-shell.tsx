@@ -10,7 +10,6 @@ import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
 import type { OrganizationSummary, WorkspaceSummary } from "@/lib/onboarding"
 import { BrandMark } from "@/components/app/brand"
 import { AppSidebar } from "@/components/app/shell/app-sidebar"
-import { DevRoleMenu } from "@/components/app/dev-role-menu"
 import { ShellBody } from "@/components/app/shell/shell-body"
 import { PastDueBillingNotice } from "@/features/billing/components/past-due-billing-notice"
 import { TrialBanner } from "@/features/billing/components/trial-banner"
@@ -269,9 +268,6 @@ function DashboardShell({
                 <SettingsIcon />
                 <span className="sr-only">Settings</span>
               </Button>
-            ) : null}
-            {import.meta.env.DEV && activeOrganization ? (
-              <DevRoleMenu activeOrganization={activeOrganization} />
             ) : null}
           </header>
 

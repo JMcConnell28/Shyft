@@ -3,6 +3,10 @@ import type {
   ClockShiftSegment,
   ClockSource,
 } from "@/features/time-clock/types"
+import type {
+  PayrollExportData,
+  PayrollExportRow,
+} from "@/features/payroll/types"
 
 type TimesheetScopeInput = {
   organizationId?: string | null
@@ -100,24 +104,9 @@ type SageTimesheetExportInput = {
   rotaId: string
 }
 
-type SageTimesheetExportRow = {
-  employeeName: string
-  employeeReference: string
-  location: string
-  payElement: string
-  units: string
-  rate: string
-  amount: string
-  weekEnd: string
-  weekStart: string
-  notes: string
-}
+type SageTimesheetExportRow = PayrollExportRow
 
-type SageTimesheetExportData = {
-  fileName: string
-  missingPayrollEmployees: string[]
-  rows: SageTimesheetExportRow[]
-}
+type SageTimesheetExportData = PayrollExportData
 
 type UpdateTimesheetEntryInput = {
   organizationId?: string | null

@@ -8,6 +8,10 @@ import {
   organizationSetupSchema,
   verifyEmailSchema,
 } from "@/lib/onboarding-schemas"
+import {
+  normalizePostcode,
+  type TimeAttendanceDeliveryAddress,
+} from "@/features/billing/schemas/time-attendance-addon-schemas"
 import { auth } from "@/lib/auth"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 import { getDatabase } from "@/lib/db"
@@ -191,6 +195,14 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
           userId: session.user.id,
           userName: session.user.name,
           userEmail: session.user.email,
+        })
+      }
+
+      if (data.timeAttendanceEnabled && data.timeAttendanceDeliveryAddress) {
+        await requestOnboardingTimeAttendanceAddon({
+          client,
+          deliveryAddress: data.timeAttendanceDeliveryAddress,
+          locationId,
         })
       }
 
@@ -382,6 +394,86 @@ async function createInitialPlaces({
      ) values ($1, $2, $3, 0)
      on conflict do nothing`,
     [organizationId, locationId, worksiteName]
+  )
+}
+
+async function requestOnboardingTimeAttendanceAddon({
+  client,
+  deliveryAddress,
+  locationId,
+}: {
+  client: PoolClient
+  deliveryAddress: TimeAttendanceDeliveryAddress
+  locationId: string
+}) {
+  const entitlementResult = await client.query<{ trial_ends_at: Date }>(
+    `select trial_ends_at
+     from billing_private.location_entitlements
+     where location_id = $1
+     limit 1`,
+    [locationId]
+  )
+  const trialEndsAt = entitlementResult.rows.at(0)?.trial_ends_at
+
+  if (!trialEndsAt) {
+    throw new Error("We could not prepare Time & Attendance billing.")
+  }
+
+  await client.query(
+    `insert into billing_private.location_addons (
+       location_id,
+       addon_type,
+       status,
+       activated_at,
+       billing_starts_at
+     ) values ($1, 'time_attendance', 'trialing', timezone('utc', now()), $2)
+     on conflict (location_id, addon_type)
+     do update set status = 'trialing',
+                   activated_at = coalesce(location_addons.activated_at, excluded.activated_at),
+                   billing_starts_at = excluded.billing_starts_at,
+                   cancel_at = null,
+                   canceled_at = null,
+                   legacy_opt_in_deadline = null,
+                   updated_at = timezone('utc', now())`,
+    [locationId, trialEndsAt]
+  )
+
+  await client.query(
+    `insert into billing_private.location_hardware_entitlements (
+       location_id,
+       entitlement_status,
+       fulfillment_status,
+       claimed_at,
+       delivery_country,
+       delivery_name,
+       delivery_line1,
+       delivery_line2,
+       delivery_city,
+       delivery_county,
+       delivery_postcode
+     ) values ($1, 'claimed', 'pending', timezone('utc', now()), $2, $3, $4, $5, $6, $7, $8)
+     on conflict (location_id)
+     do update set entitlement_status = 'claimed',
+                   fulfillment_status = 'pending',
+                   claimed_at = coalesce(location_hardware_entitlements.claimed_at, timezone('utc', now())),
+                   delivery_country = excluded.delivery_country,
+                   delivery_name = excluded.delivery_name,
+                   delivery_line1 = excluded.delivery_line1,
+                   delivery_line2 = excluded.delivery_line2,
+                   delivery_city = excluded.delivery_city,
+                   delivery_county = excluded.delivery_county,
+                   delivery_postcode = excluded.delivery_postcode,
+                   updated_at = timezone('utc', now())`,
+    [
+      locationId,
+      deliveryAddress.country,
+      deliveryAddress.name,
+      deliveryAddress.line1,
+      deliveryAddress.line2 ?? null,
+      deliveryAddress.city,
+      deliveryAddress.county ?? null,
+      normalizePostcode(deliveryAddress.postcode),
+    ]
   )
 }
 

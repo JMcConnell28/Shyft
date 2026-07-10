@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { timeAttendanceDeliveryAddressSchema } from "@/features/billing/schemas/time-attendance-addon-schemas"
 import { assignableOrganizationRoles } from "@/lib/auth/permissions"
 import { slugify } from "@/lib/slug"
 
@@ -178,6 +179,9 @@ const locationSetupSchema = z
       .optional()
       .default(""),
     includeOwnerAsEmployee: z.boolean().default(false),
+    timeAttendanceEnabled: z.boolean().default(false),
+    timeAttendanceDeliveryAddress:
+      timeAttendanceDeliveryAddressSchema.optional(),
   })
   .superRefine((value, context) => {
     const isFixedBusiness = fixedBusinessTypes.includes(
@@ -223,6 +227,14 @@ const locationSetupSchema = z
         code: "custom",
         path: ["worksiteName"],
         message: "Worksite name must be between 2 and 80 characters.",
+      })
+    }
+
+    if (value.timeAttendanceEnabled && !value.timeAttendanceDeliveryAddress) {
+      context.addIssue({
+        code: "custom",
+        path: ["timeAttendanceDeliveryAddress"],
+        message: "Enter a delivery address for the clock-in station.",
       })
     }
   })

@@ -11,6 +11,7 @@ type CompanyEmployeeListItem = {
   role: CompanyRole | null
   status: "active" | "inactive"
   groupName: string | null
+  offboardedAt: string | null
   activeLocationCount: number
   locationCount: number
 }

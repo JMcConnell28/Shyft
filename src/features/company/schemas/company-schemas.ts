@@ -18,6 +18,24 @@ const companyEmployeeInputSchema = companyWorkspaceInputSchema.extend({
   employeeId: z.string().uuid("Choose a valid employee."),
 })
 
+const removeCompanyEmployeeInputSchema = companyEmployeeInputSchema
+
+const rehireCompanyEmployeeInputSchema = companyEmployeeInputSchema
+  .extend({
+    locationIds: z
+      .array(z.string().uuid("Choose valid locations."))
+      .min(1, "Choose at least one location."),
+  })
+  .superRefine((value, context) => {
+    if (new Set(value.locationIds).size !== value.locationIds.length) {
+      context.addIssue({
+        code: "custom",
+        message: "Choose each location once.",
+        path: ["locationIds"],
+      })
+    }
+  })
+
 const updateCompanyEmployeeRoleInputSchema = companyEmployeeInputSchema.extend({
   role: z.enum(assignableOrganizationRoles),
 })
@@ -108,6 +126,8 @@ export {
   createCompanyEmployeeRotaNoteInputSchema,
   employeeRotaNoteCategorySchema,
   employeeRotaNotePrioritySchema,
+  rehireCompanyEmployeeInputSchema,
+  removeCompanyEmployeeInputSchema,
   updateCompanyEmployeeRotaNoteInputSchema,
   updateCompanyEmployeePayrollIdInputSchema,
   updateCompanyEmployeeCompensationInputSchema,

@@ -1,19 +1,28 @@
 const INCLUDED_CORE_EMPLOYEES = 10
 
-function calculateBillingSeatQuantities(activeEmployeeQuantity: number) {
-  const normalizedActiveEmployeeQuantity = Math.max(
-    Math.floor(activeEmployeeQuantity),
+type BillingSeatQuantities = {
+  usedEmployeeQuantity: number
+  includedEmployeeQuantity: number
+  extraEmployeeQuantity: number
+}
+
+function calculateBillingSeatQuantities(
+  usedEmployeeQuantity: number
+): BillingSeatQuantities {
+  const normalizedUsedEmployeeQuantity = Math.max(
+    Math.floor(usedEmployeeQuantity),
     0
   )
 
   return {
-    activeEmployeeQuantity: normalizedActiveEmployeeQuantity,
+    usedEmployeeQuantity: normalizedUsedEmployeeQuantity,
     includedEmployeeQuantity: INCLUDED_CORE_EMPLOYEES,
     extraEmployeeQuantity: Math.max(
-      normalizedActiveEmployeeQuantity - INCLUDED_CORE_EMPLOYEES,
+      normalizedUsedEmployeeQuantity - INCLUDED_CORE_EMPLOYEES,
       0
     ),
   }
 }
 
 export { INCLUDED_CORE_EMPLOYEES, calculateBillingSeatQuantities }
+export type { BillingSeatQuantities }

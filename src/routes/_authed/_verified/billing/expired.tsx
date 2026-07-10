@@ -9,9 +9,7 @@ import {
 import { BrandLockup } from "@/components/app/brand"
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button"
 import { CheckoutButton } from "@/features/billing/components/checkout-button"
-import { TrialTestingControls } from "@/features/billing/components/trial-testing-controls"
 import { hasPaidWorkspaceAccess } from "@/features/billing/utils/billing-access"
-import { getTrialDisplayState } from "@/features/billing/utils/trial-state"
 import { PAST_DUE_GRACE_DAYS } from "@/features/billing/constants"
 import type { WorkspaceBillingState } from "@/features/billing/types"
 import { Button } from "@/components/ui/button"
@@ -58,7 +56,6 @@ export const Route = createFileRoute("/_authed/_verified/billing/expired")({
 function BillingExpiredRoute() {
   const { viewer } = verifiedRouteApi.useRouteContext()
   const workspace = viewer.activeWorkspace
-  const trialState = getTrialDisplayState(viewer.trial)
   const hasSubscription = hasPaidWorkspaceAccess(viewer.billing)
   const canOpenPortal = Boolean(viewer.billing?.stripeCustomerId)
   const blockedState = getBillingBlockedState({
@@ -131,8 +128,6 @@ function BillingExpiredRoute() {
                   </div>
                 </div>
               </div>
-
-              {trialState ? <TrialTestingControls trial={trialState} /> : null}
 
               <div className="flex flex-col gap-2 sm:flex-row">
                 {blockedState.action === "choose-plan" ? (

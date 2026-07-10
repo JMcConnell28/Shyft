@@ -578,6 +578,7 @@ export type Database = {
           created_at: string
           id: string
           location_id: string | null
+          offboarded_at: string | null
           organization_id: string | null
           owner_user_id: string | null
           payment_method_saved_at: string | null
@@ -594,6 +595,7 @@ export type Database = {
           created_at?: string
           id?: string
           location_id?: string | null
+          offboarded_at?: string | null
           organization_id?: string | null
           owner_user_id?: string | null
           payment_method_saved_at?: string | null
@@ -610,6 +612,7 @@ export type Database = {
           created_at?: string
           id?: string
           location_id?: string | null
+          offboarded_at?: string | null
           organization_id?: string | null
           owner_user_id?: string | null
           payment_method_saved_at?: string | null

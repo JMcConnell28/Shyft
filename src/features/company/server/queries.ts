@@ -22,6 +22,7 @@ type EmployeeRow = {
   hourly_rate_pence: number | null
   id: string
   location_count: string | number
+  offboarded_at: string | null
   pay_type: string | null
   payroll_id: string | null
   role: string | null
@@ -151,6 +152,7 @@ async function listCompanyEmployees(context: {
                 employee.email,
                 employee.payroll_id,
                 employee.status,
+                employee.offboarded_at,
                 employee.user_id,
                 staff_group.name as group_name,
                 compensation.pay_type,
@@ -190,6 +192,7 @@ async function listCompanyEmployees(context: {
                employee.email,
                 employee.payroll_id,
                employee.status,
+                employee.offboarded_at,
                 employee.user_id,
                 staff_group.name as group_name,
                 compensation.pay_type,
@@ -381,6 +384,7 @@ function mapListEmployee(employee: EmployeeRow): CompanyEmployeeListItem {
     id: employee.id,
     locationCount: Number(employee.location_count),
     name: employee.full_name,
+    offboardedAt: employee.offboarded_at,
     payrollId: employee.payroll_id,
     role: normalizeRole(employee.role),
     status: employee.status === "inactive" ? "inactive" : "active",

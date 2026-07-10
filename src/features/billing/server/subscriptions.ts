@@ -451,7 +451,7 @@ async function createTrialSubscriptionForSavedPaymentMethod(input: {
       organizationId: input.organizationId ?? "",
       locationId: input.locationId ?? "",
       locationQuantity: String(quantities.locationQuantity),
-      activeEmployeeQuantity: String(quantities.activeEmployeeQuantity),
+      usedEmployeeQuantity: String(quantities.usedEmployeeQuantity),
       includedEmployeeQuantity: String(quantities.includedEmployeeQuantity),
       billableEmployeeQuantity: String(quantities.extraEmployeeQuantity),
       extraEmployeeQuantity: String(quantities.extraEmployeeQuantity),
@@ -574,7 +574,6 @@ async function syncBillingSubscriptionQuantities(billingAccountId: string) {
     return subscription
   }
 
-  const quantities = await getBillingPricingQuantities(billingAccountId)
   const coreBasePriceId = getCoreBasePriceId()
   const coreBaseItem = findSubscriptionItem(subscription, coreBasePriceId)
 
@@ -601,12 +600,11 @@ async function syncBillingSubscriptionQuantities(billingAccountId: string) {
     subscription,
     extraEmployeePriceId
   )
-  await syncLicensedSubscriptionItem({
+  await syncMeteredSubscriptionItem({
     billingAccountId,
     item: extraEmployeeItem,
     itemType: "core_extra_employee",
     priceId: extraEmployeePriceId,
-    quantity: quantities.extraEmployeeQuantity,
     subscriptionId: subscription.id,
   })
 
@@ -616,12 +614,11 @@ async function syncBillingSubscriptionQuantities(billingAccountId: string) {
     : null
 
   if (timeAttendancePriceId) {
-    await syncLicensedSubscriptionItem({
+    await syncMeteredSubscriptionItem({
       billingAccountId,
       item: timeAttendanceItem,
       itemType: "time_attendance_employee",
       priceId: timeAttendancePriceId,
-      quantity: quantities.timeAttendanceQuantity,
       subscriptionId: subscription.id,
     })
   }
@@ -634,45 +631,40 @@ async function syncBillingSubscriptionQuantities(billingAccountId: string) {
   return updatedSubscription
 }
 
-async function syncLicensedSubscriptionItem(input: {
+async function syncMeteredSubscriptionItem(input: {
   billingAccountId: string
   item: Stripe.SubscriptionItem | null
   itemType: "core_extra_employee" | "time_attendance_employee"
   priceId: string
-  quantity: number
   subscriptionId: string
 }) {
   const stripe = getStripe()
 
-  if (input.quantity > 0) {
-    if (input.item) {
-      if (input.item.quantity !== input.quantity) {
-        await stripe.subscriptionItems.update(input.item.id, {
-          quantity: input.quantity,
-          proration_behavior: "create_prorations",
-        })
-      }
-
-      return
-    }
-
-    await stripe.subscriptionItems.create({
-      subscription: input.subscriptionId,
-      price: input.priceId,
-      quantity: input.quantity,
-      proration_behavior: "always_invoice",
-      metadata: {
-        billingAccountId: input.billingAccountId,
-        billingItemType: input.itemType,
-      },
-    })
+  if (input.item) {
+    assertMeteredSubscriptionItem(input.item, input.itemType)
     return
   }
 
-  if (input.item) {
-    await stripe.subscriptionItems.del(input.item.id, {
-      proration_behavior: "create_prorations",
-    })
+  const item = await stripe.subscriptionItems.create({
+    subscription: input.subscriptionId,
+    price: input.priceId,
+    proration_behavior: "none",
+    metadata: {
+      billingAccountId: input.billingAccountId,
+      billingItemType: input.itemType,
+    },
+  })
+  assertMeteredSubscriptionItem(item, input.itemType)
+}
+
+function assertMeteredSubscriptionItem(
+  item: Stripe.SubscriptionItem,
+  itemType: "core_extra_employee" | "time_attendance_employee"
+) {
+  if (item.price.recurring?.usage_type !== "metered") {
+    throw new Error(
+      `${itemType} must use a metered Stripe price before usage billing can sync.`
+    )
   }
 }
 

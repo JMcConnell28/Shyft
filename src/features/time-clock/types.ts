@@ -171,6 +171,22 @@ type ClockSettingsPageData = {
     id: string
     name: string
     isEnabled: boolean
+    timeAttendanceEnabled: boolean
+    timeAttendanceStatus:
+      | "legacy_pending"
+      | "trialing"
+      | "active"
+      | "canceling"
+      | "canceled"
+      | null
+    hardwareEntitlementStatus: "available" | "claimed" | "void" | null
+    hardwareFulfillmentStatus:
+      | "not_requested"
+      | "pending"
+      | "shipped"
+      | "delivered"
+      | "failed"
+      | null
     latitude: number | null
     longitude: number | null
     radiusMeters: number

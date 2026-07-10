@@ -15,7 +15,7 @@ import { getDatabase } from "@/lib/db"
 
 type BillingPricingQuantities = {
   locationQuantity: number
-  activeEmployeeQuantity: number
+  usedEmployeeQuantity: number
   includedEmployeeQuantity: number
   extraEmployeeQuantity: number
   timeAttendanceQuantity: number
@@ -25,7 +25,7 @@ type BillingPricingQuantities = {
 type LocationPricingQuantity = {
   locationId: string
   locationName: string
-  employeeHighWaterCount: number
+  usedEmployeeCount: number
   includedEmployeeCount: number
   extraEmployeeCount: number
   timeAttendanceEnabled: boolean
@@ -47,7 +47,7 @@ type BillingAccountScopeRow = {
 type BillingLocationRow = {
   location_id: string
   location_name: string
-  active_employee_count: number | string
+  used_employee_count: number | string
   time_attendance_enabled: boolean
   time_attendance_status: LocationPricingQuantity["timeAttendanceStatus"]
   time_attendance_cancel_at: Date | string | null
@@ -55,7 +55,7 @@ type BillingLocationRow = {
 }
 
 type BillingEmployeeCountRow = {
-  active_employee_count: number | string
+  used_employee_count: number | string
   time_attendance_employee_count: number | string
 }
 
@@ -72,18 +72,16 @@ async function getBillingPricingQuantities(
     getLocationPricingQuantities(organizationId),
     getEmployeeCounts(organizationId),
   ])
-  const activeEmployeeQuantity = Number(employeeCounts.active_employee_count)
+  const usedEmployeeQuantity = Number(employeeCounts.used_employee_count)
   const timeAttendanceQuantity = Number(
     employeeCounts.time_attendance_employee_count
   )
   const locationQuantity = Math.max(locations.length, 1)
-  const seatQuantities = calculateBillingSeatQuantities(
-    activeEmployeeQuantity
-  )
+  const seatQuantities = calculateBillingSeatQuantities(usedEmployeeQuantity)
 
   return {
     locationQuantity,
-    activeEmployeeQuantity,
+    usedEmployeeQuantity,
     includedEmployeeQuantity: seatQuantities.includedEmployeeQuantity,
     extraEmployeeQuantity: seatQuantities.extraEmployeeQuantity,
     timeAttendanceQuantity,
@@ -106,29 +104,26 @@ async function getBillingAccountOrganizationId(billingAccountId: string) {
 
 async function getLocationPricingQuantities(organizationId: string) {
   const result = await getDatabase().query<BillingLocationRow>(
-    `with location_employee_counts as (
-       select
-         location.id as location_id,
-         count(distinct employee.id)::integer as active_employee_count
-       from public.locations location
-       left join public.employee_location_assignments assignment
-         on assignment.location_id = location.id
-        and assignment.is_enabled = true
-        and assignment.disabled_at is null
-       left join public.employees employee
-         on employee.organization_id = location.organization_id
-        and employee.status = 'active'
-        and (
-          employee.location_id = location.id
-          or employee.id = assignment.employee_id
-        )
-       where location.organization_id = $1
-       group by location.id
+    `with current_period as (
+       select period.id
+       from billing_private.organization_billing_periods period
+       where period.organization_id = $1
+         and period.period_start <= timezone('utc', now())
+         and timezone('utc', now()) < period.period_end
+       order by period.period_start desc
+       limit 1
+     ),
+     location_employee_counts as (
+       select usage.location_id,
+              count(distinct usage.employee_id)::integer as used_employee_count
+       from billing_private.organization_employee_usage_events usage
+       join current_period period on period.id = usage.organization_billing_period_id
+       group by usage.location_id
      )
      select
        location.id as location_id,
        location.name as location_name,
-       coalesce(counts.active_employee_count, 0) as active_employee_count,
+       coalesce(counts.used_employee_count, 0) as used_employee_count,
        coalesce(addon.status in ('trialing', 'active', 'canceling'), false) as time_attendance_enabled,
        addon.status as time_attendance_status,
        addon.cancel_at as time_attendance_cancel_at,
@@ -146,12 +141,12 @@ async function getLocationPricingQuantities(organizationId: string) {
   )
 
   return result.rows.map((row): LocationPricingQuantity => {
-    const employeeCount = Number(row.active_employee_count)
+    const employeeCount = Number(row.used_employee_count)
 
     return {
       locationId: row.location_id,
       locationName: row.location_name,
-      employeeHighWaterCount: employeeCount,
+      usedEmployeeCount: employeeCount,
       includedEmployeeCount: 0,
       extraEmployeeCount: 0,
       timeAttendanceEnabled: row.time_attendance_enabled,
@@ -166,66 +161,33 @@ async function getLocationPricingQuantities(organizationId: string) {
 
 async function getEmployeeCounts(organizationId: string) {
   const result = await getDatabase().query<BillingEmployeeCountRow>(
-    `with time_attendance_locations as (
-       select addon.location_id
-       from billing_private.location_addons addon
-       join public.locations location on location.id = addon.location_id
-       where location.organization_id = $1
-         and addon.addon_type = 'time_attendance'
-         and addon.status in ('trialing', 'active', 'canceling')
-     ),
-     assigned_time_attendance_employees as (
-       select employee.id
-       from public.employees employee
-       join time_attendance_locations location
-         on location.location_id = employee.location_id
-       where employee.organization_id = $1
-         and employee.status = 'active'
-
-       union
-
-       select employee.id
-       from public.employee_location_assignments assignment
-       join public.employees employee on employee.id = assignment.employee_id
-       join time_attendance_locations location
-         on location.location_id = assignment.location_id
-       where employee.organization_id = $1
-         and employee.status = 'active'
-         and assignment.is_enabled = true
-         and assignment.disabled_at is null
-     ),
-     active_assigned_employees as (
-       select employee.id
-       from public.employees employee
-       where employee.organization_id = $1
-         and employee.location_id is not null
-         and employee.status = 'active'
-
-       union
-
-       select employee.id
-       from public.employee_location_assignments assignment
-       join public.employees employee on employee.id = assignment.employee_id
-       where employee.organization_id = $1
-         and employee.status = 'active'
-         and assignment.is_enabled = true
-         and assignment.disabled_at is null
+    `with current_period as (
+       select period.id
+       from billing_private.organization_billing_periods period
+       where period.organization_id = $1
+         and period.period_start <= timezone('utc', now())
+         and timezone('utc', now()) < period.period_end
+       order by period.period_start desc
+       limit 1
      )
      select
        (
-         select count(distinct id)::integer
-         from active_assigned_employees
-       ) as active_employee_count,
+         select count(distinct usage.employee_id)::integer
+         from billing_private.organization_employee_usage_events usage
+         join current_period period on period.id = usage.organization_billing_period_id
+       ) as used_employee_count,
        (
-         select count(distinct id)::integer
-         from assigned_time_attendance_employees
+         select count(distinct usage.employee_id)::integer
+         from billing_private.organization_employee_usage_events usage
+         join current_period period on period.id = usage.organization_billing_period_id
+         where usage.time_attendance_billable = true
        ) as time_attendance_employee_count`,
     [organizationId]
   )
 
   return (
     result.rows.at(0) ?? {
-      active_employee_count: 0,
+      used_employee_count: 0,
       time_attendance_employee_count: 0,
     }
   )
@@ -234,7 +196,7 @@ async function getEmployeeCounts(organizationId: string) {
 function getEmptyBillingPricingQuantities(): BillingPricingQuantities {
   return {
     locationQuantity: 1,
-    activeEmployeeQuantity: 0,
+    usedEmployeeQuantity: 0,
     includedEmployeeQuantity: INCLUDED_CORE_EMPLOYEES,
     extraEmployeeQuantity: 0,
     timeAttendanceQuantity: 0,
@@ -243,7 +205,7 @@ function getEmptyBillingPricingQuantities(): BillingPricingQuantities {
 }
 
 function buildSubscriptionLineItems(
-  quantities: BillingPricingQuantities
+  _quantities: BillingPricingQuantities
 ): Stripe.Checkout.SessionCreateParams.LineItem[] {
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
     {
@@ -252,25 +214,14 @@ function buildSubscriptionLineItems(
     },
   ]
 
-  if (quantities.extraEmployeeQuantity > 0) {
-    lineItems.push({
-      price: getCoreExtraEmployeePriceId(),
-      quantity: quantities.extraEmployeeQuantity,
-    })
-  }
-
-  if (quantities.timeAttendanceQuantity > 0) {
-    lineItems.push({
-      price: getTimeAttendanceEmployeePriceId(),
-      quantity: quantities.timeAttendanceQuantity,
-    })
-  }
+  lineItems.push({ price: getCoreExtraEmployeePriceId() })
+  lineItems.push({ price: getTimeAttendanceEmployeePriceId() })
 
   return lineItems
 }
 
 function buildSubscriptionItems(
-  quantities: BillingPricingQuantities
+  _quantities: BillingPricingQuantities
 ): Stripe.SubscriptionCreateParams.Item[] {
   const items: Stripe.SubscriptionCreateParams.Item[] = [
     {
@@ -279,19 +230,8 @@ function buildSubscriptionItems(
     },
   ]
 
-  if (quantities.extraEmployeeQuantity > 0) {
-    items.push({
-      price: getCoreExtraEmployeePriceId(),
-      quantity: quantities.extraEmployeeQuantity,
-    })
-  }
-
-  if (quantities.timeAttendanceQuantity > 0) {
-    items.push({
-      price: getTimeAttendanceEmployeePriceId(),
-      quantity: quantities.timeAttendanceQuantity,
-    })
-  }
+  items.push({ price: getCoreExtraEmployeePriceId() })
+  items.push({ price: getTimeAttendanceEmployeePriceId() })
 
   return items
 }

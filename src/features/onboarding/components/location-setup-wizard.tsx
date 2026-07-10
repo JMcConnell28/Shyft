@@ -1,21 +1,33 @@
 import * as React from "react"
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react"
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  Clock3Icon,
+  MapPinnedIcon,
+  PencilLineIcon,
+  ShapesIcon,
+} from "lucide-react"
 
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
-  fixedProgress,
+  emptyTimeAttendanceAddress,
+  toTimeAttendanceDeliveryAddress,
+} from "@/features/billing/components/time-attendance-address-fields"
+import { timeAttendanceDeliveryAddressSchema } from "@/features/billing/schemas/time-attendance-addon-schemas"
+import {
   getBusinessTypeOption,
   getDefaultZoneNames,
   getPlanningModeForBusinessType,
-  variableProgress,
 } from "@/features/onboarding/constants/location-setup-options"
 import {
   AreasStep,
   BusinessTypeStep,
   NameStep,
   SummaryStep,
+  TimeAttendanceStep,
   WorksiteStep,
   type WorksiteChoice,
 } from "@/features/onboarding/components/location-setup-wizard-steps"
@@ -26,8 +38,9 @@ import {
   type OnboardingPlanningMode,
 } from "@/features/onboarding/schemas/onboarding-schemas"
 import { getErrorMessage } from "@/lib/errors"
+import { cn } from "@/lib/utils"
 
-type WizardStep = "business" | "name" | "places" | "summary"
+type WizardStep = "business" | "name" | "places" | "attendance" | "summary"
 
 type LocationSetupWizardProps = {
   onSubmit: (input: LocationSetupInput) => Promise<{ redirectTo: string }>
@@ -37,8 +50,23 @@ const stepOrder: readonly WizardStep[] = [
   "business",
   "name",
   "places",
+  "attendance",
   "summary",
 ]
+
+const stepMeta: Record<
+  WizardStep,
+  {
+    icon: typeof MapPinnedIcon
+    label: string
+  }
+> = {
+  attendance: { icon: Clock3Icon, label: "Add-on" },
+  business: { icon: MapPinnedIcon, label: "Pattern" },
+  name: { icon: PencilLineIcon, label: "Name" },
+  places: { icon: ShapesIcon, label: "Places" },
+  summary: { icon: CheckIcon, label: "Review" },
+}
 
 function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
   const [step, setStep] = React.useState<WizardStep>("business")
@@ -54,6 +82,12 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
   const [worksiteName, setWorksiteName] = React.useState("")
   const [includeOwnerAsEmployee, setIncludeOwnerAsEmployee] =
     React.useState(false)
+  const [timeAttendanceEnabled, setTimeAttendanceEnabled] =
+    React.useState(false)
+  const [timeAttendanceAddress, setTimeAttendanceAddress] = React.useState(
+    emptyTimeAttendanceAddress
+  )
+  const [postcodeMessage, setPostcodeMessage] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
@@ -84,8 +118,31 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
   }
 
   function handleNext() {
+    const stepError = getStepError({
+      planningMode,
+      step,
+      timeAttendanceAddress,
+      timeAttendanceEnabled,
+    })
+    const timeAttendanceResult =
+      step === "attendance" && timeAttendanceEnabled
+        ? timeAttendanceDeliveryAddressSchema.safeParse(
+            toTimeAttendanceDeliveryAddress(timeAttendanceAddress)
+          )
+        : null
+
     if (!canContinue) {
-      setError(getStepError(step, planningMode))
+      setError(stepError)
+      return
+    }
+
+    if (timeAttendanceResult && !timeAttendanceResult.success) {
+      const postcodeIssue = timeAttendanceResult.error.issues.find(
+        (issue) => issue.path[0] === "postcode"
+      )
+
+      setPostcodeMessage(postcodeIssue?.message ?? "")
+      setError(stepError)
       return
     }
 
@@ -107,6 +164,12 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
     )
   }
 
+  function handleTimeAttendanceEnabledChange(enabled: boolean) {
+    setTimeAttendanceEnabled(enabled)
+    setError(null)
+    setPostcodeMessage("")
+  }
+
   function addCustomArea() {
     const name = customAreaName.trim()
 
@@ -126,6 +189,9 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
   }
 
   async function handleSubmit() {
+    const deliveryAddress = timeAttendanceEnabled
+      ? toTimeAttendanceDeliveryAddress(timeAttendanceAddress)
+      : undefined
     const payload = {
       businessType,
       planningMode,
@@ -136,6 +202,8 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
           ? worksiteName
           : "",
       includeOwnerAsEmployee,
+      timeAttendanceDeliveryAddress: deliveryAddress,
+      timeAttendanceEnabled,
     } satisfies LocationSetupInput
 
     const parsed = locationSetupSchema.safeParse(payload)
@@ -160,10 +228,10 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
   }
 
   return (
-    <div className="rounded-xl border border-border/70 bg-background p-3 shadow-sm sm:p-4">
-      <WizardProgress progress={currentProgress} step={step} />
+    <div className="overflow-hidden rounded-2xl border border-border/70 bg-background shadow-sm lg:grid lg:min-h-[34rem] lg:grid-cols-[15rem_1fr]">
+      <WizardSidebar progress={currentProgress} step={step} />
       <form
-        className="space-y-3"
+        className="flex min-h-[31rem] flex-col gap-4 p-4 sm:p-5"
         onSubmit={(event) => {
           event.preventDefault()
 
@@ -175,9 +243,10 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
           handleNext()
         }}
       >
+        <WizardProgress progress={currentProgress} step={step} />
         <div
           key={step}
-          className="min-h-[16rem] animate-in space-y-3 duration-200 fade-in-0 slide-in-from-bottom-2 motion-reduce:animate-none"
+          className="min-h-[18rem] flex-1 animate-in space-y-3 duration-200 fade-in-0 slide-in-from-bottom-2 motion-reduce:animate-none"
         >
           {step === "business" ? (
             <BusinessTypeStep
@@ -210,11 +279,25 @@ function LocationSetupWizard({ onSubmit }: LocationSetupWizardProps) {
               onWorksiteNameChange={setWorksiteName}
             />
           ) : null}
+          {step === "attendance" ? (
+            <TimeAttendanceStep
+              address={timeAttendanceAddress}
+              enabled={timeAttendanceEnabled}
+              postcodeMessage={postcodeMessage}
+              onAddressChange={setTimeAttendanceAddress}
+              onEnabledChange={handleTimeAttendanceEnabledChange}
+              onPostcodeChange={() => {
+                setPostcodeMessage("")
+                setError(null)
+              }}
+            />
+          ) : null}
           {step === "summary" ? (
             <>
               <SummaryStep
                 businessLabel={businessOption?.label ?? "Team"}
                 planningMode={planningMode}
+                timeAttendanceEnabled={timeAttendanceEnabled}
                 workspaceName={workspaceName}
                 zoneNames={selectedZoneNames}
                 worksiteName={worksiteChoice === "add" ? worksiteName : ""}
@@ -256,7 +339,7 @@ function WizardProgress({
   step: WizardStep
 }) {
   return (
-    <div className="mb-3 space-y-2">
+    <div className="space-y-2 lg:hidden">
       <div className="flex items-center justify-between gap-3 text-xs font-medium text-muted-foreground">
         <span>
           Step {stepOrder.indexOf(step) + 1} of {stepOrder.length}
@@ -270,6 +353,75 @@ function WizardProgress({
         />
       </div>
     </div>
+  )
+}
+
+function WizardSidebar({
+  progress,
+  step,
+}: {
+  progress: number
+  step: WizardStep
+}) {
+  const activeIndex = stepOrder.indexOf(step)
+
+  return (
+    <aside className="hidden border-r border-border/70 bg-muted/20 p-4 lg:block">
+      <div className="flex h-full flex-col justify-between gap-6">
+        <div className="space-y-5">
+          <div className="space-y-1">
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Setup progress
+            </p>
+            <p className="text-2xl font-semibold tracking-tight text-foreground">
+              {progress}%
+            </p>
+          </div>
+          <ol className="space-y-2">
+            {stepOrder.map((item, index) => {
+              const meta = stepMeta[item]
+              const Icon = meta.icon
+              const isActive = item === step
+              const isComplete = index < activeIndex
+
+              return (
+                <li key={item}>
+                  <span
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors",
+                      isActive
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground",
+                      isComplete ? "text-primary" : null
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex size-7 items-center justify-center rounded-md border border-border/70 bg-background",
+                        isActive || isComplete
+                          ? "border-primary/30 text-primary"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {isComplete ? (
+                        <CheckIcon className="size-4" />
+                      ) : (
+                        <Icon className="size-4" />
+                      )}
+                    </span>
+                    {meta.label}
+                  </span>
+                </li>
+              )
+            })}
+          </ol>
+        </div>
+        <p className="text-xs leading-5 text-muted-foreground">
+          Keep this light. You can adjust team details, billing and clock-in
+          settings after setup.
+        </p>
+      </div>
+    </aside>
   )
 }
 
@@ -348,7 +500,17 @@ function getCanContinue({
   return true
 }
 
-function getStepError(step: WizardStep, planningMode: OnboardingPlanningMode) {
+function getStepError({
+  planningMode,
+  step,
+  timeAttendanceAddress,
+  timeAttendanceEnabled,
+}: {
+  planningMode: OnboardingPlanningMode
+  step: WizardStep
+  timeAttendanceAddress: typeof emptyTimeAttendanceAddress
+  timeAttendanceEnabled: boolean
+}) {
   if (step === "name") {
     return "Enter a workspace name."
   }
@@ -361,18 +523,22 @@ function getStepError(step: WizardStep, planningMode: OnboardingPlanningMode) {
     return "Enter a worksite name or skip this step."
   }
 
+  if (step === "attendance" && timeAttendanceEnabled) {
+    const parsed = timeAttendanceDeliveryAddressSchema.safeParse(
+      toTimeAttendanceDeliveryAddress(timeAttendanceAddress)
+    )
+
+    return (
+      parsed.error?.issues[0]?.message ??
+      "Enter a delivery address for the clock-in station."
+    )
+  }
+
   return "Check this step before continuing."
 }
 
-function getProgress(step: WizardStep, planningMode: OnboardingPlanningMode) {
-  const progress =
-    planningMode === "fixed_location" ? fixedProgress : variableProgress
-
-  if (step === "summary") {
-    return 100
-  }
-
-  return progress[stepOrder.indexOf(step)] ?? 100
+function getProgress(step: WizardStep, _planningMode: OnboardingPlanningMode) {
+  return Math.round(((stepOrder.indexOf(step) + 1) / stepOrder.length) * 100)
 }
 
 export { LocationSetupWizard }

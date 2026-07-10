@@ -1,8 +1,4 @@
-import {
-  createFileRoute,
-  getRouteApi,
-  redirect,
-} from "@tanstack/react-router"
+import { createFileRoute, getRouteApi, redirect } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 
 import { OnboardingShell } from "@/components/app/onboarding-shell"
@@ -21,7 +17,8 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/location")({
 
     if (viewer.onboarding?.hasLocation) {
       const redirectTarget =
-        getPendingOnboardingPath(viewer) ?? getExistingOrganizationRedirect(viewer)
+        getPendingOnboardingPath(viewer) ??
+        getExistingOrganizationRedirect(viewer)
 
       if (redirectTarget) {
         throw redirect({ href: redirectTarget })
@@ -48,8 +45,9 @@ function CreateLocationRoute() {
     <OnboardingShell
       badge="Workspace setup"
       eyebrow={viewer.activeWorkspace?.name ?? "Step 3"}
-      title="Set up where shifts happen."
-      description="Choose one work pattern, name the workspace, then RocketRota will open the dashboard."
+      title="Create your first workspace."
+      description="Set the rota pattern, choose any starter areas, and add Time & Attendance if you want a clock-in station."
+      contentWidth="wide"
       showSignOut
     >
       <LocationSetupWizard

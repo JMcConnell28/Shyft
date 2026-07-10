@@ -10,7 +10,7 @@ type OverviewRow = {
   billing_scope: "location" | "organization"
   current_period_end: Date | string | null
   access_state: OrganizationBillingLocationSummary["accessState"]
-  active_employee_count: number | string
+  used_employee_count: number | string
   addon_status: OrganizationBillingLocationSummary["timeAttendanceStatus"]
   transfer_id: string | null
   source_billing_account_id: string | null
@@ -40,7 +40,7 @@ async function getOrganizationBillingOverview(organizationId: string) {
          when entitlement.trial_ends_at > timezone('utc', now()) then 'trial'
          else 'recovery'
        end as access_state,
-       coalesce(employee_counts.active_employee_count, 0) as active_employee_count,
+       coalesce(employee_counts.used_employee_count, 0) as used_employee_count,
        addon.status as addon_status,
        transfer.id as transfer_id,
        transfer.source_billing_account_id,
@@ -58,23 +58,14 @@ async function getOrganizationBillingOverview(organizationId: string) {
        limit 1
      ) subscription on true
      left join lateral (
-       select count(distinct employee_id)::integer as active_employee_count
-       from (
-         select employee.id as employee_id
-         from public.employees employee
-         where employee.location_id = location.id
-           and employee.status = 'active'
-
-         union
-
-         select employee.id as employee_id
-         from public.employee_location_assignments assignment
-         join public.employees employee on employee.id = assignment.employee_id
-         where assignment.location_id = location.id
-           and assignment.is_enabled = true
-           and assignment.disabled_at is null
-           and employee.status = 'active'
-       ) assigned_employees
+       select count(distinct usage.employee_id)::integer as used_employee_count
+       from billing_private.organization_billing_periods period
+       join billing_private.organization_employee_usage_events usage
+         on usage.organization_billing_period_id = period.id
+        and usage.location_id = location.id
+       where period.billing_account_id = account.id
+         and period.period_start <= timezone('utc', now())
+         and timezone('utc', now()) < period.period_end
      ) employee_counts on true
      left join billing_private.location_addons addon
        on addon.location_id = location.id and addon.addon_type = 'time_attendance'
@@ -89,7 +80,7 @@ async function getOrganizationBillingOverview(organizationId: string) {
   )
 
   return result.rows.map((row): OrganizationBillingLocationSummary => {
-    const activeEmployeeCount = Number(row.active_employee_count)
+    const usedEmployeeCount = Number(row.used_employee_count)
     const transfer =
       row.transfer_id &&
       row.source_billing_account_id &&
@@ -114,7 +105,7 @@ async function getOrganizationBillingOverview(organizationId: string) {
         ? new Date(row.current_period_end).toISOString()
         : null,
       accessState: row.access_state,
-      employeeHighWaterCount: activeEmployeeCount,
+      usedEmployeeCount,
       includedEmployeeCount: 0,
       extraEmployeeCount: 0,
       timeAttendanceStatus: row.addon_status,

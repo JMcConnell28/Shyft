@@ -1,38 +1,30 @@
 import { addDays, format } from "date-fns"
 
+import {
+  DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE,
+  buildSagePayrollExportRow,
+  serializeSagePayrollExportCsv,
+} from "@/features/payroll/adapters/sage-csv"
+import type { PayrollExportProfile } from "@/features/payroll/types"
 import type {
   SageTimesheetExportData,
-  SageTimesheetExportRow,
   TimesheetEntry,
 } from "@/features/timesheets/types"
-import { serializeCsv } from "@/features/timesheets/utils/csv"
-
-const SAGE_BASIC_HOURS_PAY_ELEMENT = "Basic Hours"
-
-const sageTimesheetExportHeaders = [
-  "Employee Reference",
-  "Employee Name",
-  "Pay Element",
-  "Units",
-  "Rate",
-  "Amount",
-  "Week Start",
-  "Week End",
-  "Location",
-  "Notes",
-] as const
 
 function buildSageTimesheetExportData(input: {
   entries: TimesheetEntry[]
   locationName: string
   locationSlug: string | null
+  profile?: PayrollExportProfile
   rotaId: string
   weekStart: string
 }): SageTimesheetExportData {
+  const profile = input.profile ?? DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE
   const weekEnd = format(addDays(new Date(input.weekStart), 6), "dd/MM/yyyy")
   const rows = buildSagePayrollRows({
     entries: input.entries,
     locationName: input.locationName,
+    profile,
     weekEnd,
     weekStart: formatDateOnly(input.weekStart),
   })
@@ -41,29 +33,18 @@ function buildSageTimesheetExportData(input: {
     fileName: buildSageTimesheetFileName({
       locationName: input.locationName,
       locationSlug: input.locationSlug,
+      profile,
       rotaId: input.rotaId,
       weekStart: input.weekStart,
     }),
     missingPayrollEmployees: getMissingPayrollEmployees(input.entries),
+    profile,
     rows,
   }
 }
 
 function serializeSageTimesheetExportCsv(data: SageTimesheetExportData) {
-  const rows = data.rows.map((row) => [
-    row.employeeReference,
-    row.employeeName,
-    row.payElement,
-    row.units,
-    row.rate,
-    row.amount,
-    row.weekStart,
-    row.weekEnd,
-    row.location,
-    row.notes,
-  ])
-
-  return serializeCsv([Array.from(sageTimesheetExportHeaders), ...rows])
+  return serializeSagePayrollExportCsv(data)
 }
 
 function getMissingPayrollEmployees(entries: TimesheetEntry[]) {
@@ -80,23 +61,23 @@ function getMissingPayrollEmployees(entries: TimesheetEntry[]) {
 function buildSagePayrollRows(input: {
   entries: TimesheetEntry[]
   locationName: string
+  profile: PayrollExportProfile
   weekEnd: string
   weekStart: string
 }) {
   return Array.from(getPayableMinutesByEmployee(input.entries).values())
     .sort((left, right) => left.employeeName.localeCompare(right.employeeName))
-    .map<SageTimesheetExportRow>((employee) => ({
-      amount: "",
-      employeeName: employee.employeeName,
-      employeeReference: employee.employeePayrollId,
-      location: input.locationName,
-      notes: "",
-      payElement: SAGE_BASIC_HOURS_PAY_ELEMENT,
-      rate: "",
-      units: formatDecimalHours(employee.payableMinutes),
-      weekEnd: input.weekEnd,
-      weekStart: input.weekStart,
-    }))
+    .map((employee) =>
+      buildSagePayrollExportRow({
+        employeeName: employee.employeeName,
+        employeeReference: employee.employeePayrollId,
+        location: input.locationName,
+        payableMinutes: employee.payableMinutes,
+        profile: input.profile,
+        weekEnd: input.weekEnd,
+        weekStart: input.weekStart,
+      })
+    )
 }
 
 function getPayableMinutesByEmployee(entries: TimesheetEntry[]) {
@@ -141,6 +122,7 @@ function getUnresolvedEntryEmployees(entries: TimesheetEntry[]) {
 function buildSageTimesheetFileName(input: {
   locationName: string
   locationSlug: string | null
+  profile: { fileNamePrefix: string }
   rotaId: string
   weekStart: string
 }) {
@@ -148,7 +130,7 @@ function buildSageTimesheetFileName(input: {
     input.locationSlug?.trim() || slugifyFilePart(input.locationName)
   const rotaShortId = input.rotaId.slice(0, 8)
 
-  return `sage-payroll-${locationSlug || "location"}-${input.weekStart}-${rotaShortId}.csv`
+  return `${input.profile.fileNamePrefix}-${locationSlug || "location"}-${input.weekStart}-${rotaShortId}.csv`
 }
 
 function formatDateOnly(value: string | null | undefined) {
@@ -157,10 +139,6 @@ function formatDateOnly(value: string | null | undefined) {
   }
 
   return format(new Date(value), "dd/MM/yyyy")
-}
-
-function formatDecimalHours(minutes: number) {
-  return (minutes / 60).toFixed(2)
 }
 
 function slugifyFilePart(value: string) {

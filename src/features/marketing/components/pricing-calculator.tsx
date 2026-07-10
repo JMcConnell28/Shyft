@@ -49,8 +49,8 @@ function PricingCalculator() {
             Estimate your monthly price
           </h3>
           <p className="mt-3 text-sm leading-7 text-[#64789e]">
-            Locations are included. Your organisation includes 10 active
-            employees, then scales by active employee count.
+            Locations are included. Your organisation includes 10 used
+            employees, then scales by used employee count.
           </p>
         </div>
 
@@ -87,7 +87,7 @@ function PricingCalculator() {
                 <div className="mt-4 space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-semibold text-[#5d739a]">
-                      Highest employee count
+                      Used employee estimate
                     </span>
                     <span className="font-extrabold text-[#18316a]">
                       {location.employeeCount}

@@ -6,11 +6,13 @@ import {
   companyEmployeeInputSchema,
   companyWorkspaceInputSchema,
   createCompanyEmployeeRotaNoteInputSchema,
-  updateCompanyEmployeeRotaNoteInputSchema,
+  rehireCompanyEmployeeInputSchema,
+  removeCompanyEmployeeInputSchema,
   updateCompanyEmployeeCompensationInputSchema,
   updateCompanyEmployeeLocationInputSchema,
   updateCompanyEmployeePayrollIdInputSchema,
   updateCompanyEmployeeRoleInputSchema,
+  updateCompanyEmployeeRotaNoteInputSchema,
 } from "@/features/company/schemas/company-schemas"
 
 const getCompanyEmployeesPageData = createServerFn({ method: "POST" })
@@ -43,6 +45,24 @@ const updateCompanyEmployeeLocationActivity = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const module = await import("@/features/company/server/actions")
     return module.updateCompanyEmployeeLocationActivity(data)
+  })
+
+const removeCompanyEmployee = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    removeCompanyEmployeeInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/company/server/actions")
+    return module.removeCompanyEmployee(data)
+  })
+
+const rehireCompanyEmployee = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    rehireCompanyEmployeeInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/company/server/actions")
+    return module.rehireCompanyEmployee(data)
   })
 
 const updateCompanyEmployeeCompensation = createServerFn({ method: "POST" })
@@ -105,6 +125,8 @@ export {
   createCompanyEmployeeRotaNote,
   getCompanyEmployeePageData,
   getCompanyEmployeesPageData,
+  rehireCompanyEmployee,
+  removeCompanyEmployee,
   updateCompanyEmployeeCompensation,
   updateCompanyEmployeeLocationActivity,
   updateCompanyEmployeePayrollId,

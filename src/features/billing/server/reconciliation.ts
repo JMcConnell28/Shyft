@@ -6,7 +6,10 @@ import {
 } from "@/features/billing/server/subscriptions"
 import { getDatabase } from "@/lib/db"
 import { processDueAddonCancellations } from "@/features/billing/server/addons"
-import { finalizeEndedBillingPeriods } from "@/features/billing/server/usage"
+import {
+  finalizeEndedBillingPeriods,
+  submitEmployeeOverageMeter,
+} from "@/features/billing/server/usage"
 import { processDueBillingTransfers } from "@/features/billing/server/transfers"
 
 type BillingReconciliationAccountRow = {
@@ -126,13 +129,14 @@ async function reconcileBillingAccount(
     const syncedQuantitySubscription = await syncBillingSubscriptionQuantities(
       account.id
     )
+    const syncedUsage = await submitEmployeeOverageMeter(account.id)
 
     return {
       billingAccountId: account.id,
       errorMessage: null,
       stripeCustomerId: account.stripe_customer_id,
       subscriptionCount: subscriptions.length,
-      quantitySynced: Boolean(syncedQuantitySubscription),
+      quantitySynced: Boolean(syncedQuantitySubscription) || syncedUsage,
       status: "synced",
     }
   } catch (error) {

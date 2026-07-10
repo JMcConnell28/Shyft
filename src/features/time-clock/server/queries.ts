@@ -18,6 +18,7 @@ import {
 } from "@/features/time-clock/utils/shift-matching"
 import { isPastForgottenClockOutAlert } from "@/features/time-clock/utils/pay-rules"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
+import { getDatabase } from "@/lib/db"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import {
   assertSupabaseSuccess,
@@ -42,6 +43,22 @@ type ClockSessionContext = {
   locationId: string
   organizationId: string | null
   userId: string
+}
+
+type ClockStationBillingStatus =
+  ClockSettingsPageData["locations"][number]["timeAttendanceStatus"]
+
+type ClockStationHardwareEntitlementStatus =
+  ClockSettingsPageData["locations"][number]["hardwareEntitlementStatus"]
+
+type ClockStationHardwareFulfillmentStatus =
+  ClockSettingsPageData["locations"][number]["hardwareFulfillmentStatus"]
+
+type ClockStationBillingRow = {
+  location_id: string
+  time_attendance_status: ClockStationBillingStatus
+  hardware_entitlement_status: ClockStationHardwareEntitlementStatus
+  hardware_fulfillment_status: ClockStationHardwareFulfillmentStatus
 }
 
 type ClockRules = {
@@ -306,24 +323,39 @@ async function getClockSettingsPageData(input: {
   }
 
   const supabase = createSupabaseServerClient()
-  const [settings, tags] = await Promise.all([
+  const [settings, tags, stationBillingStates] = await Promise.all([
     listClockSettingsForLocations(supabase, locationIds),
     listClockTagSetups(supabase, locationIds),
+    listClockStationBillingStates(locationIds),
   ])
   const settingsByLocationId = new Map(
     settings.map((setting) => [setting.locationId, setting])
   )
   const tagsByLocationId = groupClockTagSetups(tags)
+  const stationBillingStateByLocationId = new Map(
+    stationBillingStates.map((state) => [state.locationId, state])
+  )
 
   return {
     locations: locations.map((location) => {
       const setting = settingsByLocationId.get(location.id)
       const rules = setting?.rules ?? defaultClockRules()
+      const stationBillingState = stationBillingStateByLocationId.get(
+        location.id
+      )
 
       return {
         id: location.id,
         name: location.name,
         isEnabled: setting?.isEnabled ?? false,
+        timeAttendanceEnabled:
+          stationBillingState?.timeAttendanceEnabled ?? false,
+        timeAttendanceStatus:
+          stationBillingState?.timeAttendanceStatus ?? null,
+        hardwareEntitlementStatus:
+          stationBillingState?.hardwareEntitlementStatus ?? null,
+        hardwareFulfillmentStatus:
+          stationBillingState?.hardwareFulfillmentStatus ?? null,
         latitude: setting?.latitude ?? null,
         longitude: setting?.longitude ?? null,
         radiusMeters: setting?.radiusMeters ?? 75,
@@ -468,6 +500,35 @@ async function listClockSettingsForLocations(
       lateFinishReviewMinutes: setting.late_finish_review_minutes,
       lateStartReviewMinutes: setting.late_start_review_minutes,
     },
+  }))
+}
+
+async function listClockStationBillingStates(locationIds: Array<string>) {
+  const result = await getDatabase().query<ClockStationBillingRow>(
+    `select
+       location.id as location_id,
+       addon.status as time_attendance_status,
+       hardware.entitlement_status as hardware_entitlement_status,
+       hardware.fulfillment_status as hardware_fulfillment_status
+     from public.locations location
+     left join billing_private.location_addons addon
+       on addon.location_id = location.id
+      and addon.addon_type = 'time_attendance'
+     left join billing_private.location_hardware_entitlements hardware
+       on hardware.location_id = location.id
+     where location.id = any($1::uuid[])`,
+    [locationIds]
+  )
+
+  return result.rows.map((row) => ({
+    locationId: row.location_id,
+    timeAttendanceEnabled:
+      row.time_attendance_status === "trialing" ||
+      row.time_attendance_status === "active" ||
+      row.time_attendance_status === "canceling",
+    timeAttendanceStatus: row.time_attendance_status,
+    hardwareEntitlementStatus: row.hardware_entitlement_status,
+    hardwareFulfillmentStatus: row.hardware_fulfillment_status,
   }))
 }
 

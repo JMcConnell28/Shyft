@@ -12,7 +12,7 @@ import {
 } from "@/features/marketing/constants/button-styles"
 import { MarketingFooter } from "@/features/marketing/components/marketing-footer"
 import { MarketingHeader } from "@/features/marketing/components/marketing-header"
-import { LandingRotaDemo } from "@/features/rota-demo/components/landing-rota-demo"
+import { LandingRotaImage } from "@/features/marketing/components/landing-rota-image"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -27,10 +27,10 @@ function LandingPage({ isAuthenticated = false }: { isAuthenticated?: boolean })
         />
         <div className="absolute inset-x-0 top-0 h-80 bg-linear-to-b from-white/70 via-transparent to-transparent" />
 
-        <div className="relative mx-auto flex min-h-svh w-full max-w-[1280px] flex-col px-4 pb-16 pt-5 sm:px-6 lg:px-8">
+        <div className="relative mx-auto flex min-h-svh w-full max-w-[1280px] flex-col px-5 pb-16 pt-5 sm:px-6 lg:px-8">
           <MarketingHeader activePage="home" isAuthenticated={isAuthenticated} />
           <LandingHero />
-          <LandingRotaDemo />
+          <LandingRotaImage />
         </div>
       </section>
 
@@ -48,7 +48,7 @@ function LandingPage({ isAuthenticated = false }: { isAuthenticated?: boolean })
 
 function LandingHero() {
   return (
-    <section className="flex items-center pt-10 sm:pt-12 lg:pt-12">
+    <section className="flex items-center pt-12 sm:pt-12 lg:pt-12">
       <div className="mx-auto flex w-full max-w-[760px] flex-col items-start text-left">
         <Badge
           variant="outline"
@@ -58,25 +58,26 @@ function LandingHero() {
           The smarter way to manage your team
         </Badge>
 
-        <h1 className="mt-6 max-w-[760px] text-balance text-4xl font-extrabold leading-[0.98] tracking-tight text-[#18316a] sm:text-5xl lg:text-[64px]">
+        <h1 className="mt-7 max-w-[760px] text-balance text-4xl font-extrabold leading-[1.04] tracking-[-0.04em] text-[#18316a] sm:mt-6 sm:text-5xl sm:leading-[0.98] sm:tracking-tight lg:text-[64px]">
           Rota management
           <br />
           that <span className="text-[#2c69ff]">launches</span> productivity
         </h1>
 
-        <p className="mt-6 max-w-[560px] text-lg leading-8 text-[#596f99]">
+        <p className="mt-7 max-w-[560px] text-[17px] leading-8 text-[#596f99] sm:mt-6 sm:text-lg">
           RocketRota makes scheduling simple, fair and efficient.
           <br />
           Save time, reduce admin and keep your team happy.
         </p>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:mt-8 sm:flex sm:w-auto">
           <Link
             to="/sign-up"
             search={{ redirect: "/dashboard" }}
             className={cn(
               buttonVariants({ size: "lg" }),
               marketingPrimaryHeroButtonClassName,
+              "!h-12 w-full justify-center gap-2 !rounded-xl !px-4 sm:!h-14 sm:w-auto sm:!rounded-2xl sm:!px-8",
             )}
           >
             Start free trial
@@ -87,13 +88,14 @@ function LandingHero() {
             className={cn(
               buttonVariants({ variant: "pill", size: "lg" }),
               marketingSecondaryButtonClassName,
+              "!h-12 w-full !rounded-xl !px-4 sm:!h-14 sm:w-auto sm:!rounded-2xl sm:!px-8",
             )}
           >
             View pricing
           </Link>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-[#5c729d]">
+        <div className="mt-7 flex w-full flex-wrap gap-x-4 gap-y-2.5 text-sm font-medium text-[#5c729d] sm:mt-6 sm:w-auto sm:gap-x-6 sm:gap-y-3">
           {["14-day free trial", "No credit card required", "Cancel anytime"].map(
             (item) => (
               <div key={item} className="flex items-center gap-2">

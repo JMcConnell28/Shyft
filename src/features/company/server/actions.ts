@@ -6,7 +6,10 @@ import type {
 } from "@/features/company/types"
 import type { EmployeeCompensationInput } from "@/features/staff-groups/types"
 import { requireCompanyAdminContext } from "@/features/company/server/shared"
+import { createEmployeeMemberId } from "@/features/onboarding/utils/invite-utils"
 import { setEmployeeCompensation } from "@/features/staff-groups/server/actions"
+import { removeEmployeeFromScope } from "@/features/staff-groups/server/employee-lifecycle"
+import { withDatabaseTransaction } from "@/features/staff-groups/server/shared"
 import { syncWorkspaceBillingSubscriptionQuantities } from "@/features/billing/server/subscriptions"
 import { getDatabase } from "@/lib/db"
 
@@ -16,6 +19,7 @@ type EmployeeAccountRow = {
   email: string | null
   full_name: string
   id: string
+  offboarded_at: string | null
   user_id: string | null
 }
 
@@ -69,6 +73,11 @@ async function updateCompanyEmployeeLocationActivity(input: {
 }) {
   const context = await requireCompanyAdminContext(input)
   const employee = await getEmployeeAccount(context, input.employeeId)
+
+  if (employee.offboarded_at) {
+    throw new Error("Rehire this employee before changing their location activity.")
+  }
+
   await assertLocationInScope(context, input.targetLocationId)
 
   await getDatabase().query(
@@ -97,6 +106,113 @@ async function updateCompanyEmployeeLocationActivity(input: {
     isActive: input.isActive,
     locationId: input.targetLocationId,
   }
+}
+
+async function removeCompanyEmployee(input: {
+  employeeId: string
+  locationId?: string
+  organizationId?: string
+  userId: string
+}) {
+  const context = await requireCompanyAdminContext(input)
+
+  if (!context.organizationId) {
+    throw new Error("Employees can only be removed from an organisation workspace.")
+  }
+
+  const result = await removeEmployeeFromScope({
+    employeeId: input.employeeId,
+    scope: context,
+  })
+  await syncBilling(context)
+
+  return result
+}
+
+async function rehireCompanyEmployee(input: {
+  employeeId: string
+  locationIds: Array<string>
+  locationId?: string
+  organizationId?: string
+  userId: string
+}) {
+  const context = await requireCompanyAdminContext(input)
+
+  if (!context.organizationId) {
+    throw new Error("Employees can only be rehired from an organisation workspace.")
+  }
+
+  const employee = await getEmployeeAccount(context, input.employeeId)
+
+  if (!employee.offboarded_at) {
+    throw new Error("This employee is already part of the organisation.")
+  }
+
+  await Promise.all(
+    input.locationIds.map((locationId) => assertLocationInScope(context, locationId))
+  )
+
+  await withDatabaseTransaction(async (client) => {
+    await client.query(
+      `update public.employee_location_assignments
+       set is_enabled = false,
+           disabled_at = timezone('utc', now())
+       where organization_id = $1::text
+         and employee_id = $2::uuid`,
+      [context.organizationId, employee.id]
+    )
+    await client.query(
+      `insert into public.employee_location_assignments (
+         employee_id,
+         organization_id,
+         location_id,
+         is_enabled,
+         disabled_at
+       )
+       select $1::uuid, $2::text, location_id, true, null
+       from unnest($3::uuid[]) location_id
+       on conflict (employee_id, location_id)
+       do update set is_enabled = true,
+                     disabled_at = null`,
+      [employee.id, context.organizationId, input.locationIds]
+    )
+
+    if (employee.user_id) {
+      const membershipResult = await client.query<{ id: string }>(
+        `select id
+         from public."member"
+         where "organizationId" = $1::text
+           and "userId" = $2::text
+         limit 1`,
+        [context.organizationId, employee.user_id]
+      )
+
+      if (!membershipResult.rows[0]) {
+        await client.query(
+          `insert into public."member" (
+             id,
+             "organizationId",
+             "userId",
+             role,
+             "createdAt"
+           ) values ($1, $2::text, $3::text, 'employee', timezone('utc', now()))`,
+          [createEmployeeMemberId(), context.organizationId, employee.user_id]
+        )
+      }
+    }
+
+    await client.query(
+      `update public.employees
+       set status = 'active',
+           offboarded_at = null,
+           updated_at = timezone('utc', now())
+       where id = $1::uuid`,
+      [employee.id]
+    )
+  })
+  await syncBilling(context)
+
+  return { employeeId: employee.id }
 }
 
 async function updateCompanyEmployeeCompensation(input: {
@@ -303,7 +419,7 @@ async function getEmployeeAccount(
   employeeId: string
 ): Promise<EmployeeAccountRow> {
   const result = await getDatabase().query<EmployeeAccountRow>(
-    `select id, full_name, email, user_id
+    `select id, full_name, email, user_id, offboarded_at
      from public.employees
      where (($1::text is null and organization_id is null) or organization_id = $1::text)
        and (($2::uuid is null and location_id is null) or location_id = $2::uuid)
@@ -657,6 +773,8 @@ export {
   archiveCompanyEmployeeRotaNote,
   bulkUpdateCompanyEmployeePayrollIds,
   createCompanyEmployeeRotaNote,
+  rehireCompanyEmployee,
+  removeCompanyEmployee,
   updateCompanyEmployeeCompensation,
   updateCompanyEmployeeLocationActivity,
   updateCompanyEmployeePayrollId,

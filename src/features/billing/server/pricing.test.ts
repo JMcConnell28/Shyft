@@ -4,16 +4,16 @@ import { calculateBillingSeatQuantities } from "@/features/billing/utils/pricing
 
 describe("calculateBillingSeatQuantities", () => {
   it.each([
-    { activeEmployees: 0, extraEmployees: 0 },
-    { activeEmployees: 1, extraEmployees: 0 },
-    { activeEmployees: 10, extraEmployees: 0 },
-    { activeEmployees: 11, extraEmployees: 1 },
-    { activeEmployees: 40, extraEmployees: 30 },
+    { usedEmployees: 0, extraEmployees: 0 },
+    { usedEmployees: 1, extraEmployees: 0 },
+    { usedEmployees: 10, extraEmployees: 0 },
+    { usedEmployees: 11, extraEmployees: 1 },
+    { usedEmployees: 40, extraEmployees: 30 },
   ])(
-    "calculates extra employees for $activeEmployees active employees",
-    ({ activeEmployees, extraEmployees }) => {
-      expect(calculateBillingSeatQuantities(activeEmployees)).toEqual({
-        activeEmployeeQuantity: activeEmployees,
+    "calculates extra employees for $usedEmployees used employees",
+    ({ usedEmployees, extraEmployees }) => {
+      expect(calculateBillingSeatQuantities(usedEmployees)).toEqual({
+        usedEmployeeQuantity: usedEmployees,
         includedEmployeeQuantity: 10,
         extraEmployeeQuantity: extraEmployees,
       })

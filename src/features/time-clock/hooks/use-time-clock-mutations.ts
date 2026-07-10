@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
+import { updateTimeAttendanceAddon } from "@/features/billing/server-fns"
 import type {
   ClockAction,
   ClockReason,
@@ -154,6 +155,7 @@ function useClockSettingsMutations(input: {
 }) {
   const queryClient = useQueryClient()
   const updateClockSettingsFn = useServerFn(updateClockSettings)
+  const updateTimeAttendanceAddonFn = useServerFn(updateTimeAttendanceAddon)
 
   async function invalidate() {
     await queryClient.invalidateQueries({
@@ -162,6 +164,27 @@ function useClockSettingsMutations(input: {
   }
 
   return {
+    activateStationMutation: useMutation({
+      mutationFn: (variables: { locationId: string }) =>
+        updateTimeAttendanceAddonFn({
+          data: {
+            action: "activate",
+            confirmationAccepted: true,
+            locationId: variables.locationId,
+          },
+        }),
+      onSuccess: async () => {
+        await invalidate()
+        showSuccessToast(
+          "Clock-in station activated. Time & Attendance billing is now active."
+        )
+      },
+      onError: (error) => {
+        showErrorToast(error, {
+          fallbackMessage: "We could not activate the clock-in station.",
+        })
+      },
+    }),
     updateSettingsMutation: useMutation({
       mutationFn: (variables: {
         isEnabled: boolean

@@ -13,7 +13,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckoutButton } from "@/features/billing/components/checkout-button"
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button"
 import { TimeAttendanceAddonButton } from "@/features/billing/components/time-attendance-addon-button"
-import { TrialTestingControls } from "@/features/billing/components/trial-testing-controls"
 import type {
   OrganizationBillingLocationSummary,
   WorkspaceBillingState,
@@ -70,7 +69,7 @@ function BillingSettingsPage({
               icon={CreditCardIcon}
               label="Plan"
               value={getPlanValue(billing)}
-              description="£25/month including your first 10 active employees"
+              description="£25/month including your first 10 used employees"
             />
             <BillingMetric
               icon={ShieldCheckIcon}
@@ -94,13 +93,13 @@ function BillingSettingsPage({
               icon={ShieldCheckIcon}
               label="Extra employees"
               value={getExtraEmployeeValue(billing)}
-              description="£2.50 per active employee above the included allowance"
+              description="£2.50 per used employee above the included allowance"
             />
             <BillingMetric
               icon={CalendarClockIcon}
               label="Time & Attendance"
               value={`${billing?.timeAttendanceQuantity ?? 0} employees`}
-              description="£1 per active employee assigned to enabled locations"
+              description="£1 per used employee in enabled locations"
             />
           </div>
 
@@ -119,7 +118,7 @@ function BillingSettingsPage({
                       {location.locationName}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {location.employeeHighWaterCount} active staff assigned
+                      {location.usedEmployeeCount} used staff this period
                     </p>
                   </div>
                   {locationId === location.locationId ? (
@@ -142,8 +141,10 @@ function BillingSettingsPage({
                 </div>
               ))}
               <p className="text-xs text-muted-foreground">
-                Employee quantities are synced from active schedulable staff.
-                Fixed fees are billed in advance. Plus VAT where applicable.
+                Employee quantities are counted from published rotas and
+                timesheet activity in the current billing period. Fixed fees are
+                billed in advance. Usage is billed in arrears. Plus VAT where
+                applicable.
               </p>
             </div>
           ) : null}
@@ -221,7 +222,7 @@ function BillingSettingsPage({
                   </Badge>
                 </div>
                 <p className="mt-3 text-xs text-muted-foreground">
-                  {location.employeeHighWaterCount} active staff assigned
+                  {location.usedEmployeeCount} used staff this period
                   {location.timeAttendanceStatus
                     ? ` · Time & Attendance ${location.timeAttendanceStatus}`
                     : ""}
@@ -279,11 +280,6 @@ function TrialSettingsNotice({
         <AlertTitle className="text-sm">{title}</AlertTitle>
         <AlertDescription>{description}</AlertDescription>
       </div>
-      {import.meta.env.DEV ? (
-        <div className="col-span-2 mt-3">
-          <TrialTestingControls trial={trialState} />
-        </div>
-      ) : null}
     </Alert>
   )
 }
@@ -417,13 +413,13 @@ function getPlanValue(billing: WorkspaceBillingState | null) {
 }
 
 function getEmployeeValue(billing: WorkspaceBillingState | null) {
-  return `${billing?.activeEmployeeQuantity ?? 0} counted`
+  return `${billing?.usedEmployeeQuantity ?? 0} counted`
 }
 
 function getEmployeeDescription(billing: WorkspaceBillingState | null) {
   const includedEmployeeQuantity = billing?.includedEmployeeQuantity ?? 10
 
-  return `${includedEmployeeQuantity} included; archived staff are excluded`
+  return `${includedEmployeeQuantity} included; unused staff are excluded`
 }
 
 function getExtraEmployeeValue(billing: WorkspaceBillingState | null) {

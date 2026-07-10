@@ -1,7 +1,11 @@
-import { LockIcon } from "lucide-react"
+import { Clock3Icon, LockIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  TimeAttendanceAddressFields,
+  type TimeAttendanceAddressValue,
+} from "@/features/billing/components/time-attendance-address-fields"
 import {
   businessTypeOptions,
   getDefaultZoneNames,
@@ -170,14 +174,64 @@ function WorksiteStep({
   )
 }
 
+function TimeAttendanceStep({
+  address,
+  enabled,
+  postcodeMessage,
+  onAddressChange,
+  onEnabledChange,
+  onPostcodeChange,
+}: {
+  address: TimeAttendanceAddressValue
+  enabled: boolean
+  postcodeMessage?: string
+  onAddressChange: (value: TimeAttendanceAddressValue) => void
+  onEnabledChange: (value: boolean) => void
+  onPostcodeChange: () => void
+}) {
+  return (
+    <WizardQuestion
+      title="Add Time & Attendance?"
+      description="You can request a clock-in station now, or keep the workspace on rota planning only."
+    >
+      <div className="grid gap-2 sm:grid-cols-2">
+        <ChoiceButton
+          checked={!enabled}
+          onClick={() => onEnabledChange(false)}
+          title="Rota only"
+          description="Set up scheduling now and add clock-in later."
+        />
+        <ChoiceButton
+          checked={enabled}
+          onClick={() => onEnabledChange(true)}
+          icon={<Clock3Icon className="size-4" />}
+          title="Add Time & Attendance"
+          description="Include the add-on and request a clock-in station."
+        />
+      </div>
+      {enabled ? (
+        <TimeAttendanceAddressFields
+          idPrefix="onboarding-time-attendance"
+          value={address}
+          postcodeMessage={postcodeMessage}
+          onChange={onAddressChange}
+          onPostcodeChange={onPostcodeChange}
+        />
+      ) : null}
+    </WizardQuestion>
+  )
+}
+
 function SummaryStep({
   businessLabel,
+  timeAttendanceEnabled,
   planningMode,
   workspaceName,
   zoneNames,
   worksiteName,
 }: {
   businessLabel: string
+  timeAttendanceEnabled: boolean
   planningMode: OnboardingPlanningMode
   workspaceName: string
   zoneNames: string[]
@@ -205,6 +259,10 @@ function SummaryStep({
               : worksiteName.trim() || "No usual worksite yet"
           }
         />
+        <SummaryRow
+          label="Time & Attendance"
+          value={timeAttendanceEnabled ? "Requested" : "Not now"}
+        />
       </div>
       <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-950">
         <LockIcon className="mt-0.5 size-4 shrink-0" />
@@ -216,5 +274,12 @@ function SummaryStep({
   )
 }
 
-export { AreasStep, BusinessTypeStep, NameStep, SummaryStep, WorksiteStep }
+export {
+  AreasStep,
+  BusinessTypeStep,
+  NameStep,
+  SummaryStep,
+  TimeAttendanceStep,
+  WorksiteStep,
+}
 export type { WorksiteChoice }

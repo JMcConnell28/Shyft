@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE } from "@/features/payroll/adapters/sage-csv"
+import type { PayrollExportProfile } from "@/features/payroll/types"
 import type { TimesheetEntry } from "@/features/timesheets/types"
 import {
   buildSageTimesheetExportData,
@@ -124,6 +126,7 @@ describe("serializeSageTimesheetExportCsv", () => {
     const csv = serializeSageTimesheetExportCsv({
       fileName: "sage-payroll.csv",
       missingPayrollEmployees: [],
+      profile: DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE,
       rows: [
         {
           amount: "",
@@ -143,5 +146,36 @@ describe("serializeSageTimesheetExportCsv", () => {
     expect(csv).toContain('"Employee Reference","Employee Name","Pay Element"')
     expect(csv).toContain('"42","Ada Lovelace","Basic Hours","7.50"')
     expect(csv).toContain('"Manager said ""approved"""')
+  })
+
+  it("uses the profile column order and pay element", () => {
+    const customProfile: PayrollExportProfile = {
+      ...DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE,
+      basicHoursPayElement: "Ordinary Hours",
+      columns: [
+        { key: "employeeReference", label: "Works Number" },
+        { key: "units", label: "Hours" },
+        { key: "payElement", label: "Payment Name" },
+      ],
+      hoursFormat: "hours-minutes" as const,
+      id: "sage-customer-template",
+      name: "Customer Sage template",
+    }
+
+    const exportData = buildSageTimesheetExportData({
+      entries: [baseEntry],
+      locationName: "Harbour House",
+      locationSlug: "harbour-house",
+      profile: customProfile,
+      rotaId: "rota-12345678",
+      weekStart: "2026-06-01",
+    })
+    const csv = serializeSageTimesheetExportCsv(exportData)
+
+    expect(exportData.rows[0]?.payElement).toBe("Ordinary Hours")
+    expect(exportData.rows[0]?.units).toBe("7:30")
+    expect(csv).toBe(
+      '\uFEFF"Works Number","Hours","Payment Name"\r\n"42","7:30","Ordinary Hours"'
+    )
   })
 })

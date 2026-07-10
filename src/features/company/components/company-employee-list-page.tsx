@@ -31,6 +31,7 @@ function CompanyEmployeeListPage({
   workspaceSlug: string
 }) {
   const [query, setQuery] = React.useState("")
+  const [view, setView] = React.useState<"current" | "former">("current")
   const companyQuery = useCompanyEmployeesQuery({
     organizationId,
     locationId,
@@ -55,18 +56,27 @@ function CompanyEmployeeListPage({
     )
   }
 
+  const currentEmployees = companyQuery.data.employees.filter(
+    (employee) => employee.offboardedAt === null
+  )
+  const formerEmployees = organizationId
+    ? companyQuery.data.employees.filter(
+        (employee) => employee.offboardedAt !== null
+      )
+    : []
+  const employeesForView = view === "current" ? currentEmployees : formerEmployees
   const normalizedQuery = query.trim().toLowerCase()
   const employees = normalizedQuery
-    ? companyQuery.data.employees.filter((employee) =>
+    ? employeesForView.filter((employee) =>
         `${employee.name} ${employee.email ?? ""} ${employee.payrollId ?? ""} ${getCompanyRoleLabel(employee.role)}`
           .toLowerCase()
           .includes(normalizedQuery)
       )
-    : companyQuery.data.employees
-  const activeCount = companyQuery.data.employees.filter(
+    : employeesForView
+  const activeCount = currentEmployees.filter(
     (employee) => employee.status === "active"
   ).length
-  const payrollLinkedCount = companyQuery.data.employees.filter((employee) =>
+  const payrollLinkedCount = currentEmployees.filter((employee) =>
     Boolean(employee.payrollId)
   ).length
 
@@ -86,7 +96,7 @@ function CompanyEmployeeListPage({
           <div className="grid grid-cols-3 gap-2 sm:min-w-72">
             <StatPill
               label="Employees"
-              value={companyQuery.data.employees.length}
+              value={currentEmployees.length}
             />
             <StatPill label="Active" value={activeCount} />
             <StatPill label="Payroll IDs" value={payrollLinkedCount} />
@@ -104,12 +114,40 @@ function CompanyEmployeeListPage({
             />
           </label>
           <SageEmployeeImportDialog
-            employees={companyQuery.data.employees}
+            employees={currentEmployees}
             locationId={locationId}
             organizationId={organizationId}
             userId={userId}
           />
         </div>
+        {organizationId ? (
+          <div className="mt-4 inline-flex rounded-xl bg-[#f2f5fb] p-1 text-sm font-extrabold">
+          <button
+            type="button"
+            className={cn(
+              "rounded-lg px-3 py-1.5 transition-colors",
+              view === "current"
+                ? "bg-white text-[#11245a] shadow-sm"
+                : "text-[#61709a]"
+            )}
+            onClick={() => setView("current")}
+          >
+            Current ({currentEmployees.length})
+          </button>
+          <button
+            type="button"
+            className={cn(
+              "rounded-lg px-3 py-1.5 transition-colors",
+              view === "former"
+                ? "bg-white text-[#11245a] shadow-sm"
+                : "text-[#61709a]"
+            )}
+            onClick={() => setView("former")}
+          >
+            Former ({formerEmployees.length})
+          </button>
+          </div>
+        ) : null}
       </section>
 
       <section className="overflow-hidden rounded-xl bg-white shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
@@ -117,13 +155,17 @@ function CompanyEmployeeListPage({
           <div className="flex min-h-44 flex-col items-center justify-center p-6 text-center">
             <UsersRoundIcon className="size-5 text-[#0069ff]" />
             <p className="mt-3 text-sm font-extrabold">
-              {companyQuery.data.employees.length === 0
-                ? "No employees yet"
+              {employeesForView.length === 0
+                ? view === "former"
+                  ? "No former employees"
+                  : "No employees yet"
                 : "No matching employees"}
             </p>
             <p className="mt-1 text-sm font-semibold text-[#61709a]">
-              {companyQuery.data.employees.length === 0
-                ? "Invited staff will appear here once they join."
+              {employeesForView.length === 0
+                ? view === "former"
+                  ? "Employees you remove from the organisation will appear here."
+                  : "Invited staff will appear here once they join."
                 : "Try a different name, email, or role."}
             </p>
           </div>

@@ -16,11 +16,13 @@ import {
   archiveCompanyEmployeeRotaNote,
   bulkUpdateCompanyEmployeePayrollIds,
   createCompanyEmployeeRotaNote,
+  rehireCompanyEmployee,
+  removeCompanyEmployee,
   updateCompanyEmployeeCompensation,
   updateCompanyEmployeeLocationActivity,
   updateCompanyEmployeePayrollId,
-  updateCompanyEmployeeRotaNote,
   updateCompanyEmployeeRole,
+  updateCompanyEmployeeRotaNote,
 } from "@/features/company/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -55,6 +57,8 @@ function useCompanyMutations(input: {
   const createRotaNoteFn = useServerFn(createCompanyEmployeeRotaNote)
   const updateRotaNoteFn = useServerFn(updateCompanyEmployeeRotaNote)
   const archiveRotaNoteFn = useServerFn(archiveCompanyEmployeeRotaNote)
+  const removeEmployeeFn = useServerFn(removeCompanyEmployee)
+  const rehireEmployeeFn = useServerFn(rehireCompanyEmployee)
 
   async function invalidate() {
     await Promise.all([
@@ -93,6 +97,34 @@ function useCompanyMutations(input: {
     onError: (error) => {
       showErrorToast(error, {
         fallbackMessage: "We could not update that location.",
+      })
+    },
+  })
+
+  const removeEmployeeMutation = useMutation({
+    mutationFn: (variables: { employeeId: string }) =>
+      removeEmployeeFn({ data: { ...input, ...variables } }),
+    onSuccess: async () => {
+      await invalidate()
+      showSuccessToast("Employee removed from the organisation.")
+    },
+    onError: (error) => {
+      showErrorToast(error, {
+        fallbackMessage: "We could not remove that employee.",
+      })
+    },
+  })
+
+  const rehireEmployeeMutation = useMutation({
+    mutationFn: (variables: { employeeId: string; locationIds: Array<string> }) =>
+      rehireEmployeeFn({ data: { ...input, ...variables } }),
+    onSuccess: async () => {
+      await invalidate()
+      showSuccessToast("Employee rehired.")
+    },
+    onError: (error) => {
+      showErrorToast(error, {
+        fallbackMessage: "We could not rehire that employee.",
       })
     },
   })
@@ -191,6 +223,8 @@ function useCompanyMutations(input: {
     locationActivityMutation,
     payrollIdMutation,
     payrollImportMutation,
+    rehireEmployeeMutation,
+    removeEmployeeMutation,
     roleMutation,
     updateRotaNoteMutation,
   }

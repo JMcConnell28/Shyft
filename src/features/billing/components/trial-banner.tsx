@@ -1,13 +1,13 @@
 "use client"
 
-import { AlertTriangleIcon } from "lucide-react"
+import * as React from "react"
+import { AlertTriangleIcon, XIcon } from "lucide-react"
 
 import type {
   WorkspaceBillingState,
   WorkspaceTrial,
 } from "@/features/billing/types"
 import { CheckoutButton } from "@/features/billing/components/checkout-button"
-import { TrialTestingControls } from "@/features/billing/components/trial-testing-controls"
 import { hasPaidWorkspaceAccess } from "@/features/billing/utils/billing-access"
 import { getTrialDisplayState } from "@/features/billing/utils/trial-state"
 
@@ -18,9 +18,10 @@ function TrialBanner({
   billing: WorkspaceBillingState | null
   trial: WorkspaceTrial | null
 }) {
+  const [isDismissed, setIsDismissed] = React.useState(false)
   const trialState = getTrialDisplayState(trial)
 
-  if (!trialState) {
+  if (!trialState || isDismissed) {
     return null
   }
 
@@ -70,8 +71,7 @@ function TrialBanner({
             </p>
           </div>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <TrialTestingControls trial={trialState} />
+        <div className="flex items-center gap-2 sm:flex-row sm:items-center">
           {!hasOpenSubscription &&
           (!hasSavedPaymentMethod || isExpiredWithoutPaidAccess) ? (
             <CheckoutButton
@@ -80,9 +80,20 @@ function TrialBanner({
             >
               {isExpiredWithoutPaidAccess
                 ? "Reactivate workspace"
-                : "Choose plan"}
+                : "Add payment method"}
             </CheckoutButton>
           ) : null}
+          <button
+            type="button"
+            aria-label="Dismiss trial banner"
+            title="Dismiss trial banner"
+            onClick={() => {
+              setIsDismissed(true)
+            }}
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-amber-300/80 text-amber-900 transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-amber-50"
+          >
+            <XIcon className="size-4" />
+          </button>
         </div>
       </div>
     </div>

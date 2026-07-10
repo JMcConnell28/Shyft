@@ -45,7 +45,7 @@ function PricingPage() {
 
               <p className="mt-6 max-w-[540px] text-lg leading-8 text-[#596f99]">
                 Pay {formatGbp(CORE_BASE_PRICE_GBP)} per month including your
-                first {INCLUDED_CORE_EMPLOYEES} active employees, then{" "}
+                first {INCLUDED_CORE_EMPLOYEES} used employees, then{" "}
                 {formatGbp(EXTRA_EMPLOYEE_PRICE_GBP)} per extra employee.
                 Unlimited locations are included. Prices exclude VAT.
               </p>
@@ -114,22 +114,22 @@ function PricingExplainer() {
       <PricingCard
         eyebrow="Step 1"
         title={`${formatGbp(CORE_BASE_PRICE_GBP)} base plan`}
-        body="Your organisation includes unlimited locations and the first 10 active schedulable employees."
+        body="Your organisation includes unlimited locations and the first 10 employees used in a billing period."
       />
       <PricingCard
         eyebrow="Step 2"
         title={`${INCLUDED_CORE_EMPLOYEES} employees included`}
-        body="Archived staff and leavers do not count, so you only pay for people who can be scheduled."
+        body="Dormant staff do not count until they appear on a published rota or timesheet activity."
       />
       <PricingCard
         eyebrow="Step 3"
         title={`${formatGbp(EXTRA_EMPLOYEE_PRICE_GBP)} per extra employee`}
-        body="The core plan scales with active employee count across the organisation, not by location."
+        body="The core plan scales with distinct used employees across the organisation, not by location."
       />
       <PricingCard
         eyebrow="Optional"
         title={`${formatGbp(TIME_ATTENDANCE_EMPLOYEE_PRICE_GBP)} Time & Attendance`}
-        body="Enable clocking per location and pay per active employee assigned to enabled locations. One NFC stand is included per location."
+        body="Enable clocking per location and pay per used employee in enabled locations. One NFC stand is included per location."
       />
     </section>
   )
@@ -172,15 +172,15 @@ function PricingFaq() {
       <div className="mt-8 grid gap-4 lg:grid-cols-3">
         <FaqItem
           question="How are employees counted?"
-          answer="We count active schedulable employees in the organisation. Archived staff and leavers are excluded."
+          answer="We count distinct employees used in the billing period through published rotas or timesheet activity. Unused staff are excluded."
         />
         <FaqItem
           question="What if I only have one small venue?"
-          answer="That is exactly what the base plan is for. Teams with up to 10 active employees stay at £25 per month, excluding VAT."
+          answer="That is exactly what the base plan is for. Teams with up to 10 used employees stay at £25 per month, excluding VAT."
         />
         <FaqItem
           question="Can I grow without changing plan?"
-          answer="Yes. Add as many locations and zones as you need. Billing stays based on active employees."
+          answer="Yes. Add as many locations and zones as you need. Billing stays based on used employees."
         />
       </div>
     </section>

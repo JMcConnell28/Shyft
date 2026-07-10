@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { calculatePricing } from "@/features/marketing/utils/pricing"
 
 describe("calculatePricing", () => {
-  it("includes the first 10 active employees in the base price", () => {
+  it("includes the first 10 used employees in the base price", () => {
     const pricing = calculatePricing({
       locations: [
         { employeeCount: 4, timeAttendanceEnabled: false },

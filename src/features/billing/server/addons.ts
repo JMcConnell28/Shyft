@@ -1,8 +1,8 @@
 import "@tanstack/react-start/server-only"
 
 import {
-  DERRY_CLOCK_STATION_COMING_SOON_MESSAGE,
-  isDerryClockStationPostcode,
+  CLOCK_STATION_REGION_UNAVAILABLE_MESSAGE,
+  isSupportedClockStationPostcode,
   normalizePostcode,
   type TimeAttendanceDeliveryAddress,
 } from "@/features/billing/schemas/time-attendance-addon-schemas"
@@ -80,9 +80,9 @@ async function activateTimeAttendance(input: {
   if (
     requiresHardwareDelivery &&
     deliveryAddress &&
-    !isDerryClockStationPostcode(deliveryAddress.postcode)
+    !isSupportedClockStationPostcode(deliveryAddress.postcode)
   ) {
-    throw new Error(DERRY_CLOCK_STATION_COMING_SOON_MESSAGE)
+    throw new Error(CLOCK_STATION_REGION_UNAVAILABLE_MESSAGE)
   }
 
   const trialEndsAt = new Date(billing.trial_ends_at)

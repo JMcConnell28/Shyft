@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
+import { ClockStationActivationPanel } from "@/features/time-clock/components/clock-station-activation-panel"
 import { useClockSettingsMutations } from "@/features/time-clock/hooks/use-time-clock-mutations"
 import { useClockSettingsQuery } from "@/features/time-clock/hooks/use-time-clock-query"
 import type { ClockSettingsPageData } from "@/features/time-clock/types"
@@ -70,6 +71,9 @@ function ClockLocationSettingsCard({
   const [hardReviewAfterMinutes, setHardReviewAfterMinutes] = React.useState(
     location.hardReviewAfterMinutes.toString()
   )
+  const isActivatingStation =
+    mutations.activateStationMutation.isPending &&
+    mutations.activateStationMutation.variables?.locationId === location.id
   const getSettingsPayload = React.useCallback(
     () => ({
       earlyClockInGraceMinutes: Number(earlyClockInGraceMinutes),
@@ -121,6 +125,16 @@ function ClockLocationSettingsCard({
         </Badge>
       </CardHeader>
       <CardContent className="space-y-0 py-0!">
+        <ClockStationActivationPanel
+          isPending={isActivatingStation}
+          location={location}
+          onActivate={(activateLocationId) =>
+            mutations.activateStationMutation.mutate({
+              locationId: activateLocationId,
+            })
+          }
+        />
+
         <div className="flex min-h-18 items-center justify-between border-b border-border/70 py-4">
           <div>
             <p className="text-sm font-medium">Allow employee clocking</p>

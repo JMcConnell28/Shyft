@@ -43,6 +43,14 @@ function getTimeAttendanceEmployeePriceId() {
   return getRequiredEnv("STRIPE_TIME_ATTENDANCE_EMPLOYEE_PRICE_ID")
 }
 
+function getCoreExtraEmployeeMeterEventName() {
+  return getRequiredEnv("STRIPE_CORE_EXTRA_EMPLOYEE_METER_EVENT_NAME")
+}
+
+function getTimeAttendanceEmployeeMeterEventName() {
+  return getRequiredEnv("STRIPE_TIME_ATTENDANCE_EMPLOYEE_METER_EVENT_NAME")
+}
+
 function getOptionalTimeAttendanceEmployeePriceId() {
   return getOptionalEnv("STRIPE_TIME_ATTENDANCE_EMPLOYEE_PRICE_ID")
 }
@@ -56,9 +64,11 @@ export {
   getBillingCurrency,
   getCoreBasePriceId,
   getCoreExtraEmployeePriceId,
+  getCoreExtraEmployeeMeterEventName,
   getOptionalCoreExtraEmployeePriceId,
   getOptionalTimeAttendanceEmployeePriceId,
   getStripe,
   getTimeAttendanceEmployeePriceId,
+  getTimeAttendanceEmployeeMeterEventName,
   stripeApiVersion,
 }

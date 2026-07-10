@@ -2,6 +2,7 @@ import type { EmployeeCompensationInput } from "@/features/staff-groups/types"
 import { getDatabase } from "@/lib/db"
 
 import { syncWorkspaceBillingSubscriptionQuantities } from "@/features/billing/server/subscriptions"
+import { removeEmployeeFromScope } from "@/features/staff-groups/server/employee-lifecycle"
 import {
   assertGroupNameAvailable,
   createUniqueStaffGroupSlug,
@@ -19,85 +20,6 @@ type StaffGroupScope = Pick<
   Awaited<ReturnType<typeof requireManagedStaffGroupsContext>>,
   "locationId" | "organizationId"
 >
-
-type WorkspaceEmployeeRecord = {
-  id: string
-  userId: string | null
-}
-
-async function getWorkspaceEmployee(
-  scope: StaffGroupScope,
-  employeeId: string
-): Promise<WorkspaceEmployeeRecord> {
-  const result = await getDatabase().query<{
-    id: string
-    user_id: string | null
-  }>(
-    `select id, user_id
-     from public.employees
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
-       and (($2::uuid is null and location_id is null) or location_id = $2::uuid)
-       and id = $3::uuid
-     limit 1`,
-    [scope.organizationId, scope.locationId, employeeId]
-  )
-
-  const employee = result.rows.at(0)
-
-  if (!employee) {
-    throw new Error("That team member could not be found.")
-  }
-
-  return {
-    id: employee.id,
-    userId: employee.user_id,
-  }
-}
-
-async function assertEmployeeCanBeRemoved(
-  scope: StaffGroupScope,
-  employee: WorkspaceEmployeeRecord
-) {
-  if (!employee.userId) {
-    return
-  }
-
-  if (scope.locationId) {
-    const result = await getDatabase().query<{ role: string }>(
-      `select role
-       from public.location_memberships
-       where location_id = $1::uuid
-         and user_id = $2::text
-       limit 1`,
-      [scope.locationId, employee.userId]
-    )
-
-    if (result.rows[0]?.role === "owner") {
-      throw new Error("You cannot remove a location owner.")
-    }
-
-    return
-  }
-
-  if (!scope.organizationId) {
-    return
-  }
-
-  const result = await getDatabase().query<{ role: string }>(
-    `select role
-     from public."member"
-     where "organizationId" = $1::text
-       and "userId" = $2::text
-     limit 1`,
-    [scope.organizationId, employee.userId]
-  )
-
-  const roles = result.rows[0]?.role.split(",").map((role) => role.trim()) ?? []
-
-  if (roles.includes("owner")) {
-    throw new Error("You cannot remove an organisation owner.")
-  }
-}
 
 async function createStaffGroup(input: {
   organizationId?: string
@@ -327,15 +249,20 @@ async function setEmployeeActiveStatus(input: {
 
   const status = input.isActive ? "active" : "inactive"
 
-  await getDatabase().query(
+  const result = await getDatabase().query(
     `update public.employees
      set status = $3,
          updated_at = timezone('utc', now())
      where (($1::text is null and organization_id is null) or organization_id = $1::text)
        and (($2::uuid is null and location_id is null) or location_id = $2::uuid)
-       and id = $4::uuid`,
+       and id = $4::uuid
+       and offboarded_at is null`,
     [context.organizationId, context.locationId, status, input.employeeId]
   )
+
+  if (result.rowCount !== 1) {
+    throw new Error("Rehire this team member before changing their active status.")
+  }
   await syncBillingQuantitiesForStaffContext(context)
 
   return {
@@ -432,74 +359,13 @@ async function removeEmployeeFromWorkspace(input: {
   employeeId: string
 }) {
   const context = await requireManagedStaffGroupsContext(input)
-  const employee = await getWorkspaceEmployee(context, input.employeeId)
-
-  if (employee.userId === context.userId) {
-    throw new Error("You cannot remove your own team member record.")
-  }
-
-  await assertEmployeeCanBeRemoved(context, employee)
-
-  await withDatabaseTransaction(async (client) => {
-    await client.query(
-      `update public.employees
-       set status = 'inactive',
-           updated_at = timezone('utc', now())
-       where (($1::text is null and organization_id is null) or organization_id = $1::text)
-         and (($2::uuid is null and location_id is null) or location_id = $2::uuid)
-         and id = $3::uuid`,
-      [context.organizationId, context.locationId, employee.id]
-    )
-
-    if (context.locationId) {
-      await client.query(
-        `update public.employee_location_assignments
-         set is_enabled = false,
-             disabled_at = timezone('utc', now())
-         where location_id = $1::uuid
-           and employee_id = $2::uuid`,
-        [context.locationId, employee.id]
-      )
-
-      if (employee.userId) {
-        await client.query(
-          `delete from public.location_memberships
-           where location_id = $1::uuid
-             and user_id = $2::text`,
-          [context.locationId, employee.userId]
-        )
-      }
-
-      return
-    }
-
-    if (!context.organizationId) {
-      return
-    }
-
-    await client.query(
-      `update public.employee_location_assignments
-       set is_enabled = false,
-           disabled_at = timezone('utc', now())
-       where organization_id = $1::text
-         and employee_id = $2::uuid`,
-      [context.organizationId, employee.id]
-    )
-
-    if (employee.userId) {
-      await client.query(
-        `delete from public."member"
-         where "organizationId" = $1::text
-           and "userId" = $2::text`,
-        [context.organizationId, employee.userId]
-      )
-    }
+  const result = await removeEmployeeFromScope({
+    employeeId: input.employeeId,
+    scope: context,
   })
   await syncBillingQuantitiesForStaffContext(context)
 
-  return {
-    employeeId: employee.id,
-  }
+  return result
 }
 
 async function syncBillingQuantitiesForStaffContext(

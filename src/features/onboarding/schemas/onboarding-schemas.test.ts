@@ -82,6 +82,39 @@ describe("onboarding schemas", () => {
     ).toBe(true)
   })
 
+  it("accepts Time & Attendance setup with a supported delivery address", () => {
+    expect(
+      locationSetupSchema.safeParse({
+        businessType: "hospitality",
+        planningMode: "fixed_location",
+        locationName: "The Crown",
+        zoneNames: ["Bar"],
+        worksiteName: "",
+        timeAttendanceEnabled: true,
+        timeAttendanceDeliveryAddress: {
+          city: "Launch City",
+          country: "GB",
+          line1: "1 Strand Road",
+          name: "Alex Manager",
+          postcode: "BT48 6DQ",
+        },
+      }).success
+    ).toBe(true)
+  })
+
+  it("rejects Time & Attendance setup without delivery details", () => {
+    expect(
+      locationSetupSchema.safeParse({
+        businessType: "hospitality",
+        planningMode: "fixed_location",
+        locationName: "The Crown",
+        zoneNames: ["Bar"],
+        worksiteName: "",
+        timeAttendanceEnabled: true,
+      }).success
+    ).toBe(false)
+  })
+
   it("rejects fixed-location setup without areas", () => {
     expect(
       locationSetupSchema.safeParse({

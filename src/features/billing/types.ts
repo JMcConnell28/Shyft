@@ -36,7 +36,7 @@ type WorkspaceBillingState = {
   pastDueGraceEndsAt: string | null
   isPastDueGraceActive: boolean
   locationQuantity: number
-  activeEmployeeQuantity: number
+  usedEmployeeQuantity: number
   includedEmployeeQuantity: number
   extraEmployeeQuantity: number
   timeAttendanceQuantity: number
@@ -58,7 +58,7 @@ type BillingAccountSummary = {
 type BillingPeriodUsage = {
   locationId: string
   locationName: string
-  employeeHighWaterCount: number
+  usedEmployeeCount: number
   includedEmployeeCount: number
   extraEmployeeCount: number
   timeAttendanceEnabled: boolean
@@ -102,7 +102,7 @@ type OrganizationBillingLocationSummary = {
   payerLabel: string
   renewalDate: string | null
   accessState: LocationEntitlement["accessState"]
-  employeeHighWaterCount: number
+  usedEmployeeCount: number
   includedEmployeeCount: number
   extraEmployeeCount: number
   timeAttendanceStatus: LocationAddon["status"] | null

@@ -15,6 +15,7 @@ type OnboardingShellProps = {
   description: string
   progress?: number
   children: React.ReactNode
+  contentWidth?: "default" | "wide"
   showBackToDashboard?: boolean
   showSignOut?: boolean
 }
@@ -26,6 +27,7 @@ function OnboardingShell({
   description,
   progress,
   children,
+  contentWidth = "default",
   showBackToDashboard = true,
   showSignOut = false,
 }: OnboardingShellProps) {
@@ -45,8 +47,8 @@ function OnboardingShell({
   }
 
   return (
-    <div className="h-svh overflow-hidden bg-muted/20">
-      <div className="mx-auto flex h-svh w-full max-w-5xl flex-col px-3 py-3 sm:px-5 lg:px-8">
+    <div className="min-h-svh bg-muted/20">
+      <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-3 sm:px-5 lg:px-8">
         <div className="flex items-center justify-between gap-4">
           <Link
             to={showBackToDashboard ? "/dashboard" : "/"}
@@ -70,7 +72,12 @@ function OnboardingShell({
           </div>
         </div>
 
-        <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col justify-center gap-3 py-3 sm:gap-4 sm:py-5">
+        <div
+          className={cn(
+            "mx-auto flex min-h-0 w-full flex-1 flex-col justify-center gap-3 py-5 sm:gap-4 sm:py-7",
+            contentWidth === "wide" ? "max-w-5xl" : "max-w-2xl"
+          )}
+        >
           <section className="space-y-3">
             <div className="space-y-2">
               <Badge variant="outline" className="text-[11px]">

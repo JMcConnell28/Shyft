@@ -1,7 +1,6 @@
 import "@tanstack/react-start/server-only"
 
 import type { WorkspaceTrial } from "@/features/billing/types"
-import { FREE_TRIAL_DAYS } from "@/features/onboarding/constants"
 import { getDatabase } from "@/lib/db"
 
 type WorkspaceTrialRow = {
@@ -125,45 +124,4 @@ async function ensureOrganizationWorkspaceTrial(organizationId: string) {
   )
 }
 
-async function setWorkspaceTrialForDevelopment(input: {
-  organizationId?: string | null
-  locationId?: string | null
-  state: "active" | "ending-soon" | "expired" | "reset"
-}) {
-  const now = new Date()
-  const trialEndsAt = new Date(now)
-  trialEndsAt.setUTCDate(
-    trialEndsAt.getUTCDate() +
-      (input.state === "expired"
-        ? -1
-        : input.state === "ending-soon"
-          ? 2
-          : FREE_TRIAL_DAYS)
-  )
-
-  if (input.locationId) {
-    await getDatabase().query(
-      `update billing_private.location_entitlements
-       set trial_started_at = case when $2 then $3 else trial_started_at end,
-           trial_ends_at = $4,
-           updated_at = timezone('utc', now())
-       where location_id = $1`,
-      [input.locationId, input.state === "reset", now, trialEndsAt]
-    )
-  } else if (input.organizationId) {
-    await getDatabase().query(
-      `update billing_private.location_entitlements entitlement
-       set trial_started_at = case when $2 then $3 else entitlement.trial_started_at end,
-           trial_ends_at = $4,
-           updated_at = timezone('utc', now())
-       from public.locations location
-       where location.id = entitlement.location_id
-         and location.organization_id = $1`,
-      [input.organizationId, input.state === "reset", now, trialEndsAt]
-    )
-  }
-
-  return ensureWorkspaceTrial(input)
-}
-
-export { ensureWorkspaceTrial, setWorkspaceTrialForDevelopment }
+export { ensureWorkspaceTrial }

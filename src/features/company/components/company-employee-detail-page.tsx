@@ -10,11 +10,23 @@ import {
   MapPinIcon,
   ShieldCheckIcon,
   TriangleAlertIcon,
+  UserRoundCheckIcon,
 } from "lucide-react"
 
 import type { AssignableOrganizationRole } from "@/lib/auth/permissions"
 import type { CompanyEmployeeDetail } from "@/features/company/types"
 import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -62,6 +74,8 @@ function CompanyEmployeeDetailPage({
   const [roleDialogOpen, setRoleDialogOpen] = React.useState(false)
   const [payDialogOpen, setPayDialogOpen] = React.useState(false)
   const [payrollDialogOpen, setPayrollDialogOpen] = React.useState(false)
+  const [removeDialogOpen, setRemoveDialogOpen] = React.useState(false)
+  const [rehireDialogOpen, setRehireDialogOpen] = React.useState(false)
 
   if (employeeQuery.isPending) {
     return (
@@ -89,7 +103,10 @@ function CompanyEmployeeDetailPage({
     mutations.payrollIdMutation.isPending ||
     mutations.createRotaNoteMutation.isPending ||
     mutations.updateRotaNoteMutation.isPending ||
-    mutations.archiveRotaNoteMutation.isPending
+    mutations.archiveRotaNoteMutation.isPending ||
+    mutations.removeEmployeeMutation.isPending ||
+    mutations.rehireEmployeeMutation.isPending
+  const isFormerEmployee = employee.offboardedAt !== null
 
   return (
     <div className="space-y-4 text-[#11245a]">
@@ -115,60 +132,80 @@ function CompanyEmployeeDetailPage({
               {employee.email ?? "No email yet"} -{" "}
               {employeeQuery.data.workspaceName}
             </p>
+            {isFormerEmployee ? (
+              <span className="mt-2 inline-flex rounded-md bg-[#f2f5fb] px-2 py-1 text-xs font-extrabold text-[#405078]">
+                Former employee
+              </span>
+            ) : null}
           </div>
         </div>
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <DetailCard
-          icon={ShieldCheckIcon}
-          title="Account role"
-          description={getCompanyRoleLabel(employee.role)}
-          actionLabel="Change role"
-          disabled={!isEditableCompanyRole(employee.role) || !employee.userId}
-          onAction={() => setRoleDialogOpen(true)}
+      {isFormerEmployee ? (
+        <FormerEmployeeCard
+          employee={employee}
+          open={rehireDialogOpen}
+          pending={pending}
+          onOpenChange={setRehireDialogOpen}
+          onRehire={async (locationIds) => {
+            await mutations.rehireEmployeeMutation.mutateAsync({
+              employeeId: employee.id,
+              locationIds,
+            })
+          }}
         />
-        <DetailCard
-          icon={BanknoteIcon}
-          title="Pay"
-          description={formatEmployeeCompensation(employee.compensation)}
-          actionLabel="Edit pay"
-          onAction={() => setPayDialogOpen(true)}
-        />
-        <DetailCard
-          icon={IdCardIcon}
-          title="Payroll ID"
-          description={employee.payrollId ?? "Not linked to Sage payroll"}
-          actionLabel="Edit ID"
-          onAction={() => setPayrollDialogOpen(true)}
-        />
-      </div>
+      ) : (
+        <>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <DetailCard
+              icon={ShieldCheckIcon}
+              title="Account role"
+              description={getCompanyRoleLabel(employee.role)}
+              actionLabel="Change role"
+              disabled={!isEditableCompanyRole(employee.role) || !employee.userId}
+              onAction={() => setRoleDialogOpen(true)}
+            />
+            <DetailCard
+              icon={BanknoteIcon}
+              title="Pay"
+              description={formatEmployeeCompensation(employee.compensation)}
+              actionLabel="Edit pay"
+              onAction={() => setPayDialogOpen(true)}
+            />
+            <DetailCard
+              icon={IdCardIcon}
+              title="Payroll ID"
+              description={employee.payrollId ?? "Not linked to Sage payroll"}
+              actionLabel="Edit ID"
+              onAction={() => setPayrollDialogOpen(true)}
+            />
+          </div>
 
-      <CompanyEmployeeRotaNotesCard
-        employee={employee}
-        pending={pending}
-        onArchive={async (noteId) => {
-          await mutations.archiveRotaNoteMutation.mutateAsync({
-            employeeId: employee.id,
-            noteId,
-          })
-        }}
-        onCreate={async (note) => {
-          await mutations.createRotaNoteMutation.mutateAsync({
-            employeeId: employee.id,
-            note,
-          })
-        }}
-        onUpdate={async (noteId, note) => {
-          await mutations.updateRotaNoteMutation.mutateAsync({
-            employeeId: employee.id,
-            note,
-            noteId,
-          })
-        }}
-      />
+          <CompanyEmployeeRotaNotesCard
+            employee={employee}
+            pending={pending}
+            onArchive={async (noteId) => {
+              await mutations.archiveRotaNoteMutation.mutateAsync({
+                employeeId: employee.id,
+                noteId,
+              })
+            }}
+            onCreate={async (note) => {
+              await mutations.createRotaNoteMutation.mutateAsync({
+                employeeId: employee.id,
+                note,
+              })
+            }}
+            onUpdate={async (noteId, note) => {
+              await mutations.updateRotaNoteMutation.mutateAsync({
+                employeeId: employee.id,
+                note,
+                noteId,
+              })
+            }}
+          />
 
-      <section className="rounded-xl bg-white p-4 shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
+          <section className="rounded-xl bg-white p-4 shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
         <div className="flex items-start gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#eef3ff] text-[#0069ff]">
             <MapPinIcon className="size-5" />
@@ -211,7 +248,32 @@ function CompanyEmployeeDetailPage({
             </label>
           ))}
         </div>
-      </section>
+          </section>
+
+          {organizationId ? (
+            <section className="rounded-xl border border-red-100 bg-red-50/40 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-base font-extrabold text-[#9d1c1c]">
+                    Access & offboarding
+                  </h3>
+                  <p className="mt-1 text-sm font-semibold text-[#7d4a4a]">
+                    Revoke access and clear unstarted shifts while preserving history.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={pending}
+                  onClick={() => setRemoveDialogOpen(true)}
+                >
+                  Remove from organisation
+                </Button>
+              </div>
+            </section>
+          ) : null}
+        </>
+      )}
 
       <RoleDialog
         employee={employee}
@@ -247,6 +309,17 @@ function CompanyEmployeeDetailPage({
           await mutations.payrollIdMutation.mutateAsync({
             employeeId: employee.id,
             payrollId,
+          })
+        }}
+      />
+      <RemoveEmployeeDialog
+        employeeName={employee.name}
+        open={removeDialogOpen}
+        pending={pending}
+        onOpenChange={setRemoveDialogOpen}
+        onRemove={async () => {
+          await mutations.removeEmployeeMutation.mutateAsync({
+            employeeId: employee.id,
           })
         }}
       />
@@ -430,6 +503,156 @@ function PayrollIdDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function FormerEmployeeCard({
+  employee,
+  open,
+  pending,
+  onOpenChange,
+  onRehire,
+}: {
+  employee: CompanyEmployeeDetail
+  open: boolean
+  pending: boolean
+  onOpenChange: (open: boolean) => void
+  onRehire: (locationIds: Array<string>) => Promise<void>
+}) {
+  const [locationIds, setLocationIds] = React.useState<Array<string>>([])
+
+  React.useEffect(() => {
+    if (open) setLocationIds([])
+  }, [open])
+
+  function toggleLocation(locationId: string, checked: boolean) {
+    setLocationIds((current) =>
+      checked
+        ? [...current, locationId]
+        : current.filter((id) => id !== locationId)
+    )
+  }
+
+  return (
+    <section className="rounded-xl bg-white p-4 shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
+      <div className="flex items-start gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#eef3ff] text-[#0069ff]">
+          <UserRoundCheckIcon className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base font-extrabold tracking-[-0.03em]">
+            Rehire employee
+          </h3>
+          <p className="mt-1 text-sm font-semibold text-[#61709a]">
+            Restore employee access at the locations you choose. Their pay,
+            payroll details, and history stay intact.
+          </p>
+        </div>
+      </div>
+      <Button
+        type="button"
+        className="mt-4"
+        disabled={pending}
+        onClick={() => onOpenChange(true)}
+      >
+        Rehire employee
+      </Button>
+
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="p-0 sm:max-w-md">
+          <DialogHeader className="p-5 pb-4">
+            <DialogTitle>Rehire {employee.name}</DialogTitle>
+            <DialogDescription>
+              Choose at least one location. This restores employee-level
+              access only; admin access and old future shifts are not restored.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-72 divide-y divide-[#edf0f6] overflow-y-auto px-5">
+            {employee.locations.map((location) => {
+              const checked = locationIds.includes(location.id)
+
+              return (
+                <label
+                  key={location.id}
+                  className="flex cursor-pointer items-center justify-between gap-3 py-3"
+                >
+                  <span className="text-sm font-extrabold">{location.name}</span>
+                  <Checkbox
+                    checked={checked}
+                    disabled={pending}
+                    onCheckedChange={(nextChecked) =>
+                      toggleLocation(location.id, nextChecked)
+                    }
+                  />
+                </label>
+              )
+            })}
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={pending || locationIds.length === 0}
+              onClick={() => {
+                void onRehire(locationIds).then(() => onOpenChange(false))
+              }}
+            >
+              {pending ? "Rehiring..." : "Rehire employee"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </section>
+  )
+}
+
+function RemoveEmployeeDialog({
+  employeeName,
+  open,
+  pending,
+  onOpenChange,
+  onRemove,
+}: {
+  employeeName: string
+  open: boolean
+  pending: boolean
+  onOpenChange: (open: boolean) => void
+  onRemove: () => Promise<void>
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Remove {employeeName} from the organisation?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            This revokes organisation and location access, and removes them
+            from shifts that have not started. Their historical rota, time,
+            payroll, and billing records will be kept.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            disabled={pending}
+            onClick={() => {
+              void onRemove().then(() => onOpenChange(false))
+            }}
+          >
+            {pending ? "Removing..." : "Remove employee"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

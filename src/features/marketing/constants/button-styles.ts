@@ -8,7 +8,7 @@ const marketingSecondaryButtonClassName =
   "h-14 rounded-2xl border-[#d6e2f8] bg-white/85 px-8 text-sm font-bold text-[#18316a] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_30px_rgba(18,40,92,0.08)] backdrop-blur hover:border-[#bfd0f4] hover:bg-white hover:text-[#10295f] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_36px_rgba(18,40,92,0.1)]"
 
 const marketingLoginButtonClassName =
-  "hidden h-10 rounded-2xl border-[#dce7fb] bg-white/65 px-4 text-sm font-bold text-[#16346e] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_22px_rgba(18,40,92,0.06)] backdrop-blur hover:border-[#c8d7f4] hover:bg-white hover:text-[#10295f] sm:inline-flex"
+  "inline-flex h-10 rounded-2xl border-[#dce7fb] bg-white/65 px-4 text-sm font-bold text-[#16346e] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_22px_rgba(18,40,92,0.06)] backdrop-blur hover:border-[#c8d7f4] hover:bg-white hover:text-[#10295f]"
 
 export {
   marketingLoginButtonClassName,

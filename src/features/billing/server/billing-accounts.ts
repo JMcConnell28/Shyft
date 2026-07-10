@@ -68,7 +68,7 @@ function mapBillingAccess(row: BillingAccessRow): WorkspaceBillingState {
       pastDueGraceEndsAt !== null &&
       pastDueGraceEndsAt.getTime() > Date.now(),
     locationQuantity: 1,
-    activeEmployeeQuantity: 0,
+    usedEmployeeQuantity: 0,
     includedEmployeeQuantity: INCLUDED_CORE_EMPLOYEES,
     extraEmployeeQuantity: 0,
     timeAttendanceQuantity: 0,

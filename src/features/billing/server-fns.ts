@@ -16,17 +16,6 @@ const workspaceReferenceSchema = z
     "Choose either an organization or a location."
   )
 
-const trialTestingSchema = z
-  .object({
-    organizationId: z.string().trim().min(1).optional(),
-    locationId: z.string().uuid().optional(),
-    state: z.enum(["active", "ending-soon", "expired", "reset"]),
-  })
-  .refine(
-    (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
-    "Choose either an organization or a location."
-  )
-
 const returnPathSchema = z
   .string()
   .trim()
@@ -50,33 +39,6 @@ const portalSchema = workspaceReferenceSchema.extend({
 const organizationBillingOverviewSchema = z.object({
   organizationId: z.string().trim().min(1),
 })
-
-const setTrialForTesting = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => trialTestingSchema.parse(input))
-  .handler(async ({ data }) => {
-    if (process.env.NODE_ENV !== "development") {
-      throw new Error(
-        "Trial testing controls are only available in development."
-      )
-    }
-
-    const { session } = await requireVerifiedSessionOrThrow()
-
-    if (data.organizationId) {
-      await requireWorkspaceBillingPermission({
-        organizationId: data.organizationId,
-        userId: session.user.id,
-      })
-    } else if (data.locationId) {
-      await requireWorkspaceBillingPermission({
-        locationId: data.locationId,
-        userId: session.user.id,
-      })
-    }
-
-    const module = await import("@/features/billing/server/trials")
-    return module.setWorkspaceTrialForDevelopment(data)
-  })
 
 const startSubscriptionCheckout = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => checkoutSchema.parse(input))
@@ -229,7 +191,6 @@ const getOrganizationBillingOverview = createServerFn({ method: "POST" })
 export {
   getWorkspaceBillingStatus,
   getOrganizationBillingOverview,
-  setTrialForTesting,
   startBillingPortal,
   startSubscriptionCheckout,
   updateTimeAttendanceAddon,

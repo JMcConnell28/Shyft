@@ -139,6 +139,7 @@ function MarketingHeader({
           className={cn(
             buttonVariants({ size: "lg" }),
             marketingPrimaryButtonClassName,
+            "hidden sm:inline-flex",
           )}
         >
           Start free trial
