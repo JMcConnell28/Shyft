@@ -108,6 +108,11 @@ const auth = betterAuth({
     // Better Auth recommends this as the final plugin for TanStack Start.
     tanstackStartCookies(),
   ],
+  trustedOrigins: [
+    "https://rocketrota.com",
+    "https://www.rocketrota.com",
+    "http://localhost:3000",
+  ],
 })
 
 export { auth }
