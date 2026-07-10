@@ -2,7 +2,13 @@
 
 import type { AnyFieldApi } from "@tanstack/react-form"
 
-import { Field, FieldContent, FieldError, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import type { WorkspaceDay } from "@/features/rota/types/workspace"
 import { getFieldError } from "@/lib/forms"
 import { cn } from "@/lib/utils"
@@ -17,40 +23,42 @@ function CreateShiftDayField({ field, days }: CreateShiftDayFieldProps) {
     <Field>
       <FieldLabel>Day</FieldLabel>
       <FieldContent className="gap-2">
-        <div className="grid grid-cols-7 gap-1.5">
-          {days.map((day) => {
-            const inputId = `${field.name}-${day.id}`
-            const isSelected = field.state.value === day.id
+        <ToggleGroup
+          variant="outline"
+          spacing={2}
+          value={
+            typeof field.state.value === "string" &&
+            field.state.value.length > 0
+              ? [field.state.value]
+              : []
+          }
+          onBlur={field.handleBlur}
+          onValueChange={(value) => {
+            const nextValue = Array.isArray(value) ? value[0] : undefined
 
+            if (typeof nextValue === "string" && nextValue.length > 0) {
+              field.handleChange(nextValue)
+            }
+          }}
+          className="grid w-full grid-cols-4 gap-1.5 sm:grid-cols-7"
+        >
+          {days.map((day) => {
             return (
-              <label key={day.id} htmlFor={inputId} className="block cursor-pointer">
-                <input
-                  id={inputId}
-                  name={field.name}
-                  type="radio"
-                  value={day.id}
-                  checked={isSelected}
-                  className="sr-only"
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                />
-                <span
-                  className={cn(
-                    "flex min-h-14 flex-col items-center justify-center rounded-xl border px-1 py-2 text-center transition-colors",
-                    isSelected
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                      : "border-border/70 bg-background hover:bg-muted/40"
-                  )}
-                >
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">
-                    {day.shortLabel}
-                  </span>
-                  <span className="mt-1 text-xs font-medium">{day.dayNumber}</span>
-                </span>
-              </label>
+              <ToggleGroupItem
+                key={day.id}
+                value={day.id}
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "min-h-9 w-full cursor-pointer rounded-lg border-[#e2e7f0] bg-white px-1 py-1.5 text-center text-xs font-bold text-[#11245a] shadow-none hover:border-[#c8cfdd] hover:bg-[#f8faff] aria-pressed:border-[#b8c3d9] aria-pressed:bg-[#f5f7fb] aria-pressed:text-[#11245a] aria-pressed:shadow-[0_6px_14px_rgba(30,50,96,0.07)]"
+                )}
+                aria-label={`${day.shortLabel} ${day.dayNumber} ${day.monthLabel}`}
+              >
+                {day.shortLabel}
+              </ToggleGroupItem>
             )
           })}
-        </div>
+        </ToggleGroup>
         <FieldError>{getFieldError(field)}</FieldError>
       </FieldContent>
     </Field>

@@ -11,22 +11,67 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as ClockRouteImport } from './routes/clock'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HelpIndexRouteImport } from './routes/help/index'
 import { Route as JoinTokenRouteImport } from './routes/join/$token'
+import { Route as HelpSplatRouteImport } from './routes/help/$'
+import { Route as FeaturesTimesheetsRouteImport } from './routes/features/timesheets'
+import { Route as FeaturesTimeTrackingRouteImport } from './routes/features/time-tracking'
+import { Route as FeaturesRotaPlanningRouteImport } from './routes/features/rota-planning'
+import { Route as ClockTokenRouteImport } from './routes/clock/$token'
+import { Route as AdminClockTagsRouteImport } from './routes/admin/clock-tags'
 import { Route as AcceptInvitationInvitationIdRouteImport } from './routes/accept-invitation/$invitationId'
 import { Route as AuthedVerifiedRouteRouteImport } from './routes/_authed/_verified/route'
+import { Route as ApiSupportThreadRouteImport } from './routes/api/support/thread'
+import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
+import { Route as ApiBillingReconcileRouteImport } from './routes/api/billing/reconcile'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAdminTelemetryEventRouteImport } from './routes/api/admin-telemetry/event'
+import { Route as ApiAdminTelemetryErrorRouteImport } from './routes/api/admin-telemetry/error'
 import { Route as AuthedVerifiedDashboardRouteImport } from './routes/_authed/_verified/dashboard'
+import { Route as AuthedVerifiedAccountRouteImport } from './routes/_authed/_verified/account'
+import { Route as ApiAuthStripeWebhookRouteImport } from './routes/api/auth/stripe/webhook'
+import { Route as AuthedVerifiedOnboardingSetupRouteImport } from './routes/_authed/_verified/onboarding/setup'
 import { Route as AuthedVerifiedOnboardingOrgRouteImport } from './routes/_authed/_verified/onboarding/org'
 import { Route as AuthedVerifiedOnboardingLocationRouteImport } from './routes/_authed/_verified/onboarding/location'
+import { Route as AuthedVerifiedOnboardingJoinRouteImport } from './routes/_authed/_verified/onboarding/join'
 import { Route as AuthedVerifiedOnboardingInviteRouteImport } from './routes/_authed/_verified/onboarding/invite'
-import { Route as AuthedVerifiedOOrgSlugRouteRouteImport } from './routes/_authed/_verified/o/$orgSlug/route'
-import { Route as AuthedVerifiedOOrgSlugIndexRouteImport } from './routes/_authed/_verified/o/$orgSlug/index'
-import { Route as AuthedVerifiedOOrgSlugDashboardRouteImport } from './routes/_authed/_verified/o/$orgSlug/dashboard'
-import { Route as AuthedVerifiedOOrgSlugRotaIndexRouteImport } from './routes/_authed/_verified/o/$orgSlug/rota/index'
+import { Route as AuthedVerifiedBillingSuccessRouteImport } from './routes/_authed/_verified/billing/success'
+import { Route as AuthedVerifiedBillingExpiredRouteImport } from './routes/_authed/_verified/billing/expired'
+import { Route as AuthedVerifiedWWorkspaceSlugRouteRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/route'
+import { Route as AuthedVerifiedWWorkspaceSlugIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/index'
+import { Route as AuthedVerifiedWWorkspaceSlugTimesheetsRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/timesheets'
+import { Route as AuthedVerifiedWWorkspaceSlugTimeClockRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/time-clock'
+import { Route as AuthedVerifiedWWorkspaceSlugShiftSwapsRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/shift-swaps'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings'
+import { Route as AuthedVerifiedWWorkspaceSlugDashboardRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/dashboard'
+import { Route as AuthedVerifiedWWorkspaceSlugAnnouncementsRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/announcements'
+import { Route as AuthedVerifiedWWorkspaceSlugAccountRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/account'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/index'
+import { Route as AuthedVerifiedWWorkspaceSlugRotaIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/index'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsTeamRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/team'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsRotaRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/rota'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsLocationsRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/locations'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsGeneralRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/general'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsConnectionsRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/connections'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/company'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsClockingRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/clocking'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsBillingRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/billing'
+import { Route as AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$rotaId'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/company/index'
+import { Route as AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$rotaId/index'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId'
+import { Route as AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$rotaId/view'
+import { Route as AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId'
 import { Route as AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRouteImport } from './routes/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId'
+import { Route as AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/index'
+import { Route as AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/view'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -38,9 +83,29 @@ const SignUpRoute = SignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClockRoute = ClockRouteImport.update({
+  id: '/clock',
+  path: '/clock',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedRouteRoute = AuthedRouteRouteImport.update({
@@ -52,9 +117,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HelpIndexRoute = HelpIndexRouteImport.update({
+  id: '/help/',
+  path: '/help/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JoinTokenRoute = JoinTokenRouteImport.update({
   id: '/join/$token',
   path: '/join/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpSplatRoute = HelpSplatRouteImport.update({
+  id: '/help/$',
+  path: '/help/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesTimesheetsRoute = FeaturesTimesheetsRouteImport.update({
+  id: '/features/timesheets',
+  path: '/features/timesheets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesTimeTrackingRoute = FeaturesTimeTrackingRouteImport.update({
+  id: '/features/time-tracking',
+  path: '/features/time-tracking',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesRotaPlanningRoute = FeaturesRotaPlanningRouteImport.update({
+  id: '/features/rota-planning',
+  path: '/features/rota-planning',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClockTokenRoute = ClockTokenRouteImport.update({
+  id: '/$token',
+  path: '/$token',
+  getParentRoute: () => ClockRoute,
+} as any)
+const AdminClockTagsRoute = AdminClockTagsRouteImport.update({
+  id: '/admin/clock-tags',
+  path: '/admin/clock-tags',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcceptInvitationInvitationIdRoute =
@@ -67,9 +167,34 @@ const AuthedVerifiedRouteRoute = AuthedVerifiedRouteRouteImport.update({
   id: '/_verified',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
+const ApiSupportThreadRoute = ApiSupportThreadRouteImport.update({
+  id: '/api/support/thread',
+  path: '/api/support/thread',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
+  id: '/api/stripe/webhook',
+  path: '/api/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBillingReconcileRoute = ApiBillingReconcileRouteImport.update({
+  id: '/api/billing/reconcile',
+  path: '/api/billing/reconcile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminTelemetryEventRoute = ApiAdminTelemetryEventRouteImport.update({
+  id: '/api/admin-telemetry/event',
+  path: '/api/admin-telemetry/event',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminTelemetryErrorRoute = ApiAdminTelemetryErrorRouteImport.update({
+  id: '/api/admin-telemetry/error',
+  path: '/api/admin-telemetry/error',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedVerifiedDashboardRoute = AuthedVerifiedDashboardRouteImport.update({
@@ -77,6 +202,22 @@ const AuthedVerifiedDashboardRoute = AuthedVerifiedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthedVerifiedRouteRoute,
 } as any)
+const AuthedVerifiedAccountRoute = AuthedVerifiedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthedVerifiedRouteRoute,
+} as any)
+const ApiAuthStripeWebhookRoute = ApiAuthStripeWebhookRouteImport.update({
+  id: '/api/auth/stripe/webhook',
+  path: '/api/auth/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedVerifiedOnboardingSetupRoute =
+  AuthedVerifiedOnboardingSetupRouteImport.update({
+    id: '/onboarding/setup',
+    path: '/onboarding/setup',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
 const AuthedVerifiedOnboardingOrgRoute =
   AuthedVerifiedOnboardingOrgRouteImport.update({
     id: '/onboarding/org',
@@ -89,166 +230,602 @@ const AuthedVerifiedOnboardingLocationRoute =
     path: '/onboarding/location',
     getParentRoute: () => AuthedVerifiedRouteRoute,
   } as any)
+const AuthedVerifiedOnboardingJoinRoute =
+  AuthedVerifiedOnboardingJoinRouteImport.update({
+    id: '/onboarding/join',
+    path: '/onboarding/join',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
 const AuthedVerifiedOnboardingInviteRoute =
   AuthedVerifiedOnboardingInviteRouteImport.update({
     id: '/onboarding/invite',
     path: '/onboarding/invite',
     getParentRoute: () => AuthedVerifiedRouteRoute,
   } as any)
-const AuthedVerifiedOOrgSlugRouteRoute =
-  AuthedVerifiedOOrgSlugRouteRouteImport.update({
-    id: '/o/$orgSlug',
-    path: '/o/$orgSlug',
+const AuthedVerifiedBillingSuccessRoute =
+  AuthedVerifiedBillingSuccessRouteImport.update({
+    id: '/billing/success',
+    path: '/billing/success',
     getParentRoute: () => AuthedVerifiedRouteRoute,
   } as any)
-const AuthedVerifiedOOrgSlugIndexRoute =
-  AuthedVerifiedOOrgSlugIndexRouteImport.update({
+const AuthedVerifiedBillingExpiredRoute =
+  AuthedVerifiedBillingExpiredRouteImport.update({
+    id: '/billing/expired',
+    path: '/billing/expired',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugRouteRoute =
+  AuthedVerifiedWWorkspaceSlugRouteRouteImport.update({
+    id: '/w/$workspaceSlug',
+    path: '/w/$workspaceSlug',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugIndexRoute =
+  AuthedVerifiedWWorkspaceSlugIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => AuthedVerifiedOOrgSlugRouteRoute,
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
   } as any)
-const AuthedVerifiedOOrgSlugDashboardRoute =
-  AuthedVerifiedOOrgSlugDashboardRouteImport.update({
+const AuthedVerifiedWWorkspaceSlugTimesheetsRoute =
+  AuthedVerifiedWWorkspaceSlugTimesheetsRouteImport.update({
+    id: '/timesheets',
+    path: '/timesheets',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugTimeClockRoute =
+  AuthedVerifiedWWorkspaceSlugTimeClockRouteImport.update({
+    id: '/time-clock',
+    path: '/time-clock',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugShiftSwapsRoute =
+  AuthedVerifiedWWorkspaceSlugShiftSwapsRouteImport.update({
+    id: '/shift-swaps',
+    path: '/shift-swaps',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugDashboardRoute =
+  AuthedVerifiedWWorkspaceSlugDashboardRouteImport.update({
     id: '/dashboard',
     path: '/dashboard',
-    getParentRoute: () => AuthedVerifiedOOrgSlugRouteRoute,
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
   } as any)
-const AuthedVerifiedOOrgSlugRotaIndexRoute =
-  AuthedVerifiedOOrgSlugRotaIndexRouteImport.update({
+const AuthedVerifiedWWorkspaceSlugAnnouncementsRoute =
+  AuthedVerifiedWWorkspaceSlugAnnouncementsRouteImport.update({
+    id: '/announcements',
+    path: '/announcements',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugAccountRoute =
+  AuthedVerifiedWWorkspaceSlugAccountRouteImport.update({
+    id: '/account',
+    path: '/account',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsIndexRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugRotaIndexRoute =
+  AuthedVerifiedWWorkspaceSlugRotaIndexRouteImport.update({
     id: '/rota/',
     path: '/rota/',
-    getParentRoute: () => AuthedVerifiedOOrgSlugRouteRoute,
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsTeamRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsTeamRouteImport.update({
+    id: '/team',
+    path: '/team',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsRotaRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsRotaRouteImport.update({
+    id: '/rota',
+    path: '/rota',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsLocationsRouteImport.update({
+    id: '/locations',
+    path: '/locations',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsGeneralRouteImport.update({
+    id: '/general',
+    path: '/general',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsConnectionsRouteImport.update({
+    id: '/connections',
+    path: '/connections',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsCompanyRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteImport.update({
+    id: '/company',
+    path: '/company',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsClockingRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsClockingRouteImport.update({
+    id: '/clocking',
+    path: '/clocking',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsBillingRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute =
+  AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteImport.update({
+    id: '/rota/$rotaId',
+    path: '/rota/$rotaId',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsCompanyRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute =
+  AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRouteImport.update({
+    id: '/$employeeId',
+    path: '/$employeeId',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsCompanyRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute =
+  AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRouteImport.update({
+    id: '/view',
+    path: '/view',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRoute =
+  AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteImport.update({
+    id: '/rota/$locationSlug/$rotaId',
+    path: '/rota/$locationSlug/$rotaId',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
   } as any)
 const AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute =
   AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRouteImport.update({
-    id: '/rota/$locationSlug/$rotaId',
-    path: '/rota/$locationSlug/$rotaId',
-    getParentRoute: () => AuthedVerifiedOOrgSlugRouteRoute,
+    id: '/o/$orgSlug/rota/$locationSlug/$rotaId',
+    path: '/o/$orgSlug/rota/$locationSlug/$rotaId',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute =
+  AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () =>
+      AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute =
+  AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRouteImport.update({
+    id: '/view',
+    path: '/view',
+    getParentRoute: () =>
+      AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/clock': typeof ClockRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-up': typeof SignUpRoute
   '/verify-email': typeof VerifyEmailRoute
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
+  '/admin/clock-tags': typeof AdminClockTagsRoute
+  '/clock/$token': typeof ClockTokenRoute
+  '/features/rota-planning': typeof FeaturesRotaPlanningRoute
+  '/features/time-tracking': typeof FeaturesTimeTrackingRoute
+  '/features/timesheets': typeof FeaturesTimesheetsRoute
+  '/help/$': typeof HelpSplatRoute
   '/join/$token': typeof JoinTokenRoute
+  '/help/': typeof HelpIndexRoute
+  '/account': typeof AuthedVerifiedAccountRoute
   '/dashboard': typeof AuthedVerifiedDashboardRoute
+  '/api/admin-telemetry/error': typeof ApiAdminTelemetryErrorRoute
+  '/api/admin-telemetry/event': typeof ApiAdminTelemetryEventRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/o/$orgSlug': typeof AuthedVerifiedOOrgSlugRouteRouteWithChildren
+  '/api/billing/reconcile': typeof ApiBillingReconcileRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/api/support/thread': typeof ApiSupportThreadRoute
+  '/w/$workspaceSlug': typeof AuthedVerifiedWWorkspaceSlugRouteRouteWithChildren
+  '/billing/expired': typeof AuthedVerifiedBillingExpiredRoute
+  '/billing/success': typeof AuthedVerifiedBillingSuccessRoute
   '/onboarding/invite': typeof AuthedVerifiedOnboardingInviteRoute
+  '/onboarding/join': typeof AuthedVerifiedOnboardingJoinRoute
   '/onboarding/location': typeof AuthedVerifiedOnboardingLocationRoute
   '/onboarding/org': typeof AuthedVerifiedOnboardingOrgRoute
-  '/o/$orgSlug/dashboard': typeof AuthedVerifiedOOrgSlugDashboardRoute
-  '/o/$orgSlug/': typeof AuthedVerifiedOOrgSlugIndexRoute
-  '/o/$orgSlug/rota/': typeof AuthedVerifiedOOrgSlugRotaIndexRoute
+  '/onboarding/setup': typeof AuthedVerifiedOnboardingSetupRoute
+  '/api/auth/stripe/webhook': typeof ApiAuthStripeWebhookRoute
+  '/w/$workspaceSlug/account': typeof AuthedVerifiedWWorkspaceSlugAccountRoute
+  '/w/$workspaceSlug/announcements': typeof AuthedVerifiedWWorkspaceSlugAnnouncementsRoute
+  '/w/$workspaceSlug/dashboard': typeof AuthedVerifiedWWorkspaceSlugDashboardRoute
+  '/w/$workspaceSlug/settings': typeof AuthedVerifiedWWorkspaceSlugSettingsRouteWithChildren
+  '/w/$workspaceSlug/shift-swaps': typeof AuthedVerifiedWWorkspaceSlugShiftSwapsRoute
+  '/w/$workspaceSlug/time-clock': typeof AuthedVerifiedWWorkspaceSlugTimeClockRoute
+  '/w/$workspaceSlug/timesheets': typeof AuthedVerifiedWWorkspaceSlugTimesheetsRoute
+  '/w/$workspaceSlug/': typeof AuthedVerifiedWWorkspaceSlugIndexRoute
+  '/w/$workspaceSlug/rota/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteWithChildren
+  '/w/$workspaceSlug/settings/billing': typeof AuthedVerifiedWWorkspaceSlugSettingsBillingRoute
+  '/w/$workspaceSlug/settings/clocking': typeof AuthedVerifiedWWorkspaceSlugSettingsClockingRoute
+  '/w/$workspaceSlug/settings/company': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteWithChildren
+  '/w/$workspaceSlug/settings/connections': typeof AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute
+  '/w/$workspaceSlug/settings/general': typeof AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute
+  '/w/$workspaceSlug/settings/locations': typeof AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute
+  '/w/$workspaceSlug/settings/rota': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
+  '/w/$workspaceSlug/settings/team': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
+  '/w/$workspaceSlug/rota/': typeof AuthedVerifiedWWorkspaceSlugRotaIndexRoute
+  '/w/$workspaceSlug/settings/': typeof AuthedVerifiedWWorkspaceSlugSettingsIndexRoute
   '/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
+  '/w/$workspaceSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren
+  '/w/$workspaceSlug/rota/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute
+  '/w/$workspaceSlug/settings/company/$employeeId': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  '/w/$workspaceSlug/rota/$rotaId/': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute
+  '/w/$workspaceSlug/settings/company/': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute
+  '/w/$workspaceSlug/rota/$locationSlug/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute
+  '/w/$workspaceSlug/rota/$locationSlug/$rotaId/': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/clock': typeof ClockRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-up': typeof SignUpRoute
   '/verify-email': typeof VerifyEmailRoute
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
+  '/admin/clock-tags': typeof AdminClockTagsRoute
+  '/clock/$token': typeof ClockTokenRoute
+  '/features/rota-planning': typeof FeaturesRotaPlanningRoute
+  '/features/time-tracking': typeof FeaturesTimeTrackingRoute
+  '/features/timesheets': typeof FeaturesTimesheetsRoute
+  '/help/$': typeof HelpSplatRoute
   '/join/$token': typeof JoinTokenRoute
+  '/help': typeof HelpIndexRoute
+  '/account': typeof AuthedVerifiedAccountRoute
   '/dashboard': typeof AuthedVerifiedDashboardRoute
+  '/api/admin-telemetry/error': typeof ApiAdminTelemetryErrorRoute
+  '/api/admin-telemetry/event': typeof ApiAdminTelemetryEventRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/billing/reconcile': typeof ApiBillingReconcileRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/api/support/thread': typeof ApiSupportThreadRoute
+  '/billing/expired': typeof AuthedVerifiedBillingExpiredRoute
+  '/billing/success': typeof AuthedVerifiedBillingSuccessRoute
   '/onboarding/invite': typeof AuthedVerifiedOnboardingInviteRoute
+  '/onboarding/join': typeof AuthedVerifiedOnboardingJoinRoute
   '/onboarding/location': typeof AuthedVerifiedOnboardingLocationRoute
   '/onboarding/org': typeof AuthedVerifiedOnboardingOrgRoute
-  '/o/$orgSlug/dashboard': typeof AuthedVerifiedOOrgSlugDashboardRoute
-  '/o/$orgSlug': typeof AuthedVerifiedOOrgSlugIndexRoute
-  '/o/$orgSlug/rota': typeof AuthedVerifiedOOrgSlugRotaIndexRoute
+  '/onboarding/setup': typeof AuthedVerifiedOnboardingSetupRoute
+  '/api/auth/stripe/webhook': typeof ApiAuthStripeWebhookRoute
+  '/w/$workspaceSlug/account': typeof AuthedVerifiedWWorkspaceSlugAccountRoute
+  '/w/$workspaceSlug/announcements': typeof AuthedVerifiedWWorkspaceSlugAnnouncementsRoute
+  '/w/$workspaceSlug/dashboard': typeof AuthedVerifiedWWorkspaceSlugDashboardRoute
+  '/w/$workspaceSlug/shift-swaps': typeof AuthedVerifiedWWorkspaceSlugShiftSwapsRoute
+  '/w/$workspaceSlug/time-clock': typeof AuthedVerifiedWWorkspaceSlugTimeClockRoute
+  '/w/$workspaceSlug/timesheets': typeof AuthedVerifiedWWorkspaceSlugTimesheetsRoute
+  '/w/$workspaceSlug': typeof AuthedVerifiedWWorkspaceSlugIndexRoute
+  '/w/$workspaceSlug/settings/billing': typeof AuthedVerifiedWWorkspaceSlugSettingsBillingRoute
+  '/w/$workspaceSlug/settings/clocking': typeof AuthedVerifiedWWorkspaceSlugSettingsClockingRoute
+  '/w/$workspaceSlug/settings/connections': typeof AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute
+  '/w/$workspaceSlug/settings/general': typeof AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute
+  '/w/$workspaceSlug/settings/locations': typeof AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute
+  '/w/$workspaceSlug/settings/rota': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
+  '/w/$workspaceSlug/settings/team': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
+  '/w/$workspaceSlug/rota': typeof AuthedVerifiedWWorkspaceSlugRotaIndexRoute
+  '/w/$workspaceSlug/settings': typeof AuthedVerifiedWWorkspaceSlugSettingsIndexRoute
   '/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
+  '/w/$workspaceSlug/rota/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute
+  '/w/$workspaceSlug/settings/company/$employeeId': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  '/w/$workspaceSlug/rota/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute
+  '/w/$workspaceSlug/settings/company': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute
+  '/w/$workspaceSlug/rota/$locationSlug/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute
+  '/w/$workspaceSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteRouteWithChildren
+  '/clock': typeof ClockRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-up': typeof SignUpRoute
   '/verify-email': typeof VerifyEmailRoute
   '/_authed/_verified': typeof AuthedVerifiedRouteRouteWithChildren
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
+  '/admin/clock-tags': typeof AdminClockTagsRoute
+  '/clock/$token': typeof ClockTokenRoute
+  '/features/rota-planning': typeof FeaturesRotaPlanningRoute
+  '/features/time-tracking': typeof FeaturesTimeTrackingRoute
+  '/features/timesheets': typeof FeaturesTimesheetsRoute
+  '/help/$': typeof HelpSplatRoute
   '/join/$token': typeof JoinTokenRoute
+  '/help/': typeof HelpIndexRoute
+  '/_authed/_verified/account': typeof AuthedVerifiedAccountRoute
   '/_authed/_verified/dashboard': typeof AuthedVerifiedDashboardRoute
+  '/api/admin-telemetry/error': typeof ApiAdminTelemetryErrorRoute
+  '/api/admin-telemetry/event': typeof ApiAdminTelemetryEventRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/_authed/_verified/o/$orgSlug': typeof AuthedVerifiedOOrgSlugRouteRouteWithChildren
+  '/api/billing/reconcile': typeof ApiBillingReconcileRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/api/support/thread': typeof ApiSupportThreadRoute
+  '/_authed/_verified/w/$workspaceSlug': typeof AuthedVerifiedWWorkspaceSlugRouteRouteWithChildren
+  '/_authed/_verified/billing/expired': typeof AuthedVerifiedBillingExpiredRoute
+  '/_authed/_verified/billing/success': typeof AuthedVerifiedBillingSuccessRoute
   '/_authed/_verified/onboarding/invite': typeof AuthedVerifiedOnboardingInviteRoute
+  '/_authed/_verified/onboarding/join': typeof AuthedVerifiedOnboardingJoinRoute
   '/_authed/_verified/onboarding/location': typeof AuthedVerifiedOnboardingLocationRoute
   '/_authed/_verified/onboarding/org': typeof AuthedVerifiedOnboardingOrgRoute
-  '/_authed/_verified/o/$orgSlug/dashboard': typeof AuthedVerifiedOOrgSlugDashboardRoute
-  '/_authed/_verified/o/$orgSlug/': typeof AuthedVerifiedOOrgSlugIndexRoute
-  '/_authed/_verified/o/$orgSlug/rota/': typeof AuthedVerifiedOOrgSlugRotaIndexRoute
+  '/_authed/_verified/onboarding/setup': typeof AuthedVerifiedOnboardingSetupRoute
+  '/api/auth/stripe/webhook': typeof ApiAuthStripeWebhookRoute
+  '/_authed/_verified/w/$workspaceSlug/account': typeof AuthedVerifiedWWorkspaceSlugAccountRoute
+  '/_authed/_verified/w/$workspaceSlug/announcements': typeof AuthedVerifiedWWorkspaceSlugAnnouncementsRoute
+  '/_authed/_verified/w/$workspaceSlug/dashboard': typeof AuthedVerifiedWWorkspaceSlugDashboardRoute
+  '/_authed/_verified/w/$workspaceSlug/settings': typeof AuthedVerifiedWWorkspaceSlugSettingsRouteWithChildren
+  '/_authed/_verified/w/$workspaceSlug/shift-swaps': typeof AuthedVerifiedWWorkspaceSlugShiftSwapsRoute
+  '/_authed/_verified/w/$workspaceSlug/time-clock': typeof AuthedVerifiedWWorkspaceSlugTimeClockRoute
+  '/_authed/_verified/w/$workspaceSlug/timesheets': typeof AuthedVerifiedWWorkspaceSlugTimesheetsRoute
+  '/_authed/_verified/w/$workspaceSlug/': typeof AuthedVerifiedWWorkspaceSlugIndexRoute
+  '/_authed/_verified/w/$workspaceSlug/rota/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteWithChildren
+  '/_authed/_verified/w/$workspaceSlug/settings/billing': typeof AuthedVerifiedWWorkspaceSlugSettingsBillingRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/clocking': typeof AuthedVerifiedWWorkspaceSlugSettingsClockingRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/company': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteWithChildren
+  '/_authed/_verified/w/$workspaceSlug/settings/connections': typeof AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/general': typeof AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/locations': typeof AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/rota': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/team': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
+  '/_authed/_verified/w/$workspaceSlug/rota/': typeof AuthedVerifiedWWorkspaceSlugRotaIndexRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/': typeof AuthedVerifiedWWorkspaceSlugSettingsIndexRoute
   '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
+  '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren
+  '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/company/': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute
+  '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute
+  '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/clock'
+    | '/forgot-password'
     | '/login'
+    | '/pricing'
+    | '/reset-password'
     | '/sign-up'
     | '/verify-email'
     | '/accept-invitation/$invitationId'
+    | '/admin/clock-tags'
+    | '/clock/$token'
+    | '/features/rota-planning'
+    | '/features/time-tracking'
+    | '/features/timesheets'
+    | '/help/$'
     | '/join/$token'
+    | '/help/'
+    | '/account'
     | '/dashboard'
+    | '/api/admin-telemetry/error'
+    | '/api/admin-telemetry/event'
     | '/api/auth/$'
-    | '/o/$orgSlug'
+    | '/api/billing/reconcile'
+    | '/api/stripe/webhook'
+    | '/api/support/thread'
+    | '/w/$workspaceSlug'
+    | '/billing/expired'
+    | '/billing/success'
     | '/onboarding/invite'
+    | '/onboarding/join'
     | '/onboarding/location'
     | '/onboarding/org'
-    | '/o/$orgSlug/dashboard'
-    | '/o/$orgSlug/'
-    | '/o/$orgSlug/rota/'
+    | '/onboarding/setup'
+    | '/api/auth/stripe/webhook'
+    | '/w/$workspaceSlug/account'
+    | '/w/$workspaceSlug/announcements'
+    | '/w/$workspaceSlug/dashboard'
+    | '/w/$workspaceSlug/settings'
+    | '/w/$workspaceSlug/shift-swaps'
+    | '/w/$workspaceSlug/time-clock'
+    | '/w/$workspaceSlug/timesheets'
+    | '/w/$workspaceSlug/'
+    | '/w/$workspaceSlug/rota/$rotaId'
+    | '/w/$workspaceSlug/settings/billing'
+    | '/w/$workspaceSlug/settings/clocking'
+    | '/w/$workspaceSlug/settings/company'
+    | '/w/$workspaceSlug/settings/connections'
+    | '/w/$workspaceSlug/settings/general'
+    | '/w/$workspaceSlug/settings/locations'
+    | '/w/$workspaceSlug/settings/rota'
+    | '/w/$workspaceSlug/settings/team'
+    | '/w/$workspaceSlug/rota/'
+    | '/w/$workspaceSlug/settings/'
     | '/o/$orgSlug/rota/$locationSlug/$rotaId'
+    | '/w/$workspaceSlug/rota/$locationSlug/$rotaId'
+    | '/w/$workspaceSlug/rota/$rotaId/view'
+    | '/w/$workspaceSlug/settings/company/$employeeId'
+    | '/w/$workspaceSlug/rota/$rotaId/'
+    | '/w/$workspaceSlug/settings/company/'
+    | '/w/$workspaceSlug/rota/$locationSlug/$rotaId/view'
+    | '/w/$workspaceSlug/rota/$locationSlug/$rotaId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/clock'
+    | '/forgot-password'
     | '/login'
+    | '/pricing'
+    | '/reset-password'
     | '/sign-up'
     | '/verify-email'
     | '/accept-invitation/$invitationId'
+    | '/admin/clock-tags'
+    | '/clock/$token'
+    | '/features/rota-planning'
+    | '/features/time-tracking'
+    | '/features/timesheets'
+    | '/help/$'
     | '/join/$token'
+    | '/help'
+    | '/account'
     | '/dashboard'
+    | '/api/admin-telemetry/error'
+    | '/api/admin-telemetry/event'
     | '/api/auth/$'
+    | '/api/billing/reconcile'
+    | '/api/stripe/webhook'
+    | '/api/support/thread'
+    | '/billing/expired'
+    | '/billing/success'
     | '/onboarding/invite'
+    | '/onboarding/join'
     | '/onboarding/location'
     | '/onboarding/org'
-    | '/o/$orgSlug/dashboard'
-    | '/o/$orgSlug'
-    | '/o/$orgSlug/rota'
+    | '/onboarding/setup'
+    | '/api/auth/stripe/webhook'
+    | '/w/$workspaceSlug/account'
+    | '/w/$workspaceSlug/announcements'
+    | '/w/$workspaceSlug/dashboard'
+    | '/w/$workspaceSlug/shift-swaps'
+    | '/w/$workspaceSlug/time-clock'
+    | '/w/$workspaceSlug/timesheets'
+    | '/w/$workspaceSlug'
+    | '/w/$workspaceSlug/settings/billing'
+    | '/w/$workspaceSlug/settings/clocking'
+    | '/w/$workspaceSlug/settings/connections'
+    | '/w/$workspaceSlug/settings/general'
+    | '/w/$workspaceSlug/settings/locations'
+    | '/w/$workspaceSlug/settings/rota'
+    | '/w/$workspaceSlug/settings/team'
+    | '/w/$workspaceSlug/rota'
+    | '/w/$workspaceSlug/settings'
     | '/o/$orgSlug/rota/$locationSlug/$rotaId'
+    | '/w/$workspaceSlug/rota/$rotaId/view'
+    | '/w/$workspaceSlug/settings/company/$employeeId'
+    | '/w/$workspaceSlug/rota/$rotaId'
+    | '/w/$workspaceSlug/settings/company'
+    | '/w/$workspaceSlug/rota/$locationSlug/$rotaId/view'
+    | '/w/$workspaceSlug/rota/$locationSlug/$rotaId'
   id:
     | '__root__'
     | '/'
     | '/_authed'
+    | '/clock'
+    | '/forgot-password'
     | '/login'
+    | '/pricing'
+    | '/reset-password'
     | '/sign-up'
     | '/verify-email'
     | '/_authed/_verified'
     | '/accept-invitation/$invitationId'
+    | '/admin/clock-tags'
+    | '/clock/$token'
+    | '/features/rota-planning'
+    | '/features/time-tracking'
+    | '/features/timesheets'
+    | '/help/$'
     | '/join/$token'
+    | '/help/'
+    | '/_authed/_verified/account'
     | '/_authed/_verified/dashboard'
+    | '/api/admin-telemetry/error'
+    | '/api/admin-telemetry/event'
     | '/api/auth/$'
-    | '/_authed/_verified/o/$orgSlug'
+    | '/api/billing/reconcile'
+    | '/api/stripe/webhook'
+    | '/api/support/thread'
+    | '/_authed/_verified/w/$workspaceSlug'
+    | '/_authed/_verified/billing/expired'
+    | '/_authed/_verified/billing/success'
     | '/_authed/_verified/onboarding/invite'
+    | '/_authed/_verified/onboarding/join'
     | '/_authed/_verified/onboarding/location'
     | '/_authed/_verified/onboarding/org'
-    | '/_authed/_verified/o/$orgSlug/dashboard'
-    | '/_authed/_verified/o/$orgSlug/'
-    | '/_authed/_verified/o/$orgSlug/rota/'
+    | '/_authed/_verified/onboarding/setup'
+    | '/api/auth/stripe/webhook'
+    | '/_authed/_verified/w/$workspaceSlug/account'
+    | '/_authed/_verified/w/$workspaceSlug/announcements'
+    | '/_authed/_verified/w/$workspaceSlug/dashboard'
+    | '/_authed/_verified/w/$workspaceSlug/settings'
+    | '/_authed/_verified/w/$workspaceSlug/shift-swaps'
+    | '/_authed/_verified/w/$workspaceSlug/time-clock'
+    | '/_authed/_verified/w/$workspaceSlug/timesheets'
+    | '/_authed/_verified/w/$workspaceSlug/'
+    | '/_authed/_verified/w/$workspaceSlug/rota/$rotaId'
+    | '/_authed/_verified/w/$workspaceSlug/settings/billing'
+    | '/_authed/_verified/w/$workspaceSlug/settings/clocking'
+    | '/_authed/_verified/w/$workspaceSlug/settings/company'
+    | '/_authed/_verified/w/$workspaceSlug/settings/connections'
+    | '/_authed/_verified/w/$workspaceSlug/settings/general'
+    | '/_authed/_verified/w/$workspaceSlug/settings/locations'
+    | '/_authed/_verified/w/$workspaceSlug/settings/rota'
+    | '/_authed/_verified/w/$workspaceSlug/settings/team'
+    | '/_authed/_verified/w/$workspaceSlug/rota/'
+    | '/_authed/_verified/w/$workspaceSlug/settings/'
     | '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId'
+    | '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId'
+    | '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/view'
+    | '/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId'
+    | '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/'
+    | '/_authed/_verified/w/$workspaceSlug/settings/company/'
+    | '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/view'
+    | '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
+  ClockRoute: typeof ClockRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  PricingRoute: typeof PricingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignUpRoute: typeof SignUpRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   AcceptInvitationInvitationIdRoute: typeof AcceptInvitationInvitationIdRoute
+  AdminClockTagsRoute: typeof AdminClockTagsRoute
+  FeaturesRotaPlanningRoute: typeof FeaturesRotaPlanningRoute
+  FeaturesTimeTrackingRoute: typeof FeaturesTimeTrackingRoute
+  FeaturesTimesheetsRoute: typeof FeaturesTimesheetsRoute
+  HelpSplatRoute: typeof HelpSplatRoute
   JoinTokenRoute: typeof JoinTokenRoute
+  HelpIndexRoute: typeof HelpIndexRoute
+  ApiAdminTelemetryErrorRoute: typeof ApiAdminTelemetryErrorRoute
+  ApiAdminTelemetryEventRoute: typeof ApiAdminTelemetryEventRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiBillingReconcileRoute: typeof ApiBillingReconcileRoute
+  ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  ApiSupportThreadRoute: typeof ApiSupportThreadRoute
+  ApiAuthStripeWebhookRoute: typeof ApiAuthStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -267,11 +844,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clock': {
+      id: '/clock'
+      path: '/clock'
+      fullPath: '/clock'
+      preLoaderRoute: typeof ClockRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed': {
@@ -288,11 +893,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/help/': {
+      id: '/help/'
+      path: '/help'
+      fullPath: '/help/'
+      preLoaderRoute: typeof HelpIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/join/$token': {
       id: '/join/$token'
       path: '/join/$token'
       fullPath: '/join/$token'
       preLoaderRoute: typeof JoinTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help/$': {
+      id: '/help/$'
+      path: '/help/$'
+      fullPath: '/help/$'
+      preLoaderRoute: typeof HelpSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features/timesheets': {
+      id: '/features/timesheets'
+      path: '/features/timesheets'
+      fullPath: '/features/timesheets'
+      preLoaderRoute: typeof FeaturesTimesheetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features/time-tracking': {
+      id: '/features/time-tracking'
+      path: '/features/time-tracking'
+      fullPath: '/features/time-tracking'
+      preLoaderRoute: typeof FeaturesTimeTrackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features/rota-planning': {
+      id: '/features/rota-planning'
+      path: '/features/rota-planning'
+      fullPath: '/features/rota-planning'
+      preLoaderRoute: typeof FeaturesRotaPlanningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clock/$token': {
+      id: '/clock/$token'
+      path: '/$token'
+      fullPath: '/clock/$token'
+      preLoaderRoute: typeof ClockTokenRouteImport
+      parentRoute: typeof ClockRoute
+    }
+    '/admin/clock-tags': {
+      id: '/admin/clock-tags'
+      path: '/admin/clock-tags'
+      fullPath: '/admin/clock-tags'
+      preLoaderRoute: typeof AdminClockTagsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accept-invitation/$invitationId': {
@@ -309,6 +963,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedVerifiedRouteRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
+    '/api/support/thread': {
+      id: '/api/support/thread'
+      path: '/api/support/thread'
+      fullPath: '/api/support/thread'
+      preLoaderRoute: typeof ApiSupportThreadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stripe/webhook': {
+      id: '/api/stripe/webhook'
+      path: '/api/stripe/webhook'
+      fullPath: '/api/stripe/webhook'
+      preLoaderRoute: typeof ApiStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/billing/reconcile': {
+      id: '/api/billing/reconcile'
+      path: '/api/billing/reconcile'
+      fullPath: '/api/billing/reconcile'
+      preLoaderRoute: typeof ApiBillingReconcileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -316,11 +991,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin-telemetry/event': {
+      id: '/api/admin-telemetry/event'
+      path: '/api/admin-telemetry/event'
+      fullPath: '/api/admin-telemetry/event'
+      preLoaderRoute: typeof ApiAdminTelemetryEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin-telemetry/error': {
+      id: '/api/admin-telemetry/error'
+      path: '/api/admin-telemetry/error'
+      fullPath: '/api/admin-telemetry/error'
+      preLoaderRoute: typeof ApiAdminTelemetryErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed/_verified/dashboard': {
       id: '/_authed/_verified/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthedVerifiedDashboardRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/_authed/_verified/account': {
+      id: '/_authed/_verified/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthedVerifiedAccountRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/api/auth/stripe/webhook': {
+      id: '/api/auth/stripe/webhook'
+      path: '/api/auth/stripe/webhook'
+      fullPath: '/api/auth/stripe/webhook'
+      preLoaderRoute: typeof ApiAuthStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed/_verified/onboarding/setup': {
+      id: '/_authed/_verified/onboarding/setup'
+      path: '/onboarding/setup'
+      fullPath: '/onboarding/setup'
+      preLoaderRoute: typeof AuthedVerifiedOnboardingSetupRouteImport
       parentRoute: typeof AuthedVerifiedRouteRoute
     }
     '/_authed/_verified/onboarding/org': {
@@ -337,6 +1047,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedVerifiedOnboardingLocationRouteImport
       parentRoute: typeof AuthedVerifiedRouteRoute
     }
+    '/_authed/_verified/onboarding/join': {
+      id: '/_authed/_verified/onboarding/join'
+      path: '/onboarding/join'
+      fullPath: '/onboarding/join'
+      preLoaderRoute: typeof AuthedVerifiedOnboardingJoinRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
     '/_authed/_verified/onboarding/invite': {
       id: '/_authed/_verified/onboarding/invite'
       path: '/onboarding/invite'
@@ -344,80 +1061,385 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedVerifiedOnboardingInviteRouteImport
       parentRoute: typeof AuthedVerifiedRouteRoute
     }
-    '/_authed/_verified/o/$orgSlug': {
-      id: '/_authed/_verified/o/$orgSlug'
-      path: '/o/$orgSlug'
-      fullPath: '/o/$orgSlug'
-      preLoaderRoute: typeof AuthedVerifiedOOrgSlugRouteRouteImport
+    '/_authed/_verified/billing/success': {
+      id: '/_authed/_verified/billing/success'
+      path: '/billing/success'
+      fullPath: '/billing/success'
+      preLoaderRoute: typeof AuthedVerifiedBillingSuccessRouteImport
       parentRoute: typeof AuthedVerifiedRouteRoute
     }
-    '/_authed/_verified/o/$orgSlug/': {
-      id: '/_authed/_verified/o/$orgSlug/'
+    '/_authed/_verified/billing/expired': {
+      id: '/_authed/_verified/billing/expired'
+      path: '/billing/expired'
+      fullPath: '/billing/expired'
+      preLoaderRoute: typeof AuthedVerifiedBillingExpiredRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug': {
+      id: '/_authed/_verified/w/$workspaceSlug'
+      path: '/w/$workspaceSlug'
+      fullPath: '/w/$workspaceSlug'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/': {
+      id: '/_authed/_verified/w/$workspaceSlug/'
       path: '/'
-      fullPath: '/o/$orgSlug/'
-      preLoaderRoute: typeof AuthedVerifiedOOrgSlugIndexRouteImport
-      parentRoute: typeof AuthedVerifiedOOrgSlugRouteRoute
+      fullPath: '/w/$workspaceSlug/'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugIndexRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
     }
-    '/_authed/_verified/o/$orgSlug/dashboard': {
-      id: '/_authed/_verified/o/$orgSlug/dashboard'
+    '/_authed/_verified/w/$workspaceSlug/timesheets': {
+      id: '/_authed/_verified/w/$workspaceSlug/timesheets'
+      path: '/timesheets'
+      fullPath: '/w/$workspaceSlug/timesheets'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugTimesheetsRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/time-clock': {
+      id: '/_authed/_verified/w/$workspaceSlug/time-clock'
+      path: '/time-clock'
+      fullPath: '/w/$workspaceSlug/time-clock'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugTimeClockRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/shift-swaps': {
+      id: '/_authed/_verified/w/$workspaceSlug/shift-swaps'
+      path: '/shift-swaps'
+      fullPath: '/w/$workspaceSlug/shift-swaps'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugShiftSwapsRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings'
+      path: '/settings'
+      fullPath: '/w/$workspaceSlug/settings'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/dashboard': {
+      id: '/_authed/_verified/w/$workspaceSlug/dashboard'
       path: '/dashboard'
-      fullPath: '/o/$orgSlug/dashboard'
-      preLoaderRoute: typeof AuthedVerifiedOOrgSlugDashboardRouteImport
-      parentRoute: typeof AuthedVerifiedOOrgSlugRouteRoute
+      fullPath: '/w/$workspaceSlug/dashboard'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugDashboardRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
     }
-    '/_authed/_verified/o/$orgSlug/rota/': {
-      id: '/_authed/_verified/o/$orgSlug/rota/'
+    '/_authed/_verified/w/$workspaceSlug/announcements': {
+      id: '/_authed/_verified/w/$workspaceSlug/announcements'
+      path: '/announcements'
+      fullPath: '/w/$workspaceSlug/announcements'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugAnnouncementsRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/account': {
+      id: '/_authed/_verified/w/$workspaceSlug/account'
+      path: '/account'
+      fullPath: '/w/$workspaceSlug/account'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugAccountRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/'
+      path: '/'
+      fullPath: '/w/$workspaceSlug/settings/'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsIndexRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/rota/': {
+      id: '/_authed/_verified/w/$workspaceSlug/rota/'
       path: '/rota'
-      fullPath: '/o/$orgSlug/rota/'
-      preLoaderRoute: typeof AuthedVerifiedOOrgSlugRotaIndexRouteImport
-      parentRoute: typeof AuthedVerifiedOOrgSlugRouteRoute
+      fullPath: '/w/$workspaceSlug/rota/'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRotaIndexRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/team': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/team'
+      path: '/team'
+      fullPath: '/w/$workspaceSlug/settings/team'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/rota': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/rota'
+      path: '/rota'
+      fullPath: '/w/$workspaceSlug/settings/rota'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/locations': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/locations'
+      path: '/locations'
+      fullPath: '/w/$workspaceSlug/settings/locations'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsLocationsRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/general': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/general'
+      path: '/general'
+      fullPath: '/w/$workspaceSlug/settings/general'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsGeneralRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/connections': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/connections'
+      path: '/connections'
+      fullPath: '/w/$workspaceSlug/settings/connections'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsConnectionsRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/company': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/company'
+      path: '/company'
+      fullPath: '/w/$workspaceSlug/settings/company'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/clocking': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/clocking'
+      path: '/clocking'
+      fullPath: '/w/$workspaceSlug/settings/clocking'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsClockingRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/billing': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/billing'
+      path: '/billing'
+      fullPath: '/w/$workspaceSlug/settings/billing'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsBillingRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/rota/$rotaId': {
+      id: '/_authed/_verified/w/$workspaceSlug/rota/$rotaId'
+      path: '/rota/$rotaId'
+      fullPath: '/w/$workspaceSlug/rota/$rotaId'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/company/': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/company/'
+      path: '/'
+      fullPath: '/w/$workspaceSlug/settings/company/'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/': {
+      id: '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/'
+      path: '/'
+      fullPath: '/w/$workspaceSlug/rota/$rotaId/'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId'
+      path: '/$employeeId'
+      fullPath: '/w/$workspaceSlug/settings/company/$employeeId'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/view': {
+      id: '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/view'
+      path: '/view'
+      fullPath: '/w/$workspaceSlug/rota/$rotaId/view'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId': {
+      id: '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId'
+      path: '/rota/$locationSlug/$rotaId'
+      fullPath: '/w/$workspaceSlug/rota/$locationSlug/$rotaId'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
     }
     '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId': {
       id: '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId'
-      path: '/rota/$locationSlug/$rotaId'
+      path: '/o/$orgSlug/rota/$locationSlug/$rotaId'
       fullPath: '/o/$orgSlug/rota/$locationSlug/$rotaId'
       preLoaderRoute: typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRouteImport
-      parentRoute: typeof AuthedVerifiedOOrgSlugRouteRoute
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/': {
+      id: '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/'
+      path: '/'
+      fullPath: '/w/$workspaceSlug/rota/$locationSlug/$rotaId/'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/view': {
+      id: '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/view'
+      path: '/view'
+      fullPath: '/w/$workspaceSlug/rota/$locationSlug/$rotaId/view'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRoute
     }
   }
 }
 
-interface AuthedVerifiedOOrgSlugRouteRouteChildren {
-  AuthedVerifiedOOrgSlugDashboardRoute: typeof AuthedVerifiedOOrgSlugDashboardRoute
-  AuthedVerifiedOOrgSlugIndexRoute: typeof AuthedVerifiedOOrgSlugIndexRoute
-  AuthedVerifiedOOrgSlugRotaIndexRoute: typeof AuthedVerifiedOOrgSlugRotaIndexRoute
-  AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute: typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
+interface AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteChildren {
+  AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute
 }
 
-const AuthedVerifiedOOrgSlugRouteRouteChildren: AuthedVerifiedOOrgSlugRouteRouteChildren =
+const AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteChildren: AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteChildren =
   {
-    AuthedVerifiedOOrgSlugDashboardRoute: AuthedVerifiedOOrgSlugDashboardRoute,
-    AuthedVerifiedOOrgSlugIndexRoute: AuthedVerifiedOOrgSlugIndexRoute,
-    AuthedVerifiedOOrgSlugRotaIndexRoute: AuthedVerifiedOOrgSlugRotaIndexRoute,
-    AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute:
-      AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute,
   }
 
-const AuthedVerifiedOOrgSlugRouteRouteWithChildren =
-  AuthedVerifiedOOrgSlugRouteRoute._addFileChildren(
-    AuthedVerifiedOOrgSlugRouteRouteChildren,
+const AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteWithChildren =
+  AuthedVerifiedWWorkspaceSlugSettingsCompanyRoute._addFileChildren(
+    AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteChildren,
+  )
+
+interface AuthedVerifiedWWorkspaceSlugSettingsRouteChildren {
+  AuthedVerifiedWWorkspaceSlugSettingsBillingRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsBillingRoute
+  AuthedVerifiedWWorkspaceSlugSettingsClockingRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsClockingRoute
+  AuthedVerifiedWWorkspaceSlugSettingsCompanyRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteWithChildren
+  AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute
+  AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute
+  AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute
+  AuthedVerifiedWWorkspaceSlugSettingsRotaRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
+  AuthedVerifiedWWorkspaceSlugSettingsTeamRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
+  AuthedVerifiedWWorkspaceSlugSettingsIndexRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsIndexRoute
+}
+
+const AuthedVerifiedWWorkspaceSlugSettingsRouteChildren: AuthedVerifiedWWorkspaceSlugSettingsRouteChildren =
+  {
+    AuthedVerifiedWWorkspaceSlugSettingsBillingRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsBillingRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsClockingRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsClockingRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsCompanyRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteWithChildren,
+    AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsRotaRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsRotaRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsTeamRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsTeamRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsIndexRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsIndexRoute,
+  }
+
+const AuthedVerifiedWWorkspaceSlugSettingsRouteWithChildren =
+  AuthedVerifiedWWorkspaceSlugSettingsRoute._addFileChildren(
+    AuthedVerifiedWWorkspaceSlugSettingsRouteChildren,
+  )
+
+interface AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteChildren {
+  AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute
+  AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute
+}
+
+const AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteChildren: AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteChildren =
+  {
+    AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute:
+      AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute,
+    AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute:
+      AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute,
+  }
+
+const AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteWithChildren =
+  AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute._addFileChildren(
+    AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteChildren,
+  )
+
+interface AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteChildren {
+  AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute: typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute
+  AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute: typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute
+}
+
+const AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteChildren: AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteChildren =
+  {
+    AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute:
+      AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute,
+    AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute:
+      AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute,
+  }
+
+const AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren =
+  AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRoute._addFileChildren(
+    AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteChildren,
+  )
+
+interface AuthedVerifiedWWorkspaceSlugRouteRouteChildren {
+  AuthedVerifiedWWorkspaceSlugAccountRoute: typeof AuthedVerifiedWWorkspaceSlugAccountRoute
+  AuthedVerifiedWWorkspaceSlugAnnouncementsRoute: typeof AuthedVerifiedWWorkspaceSlugAnnouncementsRoute
+  AuthedVerifiedWWorkspaceSlugDashboardRoute: typeof AuthedVerifiedWWorkspaceSlugDashboardRoute
+  AuthedVerifiedWWorkspaceSlugSettingsRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRouteWithChildren
+  AuthedVerifiedWWorkspaceSlugShiftSwapsRoute: typeof AuthedVerifiedWWorkspaceSlugShiftSwapsRoute
+  AuthedVerifiedWWorkspaceSlugTimeClockRoute: typeof AuthedVerifiedWWorkspaceSlugTimeClockRoute
+  AuthedVerifiedWWorkspaceSlugTimesheetsRoute: typeof AuthedVerifiedWWorkspaceSlugTimesheetsRoute
+  AuthedVerifiedWWorkspaceSlugIndexRoute: typeof AuthedVerifiedWWorkspaceSlugIndexRoute
+  AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteWithChildren
+  AuthedVerifiedWWorkspaceSlugRotaIndexRoute: typeof AuthedVerifiedWWorkspaceSlugRotaIndexRoute
+  AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRoute: typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren
+}
+
+const AuthedVerifiedWWorkspaceSlugRouteRouteChildren: AuthedVerifiedWWorkspaceSlugRouteRouteChildren =
+  {
+    AuthedVerifiedWWorkspaceSlugAccountRoute:
+      AuthedVerifiedWWorkspaceSlugAccountRoute,
+    AuthedVerifiedWWorkspaceSlugAnnouncementsRoute:
+      AuthedVerifiedWWorkspaceSlugAnnouncementsRoute,
+    AuthedVerifiedWWorkspaceSlugDashboardRoute:
+      AuthedVerifiedWWorkspaceSlugDashboardRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsRouteWithChildren,
+    AuthedVerifiedWWorkspaceSlugShiftSwapsRoute:
+      AuthedVerifiedWWorkspaceSlugShiftSwapsRoute,
+    AuthedVerifiedWWorkspaceSlugTimeClockRoute:
+      AuthedVerifiedWWorkspaceSlugTimeClockRoute,
+    AuthedVerifiedWWorkspaceSlugTimesheetsRoute:
+      AuthedVerifiedWWorkspaceSlugTimesheetsRoute,
+    AuthedVerifiedWWorkspaceSlugIndexRoute:
+      AuthedVerifiedWWorkspaceSlugIndexRoute,
+    AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute:
+      AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteWithChildren,
+    AuthedVerifiedWWorkspaceSlugRotaIndexRoute:
+      AuthedVerifiedWWorkspaceSlugRotaIndexRoute,
+    AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRoute:
+      AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren,
+  }
+
+const AuthedVerifiedWWorkspaceSlugRouteRouteWithChildren =
+  AuthedVerifiedWWorkspaceSlugRouteRoute._addFileChildren(
+    AuthedVerifiedWWorkspaceSlugRouteRouteChildren,
   )
 
 interface AuthedVerifiedRouteRouteChildren {
+  AuthedVerifiedAccountRoute: typeof AuthedVerifiedAccountRoute
   AuthedVerifiedDashboardRoute: typeof AuthedVerifiedDashboardRoute
-  AuthedVerifiedOOrgSlugRouteRoute: typeof AuthedVerifiedOOrgSlugRouteRouteWithChildren
+  AuthedVerifiedWWorkspaceSlugRouteRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRouteWithChildren
+  AuthedVerifiedBillingExpiredRoute: typeof AuthedVerifiedBillingExpiredRoute
+  AuthedVerifiedBillingSuccessRoute: typeof AuthedVerifiedBillingSuccessRoute
   AuthedVerifiedOnboardingInviteRoute: typeof AuthedVerifiedOnboardingInviteRoute
+  AuthedVerifiedOnboardingJoinRoute: typeof AuthedVerifiedOnboardingJoinRoute
   AuthedVerifiedOnboardingLocationRoute: typeof AuthedVerifiedOnboardingLocationRoute
   AuthedVerifiedOnboardingOrgRoute: typeof AuthedVerifiedOnboardingOrgRoute
+  AuthedVerifiedOnboardingSetupRoute: typeof AuthedVerifiedOnboardingSetupRoute
+  AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute: typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
 }
 
 const AuthedVerifiedRouteRouteChildren: AuthedVerifiedRouteRouteChildren = {
+  AuthedVerifiedAccountRoute: AuthedVerifiedAccountRoute,
   AuthedVerifiedDashboardRoute: AuthedVerifiedDashboardRoute,
-  AuthedVerifiedOOrgSlugRouteRoute:
-    AuthedVerifiedOOrgSlugRouteRouteWithChildren,
+  AuthedVerifiedWWorkspaceSlugRouteRoute:
+    AuthedVerifiedWWorkspaceSlugRouteRouteWithChildren,
+  AuthedVerifiedBillingExpiredRoute: AuthedVerifiedBillingExpiredRoute,
+  AuthedVerifiedBillingSuccessRoute: AuthedVerifiedBillingSuccessRoute,
   AuthedVerifiedOnboardingInviteRoute: AuthedVerifiedOnboardingInviteRoute,
+  AuthedVerifiedOnboardingJoinRoute: AuthedVerifiedOnboardingJoinRoute,
   AuthedVerifiedOnboardingLocationRoute: AuthedVerifiedOnboardingLocationRoute,
   AuthedVerifiedOnboardingOrgRoute: AuthedVerifiedOnboardingOrgRoute,
+  AuthedVerifiedOnboardingSetupRoute: AuthedVerifiedOnboardingSetupRoute,
+  AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute:
+    AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute,
 }
 
 const AuthedVerifiedRouteRouteWithChildren =
@@ -435,15 +1457,41 @@ const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
   AuthedRouteRouteChildren,
 )
 
+interface ClockRouteChildren {
+  ClockTokenRoute: typeof ClockTokenRoute
+}
+
+const ClockRouteChildren: ClockRouteChildren = {
+  ClockTokenRoute: ClockTokenRoute,
+}
+
+const ClockRouteWithChildren = ClockRoute._addFileChildren(ClockRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRouteRoute: AuthedRouteRouteWithChildren,
+  ClockRoute: ClockRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  PricingRoute: PricingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignUpRoute: SignUpRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   AcceptInvitationInvitationIdRoute: AcceptInvitationInvitationIdRoute,
+  AdminClockTagsRoute: AdminClockTagsRoute,
+  FeaturesRotaPlanningRoute: FeaturesRotaPlanningRoute,
+  FeaturesTimeTrackingRoute: FeaturesTimeTrackingRoute,
+  FeaturesTimesheetsRoute: FeaturesTimesheetsRoute,
+  HelpSplatRoute: HelpSplatRoute,
   JoinTokenRoute: JoinTokenRoute,
+  HelpIndexRoute: HelpIndexRoute,
+  ApiAdminTelemetryErrorRoute: ApiAdminTelemetryErrorRoute,
+  ApiAdminTelemetryEventRoute: ApiAdminTelemetryEventRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiBillingReconcileRoute: ApiBillingReconcileRoute,
+  ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  ApiSupportThreadRoute: ApiSupportThreadRoute,
+  ApiAuthStripeWebhookRoute: ApiAuthStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

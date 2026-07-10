@@ -1,9 +1,13 @@
 export type {
   ActiveOnboardingState,
+  BillingSubscriptionStatus,
   LocationSummary,
   OrganizationSummary,
   StaffGroupSummary,
   ViewerState,
+  WorkspaceBillingState,
+  WorkspaceTrialState,
+  WorkspaceSummary,
 } from "@/features/onboarding"
 export {
   FREE_TRIAL_DAYS,
@@ -15,9 +19,13 @@ export {
   createFirstLocationAndZone,
   createOrganizationWithBootstrap,
   createStaffInviteLink,
+  getActiveStaffInviteLink,
   getStaffInvitePreview,
   getViewerState,
+  getViewerStateForLocationSlug,
   getViewerStateForOrganizationSlug,
+  getViewerStateForWorkspaceSlug,
   inviteOrganizationMemberByEmail,
   resendVerificationEmail,
+  saveOnboardingIntent,
 } from "@/features/onboarding"

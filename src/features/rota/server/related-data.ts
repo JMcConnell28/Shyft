@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase"
+import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 
 type PublishedRotaUnreadRow = {
@@ -55,6 +55,7 @@ async function getZoneCountByLocationIds(
     .from("zones")
     .select("location_id")
     .in("location_id", locationIds)
+    .is("deleted_at", null)
 
   assertSupabaseSuccess(result.error, "We could not load zone counts.")
 
@@ -68,7 +69,7 @@ async function getZoneCountByLocationIds(
 }
 
 async function listPublishedRotasForLocations(
-  organizationId: string,
+  organizationId: string | null,
   locationIds: Array<string>,
 ): Promise<Array<PublishedRotaUnreadRow>> {
   if (locationIds.length === 0) {
@@ -76,12 +77,14 @@ async function listPublishedRotasForLocations(
   }
 
   const supabase = createSupabaseServerClient()
-  const result = await supabase
+  const query = supabase
     .from("rotas")
     .select("id, location_id, published_by_user_id, published_version")
-    .eq("organization_id", organizationId)
     .eq("status", "published")
     .in("location_id", locationIds)
+  const result = await (organizationId
+    ? query.eq("organization_id", organizationId)
+    : query.is("organization_id", null))
 
   assertSupabaseSuccess(
     result.error,

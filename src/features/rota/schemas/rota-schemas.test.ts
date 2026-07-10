@@ -20,7 +20,7 @@ describe("rota schemas", () => {
 
   it("builds a consistent week summary label", () => {
     expect(getWeekRangeFromStart("2026-03-30").summaryLabel).toBe(
-      "Week of 30 Mar - 5 Apr 2026",
+      "30 Mar - 5 Apr 2026",
     )
   })
 
@@ -52,7 +52,7 @@ describe("rota schemas", () => {
       location: undefined,
       page: 1,
       pageSize: 20,
-      range: "next-4-weeks",
+      range: "all",
       status: "all",
       to: undefined,
     })

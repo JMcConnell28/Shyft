@@ -1,11 +1,12 @@
-import { getRequestHeaders } from "@tanstack/react-start/server"
-
-import { auth } from "@/lib/auth"
+import {
+  getAuthRequestHeaders,
+  readSessionFromRequestHeaders,
+} from "@/lib/auth-session.server"
 import { isEmailVerificationSatisfied } from "@/lib/email-verification"
 
 async function requireVerifiedSessionOrThrow() {
-  const headers = getRequestHeaders()
-  const session = await auth.api.getSession({ headers })
+  const headers = getAuthRequestHeaders()
+  const session = await readSessionFromRequestHeaders()
 
   if (!session) {
     throw new Error("You need to sign in to continue.")

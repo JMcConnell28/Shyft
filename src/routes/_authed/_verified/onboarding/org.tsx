@@ -13,10 +13,10 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/org")({
   },
   head: () => ({
     meta: [
-      { title: "Create Organization | Shyft" },
+      { title: "Create Organization | RocketRota" },
       {
         name: "description",
-        content: "Create your Shyft organization and choose its URL slug.",
+        content: "Create your RocketRota organization and choose its URL slug.",
       },
     ],
   }),

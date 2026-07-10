@@ -37,6 +37,7 @@ export const Route = createFileRoute("/join/$token")({
         search: {
           email: viewer.user.email,
           redirect: `/join/${params.token}`,
+          sent: false,
         },
       })
     }
@@ -49,10 +50,10 @@ export const Route = createFileRoute("/join/$token")({
   },
   head: () => ({
     meta: [
-      { title: "Join Workplace | Shyft" },
+      { title: "Join Workplace | RocketRota" },
       {
         name: "description",
-        content: "Join a Shyft workplace using a staff invitation link.",
+        content: "Join a RocketRota workplace using a staff invitation link.",
       },
     ],
   }),
@@ -93,7 +94,7 @@ function JoinInviteRoute() {
         badge="Invite unavailable"
         eyebrow="Join workplace"
         title="This invite link is no longer valid."
-        description="Ask your manager for a fresh Shyft invite link and try again."
+        description="Ask your manager for a fresh RocketRota invite link and try again."
         progress={10}
       >
         <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
@@ -114,7 +115,7 @@ function JoinInviteRoute() {
     <OnboardingShell
       badge="Workplace invite"
       eyebrow="Join workplace"
-      title={`Join ${loaderData.preview.organizationName} on Shyft.`}
+      title={`Join ${loaderData.preview.organizationName} on RocketRota.`}
       description="This invite will place you into the correct workplace, location, and default staff group."
       progress={80}
     >

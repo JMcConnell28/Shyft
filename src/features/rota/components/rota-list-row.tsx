@@ -1,14 +1,32 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowUpRightIcon, CopyPlusIcon, DotIcon, LoaderCircleIcon, MapPinIcon } from "lucide-react"
+import {
+  ArrowUpRightIcon,
+  CalendarDaysIcon,
+  Clock3Icon,
+  MapPinIcon,
+  MoreHorizontalIcon,
+  PencilIcon,
+  UsersRoundIcon,
+} from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { formatHours, getStatusVariant } from "@/features/rota/utils/formatting"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  rotaListActionButtonClassName,
+  rotaListInteractiveSurfaceClassName,
+} from "@/features/rota/constants/rota-list-styles"
+import { cn } from "@/lib/utils"
 
 type RotaListRowData = {
   id: string
   locationName: string
   locationSlug: string
+  weekStart: string
   weekLabel: string
   status: "draft" | "published"
   createdBy: string
@@ -20,121 +38,218 @@ type RotaListRowData = {
   zoneCount: number
   note: string | null
   isUnread: boolean
+  hasUnpublishedChanges: boolean
 }
 
 function RotaListRow({
+  canEdit,
   orgSlug,
+  workspaceType = "organization",
+  locationWorkspaceSlug,
   row,
-  isDuplicating,
-  onDuplicate,
+  onDeleteDraft,
+  onUnpublish,
+  isDeletingDraft,
+  isUnpublishing,
 }: {
+  canEdit: boolean
   orgSlug: string
+  workspaceType?: "organization" | "location"
+  locationWorkspaceSlug?: string
   row: RotaListRowData
-  isDuplicating: boolean
-  onDuplicate: (rotaId: string) => void
+  onDeleteDraft: (rotaId: string) => void
+  onUnpublish: (rotaId: string) => void
+  isDeletingDraft: boolean
+  isUnpublishing: boolean
 }) {
-  const warnings = [
-    row.status === "draft" ? "Not yet published" : null,
-    row.shiftCount === 0 ? "No shifts added" : null,
-  ].filter(Boolean) as Array<string>
+  const opensPublishedView = row.status === "published"
+  const canOpenRota = opensPublishedView || !canEdit
+  const routeParams =
+    workspaceType === "location"
+      ? {
+          workspaceSlug: locationWorkspaceSlug ?? row.locationSlug,
+          rotaId: row.id,
+        }
+      : {
+          workspaceSlug: orgSlug,
+          locationSlug: row.locationSlug,
+          rotaId: row.id,
+        }
 
   return (
-    <article className="px-4 py-3 transition-colors hover:bg-muted/10 sm:px-5">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
+    <article
+      className={cn(
+        rotaListInteractiveSurfaceClassName,
+        "p-4",
+        row.isUnread && "border-blue-200"
+      )}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5">
             {row.isUnread ? (
-              <span className="inline-flex items-center text-rose-500">
-                <DotIcon className="-mx-1 size-6" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
+                <span className="size-2 rounded-full bg-blue-600" />
+                Unread
               </span>
             ) : null}
-            <h2 className="text-sm font-semibold tracking-tight">{row.weekLabel}</h2>
-            <Badge variant={getStatusVariant(row.status)}>
-              {row.status === "published" ? "Published" : "Draft"}
-            </Badge>
-            {warnings.map((warning) => (
-              <Badge key={warning} variant="outline" className="text-[10px]">
-                {warning}
-              </Badge>
-            ))}
+            <StatusBadge row={row} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <h2 className="mt-3 truncate text-lg leading-tight font-semibold tracking-[-0.02em] text-neutral-950">
+            {row.weekLabel}
+          </h2>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-neutral-500">
             <span className="inline-flex items-center gap-1.5">
-              <MapPinIcon className="size-3.5" />
+              <MapPinIcon className="size-3.5 text-blue-600" />
               {row.locationName}
             </span>
-            <span>Created by {row.createdBy}</span>
-            {row.publishedBy ? <span>Published by {row.publishedBy}</span> : null}
             <span>Updated {row.updatedAt}</span>
           </div>
+        </div>
 
-          {row.note?.trim() ? (
-            <p className="max-w-3xl truncate text-xs text-muted-foreground">
-              {row.note}
-            </p>
+        <div className="flex shrink-0 items-center gap-2">
+          {canOpenRota ? (
+            <Button
+              size="sm"
+              variant="base"
+              className={rotaListActionButtonClassName}
+              nativeButton={false}
+              render={
+                <Link
+                  to={
+                    opensPublishedView && workspaceType === "location"
+                      ? "/w/$workspaceSlug/rota/$rotaId/view"
+                      : opensPublishedView
+                        ? "/w/$workspaceSlug/rota/$locationSlug/$rotaId/view"
+                        : workspaceType === "location"
+                          ? "/w/$workspaceSlug/rota/$rotaId"
+                          : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
+                  }
+                  params={routeParams}
+                />
+              }
+            >
+              Open
+              <ArrowUpRightIcon className="size-3.5" />
+            </Button>
           ) : null}
 
-          <dl className="flex flex-wrap gap-2 text-xs">
-            <StatChip label="Hours" value={formatHours(row.scheduledHours)} />
-            <StatChip label="Staff" value={String(row.scheduledStaffCount)} />
-            <StatChip label="Shifts" value={String(row.shiftCount)} />
-            <StatChip label="Zones" value={String(row.zoneCount)} />
-          </dl>
-        </div>
+          {canEdit ? (
+            <Button
+              size="sm"
+              variant="base"
+              className={rotaListActionButtonClassName}
+              nativeButton={false}
+              render={
+                <Link
+                  to={
+                    workspaceType === "location"
+                      ? "/w/$workspaceSlug/rota/$rotaId"
+                      : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
+                  }
+                  params={routeParams}
+                />
+              }
+            >
+              <PencilIcon className="size-3.5" />
+              Edit
+            </Button>
+          ) : null}
 
-        <div className="flex shrink-0 items-center gap-2 lg:pt-0.5">
-          <Button
-            size="sm"
-            className="gap-2"
-            nativeButton={false}
-            render={
-              <Link
-                to="/o/$orgSlug/rota/$locationSlug/$rotaId"
-                params={{
-                  orgSlug,
-                  locationSlug: row.locationSlug,
-                  rotaId: row.id,
-                }}
-              />
-            }
-          >
-            Open
-            <ArrowUpRightIcon className="size-3.5" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            type="button"
-            onClick={() => onDuplicate(row.id)}
-            disabled={isDuplicating}
-          >
-            {isDuplicating ? (
-              <>
-                <LoaderCircleIcon className="size-3.5 animate-spin" />
-                Duplicating
-              </>
-            ) : (
-              <>
-                <CopyPlusIcon className="size-3.5" />
-                Duplicate
-              </>
-            )}
-          </Button>
+          {canEdit ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    size="sm"
+                    variant="base"
+                    type="button"
+                    className="h-8 w-9 text-neutral-900"
+                  />
+                }
+              >
+                <MoreHorizontalIcon className="size-4" />
+                <span className="sr-only">Rota actions</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                {row.status === "published" ? (
+                  <DropdownMenuItem
+                    disabled={isUnpublishing}
+                    onClick={() => onUnpublish(row.id)}
+                  >
+                    {isUnpublishing ? "Unpublishing..." : "Unpublish rota"}
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    disabled={isDeletingDraft}
+                    onClick={() => onDeleteDraft(row.id)}
+                  >
+                    {isDeletingDraft ? "Deleting..." : "Delete draft"}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
         </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <MetricPill icon={CalendarDaysIcon}>{row.shiftCount} shifts</MetricPill>
+        <MetricPill icon={UsersRoundIcon}>
+          {row.scheduledStaffCount} staff
+        </MetricPill>
+        <MetricPill icon={Clock3Icon}>
+          {row.scheduledHours.toFixed(1)}h
+        </MetricPill>
+      </div>
+
+      <div className="mt-3 truncate text-xs font-medium text-neutral-500">
+        {row.status === "published" && row.publishedBy ? (
+          <span>Published by {row.publishedBy}</span>
+        ) : (
+          <span>Created by {row.createdBy}</span>
+        )}
       </div>
     </article>
   )
 }
 
-function StatChip({ label, value }: { label: string; value: string }) {
+function StatusBadge({ row }: { row: RotaListRowData }) {
   return (
-    <div className="inline-flex items-baseline gap-1 rounded-md border border-border/60 bg-muted/20 px-2 py-1">
-      <dt className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-        {label}
-      </dt>
-      <dd className="font-medium text-foreground">{value}</dd>
-    </div>
+    <>
+      <span
+        className={cn(
+          "rounded-full px-2.5 py-1 text-[11px] font-semibold",
+          row.status === "published"
+            ? "bg-emerald-50 text-emerald-700"
+            : "bg-blue-50 text-blue-700"
+        )}
+      >
+        {row.status === "published" ? "Published" : "Draft"}
+      </span>
+      {row.status === "published" && row.hasUnpublishedChanges ? (
+        <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+          Changes not live
+        </span>
+      ) : null}
+    </>
+  )
+}
+
+function MetricPill({
+  children,
+  icon: Icon,
+}: {
+  children: React.ReactNode
+  icon: typeof CalendarDaysIcon
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-[10px] border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600">
+      <Icon className="size-3 text-blue-600" />
+      {children}
+    </span>
   )
 }
 

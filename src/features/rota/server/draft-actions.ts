@@ -2,13 +2,16 @@ import type {
   CreateDraftRotaRecordInput,
   CreateDraftRotaRecordResult,
 } from "@/features/rota/types"
-import { createSupabaseServerClient } from "@/lib/supabase"
-import {
-  assertSupabaseSuccess,
-  getRequiredSupabaseRow,
-} from "@/lib/supabase-errors"
+import { assertTrialRotaCreationAllowed } from "@/features/billing/server/trial-rota-limits"
+import { getDatabase } from "@/lib/db"
+import { createSupabaseServerClient } from "@/lib/supabase.server"
+import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 
 import { findExistingRotaByWeek } from "@/features/rota/server/lookups"
+import {
+  getTemplateForLocationOrThrow,
+  replaceRotaShiftsFromTemplate,
+} from "@/features/rota/server/template-actions"
 import { coerceNumber } from "@/features/rota/utils/week-utils"
 
 async function createDraftRotaRecord({
@@ -22,7 +25,12 @@ async function createDraftRotaRecord({
   templateId,
 }: CreateDraftRotaRecordInput): Promise<CreateDraftRotaRecordResult> {
   const supabase = createSupabaseServerClient()
-  const existing = await findExistingRotaByWeek(organizationId, locationId, weekStart)
+  const workspaceOrganizationId = organizationId || null
+  const existing = await findExistingRotaByWeek(
+    workspaceOrganizationId,
+    locationId,
+    weekStart
+  )
 
   if (existing) {
     return {
@@ -35,6 +43,11 @@ async function createDraftRotaRecord({
     }
   }
 
+  await assertTrialRotaCreationAllowed({
+    organizationId: workspaceOrganizationId,
+    locationId,
+  })
+
   let sourceRotaId: string | null = null
   let sourceTemplateId: string | null = null
   let note: string | null = null
@@ -43,20 +56,23 @@ async function createDraftRotaRecord({
   let scheduledStaffCount = 0
 
   if (sourceType === "previous-week" || sourceType === "duplicate") {
-    const sourceResult = await supabase
+    const sourceQuery = supabase
       .from("rotas")
       .select("id, note, shift_count, scheduled_hours, scheduled_staff_count")
-      .eq("organization_id", organizationId)
       .eq("location_id", locationId)
       .eq("status", "published")
       .lt("week_start", weekStart)
       .order("week_start", { ascending: false })
       .limit(1)
-      .maybeSingle()
+    const sourceResult = await (
+      workspaceOrganizationId
+        ? sourceQuery.eq("organization_id", workspaceOrganizationId)
+        : sourceQuery.is("organization_id", null)
+    ).maybeSingle()
 
     assertSupabaseSuccess(
       sourceResult.error,
-      "We could not load the previous published rota.",
+      "We could not load the previous published rota."
     )
     const source = sourceResult.data
 
@@ -74,49 +90,78 @@ async function createDraftRotaRecord({
   }
 
   if (sourceType === "template") {
-    const templateResult = await supabase
-      .from("rota_templates")
-      .select("id, description")
-      .eq("organization_id", organizationId)
-      .eq("id", templateId ?? "")
-      .or(`location_id.is.null,location_id.eq.${locationId}`)
-      .maybeSingle()
-
-    assertSupabaseSuccess(templateResult.error, "Choose a valid template.")
-    const template = templateResult.data
-
-    if (!template) {
+    if (!templateId) {
       throw new Error("Choose a valid template.")
     }
 
-    sourceTemplateId = template.id
-    note = template.description
+    const client = await getDatabase().connect()
+
+    try {
+      const template = await getTemplateForLocationOrThrow(client, {
+        templateId,
+        organizationId: workspaceOrganizationId,
+        locationId,
+      })
+      sourceTemplateId = template.id
+    } finally {
+      client.release()
+    }
   }
 
-  const insertResult = await supabase
-    .from("rotas")
-    .insert({
-      organization_id: organizationId,
-      location_id: locationId,
-      week_start: weekStart,
-      status: "draft",
-      note,
-      shift_count: shiftCount,
-      scheduled_hours: scheduledHours,
-      scheduled_staff_count: scheduledStaffCount,
-      created_by: userId,
-      source_type: sourceType,
-      source_rota_id: sourceRotaId,
-      template_id: sourceTemplateId,
-    })
-    .select("id")
-    .single()
+  const insertResult = await insertDraftRotaOrReturnExisting({
+    organizationId: workspaceOrganizationId,
+    userId,
+    locationId,
+    locationSlug,
+    orgSlug,
+    weekStart,
+    note,
+    shiftCount,
+    scheduledHours,
+    scheduledStaffCount,
+    sourceType,
+    sourceRotaId,
+    sourceTemplateId,
+  })
 
-  assertSupabaseSuccess(insertResult.error, "We could not create that draft rota.")
-  const createdRota = getRequiredSupabaseRow(
-    insertResult.data,
-    "We could not create that draft rota.",
-  )
+  if (insertResult.wasExisting) {
+    return insertResult
+  }
+
+  const createdRota = insertResult.rows.at(0)
+
+  if (!createdRota) {
+    throw new Error("We could not create that draft rota.")
+  }
+
+  if (sourceTemplateId) {
+    const client = await getDatabase().connect()
+
+    try {
+      const templateShiftCount = await replaceRotaShiftsFromTemplate(client, {
+        organizationId: workspaceOrganizationId,
+        rotaId: createdRota.id,
+        templateId: sourceTemplateId,
+        weekStart,
+      })
+
+      if (templateShiftCount === 0) {
+        throw new Error("That template does not have any shifts yet.")
+      }
+
+      await client.query(
+        `update public.rotas
+         set shift_count = $2,
+             scheduled_hours = 0,
+             scheduled_staff_count = 0,
+             updated_at = timezone('utc', now())
+         where id = $1`,
+        [createdRota.id, templateShiftCount]
+      )
+    } finally {
+      client.release()
+    }
+  }
 
   return {
     wasExisting: false,
@@ -128,5 +173,105 @@ async function createDraftRotaRecord({
   }
 }
 
-export { createDraftRotaRecord }
+type InsertDraftRotaInput = {
+  organizationId: string | null
+  userId: string
+  locationId: string
+  locationSlug: string
+  orgSlug: string
+  weekStart: string
+  note: string | null
+  shiftCount: number
+  scheduledHours: number
+  scheduledStaffCount: number
+  sourceType: CreateDraftRotaRecordInput["sourceType"]
+  sourceRotaId: string | null
+  sourceTemplateId: string | null
+}
 
+type ExistingDraftRotaResult = {
+  wasExisting: true
+  target: CreateDraftRotaRecordResult["target"]
+}
+
+type InsertDraftRotaResult =
+  | ExistingDraftRotaResult
+  | {
+      wasExisting: false
+      rows: Array<{ id: string }>
+    }
+
+async function insertDraftRotaOrReturnExisting({
+  organizationId,
+  userId,
+  locationId,
+  locationSlug,
+  orgSlug,
+  weekStart,
+  note,
+  shiftCount,
+  scheduledHours,
+  scheduledStaffCount,
+  sourceType,
+  sourceRotaId,
+  sourceTemplateId,
+}: InsertDraftRotaInput): Promise<InsertDraftRotaResult> {
+  try {
+    const insertResult = await getDatabase().query<{ id: string }>(
+      `insert into public.rotas (
+         organization_id,
+         location_id,
+         week_start,
+         status,
+         note,
+         shift_count,
+         scheduled_hours,
+         scheduled_staff_count,
+         created_by,
+         source_type,
+         source_rota_id,
+         template_id
+       ) values ($1, $2, $3, 'draft', $4, $5, $6, $7, $8, $9, $10, $11)
+       returning id`,
+      [
+        organizationId,
+        locationId,
+        weekStart,
+        note,
+        shiftCount,
+        scheduledHours,
+        scheduledStaffCount,
+        userId,
+        sourceType,
+        sourceRotaId,
+        sourceTemplateId,
+      ]
+    )
+
+    return {
+      wasExisting: false,
+      rows: insertResult.rows,
+    }
+  } catch (error) {
+    const existing = await findExistingRotaByWeek(
+      organizationId,
+      locationId,
+      weekStart
+    )
+
+    if (existing) {
+      return {
+        wasExisting: true,
+        target: {
+          orgSlug,
+          locationSlug,
+          rotaId: existing.id,
+        },
+      }
+    }
+
+    throw error
+  }
+}
+
+export { createDraftRotaRecord }

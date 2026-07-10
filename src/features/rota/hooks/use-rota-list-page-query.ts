@@ -8,8 +8,10 @@ import { rotaQueryKeys } from "@/features/rota/query-keys"
 import { getRotaListPageData } from "@/features/rota/server-fns"
 
 function useRotaListPageQuery(input: {
-  organizationId: string
-  orgSlug: string
+  organizationId?: string
+  locationId?: string
+  orgSlug?: string
+  locationSlug?: string
   userId: string
   search: RotaListSearch
 }) {

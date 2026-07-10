@@ -1,27 +1,28 @@
 import type { ViewerState } from "@/features/onboarding/types"
 import {
+  getLocationAppPath,
+  getLocationDashboardPath,
   getOrganizationAppPath,
   getOrganizationDashboardPath,
   type OrganizationAppRouteKey,
 } from "@/lib/organization-paths"
 
-type ViewerRouteState = Pick<ViewerState, "activeOrganization" | "onboarding">
+type ViewerRouteState = Pick<
+  ViewerState,
+  "activeOrganization" | "activeWorkspace" | "onboarding"
+>
 
 type PendingOnboardingPath = "/onboarding/location" | "/onboarding/invite"
 
 function getPendingOnboardingPath(
   viewer: ViewerRouteState,
 ): PendingOnboardingPath | null {
-  if (!viewer.activeOrganization) {
+  if (!viewer.activeOrganization && !viewer.activeWorkspace) {
     return null
   }
 
   if (viewer.onboarding?.hasLocation === false) {
     return "/onboarding/location"
-  }
-
-  if (viewer.onboarding?.hasInviteLink === false) {
-    return "/onboarding/invite"
   }
 
   return null
@@ -36,6 +37,13 @@ function requireActiveOrganization(viewer: ViewerRouteState) {
 }
 
 function getExistingOrganizationRedirect(viewer: ViewerRouteState) {
+  if (viewer.activeWorkspace?.type === "location") {
+    return (
+      getPendingOnboardingPath(viewer) ??
+      getLocationDashboardPath(viewer.activeWorkspace.slug)
+    )
+  }
+
   if (!viewer.activeOrganization) {
     return null
   }
@@ -50,6 +58,16 @@ function getOrganizationAppRedirect(
   viewer: ViewerRouteState,
   routeKey: OrganizationAppRouteKey,
 ) {
+  if (viewer.activeWorkspace?.type === "location") {
+    const pendingOnboardingPath = getPendingOnboardingPath(viewer)
+
+    if (pendingOnboardingPath) {
+      return pendingOnboardingPath
+    }
+
+    return getLocationAppPath(viewer.activeWorkspace.slug, routeKey)
+  }
+
   if (!viewer.activeOrganization) {
     return null
   }

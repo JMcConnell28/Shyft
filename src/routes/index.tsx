@@ -1,15 +1,31 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
 import { LandingPage } from "@/components/app/landing-page"
+import { getHelpHostState } from "@/features/help-center/server/host"
+import { getSession } from "@/lib/auth-server"
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const [{ isHelpHost }, session] = await Promise.all([
+      getHelpHostState(),
+      getSession(),
+    ])
+
+    if (isHelpHost) {
+      throw redirect({ to: "/help" })
+    }
+
+    return {
+      isAuthenticated: Boolean(session),
+    }
+  },
   head: () => ({
     meta: [
-      { title: "Northstar | TanStack Start Boilerplate" },
+      { title: "RocketRota | Rota management that launches productivity" },
       {
         name: "description",
         content:
-          "A polished landing page starter for a TanStack Start boilerplate with auth and dashboard foundations.",
+          "RocketRota helps teams build fair, efficient rotas with less admin and more clarity.",
       },
     ],
   }),
@@ -17,5 +33,7 @@ export const Route = createFileRoute("/")({
 })
 
 function App() {
-  return <LandingPage />
+  const { isAuthenticated } = Route.useLoaderData()
+
+  return <LandingPage isAuthenticated={isAuthenticated} />
 }

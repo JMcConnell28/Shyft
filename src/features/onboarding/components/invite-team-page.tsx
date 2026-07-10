@@ -26,6 +26,7 @@ import {
   inviteOrganizationMemberByEmail,
 } from "@/lib/onboarding"
 import { getOrganizationDashboardPath } from "@/lib/organization-paths"
+import { getLocationDashboardPath } from "@/lib/organization-paths"
 import {
   emailSchema,
   organizationMemberInviteSchema,
@@ -49,7 +50,7 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
 
   const defaultLocationId = viewer.locations.at(0)?.id ?? ""
   const defaultStaffGroupId =
-    viewer.staffGroups.find((group) => group.isDefault)?.id ??
+    viewer.staffGroups.find((group) => group.isFallback)?.id ??
     viewer.staffGroups.at(0)?.id ??
     ""
 
@@ -111,10 +112,11 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
   return (
     <OnboardingShell
       badge="Team onboarding"
-      eyebrow={viewer.activeOrganization?.name ?? "Invite your team"}
+      eyebrow={viewer.activeWorkspace?.name ?? viewer.activeOrganization?.name ?? "Invite your team"}
       title="Generate the first invite link for your team."
-      description="This reusable staff link is the fastest way to get employees into the right workplace, location, and default staff group."
+      description="This reusable staff link is the fastest way to get employees into the right workplace, location, and rota group."
       progress={90}
+      showSignOut
     >
       <div className="space-y-5">
         <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
@@ -170,12 +172,12 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
                   {(field) => (
                     <SelectFormField
                       field={field}
-                      label="Default staff group"
+                      label="Staff group"
                       options={viewer.staffGroups.map((group) => ({
                         label: group.name,
                         value: group.id,
                       }))}
-                      description="Staff joining from this link will be placed into this default rota group."
+                      description="Staff joining from this link will be placed into this rota group."
                     />
                   )}
                 </form.Field>
@@ -216,11 +218,13 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
                   {copyState === "copied" ? "Copied" : "Copy invite link"}
                 </Button>
                 <a
-                  href={
-                    viewer.activeOrganization
+                href={
+                  viewer.activeWorkspace?.type === "location"
+                    ? getLocationDashboardPath(viewer.activeWorkspace.slug)
+                    : viewer.activeOrganization
                       ? getOrganizationDashboardPath(viewer.activeOrganization.slug)
                       : "/dashboard"
-                  }
+                }
                   className="inline-flex h-7 items-center justify-center rounded-md border border-border px-3 text-xs font-medium transition-colors hover:bg-input/50 sm:w-auto"
                 >
                   Finish setup
@@ -230,6 +234,7 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
           </Card>
         ) : null}
 
+        {viewer.activeOrganization ? (
         <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
           <CardHeader>
             <CardTitle className="text-xl">Invite a manager or admin by email</CardTitle>
@@ -279,9 +284,10 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
                       options={[
                         { label: "Admin", value: "admin" },
                         { label: "Manager", value: "manager" },
+                        { label: "Supervisor", value: "supervisor" },
                         { label: "Employee", value: "employee" },
                       ]}
-                      description="Admins manage the organization, managers can run rota workflows, and employees stay read-only."
+                      description="Managers can build rotas. Supervisors can oversee rotas, timesheets, and attendance without editing schedules."
                     />
                   )}
                 </memberInviteForm.Field>
@@ -299,6 +305,7 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
             </form>
           </CardContent>
         </Card>
+        ) : null}
       </div>
     </OnboardingShell>
   )

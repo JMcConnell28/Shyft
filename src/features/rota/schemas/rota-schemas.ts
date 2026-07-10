@@ -26,6 +26,7 @@ const isoDateSchema = z
 const rotaStatusSchema = z.enum(["draft", "published"])
 const rotaStatusFilterSchema = z.enum(["all", "draft", "published"])
 const rotaRangeFilterSchema = z.enum([
+  "all",
   "this-week",
   "next-4-weeks",
   "past-4-weeks",
@@ -69,6 +70,14 @@ const publishRotaSchema = z.object({
   rotaId: z.string().uuid("Choose a rota."),
 })
 
+const unpublishRotaSchema = z.object({
+  rotaId: z.string().uuid("Choose a rota."),
+})
+
+const deleteDraftRotaSchema = z.object({
+  rotaId: z.string().uuid("Choose a rota."),
+})
+
 const updateRotaNoteSchema = z.object({
   rotaId: z.string().uuid("Choose a rota."),
   note: z
@@ -77,6 +86,16 @@ const updateRotaNoteSchema = z.object({
     .max(500, "Keep notes under 500 characters.")
     .optional()
     .default(""),
+})
+
+const updateRotaBudgetSchema = z.object({
+  rotaId: z.string().uuid("Choose a rota."),
+  budgetPence: z
+    .number()
+    .int()
+    .min(0, "Enter a budget of zero or more.")
+    .max(100_000_000, "Enter a budget below £1,000,000.")
+    .nullable(),
 })
 
 const rotaRouteParamsSchema = z.object({
@@ -164,7 +183,7 @@ function getWeekRangeFromStart(weekStart: Date | string) {
     end,
     startLabel: format(normalizedStart, "d MMM"),
     endLabel: format(end, "d MMM yyyy"),
-    summaryLabel: `Week of ${format(normalizedStart, "d MMM")} - ${format(
+    summaryLabel: `${format(normalizedStart, "d MMM")} - ${format(
       end,
       "d MMM yyyy"
     )}`,
@@ -189,7 +208,7 @@ function parseRotaListSearch(search: Record<string, unknown>): RotaListSearch {
         ? "next-4-weeks"
         : normalizedRange.success
           ? normalizedRange.data
-          : "next-4-weeks"
+          : "all"
 
   return {
     location: normalizedLocation.success ? normalizedLocation.data : undefined,
@@ -220,6 +239,7 @@ export {
   normalizeOptionalIsoDate,
   normalizeWeekStart,
   parseRotaListSearch,
+  deleteDraftRotaSchema,
   previewRotaCreationSchema,
   publishRotaSchema,
   rawRotaListSearchSchema,
@@ -230,5 +250,7 @@ export {
   rotaStatusFilterSchema,
   rotaStatusSchema,
   toIsoDate,
+  unpublishRotaSchema,
   updateRotaNoteSchema,
+  updateRotaBudgetSchema,
 }

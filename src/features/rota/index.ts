@@ -10,6 +10,7 @@ export type {
   RotaTemplateSummary,
 } from "@/features/rota/types"
 export {
+  copyRotaBoard,
   createRotaDraft,
   duplicateRotaToNextWeek,
   getHasUnreadRotaUpdates,

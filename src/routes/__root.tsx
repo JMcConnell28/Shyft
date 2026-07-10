@@ -5,6 +5,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 import { RootErrorState } from "@/components/errors/root-error-state"
 import { AppToaster } from "@/components/providers/app-toaster"
 import { QueryProvider } from "@/components/providers/query-provider"
+import { PwaAppController } from "@/features/pwa/components/pwa-app-controller"
 
 import appCss from "../styles.css?url"
 
@@ -19,13 +20,42 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Northstar",
+        name: "theme-color",
+        content: "#0b2b67",
+      },
+      {
+        name: "apple-mobile-web-app-capable",
+        content: "yes",
+      },
+      {
+        name: "apple-mobile-web-app-status-bar-style",
+        content: "default",
+      },
+      {
+        title: "RocketRota",
       },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        href: "/favicon.png",
+      },
+      {
+        rel: "shortcut icon",
+        href: "/favicon.png",
+      },
+      {
+        rel: "manifest",
+        href: "/manifest.json",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/pwa/icon-192.png",
       },
     ],
   }),
@@ -41,6 +71,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <QueryProvider>
+          <PwaAppController />
           {children}
           <AppToaster />
         </QueryProvider>

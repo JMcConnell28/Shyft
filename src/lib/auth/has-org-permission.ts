@@ -1,9 +1,8 @@
-import { getRequestHeaders } from "@tanstack/react-start/server"
-
 import type { OrganizationRole } from "@/lib/auth/permissions"
+import { getAuthRequestHeaders } from "@/lib/auth-session.server"
 import { getDevRoleOverride } from "@/lib/auth/dev-role-override"
 import { roles } from "@/lib/auth/permissions"
-import { createSupabaseServerClient } from "@/lib/supabase"
+import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 
 type OrganizationPermissionRequest = Parameters<
@@ -31,7 +30,7 @@ async function getOrganizationRole(
   }
 
   const resolvedRole = role as OrganizationRole
-  const requestHeaders = getRequestHeaders()
+  const requestHeaders = getAuthRequestHeaders()
   const devRoleOverride = getDevRoleOverride(
     requestHeaders.get("cookie"),
     organizationId,
