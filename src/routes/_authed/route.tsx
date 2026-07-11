@@ -1,12 +1,12 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
 
-import { getSession } from "@/lib/auth-server"
+import { getViewerState } from "@/lib/onboarding"
 
 export const Route = createFileRoute("/_authed")({
   beforeLoad: async ({ location }) => {
-    const session = await getSession()
+    const viewer = await getViewerState()
 
-    if (!session) {
+    if (!viewer) {
       throw redirect({
         to: "/login",
         search: {
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authed")({
       })
     }
 
-    return { session }
+    return { viewer }
   },
   component: Outlet,
 })

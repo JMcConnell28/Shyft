@@ -1,10 +1,10 @@
 import "@tanstack/react-start/server-only"
 
-import { getDatabase } from "@/lib/db"
 import type {
   BillingSubscriptionStatus,
   WorkspaceBillingState,
 } from "@/features/billing/types"
+import { getDatabase } from "@/lib/db"
 import {
   INCLUDED_CORE_EMPLOYEES,
   getBillingPricingQuantities,
@@ -31,17 +31,10 @@ type BillingAccountRow = {
   payment_method_saved_at: Date | string | null
 }
 
-type BillingSubscriptionRow = {
-  status: string
-  past_due_started_at: Date | string | null
-}
-
 type BillingAccessRow = BillingAccountRow & {
   subscription_status: string | null
   past_due_started_at: Date | string | null
 }
-
-let hasPastDueStartedAtColumnCache: boolean | null = null
 
 function mapBillingAccess(row: BillingAccessRow): WorkspaceBillingState {
   const subscriptionStatus = parseSubscriptionStatus(row.subscription_status)
@@ -269,14 +262,6 @@ async function getBillingAccountLocationQuantity(billingAccountId: string) {
 }
 
 async function getLocationBillingAccess(locationId: string) {
-  const account = await ensureLocationBillingAccount({ locationId })
-
-  const hasPastDueStartedAtColumn = await hasBillingSubscriptionColumn(
-    "past_due_started_at"
-  )
-  const pastDueStartedAtSelect = hasPastDueStartedAtColumn
-    ? "past_due_started_at"
-    : "case when status = 'past_due' then updated_at else null end as past_due_started_at"
   const result = await getDatabase().query<BillingAccessRow>(
     `select
        ba.id,
@@ -286,23 +271,23 @@ async function getLocationBillingAccess(locationId: string) {
        subscription.status as subscription_status,
        subscription.past_due_started_at
      from public.locations l
-     join public.billing_accounts ba on ba.id = $2
+     join public.billing_accounts ba on ba.id = l.billing_account_id
      left join lateral (
        select status,
-              ${pastDueStartedAtSelect}
+              past_due_started_at
        from public.billing_subscriptions
        where billing_account_id = ba.id
        order by created_at desc
        limit 1
      ) subscription on true
      where l.id = $1`,
-    [locationId, account.id]
+    [locationId]
   )
 
   const row = result.rows.at(0)
 
   if (!row) {
-    throw new Error("We could not load billing for this location.")
+    return null
   }
 
   return {
@@ -312,78 +297,36 @@ async function getLocationBillingAccess(locationId: string) {
 }
 
 async function getOrganizationBillingAccess(organizationId: string) {
-  const hasPastDueStartedAtColumn = await hasBillingSubscriptionColumn(
-    "past_due_started_at"
-  )
-  const pastDueStartedAtSelect = hasPastDueStartedAtColumn
-    ? "past_due_started_at"
-    : "case when status = 'past_due' then updated_at else null end as past_due_started_at"
-  const accountResult = await getDatabase().query<BillingAccountRow>(
-    `select id,
-            stripe_customer_id,
-            stripe_payment_method_id,
-            payment_method_saved_at
-     from public.billing_accounts
-     where scope = 'organization'
-       and organization_id = $1
+  const result = await getDatabase().query<BillingAccessRow>(
+    `select account.id,
+            account.stripe_customer_id,
+            account.stripe_payment_method_id,
+            account.payment_method_saved_at,
+            subscription.status as subscription_status,
+            subscription.past_due_started_at
+     from public.billing_accounts account
+     left join lateral (
+       select status, past_due_started_at
+       from public.billing_subscriptions
+       where billing_account_id = account.id
+       order by created_at desc
+       limit 1
+     ) subscription on true
+     where account.scope = 'organization'
+       and account.organization_id = $1
      limit 1`,
     [organizationId]
   )
-  const account = accountResult.rows.at(0)
+  const row = result.rows.at(0)
 
-  if (!account) {
+  if (!row) {
     return null
   }
 
-  const subscriptionResult = await getDatabase().query<BillingSubscriptionRow>(
-    `select status,
-            ${pastDueStartedAtSelect}
-     from public.billing_subscriptions
-     where billing_account_id = $1
-     order by created_at desc
-     limit 1`,
-    [account.id]
-  )
-  const subscription = subscriptionResult.rows.at(0) ?? null
-
   return {
-    ...mapBillingAccess({
-      id: account.id,
-      stripe_customer_id: account.stripe_customer_id,
-      stripe_payment_method_id: account.stripe_payment_method_id,
-      payment_method_saved_at: account.payment_method_saved_at,
-      subscription_status: subscription?.status ?? null,
-      past_due_started_at: subscription?.past_due_started_at ?? null,
-    }),
-    ...(await getBillingPricingQuantities(account.id)),
+    ...mapBillingAccess(row),
+    ...(await getBillingPricingQuantities(row.id)),
   }
-}
-
-async function hasBillingSubscriptionColumn(columnName: string) {
-  if (
-    columnName === "past_due_started_at" &&
-    hasPastDueStartedAtColumnCache !== null
-  ) {
-    return hasPastDueStartedAtColumnCache
-  }
-
-  const result = await getDatabase().query<{ exists: boolean }>(
-    `select exists (
-       select 1
-       from information_schema.columns
-       where table_schema = 'public'
-         and table_name = 'billing_subscriptions'
-         and column_name = $1
-     )`,
-    [columnName]
-  )
-  const exists = result.rows.at(0)?.exists ?? false
-
-  if (columnName === "past_due_started_at") {
-    hasPastDueStartedAtColumnCache = exists
-  }
-
-  return exists
 }
 
 export {

@@ -53,6 +53,69 @@ async function ensureWorkspaceTrial(input: {
   return mapWorkspaceTrial(trial)
 }
 
+async function getWorkspaceTrial(input: {
+  organizationId?: string | null
+  locationId?: string | null
+}) {
+  const result = input.locationId
+    ? await getDatabase().query<WorkspaceTrialRow>(
+        `select
+           'location'::text as scope,
+           location.organization_id,
+           entitlement.location_id,
+           entitlement.trial_started_at,
+           entitlement.trial_ends_at
+         from billing_private.location_entitlements entitlement
+         join public.locations location on location.id = entitlement.location_id
+         where entitlement.location_id = $1`,
+        [input.locationId]
+      )
+    : input.organizationId
+      ? await getDatabase().query<WorkspaceTrialRow>(
+          `select
+             'organization'::text as scope,
+             organization_row."id" as organization_id,
+             null::uuid as location_id,
+             coalesce(
+               min(entitlement.trial_started_at),
+               existing_trial.trial_started_at,
+               onboarding_state.trial_started_at,
+               organization_row."createdAt"
+             ) as trial_started_at,
+             coalesce(
+               min(entitlement.trial_ends_at),
+               existing_trial.trial_ends_at,
+               onboarding_state.trial_ends_at,
+               organization_row."createdAt" + interval '14 days'
+             ) as trial_ends_at
+           from public."organization" organization_row
+           left join public.workspace_trials existing_trial
+             on existing_trial.organization_id = organization_row."id"
+           left join public.organization_onboarding_states onboarding_state
+             on onboarding_state.organization_id = organization_row."id"
+           left join public.locations location
+             on location.organization_id = organization_row."id"
+           left join billing_private.location_entitlements entitlement
+             on entitlement.location_id = location.id
+           where organization_row."id" = $1
+           group by organization_row."id",
+                    organization_row."createdAt",
+                    existing_trial.trial_started_at,
+                    existing_trial.trial_ends_at,
+                    onboarding_state.trial_started_at,
+                    onboarding_state.trial_ends_at`,
+          [input.organizationId]
+        )
+      : null
+  const trial = result?.rows.at(0)
+
+  if (!trial?.trial_started_at || !trial.trial_ends_at) {
+    throw new Error("We could not load the workspace trial.")
+  }
+
+  return mapWorkspaceTrial(trial)
+}
+
 async function ensureOrganizationWorkspaceTrial(organizationId: string) {
   return getDatabase().query<WorkspaceTrialRow>(
     `with trial_source as (
@@ -124,4 +187,4 @@ async function ensureOrganizationWorkspaceTrial(organizationId: string) {
   )
 }
 
-export { ensureWorkspaceTrial }
+export { ensureWorkspaceTrial, getWorkspaceTrial }

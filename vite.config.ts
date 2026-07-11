@@ -43,7 +43,31 @@ const config = defineConfig({
     tanstackStart(),
     //mdx(),
     devtools(),
-    nitro(),
+    nitro({
+      compressPublicAssets: {
+        brotli: true,
+        gzip: true,
+      },
+      routeRules: {
+        "/assets/**": {
+          headers: {
+            "cache-control": "public, max-age=31536000, immutable",
+          },
+        },
+        "/brand/**": {
+          headers: {
+            "cache-control":
+              "public, max-age=604800, stale-while-revalidate=86400",
+          },
+        },
+        "/pwa/**": {
+          headers: {
+            "cache-control":
+              "public, max-age=604800, stale-while-revalidate=86400",
+          },
+        },
+      },
+    }),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ["./tsconfig.json"],

@@ -8,7 +8,7 @@ import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 
 import { FREE_TRIAL_DAYS } from "@/features/onboarding/constants"
-import { ensureWorkspaceTrial } from "@/features/billing/server/trials"
+import { getWorkspaceTrial } from "@/features/billing/server/trials"
 import {
   ensureEmployeeStaffGroup,
   isEmployeeStaffGroup,
@@ -16,11 +16,6 @@ import {
 import { toIsoString } from "@/features/onboarding/utils/invite-utils"
 
 async function getActiveOrganizationState(organizationId: string) {
-  await ensureEmployeeStaffGroup({
-    organizationId,
-    locationId: null,
-  })
-
   const supabase = createSupabaseServerClient()
   const now = new Date()
 
@@ -28,9 +23,9 @@ async function getActiveOrganizationState(organizationId: string) {
     onboardingResult,
     locationsResult,
     staffGroupsResult,
-    locationsCountResult,
     zonesCountResult,
     inviteLinksResult,
+    trial,
   ] = await Promise.all([
     supabase
       .from("organization_onboarding_states")
@@ -48,10 +43,6 @@ async function getActiveOrganizationState(organizationId: string) {
       .eq("organization_id", organizationId)
       .order("name", { ascending: true }),
     supabase
-      .from("locations")
-      .select("id", { count: "exact", head: true })
-      .eq("organization_id", organizationId),
-    supabase
       .from("zones")
       .select("id", { count: "exact", head: true })
       .eq("organization_id", organizationId)
@@ -60,7 +51,10 @@ async function getActiveOrganizationState(organizationId: string) {
       .from("staff_invite_links")
       .select("expires_at")
       .eq("organization_id", organizationId)
-      .is("disabled_at", null),
+      .is("disabled_at", null)
+      .or(`expires_at.is.null,expires_at.gt.${now.toISOString()}`)
+      .limit(1),
+    getWorkspaceTrial({ organizationId }),
   ])
 
   assertSupabaseSuccess(
@@ -76,10 +70,6 @@ async function getActiveOrganizationState(organizationId: string) {
     "We could not load your staff groups."
   )
   assertSupabaseSuccess(
-    locationsCountResult.error,
-    "We could not count your locations."
-  )
-  assertSupabaseSuccess(
     zonesCountResult.error,
     "We could not count your zones."
   )
@@ -89,16 +79,9 @@ async function getActiveOrganizationState(organizationId: string) {
   )
 
   const onboardingRow = onboardingResult.data
-  const trial = await ensureWorkspaceTrial({ organizationId })
-  const hasLocation = (locationsCountResult.count ?? 0) > 0
+  const hasLocation = (locationsResult.data?.length ?? 0) > 0
   const hasZone = (zonesCountResult.count ?? 0) > 0
-  const hasInviteLink =
-    (inviteLinksResult.data ?? []).filter((invite) => {
-      return (
-        invite.expires_at === null ||
-        new Date(invite.expires_at).getTime() > now.getTime()
-      )
-    }).length > 0
+  const hasInviteLink = (inviteLinksResult.data?.length ?? 0) > 0
   const lastStep: OnboardingStep =
     onboardingRow?.last_step === "location" ||
     onboardingRow?.last_step === "invite" ||
@@ -127,18 +110,20 @@ async function getActiveOrganizationState(organizationId: string) {
     onboarding,
     trial,
     locations: locationsResult.data ?? [],
-    staffGroups: (staffGroupsResult.data ?? []).map((staffGroup) => ({
-      id: staffGroup.id,
-      name: staffGroup.name,
-      slug: staffGroup.slug,
-      isFallback: isEmployeeStaffGroup(staffGroup),
-    })).sort((left, right) => {
-      if (left.isFallback === right.isFallback) {
-        return left.name.localeCompare(right.name)
-      }
+    staffGroups: (staffGroupsResult.data ?? [])
+      .map((staffGroup) => ({
+        id: staffGroup.id,
+        name: staffGroup.name,
+        slug: staffGroup.slug,
+        isFallback: isEmployeeStaffGroup(staffGroup),
+      }))
+      .sort((left, right) => {
+        if (left.isFallback === right.isFallback) {
+          return left.name.localeCompare(right.name)
+        }
 
-      return left.isFallback ? -1 : 1
-    }),
+        return left.isFallback ? -1 : 1
+      }),
   }
 }
 
@@ -150,15 +135,13 @@ async function ensureDefaultStaffGroup(organizationId: string) {
 }
 
 async function getActiveLocationState(locationId: string) {
-  await ensureLocationEmployeeStaffGroup(locationId)
-
   const database = getDatabase()
-  const now = new Date()
   const [
     locationResult,
     staffGroupsResult,
     zonesCountResult,
     inviteLinksResult,
+    trial,
   ] = await Promise.all([
     database.query<{
       id: string
@@ -169,7 +152,7 @@ async function getActiveLocationState(locationId: string) {
       `select id, name, slug, organization_id
        from public.locations
        where id = $1`,
-      [locationId],
+      [locationId]
     ),
     database.query<{
       id: string
@@ -181,7 +164,7 @@ async function getActiveLocationState(locationId: string) {
        from public.staff_groups
        where location_id = $1
        order by name asc`,
-      [locationId],
+      [locationId]
     ),
     database.query(
       `select id
@@ -189,15 +172,18 @@ async function getActiveLocationState(locationId: string) {
        where location_id = $1
          and deleted_at is null
        limit 1`,
-      [locationId],
+      [locationId]
     ),
     database.query<{ expires_at: Date | string | null }>(
       `select expires_at
        from public.staff_invite_links
        where location_id = $1
-         and disabled_at is null`,
-      [locationId],
+         and disabled_at is null
+         and (expires_at is null or expires_at > timezone('utc', now()))
+       limit 1`,
+      [locationId]
     ),
+    getWorkspaceTrial({ locationId }),
   ])
   const location = locationResult.rows.at(0)
 
@@ -205,14 +191,8 @@ async function getActiveLocationState(locationId: string) {
     throw new Error("We could not load your location.")
   }
 
-  const hasInviteLink = inviteLinksResult.rows.some((invite) => {
-    return (
-      invite.expires_at === null ||
-      new Date(invite.expires_at).getTime() > now.getTime()
-    )
-  })
+  const hasInviteLink = inviteLinksResult.rows.length > 0
   const hasZone = zonesCountResult.rows.length > 0
-  const trial = await ensureWorkspaceTrial({ locationId: location.id })
 
   return {
     onboarding: {
@@ -261,7 +241,7 @@ async function ensureLocationEmployeeStaffGroup(locationId: string) {
        and (slug = 'employee' or slug = 'employees' or is_default = true)
      order by created_at asc
      limit 1`,
-    [locationId],
+    [locationId]
   )
   const existing = existingResult.rows.at(0)
 
@@ -274,7 +254,7 @@ async function ensureLocationEmployeeStaffGroup(locationId: string) {
          is_default,
          color
        ) values ($1, 'Employee', 'employee', true, 'emerald')`,
-      [locationId],
+      [locationId]
     )
 
     return
@@ -288,7 +268,7 @@ async function ensureLocationEmployeeStaffGroup(locationId: string) {
          color = 'emerald',
          updated_at = timezone('utc', now())
      where id = $1`,
-    [existing.id],
+    [existing.id]
   )
 }
 
@@ -386,7 +366,7 @@ async function upsertOrganizationTrialState(input: {
 
 async function createUniqueLocationSlug(
   organizationId: string | null,
-  name: string,
+  name: string
 ) {
   const supabase = createSupabaseServerClient()
   const baseSlug = slugify(name) || "location"
@@ -394,14 +374,12 @@ async function createUniqueLocationSlug(
   let counter = 2
 
   for (;;) {
-    const query = supabase
-      .from("locations")
-      .select("id")
-      .eq("slug", nextSlug)
+    const query = supabase.from("locations").select("id").eq("slug", nextSlug)
 
-    const { data, error } = await (organizationId === null
-      ? query.is("organization_id", null)
-      : query.eq("organization_id", organizationId)
+    const { data, error } = await (
+      organizationId === null
+        ? query.is("organization_id", null)
+        : query.eq("organization_id", organizationId)
     ).maybeSingle()
 
     assertSupabaseSuccess(error, "We could not check location availability.")

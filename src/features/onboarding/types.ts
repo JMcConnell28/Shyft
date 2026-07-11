@@ -1,3 +1,9 @@
+import type {
+  BillingSubscriptionStatus,
+  WorkspaceBillingState,
+} from "@/features/billing/types"
+import type { OrganizationRole } from "@/lib/auth/permissions"
+
 type OrganizationSummary = {
   id: string
   name: string
@@ -61,6 +67,7 @@ type ViewerState = {
   organizations: Array<OrganizationSummary>
   activeOrganization: OrganizationSummary | null
   activeWorkspace: WorkspaceSummary | null
+  activeRole: OrganizationRole | null
   workspaces: Array<WorkspaceSummary>
   onboarding: ActiveOnboardingState | null
   trial: WorkspaceTrialState | null
@@ -83,7 +90,3 @@ export type {
   ViewerState,
   WorkspaceSummary,
 }
-import type {
-  BillingSubscriptionStatus,
-  WorkspaceBillingState,
-} from "@/features/billing/types"

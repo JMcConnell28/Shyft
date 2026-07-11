@@ -12,15 +12,36 @@ import {
 } from "@/components/ui/empty"
 import { RotaListPage } from "@/features/rota/components/rota-list-page"
 import { useRotaListPageQuery } from "@/features/rota/hooks/use-rota-list-page-query"
-import {
-  parseRotaListSearch,
-  type RotaListSearch,
-  type RotaPageSize,
-  type RotaRangeFilter,
-} from "@/features/rota/schemas/rota-schemas"
+import { rotaListQueryOptions } from "@/features/rota/query-options"
+import { parseRotaListSearch } from "@/features/rota/schemas/rota-schemas"
 
-export const Route = createFileRoute("/_authed/_verified/w/$workspaceSlug/rota/")({
+type RotaListSearch = ReturnType<typeof parseRotaListSearch>
+
+export const Route = createFileRoute(
+  "/_authed/_verified/w/$workspaceSlug/rota/"
+)({
   validateSearch: parseRotaListSearch,
+  loaderDeps: ({ search }) => ({ search }),
+  loader: ({ context, deps }) => {
+    const workspace = context.viewer.activeWorkspace
+
+    if (!workspace) {
+      throw new Error("An active workspace is required for rota routes.")
+    }
+
+    return context.queryClient.ensureQueryData(
+      rotaListQueryOptions({
+        organizationId:
+          workspace.type === "organization" ? workspace.id : undefined,
+        orgSlug: workspace.type === "organization" ? workspace.slug : undefined,
+        locationId: workspace.type === "location" ? workspace.id : undefined,
+        locationSlug:
+          workspace.type === "location" ? workspace.slug : undefined,
+        userId: context.viewer.user.id,
+        search: deps.search,
+      })
+    )
+  },
   component: RotaWorkspaceRoute,
 })
 
@@ -38,7 +59,9 @@ function RotaWorkspaceRoute() {
     organizationId:
       activeWorkspace.type === "organization" ? activeWorkspace.id : undefined,
     orgSlug:
-      activeWorkspace.type === "organization" ? activeWorkspace.slug : undefined,
+      activeWorkspace.type === "organization"
+        ? activeWorkspace.slug
+        : undefined,
     locationId:
       activeWorkspace.type === "location" ? activeWorkspace.id : undefined,
     locationSlug:
@@ -51,7 +74,7 @@ function RotaWorkspaceRoute() {
     nextValue: Partial<RotaListSearch>,
     options?: {
       resetPage?: boolean
-    },
+    }
   ) {
     void navigate({
       search: (previous: RotaListSearch) => ({
@@ -93,24 +116,21 @@ function RotaWorkspaceRoute() {
                 from: undefined,
                 to: undefined,
               },
-              { resetPage: true },
+              { resetPage: true }
             )
           }
           onCustomRangeChange={({ from, to }) =>
             updateSearch(
               {
-                range: "custom" as RotaRangeFilter,
+                range: "custom",
                 from,
                 to,
               },
-              { resetPage: true },
+              { resetPage: true }
             )
           }
           onPageSizeChange={(pageSize) =>
-            updateSearch(
-              { pageSize: pageSize as RotaPageSize },
-              { resetPage: true },
-            )
+            updateSearch({ pageSize: pageSize }, { resetPage: true })
           }
           onPageChange={(page) => updateSearch({ page })}
         />

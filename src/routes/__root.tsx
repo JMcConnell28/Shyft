@@ -1,15 +1,23 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import {
+  HeadContent,
+  Scripts,
+  createRootRouteWithContext,
+} from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
+import appCss from "../styles.css?url"
+import type { QueryClient } from "@tanstack/react-query"
 
 import { RootErrorState } from "@/components/errors/root-error-state"
 import { AppToaster } from "@/components/providers/app-toaster"
-import { QueryProvider } from "@/components/providers/query-provider"
 import { PwaAppController } from "@/features/pwa/components/pwa-app-controller"
 
-import appCss from "../styles.css?url"
 
-export const Route = createRootRoute({
+type RouterContext = {
+  queryClient: QueryClient
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       {
@@ -30,6 +38,10 @@ export const Route = createRootRoute({
       {
         name: "apple-mobile-web-app-status-bar-style",
         content: "default",
+      },
+      {
+        name: "apple-mobile-web-app-title",
+        content: "RocketRota",
       },
       {
         title: "RocketRota",
@@ -55,7 +67,11 @@ export const Route = createRootRoute({
       },
       {
         rel: "apple-touch-icon",
-        href: "/pwa/icon-192.png",
+        href: "/pwa/icon-180.png",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/pwa/splash-2048.png",
       },
     ],
   }),
@@ -70,11 +86,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <QueryProvider>
-          <PwaAppController />
-          {children}
-          <AppToaster />
-        </QueryProvider>
+        <PwaAppController />
+        {children}
+        <AppToaster />
         <TanStackDevtools
           config={{
             position: "bottom-right",

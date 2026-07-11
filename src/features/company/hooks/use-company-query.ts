@@ -3,7 +3,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
-import { companyQueryKeys } from "@/features/company/query-keys"
+import {
+  companyEmployeeQueryOptions,
+  companyEmployeesQueryOptions,
+} from "@/features/company/query-options"
 import {
   getCompanyEmployeePageData,
   getCompanyEmployeesPageData,
@@ -16,10 +19,9 @@ function useCompanyEmployeesQuery(input: {
 }) {
   const getCompanyEmployeesPageDataFn = useServerFn(getCompanyEmployeesPageData)
 
-  return useQuery({
-    queryKey: companyQueryKeys.employees(input),
-    queryFn: () => getCompanyEmployeesPageDataFn({ data: input }),
-  })
+  return useQuery(
+    companyEmployeesQueryOptions(input, getCompanyEmployeesPageDataFn)
+  )
 }
 
 function useCompanyEmployeeQuery(input: {
@@ -30,10 +32,9 @@ function useCompanyEmployeeQuery(input: {
 }) {
   const getCompanyEmployeePageDataFn = useServerFn(getCompanyEmployeePageData)
 
-  return useQuery({
-    queryKey: companyQueryKeys.employee(input),
-    queryFn: () => getCompanyEmployeePageDataFn({ data: input }),
-  })
+  return useQuery(
+    companyEmployeeQueryOptions(input, getCompanyEmployeePageDataFn)
+  )
 }
 
 export { useCompanyEmployeeQuery, useCompanyEmployeesQuery }

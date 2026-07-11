@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
-import { settingsQueryKeys } from "@/features/settings/query-keys"
+import { rotaSettingsQueryOptions } from "@/features/settings/query-options"
 import { getRotaSettingsPageData } from "@/features/settings/server-fns"
 
 function useRotaSettingsQuery(input: {
@@ -13,13 +13,7 @@ function useRotaSettingsQuery(input: {
 }) {
   const getRotaSettingsPageDataFn = useServerFn(getRotaSettingsPageData)
 
-  return useQuery({
-    queryKey: settingsQueryKeys.rota(input),
-    queryFn: () =>
-      getRotaSettingsPageDataFn({
-        data: input,
-      }),
-  })
+  return useQuery(rotaSettingsQueryOptions(input, getRotaSettingsPageDataFn))
 }
 
 export { useRotaSettingsQuery }

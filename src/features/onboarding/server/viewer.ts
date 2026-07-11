@@ -6,6 +6,7 @@ import type {
   ViewerState,
   WorkspaceSummary,
 } from "@/features/onboarding/types"
+import type { AuthSession } from "@/lib/auth-session.server"
 import { isEmailVerificationSatisfied } from "@/lib/email-verification"
 import { organizationRouteParamsSchema } from "@/lib/onboarding-schemas"
 
@@ -23,11 +24,15 @@ import {
   getActiveLocationState,
   getActiveOrganizationState,
 } from "@/features/onboarding/server/state"
+// The type-only import above is intentionally separate so TanStack Start can
+// strip it before applying server-only import protection.
+// eslint-disable-next-line no-duplicate-imports
 import {
   getAuthRequestHeaders,
   readSessionFromRequestHeaders,
 } from "@/lib/auth-session.server"
-import type { AuthSession } from "@/lib/auth-session.server"
+import { getLocationRole } from "@/lib/auth/has-location-permission"
+import { getOrganizationRole } from "@/lib/auth/has-org-permission"
 
 function buildUser(session: AuthSession) {
   return {
@@ -83,12 +88,11 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
         await setActiveOrganizationForHeaders(headers, selectedOrganization.id)
       }
 
-      const activeState = await getActiveOrganizationState(
-        selectedOrganization.id
-      )
-      const billing = await getOrganizationBillingAccess(
-        selectedOrganization.id
-      )
+      const [activeState, billing, activeRole] = await Promise.all([
+        getActiveOrganizationState(selectedOrganization.id),
+        getOrganizationBillingAccess(selectedOrganization.id),
+        getOrganizationRole(selectedOrganization.id, session.user.id),
+      ])
 
       return {
         user,
@@ -102,6 +106,7 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
           type: "organization",
           organizationId: selectedOrganization.id,
         },
+        activeRole,
         workspaces,
         onboarding: activeState.onboarding,
         trial: activeState.trial,
@@ -120,10 +125,11 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
       null
 
     if (activeLocationWorkspace) {
-      const activeState = await getActiveLocationState(
-        activeLocationWorkspace.id
-      )
-      const billing = await getLocationBillingAccess(activeLocationWorkspace.id)
+      const [activeState, billing, activeRole] = await Promise.all([
+        getActiveLocationState(activeLocationWorkspace.id),
+        getLocationBillingAccess(activeLocationWorkspace.id),
+        getLocationRole(activeLocationWorkspace.id, session.user.id),
+      ])
 
       return {
         user,
@@ -131,6 +137,7 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
         organizations,
         activeOrganization: null,
         activeWorkspace: activeLocationWorkspace,
+        activeRole,
         workspaces,
         onboarding: activeState.onboarding,
         trial: activeState.trial,
@@ -147,6 +154,7 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
       organizations,
       activeOrganization: null,
       activeWorkspace: null,
+      activeRole: null,
       workspaces,
       onboarding: null,
       trial: null,
@@ -190,8 +198,11 @@ const getViewerStateForLocationSlug = createServerFn({ method: "GET" })
       return null
     }
 
-    const activeState = await getActiveLocationState(activeWorkspace.id)
-    const billing = await getLocationBillingAccess(activeWorkspace.id)
+    const [activeState, billing, activeRole] = await Promise.all([
+      getActiveLocationState(activeWorkspace.id),
+      getLocationBillingAccess(activeWorkspace.id),
+      getLocationRole(activeWorkspace.id, session.user.id),
+    ])
 
     return {
       user: buildUser(session),
@@ -199,6 +210,7 @@ const getViewerStateForLocationSlug = createServerFn({ method: "GET" })
       organizations,
       activeOrganization: null,
       activeWorkspace,
+      activeRole,
       workspaces: [
         ...locationWorkspaces,
         ...organizationWorkspaces(organizations),
@@ -243,8 +255,11 @@ const getViewerStateForOrganizationSlug = createServerFn({ method: "GET" })
       await setActiveOrganizationForHeaders(headers, activeOrganization.id)
     }
 
-    const activeState = await getActiveOrganizationState(activeOrganization.id)
-    const billing = await getOrganizationBillingAccess(activeOrganization.id)
+    const [activeState, billing, activeRole] = await Promise.all([
+      getActiveOrganizationState(activeOrganization.id),
+      getOrganizationBillingAccess(activeOrganization.id),
+      getOrganizationRole(activeOrganization.id, session.user.id),
+    ])
 
     return {
       user: buildUser(session),
@@ -258,6 +273,7 @@ const getViewerStateForOrganizationSlug = createServerFn({ method: "GET" })
         type: "organization",
         organizationId: activeOrganization.id,
       },
+      activeRole,
       workspaces: [
         ...locationWorkspaces,
         ...organizationWorkspaces(organizations),

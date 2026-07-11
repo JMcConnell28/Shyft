@@ -117,7 +117,7 @@ function CreateShift() {
         render={
           <Button
             variant="raised"
-            className={rotaToolbarPrimaryButtonClassName}
+            className={`${rotaToolbarPrimaryButtonClassName} w-auto gap-1.5 px-2`}
           />
         }
       >

@@ -52,6 +52,13 @@ const auth = betterAuth({
   baseURL: authBaseUrl,
   secret: getRequiredEnv("BETTER_AUTH_SECRET"),
   database: getDatabase(),
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+      strategy: "compact",
+    },
+  },
   user: {
     additionalFields: authUserAdditionalFields,
   },
