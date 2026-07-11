@@ -29,6 +29,6 @@
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
   "theme_color": "#0b2b67",
-  "background_color": "#f8fafc",
+  "background_color": "#ffffff",
   "categories": ["business", "productivity"]
 }

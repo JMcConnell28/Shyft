@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
-import { staffGroupQueryKeys } from "@/features/staff-groups/query-keys"
+import { staffGroupSettingsQueryOptions } from "@/features/staff-groups/query-options"
 import { getStaffGroupSettingsPageData } from "@/features/staff-groups/server-fns"
 
 function useStaffGroupSettingsQuery(input: {
@@ -12,16 +12,12 @@ function useStaffGroupSettingsQuery(input: {
   userId: string
 }) {
   const getStaffGroupSettingsPageDataFn = useServerFn(
-    getStaffGroupSettingsPageData,
+    getStaffGroupSettingsPageData
   )
 
-  return useQuery({
-    queryKey: staffGroupQueryKeys.settings(input),
-    queryFn: () =>
-      getStaffGroupSettingsPageDataFn({
-        data: input,
-      }),
-  })
+  return useQuery(
+    staffGroupSettingsQueryOptions(input, getStaffGroupSettingsPageDataFn)
+  )
 }
 
 export { useStaffGroupSettingsQuery }

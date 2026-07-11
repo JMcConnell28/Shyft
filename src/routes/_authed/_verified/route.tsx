@@ -1,19 +1,8 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
 
-import { getViewerState } from "@/lib/onboarding"
-
 export const Route = createFileRoute("/_authed/_verified")({
-  beforeLoad: async ({ location }) => {
-    const viewer = await getViewerState()
-
-    if (!viewer) {
-      throw redirect({
-        to: "/login",
-        search: {
-          redirect: location.href,
-        },
-      })
-    }
+  beforeLoad: ({ context, location }) => {
+    const { viewer } = context
 
     if (!viewer.user.emailVerified) {
       throw redirect({
@@ -25,8 +14,6 @@ export const Route = createFileRoute("/_authed/_verified")({
         },
       })
     }
-
-    return { viewer }
   },
   component: Outlet,
 })

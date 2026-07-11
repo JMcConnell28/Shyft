@@ -1,11 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { pdf } from "@react-pdf/renderer"
 
-import { RotaPdfDocument } from "@/features/rota/components/rota-pdf-document"
-import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
 import type { RotaPdfExportOptions } from "@/features/rota/types/rota-pdf"
+import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
 import { buildRotaPdfDocumentData } from "@/features/rota/utils/rota-pdf-export"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -23,55 +21,63 @@ function useExportRotaPdf() {
   } = useRotaWorkspace()
   const [isExporting, setIsExporting] = React.useState(false)
 
-  const exportPdf = React.useCallback(async (options: RotaPdfExportOptions) => {
-    if (isExporting || zones.length === 0) {
-      return
-    }
+  const exportPdf = React.useCallback(
+    async (options: RotaPdfExportOptions) => {
+      if (isExporting || zones.length === 0) {
+        return
+      }
 
-    setIsExporting(true)
+      setIsExporting(true)
 
-    try {
-      const brandLogoUrl =
-        typeof window === "undefined"
-          ? null
-          : new URL("/brand/rocketrota-logo.png", window.location.origin).toString()
+      try {
+        const brandLogoUrl =
+          typeof window === "undefined"
+            ? null
+            : new URL(
+                "/brand/rocketrota-logo.png",
+                window.location.origin
+              ).toString()
 
-      const documentData = buildRotaPdfDocumentData({
-        assignmentIdsByShiftId,
-        assignmentsById,
-        brandLogoUrl,
-        days,
-        employeeGroups,
-        employeesById,
-        location: selectedLocation,
-        meta,
-        options,
-        shiftsById,
-        zones,
-      })
+        const documentData = buildRotaPdfDocumentData({
+          assignmentIdsByShiftId,
+          assignmentsById,
+          brandLogoUrl,
+          days,
+          employeeGroups,
+          employeesById,
+          location: selectedLocation,
+          meta,
+          options,
+          shiftsById,
+          zones,
+        })
 
-      const blob = await pdf(<RotaPdfDocument data={documentData} />).toBlob()
-      downloadBlob(blob, documentData.fileName)
-      showSuccessToast("Your rota PDF is ready.")
-    } catch (error) {
-      showErrorToast(error, {
-        fallbackMessage: "We could not export this rota right now.",
-      })
-    } finally {
-      setIsExporting(false)
-    }
-  }, [
-    assignmentIdsByShiftId,
-    assignmentsById,
-    days,
-    employeeGroups,
-    employeesById,
-    isExporting,
-    meta,
-    selectedLocation,
-    shiftsById,
-    zones,
-  ])
+        const { generateRotaPdf } =
+          await import("@/features/rota/utils/generate-rota-pdf")
+        const blob = await generateRotaPdf(documentData)
+        downloadBlob(blob, documentData.fileName)
+        showSuccessToast("Your rota PDF is ready.")
+      } catch (error) {
+        showErrorToast(error, {
+          fallbackMessage: "We could not export this rota right now.",
+        })
+      } finally {
+        setIsExporting(false)
+      }
+    },
+    [
+      assignmentIdsByShiftId,
+      assignmentsById,
+      days,
+      employeeGroups,
+      employeesById,
+      isExporting,
+      meta,
+      selectedLocation,
+      shiftsById,
+      zones,
+    ]
+  )
 
   return {
     canExport: !isExporting && zones.length > 0,

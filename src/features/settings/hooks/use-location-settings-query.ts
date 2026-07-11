@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
-import { settingsQueryKeys } from "@/features/settings/query-keys"
+import { locationSettingsQueryOptions } from "@/features/settings/query-options"
 import { getLocationSettingsPageData } from "@/features/settings/server-fns"
 
 function useLocationSettingsQuery(input: {
@@ -13,13 +13,9 @@ function useLocationSettingsQuery(input: {
 }) {
   const getLocationSettingsPageDataFn = useServerFn(getLocationSettingsPageData)
 
-  return useQuery({
-    queryKey: settingsQueryKeys.locations(input),
-    queryFn: () =>
-      getLocationSettingsPageDataFn({
-        data: input,
-      }),
-  })
+  return useQuery(
+    locationSettingsQueryOptions(input, getLocationSettingsPageDataFn)
+  )
 }
 
 export { useLocationSettingsQuery }

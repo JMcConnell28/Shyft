@@ -1,11 +1,14 @@
-const CACHE_NAME = "rocketrota-pwa-v1"
+const CACHE_NAME = "rocketrota-pwa-v2"
 const APP_ASSETS = [
   "/manifest.json",
   "/offline.html",
   "/brand/rocketrota-logo.png",
+  "/brand/rocketrota-app-splash.png",
   "/pwa/icon-192.png",
+  "/pwa/icon-180.png",
   "/pwa/icon-512.png",
   "/pwa/icon-maskable-512.png",
+  "/pwa/splash-2048.png",
 ]
 
 self.addEventListener("install", (event) => {

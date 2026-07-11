@@ -8,35 +8,27 @@ import {
 import { DashboardShell } from "@/components/app/dashboard-shell"
 import { getHasUnreadAnnouncements } from "@/features/announcements/server-fns"
 import { getWorkspaceShellConfig } from "@/features/navigation/utils/workspace-shell"
-import { getWorkspaceCapabilities } from "@/lib/auth/auth-server-fns"
+import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
 import { getViewerStateForWorkspaceSlug } from "@/lib/onboarding"
 import { getHasUnreadRotaUpdates } from "@/lib/rota"
 
 export const Route = createFileRoute("/_authed/_verified/w/$workspaceSlug")({
-  beforeLoad: async ({ params }) => {
-    const viewer = await getViewerStateForWorkspaceSlug({
-      data: {
-        workspaceSlug: params.workspaceSlug,
-      },
-    })
+  beforeLoad: async ({ context, params }) => {
+    const currentViewer = context.viewer
+    const viewer =
+      currentViewer.activeWorkspace?.slug === params.workspaceSlug
+        ? currentViewer
+        : await getViewerStateForWorkspaceSlug({
+            data: {
+              workspaceSlug: params.workspaceSlug,
+            },
+          })
 
     if (!viewer?.activeWorkspace) {
       throw redirect({ to: "/dashboard" })
     }
 
-    const activeWorkspace = viewer.activeWorkspace
-    const capabilities = await getWorkspaceCapabilities({
-      data:
-        activeWorkspace.type === "organization"
-          ? {
-              organizationId: activeWorkspace.id,
-              userId: viewer.user.id,
-            }
-          : {
-              locationId: activeWorkspace.id,
-              userId: viewer.user.id,
-            },
-    })
+    const capabilities = getOrgCapabilitiesForRole(viewer.activeRole)
 
     return { capabilities, viewer }
   },
@@ -84,11 +76,8 @@ function WorkspaceRoute() {
   const pathname = useLocation({
     select: (location) => location.pathname,
   })
-  const {
-    canInviteTeamMembers,
-    hasUnreadAnnouncements,
-    hasUnreadRotaUpdates,
-  } = Route.useLoaderData()
+  const { canInviteTeamMembers, hasUnreadAnnouncements, hasUnreadRotaUpdates } =
+    Route.useLoaderData()
   const activeWorkspace = viewer.activeWorkspace
 
   if (!activeWorkspace) {

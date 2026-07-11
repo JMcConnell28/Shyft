@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
-import { settingsQueryKeys } from "@/features/settings/query-keys"
+import { generalSettingsQueryOptions } from "@/features/settings/query-options"
 import { getGeneralSettingsPageData } from "@/features/settings/server-fns"
 
 function useGeneralSettingsQuery(input: {
@@ -12,13 +12,9 @@ function useGeneralSettingsQuery(input: {
 }) {
   const getGeneralSettingsPageDataFn = useServerFn(getGeneralSettingsPageData)
 
-  return useQuery({
-    queryKey: settingsQueryKeys.general(input),
-    queryFn: () =>
-      getGeneralSettingsPageDataFn({
-        data: input,
-      }),
-  })
+  return useQuery(
+    generalSettingsQueryOptions(input, getGeneralSettingsPageDataFn)
+  )
 }
 
 export { useGeneralSettingsQuery }

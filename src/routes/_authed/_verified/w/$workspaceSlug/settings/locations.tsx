@@ -1,10 +1,11 @@
 import { createFileRoute, redirect, useLocation } from "@tanstack/react-router"
 
 import { LocationsSettingsPage } from "@/features/settings/components/locations-settings-page"
+import { locationSettingsQueryOptions } from "@/features/settings/query-options"
 import { SettingsLayout } from "@/features/settings/components/settings-layout"
 
 export const Route = createFileRoute(
-  "/_authed/_verified/w/$workspaceSlug/settings/locations",
+  "/_authed/_verified/w/$workspaceSlug/settings/locations"
 )({
   beforeLoad: ({ context, params }) => {
     if (context.viewer.activeWorkspace?.type === "location") {
@@ -15,6 +16,20 @@ export const Route = createFileRoute(
         },
       })
     }
+  },
+  loader: ({ context }) => {
+    const workspace = context.viewer.activeWorkspace
+
+    if (!workspace || workspace.type !== "organization") {
+      return
+    }
+
+    return context.queryClient.ensureQueryData(
+      locationSettingsQueryOptions({
+        organizationId: workspace.id,
+        userId: context.viewer.user.id,
+      })
+    )
   },
   component: WorkspaceLocationsSettingsRoute,
 })
@@ -28,7 +43,9 @@ function WorkspaceLocationsSettingsRoute() {
   const activeWorkspace = viewer.activeWorkspace
 
   if (!activeWorkspace || activeWorkspace.type !== "organization") {
-    throw new Error("An active organization workspace is required for settings.")
+    throw new Error(
+      "An active organization workspace is required for settings."
+    )
   }
 
   return (

@@ -1,17 +1,7 @@
-import * as React from "react"
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query"
+import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query"
 
 import { getAppMutationMeta, getAppQueryMeta } from "@/lib/query-toast-meta"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
-
-type QueryProviderProps = {
-  children: React.ReactNode
-}
 
 function createQueryClient() {
   return new QueryClient({
@@ -24,7 +14,8 @@ function createQueryClient() {
         }
 
         showErrorToast(error, {
-          fallbackMessage: meta.errorMessage ?? "We could not finish that action.",
+          fallbackMessage:
+            meta.errorMessage ?? "We could not finish that action.",
         })
       },
       onSuccess: (_data, _variables, _context, mutation) => {
@@ -59,12 +50,4 @@ function createQueryClient() {
   })
 }
 
-function QueryProvider({ children }: QueryProviderProps) {
-  const [queryClient] = React.useState(createQueryClient)
-
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  )
-}
-
-export { QueryProvider }
+export { createQueryClient }
