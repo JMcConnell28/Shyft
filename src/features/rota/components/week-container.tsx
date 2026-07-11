@@ -12,16 +12,24 @@ function WeekContainer({
   readOnly?: boolean
 }) {
   const { days } = useRotaWorkspace()
-  const dayFrameClassName =
+  const mobileColumnClassName =
     mobileDayColumns === 2
-      ? "h-full min-h-0 min-w-[calc(50%_-_0.25rem)] snap-start overflow-hidden md:min-w-0"
-      : "h-full min-h-0 min-w-full snap-center overflow-hidden md:min-w-0"
+      ? "auto-cols-[calc(50%_-_0.3125rem)]"
+      : "auto-cols-[100%]"
 
   return (
     <div className={cn("min-h-0 min-w-0 flex-1 overflow-hidden", className)}>
-      <div className="no-scrollbar flex h-full min-h-0 w-full touch-pan-x snap-x snap-mandatory gap-2.5 overflow-x-auto overscroll-x-contain scroll-smooth md:grid md:grid-cols-7 md:gap-2 md:overflow-hidden">
+      <div
+        className={cn(
+          "no-scrollbar grid h-full min-h-0 w-full touch-pan-x snap-x snap-mandatory grid-flow-col gap-2.5 overflow-x-auto overscroll-x-contain scroll-smooth [-webkit-overflow-scrolling:touch] md:grid-flow-row md:auto-cols-auto md:grid-cols-7 md:gap-2 md:overflow-hidden",
+          mobileColumnClassName
+        )}
+      >
         {days.map((day) => (
-          <div key={day.id} className={dayFrameClassName}>
+          <div
+            key={day.id}
+            className="h-full min-h-0 min-w-0 snap-start overflow-hidden"
+          >
             {readOnly ? (
               <DayContent dayId={day.id} readOnly />
             ) : (

@@ -33,7 +33,7 @@ function DayContent({
         showOpenShiftCount={!readOnly}
       />
       <Separator className="bg-[#edf0f6]" />
-      <div className="no-scrollbar min-h-0 flex-1 space-y-2 overflow-x-hidden overflow-y-auto overscroll-contain px-1 pt-2 pb-2 inset-shadow-sm/8">
+      <div className="no-scrollbar min-h-0 flex-1 space-y-2 overflow-x-hidden overflow-y-auto overscroll-y-contain px-1 pt-2 pb-2 inset-shadow-sm/8">
         {shiftIds.length === 0 ? (
           <div className="rounded-lg border border-dashed border-[#dfe5f0] bg-[#f7f8fb] px-3 py-3 text-center text-[11px] font-medium text-[#7a86a4]">
             No shifts yet for this day.
