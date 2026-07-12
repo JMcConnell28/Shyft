@@ -1,4 +1,4 @@
-const CACHE_NAME = "rocketrota-pwa-v3"
+const CACHE_NAME = "rocketrota-pwa-v4"
 const APP_ASSETS = [
   "/manifest.json",
   "/offline.html",
@@ -101,6 +101,7 @@ async function showPushNotification(pushData) {
     tag: payload.tag,
     renotify: payload.renotify,
     data,
+    navigate: data.url,
   })
 }
 
@@ -141,16 +142,34 @@ async function openNotificationTarget(value) {
   })
 
   for (const client of windows) {
-    if ("navigate" in client && client.url !== targetUrl) {
-      await client.navigate(targetUrl)
-    }
-
-    if ("focus" in client) {
+    if (client.url === targetUrl && "focus" in client) {
       return client.focus()
     }
   }
 
-  return self.clients.openWindow(targetUrl)
+  try {
+    const openedClient = await self.clients.openWindow(targetUrl)
+    if (openedClient && "focus" in openedClient) {
+      return openedClient.focus()
+    }
+  } catch {
+    // Fall through to reuse an existing app window when opening is blocked.
+  }
+
+  for (const client of windows) {
+    if (!("navigate" in client)) continue
+
+    try {
+      const navigatedClient = await client.navigate(targetUrl)
+      if (navigatedClient && "focus" in navigatedClient) {
+        return navigatedClient.focus()
+      }
+    } catch {
+      // Try the next available window.
+    }
+  }
+
+  return undefined
 }
 
 function getSafeInternalUrl(value) {
