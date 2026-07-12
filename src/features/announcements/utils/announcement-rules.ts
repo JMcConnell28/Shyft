@@ -18,9 +18,9 @@ function isAnnouncementUnread(input: {
 }
 
 function canManageAnnouncementTargets(input: {
-  manageableLocationIds: string[]
+  manageableLocationIds: Array<string>
   role: OrganizationRole | null
-  targetLocationIds: string[]
+  targetLocationIds: Array<string>
   targetScope: AnnouncementTargetScope
 }) {
   if (input.role === "owner" || input.role === "admin") {
@@ -38,7 +38,7 @@ function canManageAnnouncementTargets(input: {
   return (
     input.targetLocationIds.length > 0 &&
     input.targetLocationIds.every((locationId) =>
-      manageableLocationIds.has(locationId),
+      manageableLocationIds.has(locationId)
     )
   )
 }

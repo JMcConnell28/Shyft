@@ -64,8 +64,12 @@ import { Route as AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteImport } from 
 import { Route as AuthedVerifiedWWorkspaceSlugSettingsClockingRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/clocking'
 import { Route as AuthedVerifiedWWorkspaceSlugSettingsBillingRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/billing'
 import { Route as AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$rotaId'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/team/index'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/rota/index'
 import { Route as AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/company/index'
 import { Route as AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$rotaId/index'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/team/groups'
+import { Route as AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/rota/zones'
 import { Route as AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId'
 import { Route as AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$rotaId/view'
 import { Route as AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteImport } from './routes/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId'
@@ -374,6 +378,18 @@ const AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute =
     path: '/rota/$rotaId',
     getParentRoute: () => AuthedVerifiedWWorkspaceSlugRouteRoute,
   } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsTeamRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRotaRoute,
+  } as any)
 const AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute =
   AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRouteImport.update({
     id: '/',
@@ -385,6 +401,18 @@ const AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRouteImport.update({
+    id: '/groups',
+    path: '/groups',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsTeamRoute,
+  } as any)
+const AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRoute =
+  AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRouteImport.update({
+    id: '/zones',
+    path: '/zones',
+    getParentRoute: () => AuthedVerifiedWWorkspaceSlugSettingsRotaRoute,
   } as any)
 const AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute =
   AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRouteImport.update({
@@ -475,16 +503,20 @@ export interface FileRoutesByFullPath {
   '/w/$workspaceSlug/settings/connections': typeof AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute
   '/w/$workspaceSlug/settings/general': typeof AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute
   '/w/$workspaceSlug/settings/locations': typeof AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute
-  '/w/$workspaceSlug/settings/rota': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
-  '/w/$workspaceSlug/settings/team': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
+  '/w/$workspaceSlug/settings/rota': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRouteWithChildren
+  '/w/$workspaceSlug/settings/team': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRouteWithChildren
   '/w/$workspaceSlug/rota/': typeof AuthedVerifiedWWorkspaceSlugRotaIndexRoute
   '/w/$workspaceSlug/settings/': typeof AuthedVerifiedWWorkspaceSlugSettingsIndexRoute
   '/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
   '/w/$workspaceSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren
   '/w/$workspaceSlug/rota/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute
   '/w/$workspaceSlug/settings/company/$employeeId': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  '/w/$workspaceSlug/settings/rota/zones': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRoute
+  '/w/$workspaceSlug/settings/team/groups': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRoute
   '/w/$workspaceSlug/rota/$rotaId/': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute
   '/w/$workspaceSlug/settings/company/': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute
+  '/w/$workspaceSlug/settings/rota/': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRoute
+  '/w/$workspaceSlug/settings/team/': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRoute
   '/w/$workspaceSlug/rota/$locationSlug/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute
   '/w/$workspaceSlug/rota/$locationSlug/$rotaId/': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute
 }
@@ -534,15 +566,17 @@ export interface FileRoutesByTo {
   '/w/$workspaceSlug/settings/connections': typeof AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute
   '/w/$workspaceSlug/settings/general': typeof AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute
   '/w/$workspaceSlug/settings/locations': typeof AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute
-  '/w/$workspaceSlug/settings/rota': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
-  '/w/$workspaceSlug/settings/team': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
   '/w/$workspaceSlug/rota': typeof AuthedVerifiedWWorkspaceSlugRotaIndexRoute
   '/w/$workspaceSlug/settings': typeof AuthedVerifiedWWorkspaceSlugSettingsIndexRoute
   '/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
   '/w/$workspaceSlug/rota/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute
   '/w/$workspaceSlug/settings/company/$employeeId': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  '/w/$workspaceSlug/settings/rota/zones': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRoute
+  '/w/$workspaceSlug/settings/team/groups': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRoute
   '/w/$workspaceSlug/rota/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute
   '/w/$workspaceSlug/settings/company': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute
+  '/w/$workspaceSlug/settings/rota': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRoute
+  '/w/$workspaceSlug/settings/team': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRoute
   '/w/$workspaceSlug/rota/$locationSlug/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute
   '/w/$workspaceSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute
 }
@@ -599,16 +633,20 @@ export interface FileRoutesById {
   '/_authed/_verified/w/$workspaceSlug/settings/connections': typeof AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute
   '/_authed/_verified/w/$workspaceSlug/settings/general': typeof AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute
   '/_authed/_verified/w/$workspaceSlug/settings/locations': typeof AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute
-  '/_authed/_verified/w/$workspaceSlug/settings/rota': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
-  '/_authed/_verified/w/$workspaceSlug/settings/team': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/rota': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRouteWithChildren
+  '/_authed/_verified/w/$workspaceSlug/settings/team': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRouteWithChildren
   '/_authed/_verified/w/$workspaceSlug/rota/': typeof AuthedVerifiedWWorkspaceSlugRotaIndexRoute
   '/_authed/_verified/w/$workspaceSlug/settings/': typeof AuthedVerifiedWWorkspaceSlugSettingsIndexRoute
   '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
   '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren
   '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdViewRoute
   '/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/rota/zones': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/team/groups': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRoute
   '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/': typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRoute
   '/_authed/_verified/w/$workspaceSlug/settings/company/': typeof AuthedVerifiedWWorkspaceSlugSettingsCompanyIndexRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/rota/': typeof AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRoute
+  '/_authed/_verified/w/$workspaceSlug/settings/team/': typeof AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRoute
   '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/view': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdViewRoute
   '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/': typeof AuthedVerifiedWWorkspaceSlugRotaLocationSlugRotaIdIndexRoute
 }
@@ -672,8 +710,12 @@ export interface FileRouteTypes {
     | '/w/$workspaceSlug/rota/$locationSlug/$rotaId'
     | '/w/$workspaceSlug/rota/$rotaId/view'
     | '/w/$workspaceSlug/settings/company/$employeeId'
+    | '/w/$workspaceSlug/settings/rota/zones'
+    | '/w/$workspaceSlug/settings/team/groups'
     | '/w/$workspaceSlug/rota/$rotaId/'
     | '/w/$workspaceSlug/settings/company/'
+    | '/w/$workspaceSlug/settings/rota/'
+    | '/w/$workspaceSlug/settings/team/'
     | '/w/$workspaceSlug/rota/$locationSlug/$rotaId/view'
     | '/w/$workspaceSlug/rota/$locationSlug/$rotaId/'
   fileRoutesByTo: FileRoutesByTo
@@ -723,15 +765,17 @@ export interface FileRouteTypes {
     | '/w/$workspaceSlug/settings/connections'
     | '/w/$workspaceSlug/settings/general'
     | '/w/$workspaceSlug/settings/locations'
-    | '/w/$workspaceSlug/settings/rota'
-    | '/w/$workspaceSlug/settings/team'
     | '/w/$workspaceSlug/rota'
     | '/w/$workspaceSlug/settings'
     | '/o/$orgSlug/rota/$locationSlug/$rotaId'
     | '/w/$workspaceSlug/rota/$rotaId/view'
     | '/w/$workspaceSlug/settings/company/$employeeId'
+    | '/w/$workspaceSlug/settings/rota/zones'
+    | '/w/$workspaceSlug/settings/team/groups'
     | '/w/$workspaceSlug/rota/$rotaId'
     | '/w/$workspaceSlug/settings/company'
+    | '/w/$workspaceSlug/settings/rota'
+    | '/w/$workspaceSlug/settings/team'
     | '/w/$workspaceSlug/rota/$locationSlug/$rotaId/view'
     | '/w/$workspaceSlug/rota/$locationSlug/$rotaId'
   id:
@@ -795,8 +839,12 @@ export interface FileRouteTypes {
     | '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId'
     | '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/view'
     | '/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId'
+    | '/_authed/_verified/w/$workspaceSlug/settings/rota/zones'
+    | '/_authed/_verified/w/$workspaceSlug/settings/team/groups'
     | '/_authed/_verified/w/$workspaceSlug/rota/$rotaId/'
     | '/_authed/_verified/w/$workspaceSlug/settings/company/'
+    | '/_authed/_verified/w/$workspaceSlug/settings/rota/'
+    | '/_authed/_verified/w/$workspaceSlug/settings/team/'
     | '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/view'
     | '/_authed/_verified/w/$workspaceSlug/rota/$locationSlug/$rotaId/'
   fileRoutesById: FileRoutesById
@@ -1215,6 +1263,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdRouteImport
       parentRoute: typeof AuthedVerifiedWWorkspaceSlugRouteRoute
     }
+    '/_authed/_verified/w/$workspaceSlug/settings/team/': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/team/'
+      path: '/'
+      fullPath: '/w/$workspaceSlug/settings/team/'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/rota/': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/rota/'
+      path: '/'
+      fullPath: '/w/$workspaceSlug/settings/rota/'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
+    }
     '/_authed/_verified/w/$workspaceSlug/settings/company/': {
       id: '/_authed/_verified/w/$workspaceSlug/settings/company/'
       path: '/'
@@ -1228,6 +1290,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/w/$workspaceSlug/rota/$rotaId/'
       preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdIndexRouteImport
       parentRoute: typeof AuthedVerifiedWWorkspaceSlugRotaRotaIdRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/team/groups': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/team/groups'
+      path: '/groups'
+      fullPath: '/w/$workspaceSlug/settings/team/groups'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
+    }
+    '/_authed/_verified/w/$workspaceSlug/settings/rota/zones': {
+      id: '/_authed/_verified/w/$workspaceSlug/settings/rota/zones'
+      path: '/zones'
+      fullPath: '/w/$workspaceSlug/settings/rota/zones'
+      preLoaderRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRouteImport
+      parentRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
     }
     '/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId': {
       id: '/_authed/_verified/w/$workspaceSlug/settings/company/$employeeId'
@@ -1292,6 +1368,42 @@ const AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteWithChildren =
     AuthedVerifiedWWorkspaceSlugSettingsCompanyRouteChildren,
   )
 
+interface AuthedVerifiedWWorkspaceSlugSettingsRotaRouteChildren {
+  AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRoute
+  AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRoute
+}
+
+const AuthedVerifiedWWorkspaceSlugSettingsRotaRouteChildren: AuthedVerifiedWWorkspaceSlugSettingsRotaRouteChildren =
+  {
+    AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsRotaZonesRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsRotaIndexRoute,
+  }
+
+const AuthedVerifiedWWorkspaceSlugSettingsRotaRouteWithChildren =
+  AuthedVerifiedWWorkspaceSlugSettingsRotaRoute._addFileChildren(
+    AuthedVerifiedWWorkspaceSlugSettingsRotaRouteChildren,
+  )
+
+interface AuthedVerifiedWWorkspaceSlugSettingsTeamRouteChildren {
+  AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRoute
+  AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRoute
+}
+
+const AuthedVerifiedWWorkspaceSlugSettingsTeamRouteChildren: AuthedVerifiedWWorkspaceSlugSettingsTeamRouteChildren =
+  {
+    AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsTeamGroupsRoute,
+    AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRoute:
+      AuthedVerifiedWWorkspaceSlugSettingsTeamIndexRoute,
+  }
+
+const AuthedVerifiedWWorkspaceSlugSettingsTeamRouteWithChildren =
+  AuthedVerifiedWWorkspaceSlugSettingsTeamRoute._addFileChildren(
+    AuthedVerifiedWWorkspaceSlugSettingsTeamRouteChildren,
+  )
+
 interface AuthedVerifiedWWorkspaceSlugSettingsRouteChildren {
   AuthedVerifiedWWorkspaceSlugSettingsBillingRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsBillingRoute
   AuthedVerifiedWWorkspaceSlugSettingsClockingRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsClockingRoute
@@ -1299,8 +1411,8 @@ interface AuthedVerifiedWWorkspaceSlugSettingsRouteChildren {
   AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsConnectionsRoute
   AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsGeneralRoute
   AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute
-  AuthedVerifiedWWorkspaceSlugSettingsRotaRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRoute
-  AuthedVerifiedWWorkspaceSlugSettingsTeamRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRoute
+  AuthedVerifiedWWorkspaceSlugSettingsRotaRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsRotaRouteWithChildren
+  AuthedVerifiedWWorkspaceSlugSettingsTeamRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsTeamRouteWithChildren
   AuthedVerifiedWWorkspaceSlugSettingsIndexRoute: typeof AuthedVerifiedWWorkspaceSlugSettingsIndexRoute
 }
 
@@ -1319,9 +1431,9 @@ const AuthedVerifiedWWorkspaceSlugSettingsRouteChildren: AuthedVerifiedWWorkspac
     AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute:
       AuthedVerifiedWWorkspaceSlugSettingsLocationsRoute,
     AuthedVerifiedWWorkspaceSlugSettingsRotaRoute:
-      AuthedVerifiedWWorkspaceSlugSettingsRotaRoute,
+      AuthedVerifiedWWorkspaceSlugSettingsRotaRouteWithChildren,
     AuthedVerifiedWWorkspaceSlugSettingsTeamRoute:
-      AuthedVerifiedWWorkspaceSlugSettingsTeamRoute,
+      AuthedVerifiedWWorkspaceSlugSettingsTeamRouteWithChildren,
     AuthedVerifiedWWorkspaceSlugSettingsIndexRoute:
       AuthedVerifiedWWorkspaceSlugSettingsIndexRoute,
   }

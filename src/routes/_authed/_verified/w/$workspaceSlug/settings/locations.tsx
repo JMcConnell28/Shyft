@@ -50,6 +50,7 @@ function WorkspaceLocationsSettingsRoute() {
 
   return (
     <SettingsLayout
+      contentOnly
       workspaceSlug={workspaceSlug}
       workspaceType={activeWorkspace.type}
       activePath={pathname}

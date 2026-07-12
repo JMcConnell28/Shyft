@@ -6,6 +6,7 @@ import type {
   WorkspaceBillingState,
   WorkspaceTrial,
 } from "@/features/billing/types"
+import type { DashboardAnnouncement } from "@/features/announcements/types"
 import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
 import type { OrganizationSummary, WorkspaceSummary } from "@/lib/onboarding"
 import { BrandMark } from "@/components/app/brand"
@@ -13,6 +14,7 @@ import { AppSidebar } from "@/components/app/shell/app-sidebar"
 import { ShellBody } from "@/components/app/shell/shell-body"
 import { PastDueBillingNotice } from "@/features/billing/components/past-due-billing-notice"
 import { TrialBanner } from "@/features/billing/components/trial-banner"
+import { NotificationMenu } from "@/features/notifications/components/notification-menu"
 import { authClient } from "@/lib/auth-client"
 import {
   getWorkspaceAppPath,
@@ -43,6 +45,7 @@ function DashboardShell({
   children,
   hasUnreadRotaUpdates,
   hasUnreadAnnouncements,
+  recentAnnouncements = [],
   canInviteTeamMembers,
   user,
   organizations,
@@ -63,6 +66,7 @@ function DashboardShell({
   children?: React.ReactNode
   hasUnreadRotaUpdates?: boolean
   hasUnreadAnnouncements?: boolean
+  recentAnnouncements?: Array<DashboardAnnouncement>
   canInviteTeamMembers?: boolean
   user: {
     name: string
@@ -93,12 +97,14 @@ function DashboardShell({
   const isSettingsHome = routeKey === "settings"
   const isTimesheetsHome = routeKey === "timesheets"
   const isTimeClockHome = routeKey === "timeClock"
+  const isAnnouncementsHome = routeKey === "announcements"
   const hasMobileBrandHeader =
     isDashboardHome ||
     isRotaListHome ||
     isSettingsHome ||
     isTimesheetsHome ||
-    isTimeClockHome
+    isTimeClockHome ||
+    isAnnouncementsHome
   const canViewTrialBanner =
     capabilities.canManageRota || Boolean(canInviteTeamMembers)
 
@@ -226,13 +232,18 @@ function DashboardShell({
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+            <NotificationMenu
+              announcements={recentAnnouncements}
+              hasUnreadRotaUpdates={Boolean(hasUnreadRotaUpdates)}
+              prominent={hasMobileBrandHeader}
+              workspaceSlug={activeWorkspace?.slug ?? ""}
+            />
             {capabilities.canManageSettings &&
             activeWorkspace?.type === "location" ? (
               <Button
                 variant="pill"
                 size="icon"
                 className={cn(
-                  "ml-auto",
                   hasMobileBrandHeader &&
                     "size-11 rounded-xl bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
                 )}
@@ -254,7 +265,6 @@ function DashboardShell({
                 variant="pill"
                 size="icon"
                 className={cn(
-                  "ml-auto",
                   hasMobileBrandHeader &&
                     "size-11 rounded-xl bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
                 )}

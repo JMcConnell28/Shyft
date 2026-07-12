@@ -13,7 +13,7 @@ describe("announcement rules", () => {
         readAt: null,
         status: "active",
         userId: "user-1",
-      }),
+      })
     ).toBe(false)
   })
 
@@ -24,7 +24,7 @@ describe("announcement rules", () => {
         readAt: null,
         status: "active",
         userId: "user-2",
-      }),
+      })
     ).toBe(true)
   })
 
@@ -35,7 +35,7 @@ describe("announcement rules", () => {
         role: "manager",
         targetLocationIds: ["loc-1"],
         targetScope: "locations",
-      }),
+      })
     ).toBe(true)
 
     expect(
@@ -44,7 +44,7 @@ describe("announcement rules", () => {
         role: "manager",
         targetLocationIds: ["loc-2"],
         targetScope: "locations",
-      }),
+      })
     ).toBe(false)
   })
 
@@ -55,7 +55,7 @@ describe("announcement rules", () => {
         role: "manager",
         targetLocationIds: [],
         targetScope: "organization",
-      }),
+      })
     ).toBe(false)
   })
 })

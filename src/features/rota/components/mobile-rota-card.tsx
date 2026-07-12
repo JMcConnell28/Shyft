@@ -1,85 +1,58 @@
 import { CalendarDaysIcon } from "lucide-react"
-import type { ReactNode } from "react"
 
 import type { RotaListItem, RotaListPageData } from "@/features/rota/types"
 import { MobileRotaCardActions } from "@/features/rota/components/mobile-rota-card-actions"
-import { rotaListInteractiveSurfaceClassName } from "@/features/rota/constants/rota-list-styles"
+import { formatMobileRotaUpdatedLabel } from "@/features/rota/utils/mobile-rota-list"
 import { cn } from "@/lib/utils"
 
 type MobileRotaCardProps = {
   canEdit: boolean
   data: RotaListPageData
-  isCurrent: boolean
-  isDeletingDraft: boolean
-  isUnpublishing: boolean
-  onDeleteDraft: (rotaId: string, weekLabel: string) => void
-  onUnpublish: (rotaId: string, weekLabel: string) => void
   row: RotaListItem
 }
 
-function MobileRotaCard({
-  canEdit,
-  data,
-  isCurrent,
-  isDeletingDraft,
-  isUnpublishing,
-  onDeleteDraft,
-  onUnpublish,
-  row,
-}: MobileRotaCardProps) {
+function MobileRotaCard({ canEdit, data, row }: MobileRotaCardProps) {
   return (
-    <article
-      className={cn(
-        rotaListInteractiveSurfaceClassName,
-        "animate-in p-4 duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none",
-        isCurrent && "border-emerald-300"
-      )}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5">
-            {isCurrent ? <CurrentRotaBadge /> : null}
-            <StatusBadge status={row.status} />
-          </div>
-          <h2 className="mt-3 truncate text-[17px] leading-tight font-semibold tracking-[-0.02em]">
+    <article className="relative grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 rounded-[11px] border border-[#e0e7f1] bg-white p-3 text-[#10285c] shadow-[0_3px_10px_rgba(30,50,96,0.065)]">
+      <span className="flex size-11 items-center justify-center rounded-xl bg-[#edf3ff] text-[#0868f7]">
+        <CalendarDaysIcon className="size-5" strokeWidth={2.2} />
+      </span>
+
+      <div className="min-w-0">
+        <div className="flex items-start justify-between gap-2 pr-6">
+          <h2 className="min-w-0 text-[16px] leading-6 font-semibold tracking-[-0.02em]">
             {row.weekLabel}
           </h2>
-          <RotaMeta icon={CalendarDaysIcon}>{row.locationName}</RotaMeta>
+          <StatusBadge status={row.status} />
         </div>
 
-        {row.isUnread ? (
-          <span className="mt-1 size-2.5 shrink-0 rounded-full bg-blue-600" />
-        ) : null}
+        <p className="mt-0.5 text-xs font-medium text-[#526991]">
+          {row.status === "published" ? (
+            <>
+              Published{row.publishedBy ? " by " : null}
+              {row.publishedBy ? (
+                <span className="font-semibold text-[#0868f7]">
+                  {row.publishedBy}
+                </span>
+              ) : null}
+            </>
+          ) : (
+            "Draft"
+          )}
+        </p>
+
+        <div className="mt-2 flex items-end justify-between gap-2">
+          <p className="min-w-0 truncate pb-0.5 text-[11px] font-medium text-[#607399]">
+            {formatMobileRotaUpdatedLabel(row)}
+            <span className="px-1.5" aria-hidden="true">
+              •
+            </span>
+            {Math.round(row.scheduledHours)} hours
+          </p>
+          <MobileRotaCardActions canEdit={canEdit} data={data} row={row} />
+        </div>
       </div>
-
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        <MetricPill>{row.shiftCount} shifts</MetricPill>
-        <MetricPill>{row.scheduledStaffCount} staff</MetricPill>
-        <MetricPill>{row.scheduledHours.toFixed(1)}h</MetricPill>
-      </div>
-
-      <RotaAuditLine row={row} />
-
-      <MobileRotaCardActions
-        canEdit={canEdit}
-        data={data}
-        isCurrent={isCurrent}
-        isDeletingDraft={isDeletingDraft}
-        isUnpublishing={isUnpublishing}
-        onDeleteDraft={onDeleteDraft}
-        onUnpublish={onUnpublish}
-        row={row}
-      />
     </article>
-  )
-}
-
-function CurrentRotaBadge() {
-  return (
-    <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-      <span className="size-2 rounded-full bg-emerald-600" />
-      Current rota
-    </div>
   )
 }
 
@@ -87,58 +60,20 @@ function StatusBadge({ status }: { status: RotaListItem["status"] }) {
   return (
     <span
       className={cn(
-        "rounded-full px-2.5 py-1 text-[11px] font-semibold",
+        "mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] leading-4 font-semibold",
         status === "published"
-          ? "bg-emerald-50 text-emerald-700"
-          : "bg-blue-50 text-blue-700"
+          ? "bg-[#e9f8ee] text-[#20984d]"
+          : "bg-[#fff3d9] text-[#c77b00]"
       )}
     >
+      <span
+        className={cn(
+          "size-1.5 rounded-full",
+          status === "published" ? "bg-[#39c76b]" : "bg-[#f2a900]"
+        )}
+      />
       {status === "published" ? "Published" : "Draft"}
     </span>
-  )
-}
-
-function MetricPill({ children }: { children: ReactNode }) {
-  return (
-    <span className="rounded-[10px] border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600">
-      {children}
-    </span>
-  )
-}
-
-function RotaMeta({
-  children,
-  compact = false,
-  icon: Icon,
-}: {
-  children: ReactNode
-  compact?: boolean
-  icon: typeof CalendarDaysIcon
-}) {
-  return (
-    <div
-      className={cn(
-        "flex min-w-0 items-center gap-1.5 text-xs font-medium text-neutral-500",
-        compact ? "mt-0" : "mt-1.5"
-      )}
-    >
-      <Icon className="size-3.5 shrink-0 text-blue-600" />
-      <span className="truncate">{children}</span>
-    </div>
-  )
-}
-
-function RotaAuditLine({ row }: { row: RotaListItem }) {
-  return (
-    <div className="mt-3 truncate text-xs font-medium text-neutral-500">
-      {row.status === "published" && row.publishedBy ? (
-        <span>Published by {row.publishedBy}</span>
-      ) : (
-        <span>Created by {row.createdBy}</span>
-      )}
-      <span aria-hidden="true"> - </span>
-      <span>{row.updatedAt}</span>
-    </div>
   )
 }
 

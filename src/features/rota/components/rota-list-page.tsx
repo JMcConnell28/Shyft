@@ -93,32 +93,10 @@ function RotaListPage({
         data={data}
         canCreateRota={canCreateRota}
         canEditRotas={canEditRotas}
-        isDeletingDraft={(rotaId) =>
-          deleteDraftMutation.isPending &&
-          deleteDraftMutation.variables.rotaId === rotaId
-        }
-        isUnpublishing={(rotaId) =>
-          unpublishMutation.isPending &&
-          unpublishMutation.variables.rotaId === rotaId
-        }
-        onDeleteDraft={(rotaId, weekLabel) => {
-          setPendingLifecycleAction({
-            rotaId,
-            type: "delete-draft",
-            weekLabel,
-          })
-        }}
         onLocationChange={onLocationChange}
         onPageSizeChange={onPageSizeChange}
         onRangeChange={onRangeChange}
         onStatusChange={onStatusChange}
-        onUnpublish={(rotaId, weekLabel) => {
-          setPendingLifecycleAction({
-            rotaId,
-            type: "unpublish",
-            weekLabel,
-          })
-        }}
       />
 
       <div className="hidden flex-1 flex-col overflow-x-hidden bg-[#f7f8fb] text-[#11245a] md:flex">

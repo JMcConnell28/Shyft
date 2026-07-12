@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useLocation } from "@tanstack/react-router"
 
 import {
   setInstallPrompt,
@@ -38,6 +39,8 @@ function isAppRoute(pathname: string) {
 }
 
 function PwaAppController() {
+  const pathname = useLocation({ select: (location) => location.pathname })
+
   React.useEffect(() => {
     const handleInstallPrompt = (event: Event) => {
       event.preventDefault()
@@ -48,10 +51,6 @@ function PwaAppController() {
     window.addEventListener("beforeinstallprompt", handleInstallPrompt)
     window.addEventListener("appinstalled", clearInstallPrompt)
 
-    if (isInstalledApp() && !isAppRoute(window.location.pathname)) {
-      window.location.replace("/dashboard")
-    }
-
     if (import.meta.env.PROD && "serviceWorker" in navigator) {
       void navigator.serviceWorker.register("/sw.js")
     }
@@ -61,6 +60,16 @@ function PwaAppController() {
       window.removeEventListener("appinstalled", clearInstallPrompt)
     }
   }, [])
+
+  React.useEffect(() => {
+    if (!isInstalledApp()) return
+
+    document.documentElement.dataset.installedApp = "true"
+
+    if (!isAppRoute(pathname)) {
+      window.location.replace("/dashboard")
+    }
+  }, [pathname])
 
   return null
 }

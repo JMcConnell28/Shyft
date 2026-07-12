@@ -4,9 +4,9 @@ import type {
   AnnouncementLocationTarget,
   AnnouncementScopeInput,
 } from "@/features/announcements/types"
+import type { OrganizationRole } from "@/lib/auth/permissions"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
 import { getOrganizationRole } from "@/lib/auth/has-org-permission"
-import type { OrganizationRole } from "@/lib/auth/permissions"
 import { getDatabase } from "@/lib/db"
 
 type AnnouncementContext = {
@@ -26,20 +26,20 @@ type WorkspaceLocationRow = LocationRow & {
 }
 
 async function getAnnouncementContext(
-  input: AnnouncementScopeInput,
+  input: AnnouncementScopeInput
 ): Promise<AnnouncementContext> {
   const { session } = await requireVerifiedSessionOrThrow()
 
   if (session.user.id !== input.userId) {
     throw new Error(
-      "Your workspace session is no longer valid. Refresh and try again.",
+      "Your workspace session is no longer valid. Refresh and try again."
     )
   }
 
   if (input.organizationId) {
     if (session.session.activeOrganizationId !== input.organizationId) {
       throw new Error(
-        "Your workspace session is no longer valid. Refresh and try again.",
+        "Your workspace session is no longer valid. Refresh and try again."
       )
     }
 
@@ -63,7 +63,7 @@ async function getAnnouncementContext(
 
   if (session.session.activeOrganizationId !== location.organization_id) {
     throw new Error(
-      "Your workspace session is no longer valid. Refresh and try again.",
+      "Your workspace session is no longer valid. Refresh and try again."
     )
   }
 
@@ -81,7 +81,7 @@ async function getWorkspaceLocation(locationId: string) {
      from public.locations
      where id = $1::uuid
      limit 1`,
-    [locationId],
+    [locationId]
   )
   const location = result.rows.at(0)
 
@@ -93,8 +93,8 @@ async function getWorkspaceLocation(locationId: string) {
 }
 
 async function listAnnouncementManageableLocations(
-  context: AnnouncementContext,
-): Promise<AnnouncementLocationTarget[]> {
+  context: AnnouncementContext
+): Promise<Array<AnnouncementLocationTarget>> {
   if (context.role === "owner" || context.role === "admin") {
     return listOrganizationLocations(context.organizationId)
   }
@@ -112,7 +112,7 @@ async function listAnnouncementManageableLocations(
       and membership.role = any(array['owner', 'admin', 'manager']::text[])
      where location.organization_id = $1
      order by location.created_at asc, location.name asc`,
-    [context.organizationId, context.userId],
+    [context.organizationId, context.userId]
   )
 
   return result.rows
@@ -124,13 +124,15 @@ async function listOrganizationLocations(organizationId: string) {
      from public.locations
      where organization_id = $1
      order by created_at asc, name asc`,
-    [organizationId],
+    [organizationId]
   )
 
   return result.rows
 }
 
-async function listAnnouncementVisibleLocationIds(context: AnnouncementContext) {
+async function listAnnouncementVisibleLocationIds(
+  context: AnnouncementContext
+) {
   if (context.role === "owner" || context.role === "admin") {
     const locations = await listOrganizationLocations(context.organizationId)
     return locations.map((location) => location.id)
@@ -161,14 +163,14 @@ async function listAnnouncementVisibleLocationIds(context: AnnouncementContext) 
          and employee.status = 'active'
          and location.organization_id = $1
      ) visible_location`,
-    [context.organizationId, context.userId],
+    [context.organizationId, context.userId]
   )
 
   return result.rows.map((location) => location.id)
 }
 
 async function withAnnouncementTransaction<T>(
-  callback: (client: PoolClient) => Promise<T>,
+  callback: (client: PoolClient) => Promise<T>
 ) {
   const client = await getDatabase().connect()
 

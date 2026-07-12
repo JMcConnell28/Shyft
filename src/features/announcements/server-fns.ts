@@ -1,17 +1,18 @@
 import { createServerFn } from "@tanstack/react-start"
 
 import {
+  announcementWorkspaceInputSchema,
   archiveAnnouncementInputSchema,
   createAnnouncementInputSchema,
   markAllAnnouncementsReadInputSchema,
   markAnnouncementReadInputSchema,
-  announcementWorkspaceInputSchema,
   updateAnnouncementInputSchema,
+  voteAnnouncementPollInputSchema,
 } from "@/features/announcements/schemas/announcement-schemas"
 
 const getAnnouncementsPageData = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    announcementWorkspaceInputSchema.parse(input),
+    announcementWorkspaceInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/announcements/server/queries")
@@ -20,7 +21,7 @@ const getAnnouncementsPageData = createServerFn({ method: "POST" })
 
 const getDashboardAnnouncements = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    announcementWorkspaceInputSchema.parse(input),
+    announcementWorkspaceInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/announcements/server/queries")
@@ -29,7 +30,7 @@ const getDashboardAnnouncements = createServerFn({ method: "POST" })
 
 const getHasUnreadAnnouncements = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    announcementWorkspaceInputSchema.parse(input),
+    announcementWorkspaceInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/announcements/server/queries")
@@ -37,21 +38,27 @@ const getHasUnreadAnnouncements = createServerFn({ method: "POST" })
   })
 
 const createAnnouncement = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createAnnouncementInputSchema.parse(input))
+  .inputValidator((input: unknown) =>
+    createAnnouncementInputSchema.parse(input)
+  )
   .handler(async ({ data }) => {
     const module = await import("@/features/announcements/server/actions")
     return module.createAnnouncement(data)
   })
 
 const updateAnnouncement = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => updateAnnouncementInputSchema.parse(input))
+  .inputValidator((input: unknown) =>
+    updateAnnouncementInputSchema.parse(input)
+  )
   .handler(async ({ data }) => {
     const module = await import("@/features/announcements/server/actions")
     return module.updateAnnouncement(data)
   })
 
 const archiveAnnouncement = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => archiveAnnouncementInputSchema.parse(input))
+  .inputValidator((input: unknown) =>
+    archiveAnnouncementInputSchema.parse(input)
+  )
   .handler(async ({ data }) => {
     const module = await import("@/features/announcements/server/actions")
     return module.archiveAnnouncement(data)
@@ -59,7 +66,7 @@ const archiveAnnouncement = createServerFn({ method: "POST" })
 
 const markAnnouncementRead = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    markAnnouncementReadInputSchema.parse(input),
+    markAnnouncementReadInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/announcements/server/actions")
@@ -68,11 +75,20 @@ const markAnnouncementRead = createServerFn({ method: "POST" })
 
 const markAllAnnouncementsRead = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    markAllAnnouncementsReadInputSchema.parse(input),
+    markAllAnnouncementsReadInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
     const module = await import("@/features/announcements/server/actions")
     return module.markAllAnnouncementsRead(data)
+  })
+
+const voteAnnouncementPoll = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    voteAnnouncementPollInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/announcements/server/actions")
+    return module.voteAnnouncementPoll(data)
   })
 
 export {
@@ -84,4 +100,5 @@ export {
   markAllAnnouncementsRead,
   markAnnouncementRead,
   updateAnnouncement,
+  voteAnnouncementPoll,
 }

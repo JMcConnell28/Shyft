@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { PlusIcon, PencilIcon } from "lucide-react"
+import { PencilIcon, PlusIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -20,6 +20,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+
+type ZoneDialogLocation = { id: string; name: string }
 
 function ZoneDialog({
   pending = false,
@@ -27,6 +30,7 @@ function ZoneDialog({
   title,
   description,
   defaultName = "",
+  locations,
   triggerLabel,
   triggerVariant = "outline",
   onSubmit,
@@ -38,18 +42,21 @@ function ZoneDialog({
   defaultName?: string
   triggerLabel: React.ReactNode
   triggerVariant?: "outline" | "pill"
-  onSubmit: (values: { name: string }) => Promise<void>
+  locations?: Array<ZoneDialogLocation>
+  onSubmit: (values: { name: string; locationId?: string }) => Promise<void>
 }) {
   const [open, setOpen] = React.useState(false)
   const [name, setName] = React.useState(defaultName)
+  const [locationId, setLocationId] = React.useState(locations?.[0]?.id ?? "")
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (!open) {
       setName(defaultName)
+      setLocationId(locations?.[0]?.id ?? "")
       setError(null)
     }
-  }, [defaultName, open])
+  }, [defaultName, locations, open])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -63,13 +70,14 @@ function ZoneDialog({
     try {
       await onSubmit({
         name: normalizedName,
+        locationId: locations ? locationId : undefined,
       })
       setOpen(false)
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
           ? submissionError.message
-          : "We could not save that zone.",
+          : "We could not save that zone."
       )
     }
   }
@@ -110,6 +118,26 @@ function ZoneDialog({
             </FieldContent>
           </Field>
 
+          {locations ? (
+            <Field className="mt-4">
+              <FieldLabel htmlFor="zone-location">Location</FieldLabel>
+              <FieldContent>
+                <NativeSelect
+                  id="zone-location"
+                  className="w-full"
+                  value={locationId}
+                  onChange={(event) => setLocationId(event.target.value)}
+                >
+                  {locations.map((location) => (
+                    <NativeSelectOption key={location.id} value={location.id}>
+                      {location.name}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </FieldContent>
+            </Field>
+          ) : null}
+
           <DialogFooter className="mt-4">
             <Button type="submit" disabled={pending}>
               {pending ? "Saving..." : submitLabel}
@@ -121,7 +149,12 @@ function ZoneDialog({
   )
 }
 
-function CreateZoneDialog(props: Omit<React.ComponentProps<typeof ZoneDialog>, "triggerLabel" | "title" | "description" | "submitLabel">) {
+function CreateZoneDialog(
+  props: Omit<
+    React.ComponentProps<typeof ZoneDialog>,
+    "triggerLabel" | "title" | "description" | "submitLabel"
+  >
+) {
   return (
     <ZoneDialog
       {...props}
@@ -139,7 +172,12 @@ function CreateZoneDialog(props: Omit<React.ComponentProps<typeof ZoneDialog>, "
   )
 }
 
-function EditZoneDialog(props: Omit<React.ComponentProps<typeof ZoneDialog>, "triggerLabel" | "title" | "description" | "submitLabel" | "triggerVariant">) {
+function EditZoneDialog(
+  props: Omit<
+    React.ComponentProps<typeof ZoneDialog>,
+    "triggerLabel" | "title" | "description" | "submitLabel" | "triggerVariant"
+  >
+) {
   return (
     <ZoneDialog
       {...props}
@@ -157,3 +195,4 @@ function EditZoneDialog(props: Omit<React.ComponentProps<typeof ZoneDialog>, "tr
 }
 
 export { CreateZoneDialog, EditZoneDialog }
+export type { ZoneDialogLocation }
