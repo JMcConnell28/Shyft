@@ -1,11 +1,13 @@
 import "@tanstack/react-start/server-only"
 
+import { randomUUID } from "node:crypto"
 import { format } from "date-fns"
 
-import { sendRotaPublishedEmail } from "@/features/email/server/rota-emails"
 import type { RotaPublishedShift } from "@/features/email/templates/rota-published"
+import { sendRotaPublishedEmail } from "@/features/email/server/rota-emails"
 import { buildAppUrl } from "@/lib/app-url.server"
 import { getDatabase } from "@/lib/db"
+import { sendPushToUsers } from "@/features/push-notifications/server/push-service"
 
 type RotaPublishedEmailRow = {
   employee_email: string | null
@@ -22,6 +24,7 @@ type RotaPublishedEmailRow = {
   shift_start_time: string
   shift_type: string
   user_email: string | null
+  user_id: string | null
   week_start: Date | string
   zone_name: string | null
 }
@@ -29,13 +32,14 @@ type RotaPublishedEmailRow = {
 type RotaEmailRecipient = {
   email: string
   locationName: string
-  shifts: RotaPublishedShift[]
+  shifts: Array<RotaPublishedShift>
   userName: string
   weekLabel: string
 }
 
 type RotaPublishedNotificationResult = {
   errorMessage?: string
+  pushSentCount?: number
   sentCount: number
 }
 
@@ -59,16 +63,45 @@ async function sendRotaPublishedNotifications(input: {
           shifts: recipient.shifts,
           userName: recipient.userName,
           weekLabel: recipient.weekLabel,
-        }),
-      ),
+        })
+      )
     )
 
+    const userIds = [
+      ...new Set(
+        rows.map((row) => row.user_id).filter((id): id is string => Boolean(id))
+      ),
+    ]
+    let pushSentCount = 0
+
+    try {
+      const weekLabel = rows[0]
+        ? formatWeekLabel(rows[0].week_start)
+        : "your upcoming week"
+      const pushSummary = await sendPushToUsers(userIds, {
+        title: "New rota published",
+        body: `Your rota for ${weekLabel} is ready.`,
+        tag: `rota-published-${input.rotaId}`,
+        data: {
+          notificationId: randomUUID(),
+          url: getPublishedRotaPath(input),
+        },
+      })
+      pushSentCount = pushSummary.sent
+    } catch (error) {
+      console.error("Rota Web Push notifications failed", {
+        rotaId: input.rotaId,
+        message: error instanceof Error ? error.message : "Unknown push error",
+      })
+    }
+
     console.info(
-      `Rota published email notifications sent for ${input.rotaId}: ${recipients.length}`,
+      `Rota published email notifications sent for ${input.rotaId}: ${recipients.length}`
     )
 
     return {
       sentCount: recipients.length,
+      pushSentCount,
     } satisfies RotaPublishedNotificationResult
   } catch (error) {
     const errorMessage =
@@ -89,6 +122,7 @@ async function listRotaPublishedEmailRows(rotaId: string) {
        employee.full_name as employee_name,
        employee.email as employee_email,
        account_user.email as user_email,
+       account_user.id as user_id,
        location.name as location_name,
        location.slug as location_slug,
        organization.slug as organization_slug,
@@ -115,13 +149,13 @@ async function listRotaPublishedEmailRows(rotaId: string) {
      order by employee.full_name asc,
               published_shift.day_date asc,
               published_shift.start_time asc`,
-    [rotaId],
+    [rotaId]
   )
 
   return result.rows
 }
 
-function mapRotaPublishedRecipients(rows: RotaPublishedEmailRow[]) {
+function mapRotaPublishedRecipients(rows: Array<RotaPublishedEmailRow>) {
   const recipientsByEmail = new Map<string, RotaEmailRecipient>()
 
   for (const row of rows) {
@@ -184,7 +218,7 @@ function getPublishedShiftTimeLabel(row: RotaPublishedEmailRow) {
         ? "Close"
         : formatClockTime(row.shift_end_time ?? row.shift_start_time)
     const secondStart = formatClockTime(
-      row.shift_split_second_start_time ?? row.shift_start_time,
+      row.shift_split_second_start_time ?? row.shift_start_time
     )
     const secondEnd = row.shift_split_second_end_time ?? secondStart
 

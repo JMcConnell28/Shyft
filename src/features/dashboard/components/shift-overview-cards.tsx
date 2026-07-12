@@ -1,6 +1,7 @@
 import type { DashboardAnnouncements } from "@/features/announcements/types"
-import { DashboardAnnouncementsPanel } from "@/features/announcements/components/dashboard-announcements-panel"
 import type { DashboardMobileContext } from "@/features/dashboard/components/dashboard-mobile-types"
+import type { DashboardShiftOverview } from "@/features/dashboard/types"
+import { DashboardAnnouncementsPanel } from "@/features/announcements/components/dashboard-announcements-panel"
 import { DashboardClockStatusPanel } from "@/features/dashboard/components/dashboard-clock-status-panel"
 import {
   NextShiftCard,
@@ -8,7 +9,6 @@ import {
 } from "@/features/dashboard/components/dashboard-shift-panels"
 import { DashboardSummaryStrip } from "@/features/dashboard/components/dashboard-summary-strip"
 import { MobileDashboardShell } from "@/features/dashboard/components/mobile-dashboard-shell"
-import type { DashboardShiftOverview } from "@/features/dashboard/types"
 
 function ShiftOverviewCards({
   announcements,
@@ -30,7 +30,7 @@ function ShiftOverviewCards({
         context={mobileContext}
         nextShift={overview.nextShift}
         shifts={overview.thisWeekShifts}
-        weekRangeLabel={overview.weekRangeLabel}
+        weekHoursLabel={overview.weekHoursLabel}
       />
       <div className="hidden flex-col gap-4 md:flex">
         <DashboardSummaryStrip overview={overview} />

@@ -3,6 +3,7 @@ type DashboardShiftSummary = {
   date: string
   dateLabel: string
   dayLabel: string
+  durationLabel: string | null
   locationName: string
   locationSlug: string
   rotaId: string
@@ -13,7 +14,8 @@ type DashboardShiftSummary = {
 type DashboardShiftOverview = {
   clockStatus: DashboardClockStatus
   nextShift: DashboardShiftSummary | null
-  thisWeekShifts: DashboardShiftSummary[]
+  thisWeekShifts: Array<DashboardShiftSummary>
+  weekHoursLabel: string | null
   weekRangeLabel: string
 }
 

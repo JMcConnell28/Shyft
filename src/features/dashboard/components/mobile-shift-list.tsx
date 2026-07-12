@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { CalendarDaysIcon, ChevronRightIcon } from "lucide-react"
+import { ChevronRightIcon, Clock3Icon, UserRoundIcon } from "lucide-react"
 
 import type { DashboardMobileContext } from "@/features/dashboard/components/dashboard-mobile-types"
 import type { DashboardShiftSummary } from "@/features/dashboard/types"
@@ -7,76 +7,74 @@ import {
   getRotaViewPath,
   getShiftDateParts,
 } from "@/features/dashboard/utils/shift-display"
-import { cn } from "@/lib/utils"
+
+type WeeklyShiftPanelProps = {
+  context: DashboardMobileContext
+  shifts: Array<DashboardShiftSummary>
+  weekHoursLabel: string | null
+}
 
 function WeeklyShiftPanel({
   context,
   shifts,
-  weekRangeLabel,
-}: {
-  context: DashboardMobileContext
-  shifts: Array<DashboardShiftSummary>
-  weekRangeLabel: string
-}) {
+  weekHoursLabel,
+}: WeeklyShiftPanelProps) {
   const firstShift = shifts.at(0)
 
   return (
-    <section className="mt-3 animate-in overflow-hidden rounded-[20px] bg-white shadow-[0_5px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7e9f0] duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
-      <div className="flex items-center justify-between gap-3 px-4 py-4">
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-[#f2edff] text-[#795fe5]">
-            <CalendarDaysIcon className="size-5" />
+    <section className="mt-5 animate-in duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg leading-tight font-extrabold tracking-[-0.025em] text-[#0b1836]">
+          Shifts this week
+        </h2>
+        {weekHoursLabel ? (
+          <span className="text-base font-extrabold tracking-[-0.02em] text-[#0865f5]">
+            {weekHoursLabel}
           </span>
-          <div>
-            <h2 className="text-[17px] font-extrabold tracking-[-0.02em]">
-              Shifts this week
-            </h2>
-            <p className="mt-0.5 text-[11px] font-semibold text-[#8a90a1]">
-              {weekRangeLabel}
-            </p>
-          </div>
-        </div>
-        {firstShift ? (
-          <Link
-            to={getRotaViewPath({
-              shift: firstShift,
-              workspaceSlug: context.workspaceSlug,
-              workspaceType: context.workspaceType,
-            })}
-            className="shrink-0 text-sm font-bold text-[#4265df]"
-          >
-            View all
-          </Link>
         ) : null}
       </div>
 
-      {shifts.length === 0 ? (
-        <p className="mx-4 mb-4 rounded-2xl bg-[#f4f6fc] px-4 py-8 text-center text-sm font-medium text-[#747b91]">
-          No published shifts are assigned to you this week.
-        </p>
-      ) : (
-        <div className="divide-y divide-[#edf0f5]">
-          {shifts.slice(0, 5).map((shift) => (
-            <MobileShiftRow
-              key={shift.id}
-              context={context}
-              highlighted={shift.date === getLocalDateValue()}
-              shift={shift}
-            />
-          ))}
-        </div>
-      )}
+      <div className="mt-2.5 overflow-hidden rounded-xl bg-white shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#e0e5ed]">
+        {shifts.length === 0 ? (
+          <p className="px-4 py-6 text-center text-sm font-medium text-[#66738d]">
+            No shifts are assigned to you this week.
+          </p>
+        ) : (
+          <>
+            <div className="divide-y divide-[#e6e9ef]">
+              {shifts.slice(0, 5).map((shift) => (
+                <MobileShiftRow
+                  key={shift.id}
+                  context={context}
+                  shift={shift}
+                />
+              ))}
+            </div>
+            {firstShift ? (
+              <Link
+                to={getRotaViewPath({
+                  shift: firstShift,
+                  workspaceSlug: context.workspaceSlug,
+                  workspaceType: context.workspaceType,
+                })}
+                className="flex items-center justify-center gap-1.5 border-t border-[#e6e9ef] px-4 py-3 text-sm font-extrabold tracking-[-0.015em] text-[#0865f5] transition-colors active:bg-[#f7f9ff]"
+              >
+                View full rota
+                <ChevronRightIcon className="size-4" strokeWidth={2.5} />
+              </Link>
+            ) : null}
+          </>
+        )}
+      </div>
     </section>
   )
 }
 
 function MobileShiftRow({
   context,
-  highlighted,
   shift,
 }: {
   context: DashboardMobileContext
-  highlighted: boolean
   shift: DashboardShiftSummary
 }) {
   const date = getShiftDateParts(shift.date)
@@ -88,50 +86,40 @@ function MobileShiftRow({
         workspaceSlug: context.workspaceSlug,
         workspaceType: context.workspaceType,
       })}
-      className={cn(
-        "grid grid-cols-[3.25rem_0.5rem_minmax(0,1fr)_auto_auto] items-center gap-2.5 px-4 py-3 transition-colors active:bg-[#f5f7fc]",
-        highlighted && "bg-[#f6f8ff]"
-      )}
+      className="grid grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-2 px-3 py-2.5 transition-colors active:bg-[#f7f9ff]"
     >
-      <div className="flex h-12 flex-col items-center justify-center rounded-xl border border-[#e1e4eb] bg-white">
-        <span className="text-[10px] font-bold tracking-[0.06em] text-[#7b8195] uppercase">
+      <div>
+        <p className="text-[0.9375rem] leading-tight font-extrabold tracking-[-0.02em] text-[#102044]">
           {date.day}
-        </span>
-        <strong className="text-base leading-none font-medium">
-          {date.dayNumber}
-        </strong>
-      </div>
-
-      <span
-        className={cn(
-          "size-2 rounded-full",
-          highlighted ? "bg-[#38ad7e]" : "bg-[#f3ad22]"
-        )}
-      />
-
-      <div className="min-w-0">
-        <p className="truncate text-sm font-bold tracking-tight">
-          {shift.zoneName}
         </p>
-        <p className="mt-0.5 truncate text-xs font-medium text-[#7b8195]">
-          {shift.locationName}
+        <p className="mt-0.5 text-xs font-medium text-[#53617d]">
+          {date.dayNumber} {date.month}
         </p>
       </div>
 
-      <span className="text-xs font-semibold whitespace-nowrap text-[#4c5675]">
-        {shift.timeLabel}
-      </span>
-      <ChevronRightIcon className="size-4 text-[#8f95a5]" />
+      <div className="grid min-w-0 gap-1 text-sm font-medium text-[#53617d]">
+        <ShiftMeta icon={Clock3Icon} label={shift.timeLabel} />
+        <ShiftMeta icon={UserRoundIcon} label={shift.zoneName} />
+      </div>
+
+      <ChevronRightIcon className="size-4 text-[#71809a]" />
     </Link>
   )
 }
 
-function getLocalDateValue(date = new Date()) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, "0")
-  const day = String(date.getDate()).padStart(2, "0")
-
-  return `${year}-${month}-${day}`
+function ShiftMeta({
+  icon: Icon,
+  label,
+}: {
+  icon: typeof Clock3Icon
+  label: string
+}) {
+  return (
+    <p className="flex min-w-0 items-center gap-2">
+      <Icon className="size-4 shrink-0 text-[#0865f5]" />
+      <span className="truncate">{label}</span>
+    </p>
+  )
 }
 
 export { WeeklyShiftPanel }

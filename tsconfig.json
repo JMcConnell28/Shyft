@@ -2,6 +2,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "scripts/**/*.ts",
     "scripts/**/*.js",
     "eslint.config.js",
     "prettier.config.js",
@@ -14,7 +15,7 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"],
+    "types": ["node", "vite/client"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
