@@ -4,6 +4,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 
+import type {
+  AnnouncementFormInput,
+  AnnouncementScopeInput,
+} from "@/features/announcements/types"
 import { announcementQueryKeys } from "@/features/announcements/query-keys"
 import {
   archiveAnnouncement,
@@ -11,9 +15,8 @@ import {
   markAllAnnouncementsRead,
   markAnnouncementRead,
   updateAnnouncement,
+  voteAnnouncementPoll,
 } from "@/features/announcements/server-fns"
-import type { AnnouncementFormInput } from "@/features/announcements/schemas/announcement-schemas"
-import type { AnnouncementScopeInput } from "@/features/announcements/types"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
 function useAnnouncementMutations(scope: AnnouncementScopeInput) {
@@ -24,6 +27,7 @@ function useAnnouncementMutations(scope: AnnouncementScopeInput) {
   const markAllAnnouncementsReadFn = useServerFn(markAllAnnouncementsRead)
   const markAnnouncementReadFn = useServerFn(markAnnouncementRead)
   const updateAnnouncementFn = useServerFn(updateAnnouncement)
+  const voteAnnouncementPollFn = useServerFn(voteAnnouncementPoll)
 
   async function invalidate() {
     await queryClient.invalidateQueries({
@@ -87,7 +91,7 @@ function useAnnouncementMutations(scope: AnnouncementScopeInput) {
       mutationFn: (
         input: AnnouncementFormInput & {
           announcementId: string
-        },
+        }
       ) => updateAnnouncementFn({ data: { ...scope, ...input } }),
       onSuccess: async () => {
         await invalidate()
@@ -96,6 +100,18 @@ function useAnnouncementMutations(scope: AnnouncementScopeInput) {
       onError: (error) => {
         showErrorToast(error, {
           fallbackMessage: "We could not update that announcement.",
+        })
+      },
+    }),
+    voteMutation: useMutation({
+      mutationFn: (input: { announcementId: string; optionId: string }) =>
+        voteAnnouncementPollFn({ data: { ...scope, ...input } }),
+      onSuccess: async () => {
+        await invalidate()
+      },
+      onError: (error) => {
+        showErrorToast(error, {
+          fallbackMessage: "We could not save your vote.",
         })
       },
     }),

@@ -144,8 +144,14 @@ async function listRotaPublishedEmailRows(rotaId: string) {
      left join public."organization" organization
        on organization.id = rota.organization_id
      join public.employees employee on employee.id = assignment.employee_id
+     join public.employee_location_assignments active_location_assignment
+       on active_location_assignment.employee_id = employee.id
+      and active_location_assignment.location_id = rota.location_id
+      and active_location_assignment.is_enabled = true
+      and active_location_assignment.disabled_at is null
      left join public."user" account_user on account_user.id = employee.user_id
      where published_shift.rota_id = $1
+       and employee.status = 'active'
      order by employee.full_name asc,
               published_shift.day_date asc,
               published_shift.start_time asc`,

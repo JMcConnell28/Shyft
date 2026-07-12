@@ -54,21 +54,20 @@ function DialogSelectRow({
 
   return (
     <div className="block">
-      <div className="relative flex min-h-12 items-center gap-2.5 rounded-[10px] border border-[#dfe5f0] bg-[#fbfcff] px-3 py-2 shadow-[0_5px_16px_rgba(30,50,96,0.045)]">
+      <div className="relative flex min-h-16 items-center gap-3 rounded-xl border border-[#d7e0ed] bg-white px-3 py-2 shadow-[0_3px_12px_rgba(30,50,96,0.035)] sm:min-h-12 sm:gap-2.5 sm:rounded-[10px] sm:bg-[#fbfcff]">
         <span
           className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-[9px]",
-            iconTone === "green"
-              ? "bg-[#e1f8eb] text-[#00a84f]"
-              : "bg-[#eaf0ff] text-[#174ef4]"
+            "flex size-10 shrink-0 items-center justify-center rounded-xl sm:size-8 sm:rounded-[9px]",
+            "bg-[#edf3ff] text-[#0868f7]",
+            iconTone === "green" && "sm:bg-[#e1f8eb] sm:text-[#00a84f]"
           )}
         >
-          <Icon className="size-4" />
+          <Icon className="size-5 sm:size-4" />
         </span>
         <div className="min-w-0 flex-1">
           <label
             htmlFor={id}
-            className="block text-[11px] leading-none font-semibold text-[#7a86a4]"
+            className="sr-only sm:block sm:text-[11px] sm:leading-none sm:font-semibold sm:text-[#7a86a4]"
           >
             {label}
           </label>
@@ -79,7 +78,7 @@ function DialogSelectRow({
             disabled={disabled}
             onBlur={onBlur}
             onChange={(event) => onChange(event.target.value)}
-            className="mt-1 w-full sm:hidden [&_[data-slot=native-select-icon]]:hidden [&_select]:h-auto [&_select]:border-0 [&_select]:bg-transparent [&_select]:p-0 [&_select]:pr-6 [&_select]:text-[13px] [&_select]:font-bold [&_select]:text-[#11245a] [&_select]:shadow-none"
+            className="w-full sm:hidden [&_[data-slot=native-select-icon]]:hidden [&_select]:h-auto [&_select]:border-0 [&_select]:bg-transparent [&_select]:p-0 [&_select]:pr-6 [&_select]:text-[16px] [&_select]:font-semibold [&_select]:text-[#10285c] [&_select]:shadow-none"
           >
             {options.map((option) => (
               <NativeSelectOption key={option.value} value={option.value}>
@@ -162,7 +161,7 @@ function TemplateSelect({
         value={value}
         onBlur={onBlur}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full sm:hidden [&_select]:h-10 [&_select]:rounded-[10px] [&_select]:border-[#dfe5f0] [&_select]:bg-[#fbfcff] [&_select]:px-3 [&_select]:text-[13px] [&_select]:font-bold [&_select]:text-[#11245a] [&_select]:shadow-[0_5px_16px_rgba(30,50,96,0.045)]"
+        className="w-full sm:hidden [&_select]:h-11 [&_select]:rounded-xl [&_select]:border-[#d7e0ed] [&_select]:bg-white [&_select]:px-3 [&_select]:text-sm [&_select]:font-semibold [&_select]:text-[#10285c] [&_select]:shadow-none"
       >
         {options.map((option) => (
           <NativeSelectOption key={option.value} value={option.value}>

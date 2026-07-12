@@ -1,16 +1,15 @@
 import type { PoolClient } from "pg"
 
 import type {
+  AnnouncementFormInput,
   AnnouncementScopeInput,
   AnnouncementTargetScope,
 } from "@/features/announcements/types"
-import type { AnnouncementFormInput } from "@/features/announcements/schemas/announcement-schemas"
 import { getAnnouncementsPageData } from "@/features/announcements/server/queries"
 import {
   getAnnouncementContext,
   listAnnouncementManageableLocations,
   withAnnouncementTransaction,
-  type AnnouncementContext,
 } from "@/features/announcements/server/shared"
 import { canManageAnnouncementTargets } from "@/features/announcements/utils/announcement-rules"
 import { getDatabase } from "@/lib/db"
@@ -34,8 +33,9 @@ async function createAnnouncement(input: AnnouncementMutationInput) {
          author_user_id,
          title,
          body,
-         target_scope
-       ) values ($1, $2, $3, $4, $5)
+         target_scope,
+         is_pinned
+       ) values ($1, $2, $3, $4, $5, $6)
        returning id`,
       [
         context.organizationId,
@@ -43,7 +43,8 @@ async function createAnnouncement(input: AnnouncementMutationInput) {
         input.title,
         input.body,
         input.targetScope,
-      ],
+        input.isPinned,
+      ]
     )
     const announcementId = result.rows[0]?.id
 
@@ -51,7 +52,12 @@ async function createAnnouncement(input: AnnouncementMutationInput) {
       throw new Error("We could not create that announcement.")
     }
 
-    await replaceAnnouncementLocations(client, announcementId, targetLocationIds)
+    await replaceAnnouncementLocations(
+      client,
+      announcementId,
+      targetLocationIds
+    )
+    await replaceAnnouncementPoll(client, announcementId, input.pollOptions)
     await markRead(client, announcementId, context.userId)
 
     return { announcementId }
@@ -59,7 +65,7 @@ async function createAnnouncement(input: AnnouncementMutationInput) {
 }
 
 async function updateAnnouncement(
-  input: AnnouncementMutationInput & { announcementId: string },
+  input: AnnouncementMutationInput & { announcementId: string }
 ) {
   const context = await getAnnouncementContext(input)
   await assertCanManageAnnouncement(context, input.announcementId)
@@ -71,6 +77,7 @@ async function updateAnnouncement(
        set title = $3,
            body = $4,
            target_scope = $5,
+           is_pinned = $6,
            updated_at = timezone('utc', now())
        where id = $1::uuid
          and organization_id = $2
@@ -81,12 +88,18 @@ async function updateAnnouncement(
         input.title,
         input.body,
         input.targetScope,
-      ],
+        input.isPinned,
+      ]
     )
     await replaceAnnouncementLocations(
       client,
       input.announcementId,
-      targetLocationIds,
+      targetLocationIds
+    )
+    await replaceAnnouncementPoll(
+      client,
+      input.announcementId,
+      input.pollOptions
     )
     await markRead(client, input.announcementId, context.userId)
   })
@@ -95,7 +108,7 @@ async function updateAnnouncement(
 }
 
 async function archiveAnnouncement(
-  input: AnnouncementScopeInput & { announcementId: string },
+  input: AnnouncementScopeInput & { announcementId: string }
 ) {
   const context = await getAnnouncementContext(input)
   await assertCanManageAnnouncement(context, input.announcementId)
@@ -108,14 +121,14 @@ async function archiveAnnouncement(
      where id = $1::uuid
        and organization_id = $2
        and status = 'active'`,
-    [input.announcementId, context.organizationId],
+    [input.announcementId, context.organizationId]
   )
 
   return { announcementId: input.announcementId }
 }
 
 async function markAnnouncementRead(
-  input: AnnouncementScopeInput & { announcementId: string },
+  input: AnnouncementScopeInput & { announcementId: string }
 ) {
   const context = await getAnnouncementContext(input)
   const pageData = await getAnnouncementsPageData({
@@ -126,7 +139,7 @@ async function markAnnouncementRead(
 
   if (
     !pageData.announcements.some(
-      (announcement) => announcement.id === input.announcementId,
+      (announcement) => announcement.id === input.announcementId
     )
   ) {
     throw new Error("That announcement could not be found.")
@@ -137,7 +150,7 @@ async function markAnnouncementRead(
      values ($1::uuid, $2, timezone('utc', now()))
      on conflict (announcement_id, user_id)
      do update set read_at = excluded.read_at`,
-    [input.announcementId, context.userId],
+    [input.announcementId, context.userId]
   )
 
   return { announcementId: input.announcementId }
@@ -164,18 +177,60 @@ async function markAllAnnouncementsRead(input: AnnouncementScopeInput) {
      from unnest($1::uuid[]) announcement_id
      on conflict (announcement_id, user_id)
      do update set read_at = excluded.read_at`,
-    [unreadIds, context.userId],
+    [unreadIds, context.userId]
   )
 
   return { readCount: unreadIds.length }
 }
 
+async function voteAnnouncementPoll(
+  input: AnnouncementScopeInput & {
+    announcementId: string
+    optionId: string
+  }
+) {
+  const context = await getAnnouncementContext(input)
+  const pageData = await getAnnouncementsPageData({
+    locationId: input.locationId,
+    organizationId: input.organizationId,
+    userId: input.userId,
+  })
+  const announcement = pageData.announcements.find(
+    (item) => item.id === input.announcementId
+  )
+
+  if (
+    !announcement?.poll?.options.some((option) => option.id === input.optionId)
+  ) {
+    throw new Error("That poll option is not available.")
+  }
+
+  await getDatabase().query(
+    `insert into public.announcement_poll_votes (
+       announcement_id,
+       option_id,
+       user_id
+     ) values ($1::uuid, $2::uuid, $3)
+     on conflict (announcement_id, user_id)
+     do update set option_id = excluded.option_id,
+                   updated_at = timezone('utc', now())`,
+    [input.announcementId, input.optionId, context.userId]
+  )
+
+  return {
+    announcementId: input.announcementId,
+    optionId: input.optionId,
+  }
+}
+
 async function assertCanManageTargets(
-  context: AnnouncementContext,
-  input: AnnouncementFormInput,
+  context: Awaited<ReturnType<typeof getAnnouncementContext>>,
+  input: AnnouncementFormInput
 ) {
   const manageableLocations = await listAnnouncementManageableLocations(context)
-  const manageableLocationIds = manageableLocations.map((location) => location.id)
+  const manageableLocationIds = manageableLocations.map(
+    (location) => location.id
+  )
   const targetLocationIds =
     input.targetScope === "organization"
       ? []
@@ -196,8 +251,8 @@ async function assertCanManageTargets(
 }
 
 async function assertCanManageAnnouncement(
-  context: AnnouncementContext,
-  announcementId: string,
+  context: Awaited<ReturnType<typeof getAnnouncementContext>>,
+  announcementId: string
 ) {
   const announcement = await getExistingAnnouncement(context, announcementId)
 
@@ -218,20 +273,22 @@ async function assertCanManageAnnouncement(
     listAnnouncementTargetIds(announcementId),
   ])
   const manageableLocationIds = new Set(
-    manageableLocations.map((location) => location.id),
+    manageableLocations.map((location) => location.id)
   )
 
   if (
     targetLocationIds.length === 0 ||
-    !targetLocationIds.every((locationId) => manageableLocationIds.has(locationId))
+    !targetLocationIds.every((locationId) =>
+      manageableLocationIds.has(locationId)
+    )
   ) {
     throw new Error("You do not have permission to manage that announcement.")
   }
 }
 
 async function getExistingAnnouncement(
-  context: AnnouncementContext,
-  announcementId: string,
+  context: Awaited<ReturnType<typeof getAnnouncementContext>>,
+  announcementId: string
 ) {
   const result = await getDatabase().query<ExistingAnnouncementRow>(
     `select id, status, target_scope
@@ -239,7 +296,7 @@ async function getExistingAnnouncement(
      where id = $1::uuid
        and organization_id = $2
      limit 1`,
-    [announcementId, context.organizationId],
+    [announcementId, context.organizationId]
   )
   const announcement = result.rows.at(0)
 
@@ -255,7 +312,7 @@ async function listAnnouncementTargetIds(announcementId: string) {
     `select location_id
      from public.announcement_locations
      where announcement_id = $1::uuid`,
-    [announcementId],
+    [announcementId]
   )
 
   return result.rows.map((row) => row.location_id)
@@ -264,12 +321,12 @@ async function listAnnouncementTargetIds(announcementId: string) {
 async function replaceAnnouncementLocations(
   client: PoolClient,
   announcementId: string,
-  locationIds: string[],
+  locationIds: Array<string>
 ) {
   await client.query(
     `delete from public.announcement_locations
      where announcement_id = $1::uuid`,
-    [announcementId],
+    [announcementId]
   )
 
   if (locationIds.length === 0) {
@@ -280,21 +337,48 @@ async function replaceAnnouncementLocations(
     `insert into public.announcement_locations (announcement_id, location_id)
      select $1::uuid, location_id
      from unnest($2::uuid[]) location_id`,
-    [announcementId, locationIds],
+    [announcementId, locationIds]
+  )
+}
+
+async function replaceAnnouncementPoll(
+  client: PoolClient,
+  announcementId: string,
+  pollOptions: Array<string>
+) {
+  await client.query(
+    `delete from public.announcement_poll_options
+     where announcement_id = $1::uuid`,
+    [announcementId]
+  )
+
+  if (pollOptions.length === 0) {
+    return
+  }
+
+  await client.query(
+    `insert into public.announcement_poll_options (
+       announcement_id,
+       label,
+       position
+     )
+     select $1::uuid, option.label, (option.position - 1)::smallint
+     from unnest($2::text[]) with ordinality as option(label, position)`,
+    [announcementId, pollOptions]
   )
 }
 
 async function markRead(
   client: PoolClient,
   announcementId: string,
-  userId: string,
+  userId: string
 ) {
   await client.query(
     `insert into public.announcement_reads (announcement_id, user_id, read_at)
      values ($1::uuid, $2, timezone('utc', now()))
      on conflict (announcement_id, user_id)
      do update set read_at = excluded.read_at`,
-    [announcementId, userId],
+    [announcementId, userId]
   )
 }
 
@@ -304,4 +388,5 @@ export {
   markAllAnnouncementsRead,
   markAnnouncementRead,
   updateAnnouncement,
+  voteAnnouncementPoll,
 }

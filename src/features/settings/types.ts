@@ -11,12 +11,15 @@ type LocationSettingsItem = {
   id: string
   name: string
   slug: string
+  employeeCount: number
+  zoneCount: number
   estimatedClosingTime: string
   estimatedClosingTimeNextDay: boolean
 }
 
 type LocationSettingsPageData = {
   locations: Array<LocationSettingsItem>
+  totalEmployeeCount: number
 }
 
 type RotaSettingsZone = {

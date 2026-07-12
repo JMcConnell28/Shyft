@@ -1,36 +1,25 @@
 "use client"
 
-import {
-  Layers3Icon,
-  LoaderCircleIcon,
-  TriangleAlertIcon,
-  UsersIcon,
-} from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import { Layers3Icon, LoaderCircleIcon, TriangleAlertIcon } from "lucide-react"
 
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import { getErrorMessage } from "@/lib/errors"
+import { Button } from "@/components/ui/button"
+import { StaffTable } from "@/features/staff-groups/components/staff-table"
 import { useStaffGroupMutations } from "@/features/staff-groups/hooks/use-staff-group-mutations"
 import { useStaffGroupSettingsQuery } from "@/features/staff-groups/hooks/use-staff-group-settings-query"
-import { StaffGroupListCard } from "@/features/staff-groups/components/staff-group-list-card"
-import { StaffTable } from "@/features/staff-groups/components/staff-table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 function StaffGroupDashboardPage({
   organizationId,
   locationId,
   userId,
+  workspaceSlug,
 }: {
   organizationId?: string
   locationId?: string
   userId: string
+  workspaceSlug: string
 }) {
-  const settingsQuery = useStaffGroupSettingsQuery({
+  const query = useStaffGroupSettingsQuery({
     organizationId,
     locationId,
     userId,
@@ -41,104 +30,74 @@ function StaffGroupDashboardPage({
     userId,
   })
 
-  if (settingsQuery.isPending) {
+  if (query.isPending)
     return (
-      <div className="flex min-h-64 items-center justify-center text-sm text-muted-foreground">
-        <LoaderCircleIcon className="mr-2 size-4 animate-spin" />
-        Loading team settings...
-      </div>
+      <TeamState icon={LoaderCircleIcon} message="Loading team settings..." />
     )
-  }
-
-  if (settingsQuery.isError) {
+  if (query.isError)
     return (
-      <Empty className="border border-dashed border-border/70 bg-muted/10 py-10">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <TriangleAlertIcon className="size-4" />
-          </EmptyMedia>
-          <EmptyTitle>We could not load team settings</EmptyTitle>
-          <EmptyDescription>
-            {getErrorMessage(
-              settingsQuery.error,
-              "We could not load your staff groups right now."
-            )}
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <TeamState
+        icon={TriangleAlertIcon}
+        message="We could not load team settings right now."
+      />
     )
-  }
 
   const isBusy =
-    mutations.createMutation.isPending ||
-    mutations.renameMutation.isPending ||
-    mutations.setColorMutation.isPending ||
-    mutations.deleteMutation.isPending ||
-    mutations.assignMutation.isPending ||
-    mutations.bulkAssignMutation.isPending
+    mutations.assignMutation.isPending || mutations.bulkAssignMutation.isPending
 
   return (
     <div className="space-y-4 text-[#11245a]">
-      <Tabs defaultValue="team" className="gap-4">
-        <TabsList
-          variant="line"
-          className="h-auto w-full justify-start gap-5 border-b border-[#dfe5f0] p-0"
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-extrabold">Team members</h2>
+          <p className="mt-1 text-xs font-medium text-[#61709a]">
+            Assign staff and manage their rota grouping.
+          </p>
+        </div>
+        <Button
+          render={
+            <Link
+              to="/w/$workspaceSlug/settings/team/groups"
+              params={{ workspaceSlug }}
+            />
+          }
+          variant="outline"
+          size="lg"
+          className="h-9 gap-2 rounded-lg px-3 text-[#0968f5]"
         >
-          <TabsTrigger value="team" className="flex-none px-0 pb-3">
-            <UsersIcon />
-            Team
-            <span className="text-muted-foreground">
-              {settingsQuery.data.employees.length}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="groups" className="flex-none px-0 pb-3">
-            <Layers3Icon />
-            Groups
-            <span className="text-muted-foreground">
-              {settingsQuery.data.groups.length}
-            </span>
-          </TabsTrigger>
-        </TabsList>
+          <Layers3Icon />
+          Groups
+        </Button>
+      </div>
+      <StaffTable
+        employees={query.data.employees}
+        groups={query.data.groups}
+        pending={isBusy}
+        onAssign={async (employeeId, groupId) => {
+          await mutations.assignMutation.mutateAsync({ employeeId, groupId })
+        }}
+        onBulkAssign={async (employeeIds, groupId) => {
+          await mutations.bulkAssignMutation.mutateAsync({
+            employeeIds,
+            groupId,
+          })
+        }}
+      />
+    </div>
+  )
+}
 
-        <TabsContent value="team">
-          <StaffTable
-            employees={settingsQuery.data.employees}
-            groups={settingsQuery.data.groups}
-            pending={isBusy}
-            onAssign={async (employeeId, groupId) => {
-              await mutations.assignMutation.mutateAsync({
-                employeeId,
-                groupId,
-              })
-            }}
-            onBulkAssign={async (employeeIds, groupId) => {
-              await mutations.bulkAssignMutation.mutateAsync({
-                employeeIds,
-                groupId,
-              })
-            }}
-          />
-        </TabsContent>
-
-        <TabsContent value="groups">
-          <StaffGroupListCard
-            groups={settingsQuery.data.groups}
-            isBusy={isBusy}
-            onCreate={async (values) => {
-              await mutations.createMutation.mutateAsync(values)
-            }}
-            onRename={async (groupId, name) => {
-              await mutations.renameMutation.mutateAsync({ groupId, name })
-            }}
-            onSetColor={async (groupId, color) => {
-              await mutations.setColorMutation.mutateAsync({ groupId, color })
-            }}
-            onDelete={async (groupId) => {
-              await mutations.deleteMutation.mutateAsync(groupId)
-            }}
-          />
-        </TabsContent>
-      </Tabs>
+function TeamState({
+  icon: Icon,
+  message,
+}: {
+  icon: typeof LoaderCircleIcon
+  message: string
+}) {
+  return (
+    <div className="flex min-h-64 items-center justify-center text-sm text-muted-foreground">
+      <Icon className="mr-2 size-4" />
+      {message}
     </div>
   )
 }

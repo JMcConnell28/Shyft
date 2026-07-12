@@ -2,8 +2,8 @@
 
 import { Link } from "@tanstack/react-router"
 import {
-  CalendarRangeIcon,
   Building2Icon,
+  CalendarRangeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ClockIcon,
@@ -82,11 +82,13 @@ function SettingsLayout({
   workspaceSlug,
   workspaceType,
   activePath,
+  contentOnly = false,
   children,
 }: {
   workspaceSlug: string
   workspaceType?: "location" | "organization"
   activePath: string
+  contentOnly?: boolean
   children: React.ReactNode
 }) {
   const navItems = workspaceSettingsNavItems.filter(
@@ -131,19 +133,23 @@ function SettingsLayout({
           />
 
           <div className={cn(isCategoryIndex ? "hidden md:block" : "block")}>
-            <MobileSettingsDetailHeader
-              activePath={activePath}
-              activeItem={activeItem}
-              workspaceSlug={workspaceSlug}
-            />
-            <header className="mb-5 hidden rounded-[14px] border border-[#dfe5f0] bg-card px-4 py-3 shadow-[0_8px_24px_rgba(30,50,96,0.045)] md:block">
-              <h1 className="text-[17px] font-semibold tracking-[-0.01em] text-[#11245a]">
-                {activeItem.label}
-              </h1>
-              <p className="mt-0.5 max-w-2xl text-xs font-medium text-[#7a86a4]">
-                {activeItem.description}
-              </p>
-            </header>
+            {!contentOnly ? (
+              <>
+                <MobileSettingsDetailHeader
+                  activePath={activePath}
+                  activeItem={activeItem}
+                  workspaceSlug={workspaceSlug}
+                />
+                <header className="mb-5 hidden rounded-[14px] border border-[#dfe5f0] bg-card px-4 py-3 shadow-[0_8px_24px_rgba(30,50,96,0.045)] md:block">
+                  <h1 className="text-[17px] font-semibold tracking-[-0.01em] text-[#11245a]">
+                    {activeItem.label}
+                  </h1>
+                  <p className="mt-0.5 max-w-2xl text-xs font-medium text-[#7a86a4]">
+                    {activeItem.description}
+                  </p>
+                </header>
+              </>
+            ) : null}
             <div className="settings-content min-w-0 [&_[data-slot=card-content]]:px-4 [&_[data-slot=card-content]]:py-4 [&_[data-slot=card-header]]:min-h-14 [&_[data-slot=card-header]]:rounded-none [&_[data-slot=card-header]]:border-b [&_[data-slot=card-header]]:border-[#edf0f6] [&_[data-slot=card-header]]:px-4 [&_[data-slot=card-header]]:py-3 [&_[data-slot=card]]:gap-0 [&_[data-slot=card]]:overflow-hidden [&_[data-slot=card]]:rounded-[14px] [&_[data-slot=card]]:border-[#dfe5f0] [&_[data-slot=card]]:bg-card [&_[data-slot=card]]:py-0 [&_[data-slot=card]]:shadow-[0_8px_24px_rgba(30,50,96,0.045)]">
               {children}
             </div>

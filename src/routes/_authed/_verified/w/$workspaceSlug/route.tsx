@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router"
 
 import { DashboardShell } from "@/components/app/dashboard-shell"
-import { getHasUnreadAnnouncements } from "@/features/announcements/server-fns"
+import { getDashboardAnnouncements } from "@/features/announcements/server-fns"
 import { getWorkspaceShellConfig } from "@/features/navigation/utils/workspace-shell"
 import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
 import { getViewerStateForWorkspaceSlug } from "@/lib/onboarding"
@@ -39,6 +39,7 @@ export const Route = createFileRoute("/_authed/_verified/w/$workspaceSlug")({
       return {
         hasUnreadAnnouncements: false,
         hasUnreadRotaUpdates: false,
+        recentAnnouncements: [],
         canInviteTeamMembers: false,
       }
     }
@@ -53,8 +54,8 @@ export const Route = createFileRoute("/_authed/_verified/w/$workspaceSlug")({
             locationId: activeWorkspace.id,
             userId: context.viewer.user.id,
           }
-    const [hasUnreadAnnouncements, hasUnreadRotaUpdates] = await Promise.all([
-      getHasUnreadAnnouncements({
+    const [dashboardAnnouncements, hasUnreadRotaUpdates] = await Promise.all([
+      getDashboardAnnouncements({
         data: unreadInput,
       }),
       getHasUnreadRotaUpdates({
@@ -63,8 +64,9 @@ export const Route = createFileRoute("/_authed/_verified/w/$workspaceSlug")({
     ])
 
     return {
-      hasUnreadAnnouncements,
+      hasUnreadAnnouncements: dashboardAnnouncements.unreadCount > 0,
       hasUnreadRotaUpdates,
+      recentAnnouncements: dashboardAnnouncements.announcements,
       canInviteTeamMembers: context.capabilities.canInviteTeamMembers,
     }
   },
@@ -76,8 +78,12 @@ function WorkspaceRoute() {
   const pathname = useLocation({
     select: (location) => location.pathname,
   })
-  const { canInviteTeamMembers, hasUnreadAnnouncements, hasUnreadRotaUpdates } =
-    Route.useLoaderData()
+  const {
+    canInviteTeamMembers,
+    hasUnreadAnnouncements,
+    hasUnreadRotaUpdates,
+    recentAnnouncements,
+  } = Route.useLoaderData()
   const activeWorkspace = viewer.activeWorkspace
 
   if (!activeWorkspace) {
@@ -94,6 +100,7 @@ function WorkspaceRoute() {
       backLink={shellConfig.backLink}
       hasUnreadRotaUpdates={hasUnreadRotaUpdates}
       hasUnreadAnnouncements={hasUnreadAnnouncements}
+      recentAnnouncements={recentAnnouncements}
       canInviteTeamMembers={canInviteTeamMembers}
       user={viewer.user}
       organizations={viewer.organizations}

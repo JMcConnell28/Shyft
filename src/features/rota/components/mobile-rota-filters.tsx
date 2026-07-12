@@ -1,5 +1,5 @@
-import { ChevronDownIcon, SlidersHorizontalIcon } from "lucide-react"
-import type { ReactNode } from "react"
+import { ArrowUpDownIcon, ListFilterIcon } from "lucide-react"
+import type { ComponentType, ReactNode } from "react"
 
 import type {
   RotaPageSize,
@@ -7,27 +7,30 @@ import type {
   RotaStatusFilter,
 } from "@/features/rota/schemas/rota-schemas"
 import type { RotaListPageData } from "@/features/rota/types"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  NativeSelect,
+  NativeSelectOptGroup,
+  NativeSelectOption,
+} from "@/components/ui/native-select"
 import { rotaPageSizeValues } from "@/lib/rota-schemas"
-import { cn } from "@/lib/utils"
 
 type MobileRotaFiltersProps = {
   canEditRotas: boolean
   data: RotaListPageData
   onLocationChange: (locationSlug: string) => void
+  onPageSizeChange: (pageSize: RotaPageSize) => void
   onStatusChange: (status: RotaStatusFilter) => void
   onRangeChange: (range: RotaRangeFilter) => void
-  onPageSizeChange: (pageSize: RotaPageSize) => void
 }
 
 const statusOptions: Array<{ label: string; value: RotaStatusFilter }> = [
-  { label: "Status", value: "all" },
-  { label: "Draft", value: "draft" },
-  { label: "Published", value: "published" },
+  { label: "All rotas", value: "all" },
+  { label: "Draft rotas", value: "draft" },
+  { label: "Published rotas", value: "published" },
 ]
 
 const rangeOptions: Array<{ label: string; value: RotaRangeFilter }> = [
-  { label: "Week", value: "all" },
+  { label: "All weeks", value: "all" },
   { label: "This week", value: "this-week" },
   { label: "Next 4 weeks", value: "next-4-weeks" },
   { label: "Past 4 weeks", value: "past-4-weeks" },
@@ -37,110 +40,118 @@ function MobileRotaFilters({
   canEditRotas,
   data,
   onLocationChange,
+  onPageSizeChange,
   onStatusChange,
   onRangeChange,
-  onPageSizeChange,
 }: MobileRotaFiltersProps) {
   return (
-    <>
+    <div className="flex items-center gap-2.5">
       {canEditRotas ? (
         <MobileFilterSelect
-          label="Status"
-          value={data.filters.status}
-          onChange={(value) => onStatusChange(value as RotaStatusFilter)}
+          icon={ListFilterIcon}
+          label="Filter"
+          onChange={(value) => {
+            const [kind, nextValue] = value.split(":")
+
+            if (kind === "status") {
+              onStatusChange(nextValue as RotaStatusFilter)
+              return
+            }
+
+            if (kind === "location") {
+              onLocationChange(nextValue)
+            }
+          }}
         >
-          {statusOptions.map((option) => (
-            <NativeSelectOption key={option.value} value={option.value}>
-              {option.label}
-            </NativeSelectOption>
-          ))}
+          <NativeSelectOptGroup label="Status">
+            {statusOptions.map((option) => (
+              <NativeSelectOption
+                key={option.value}
+                value={`status:${option.value}`}
+              >
+                {option.label}
+              </NativeSelectOption>
+            ))}
+          </NativeSelectOptGroup>
+          {data.locations.length > 1 ? (
+            <NativeSelectOptGroup label="Location">
+              {data.locations.map((location) => (
+                <NativeSelectOption
+                  key={location.id}
+                  value={`location:${location.slug}`}
+                >
+                  {location.name}
+                </NativeSelectOption>
+              ))}
+            </NativeSelectOptGroup>
+          ) : null}
         </MobileFilterSelect>
       ) : null}
 
       <MobileFilterSelect
-        label="Location"
-        value={data.selectedLocation?.id ?? ""}
-        disabled={data.locations.length === 0}
+        icon={ArrowUpDownIcon}
+        label="Sort"
         onChange={(value) => {
-          const location = data.locations.find((entry) => entry.id === value)
+          const [kind, nextValue] = value.split(":")
 
-          if (location) {
-            onLocationChange(location.slug)
+          if (kind === "range") {
+            onRangeChange(nextValue as RotaRangeFilter)
+            return
+          }
+
+          if (kind === "page") {
+            onPageSizeChange(Number(nextValue) as RotaPageSize)
           }
         }}
       >
-        {data.locations.map((location) => (
-          <NativeSelectOption key={location.id} value={location.id}>
-            {location.name}
-          </NativeSelectOption>
-        ))}
+        <NativeSelectOptGroup label="Week range">
+          {rangeOptions.map((option) => (
+            <NativeSelectOption
+              key={option.value}
+              value={`range:${option.value}`}
+            >
+              {option.label}
+            </NativeSelectOption>
+          ))}
+        </NativeSelectOptGroup>
+        <NativeSelectOptGroup label="Rows per page">
+          {rotaPageSizeValues.map((size) => (
+            <NativeSelectOption key={size} value={`page:${size}`}>
+              {size} rotas
+            </NativeSelectOption>
+          ))}
+        </NativeSelectOptGroup>
       </MobileFilterSelect>
-
-      <MobileFilterSelect
-        label="Week"
-        value={data.filters.range === "custom" ? "all" : data.filters.range}
-        onChange={(value) => onRangeChange(value as RotaRangeFilter)}
-      >
-        {rangeOptions.map((option) => (
-          <NativeSelectOption key={option.value} value={option.value}>
-            {option.label}
-          </NativeSelectOption>
-        ))}
-      </MobileFilterSelect>
-
-      <MobileFilterSelect
-        label="Page size"
-        value={String(data.filters.pageSize)}
-        iconOnly
-        onChange={(value) => onPageSizeChange(Number(value) as RotaPageSize)}
-      >
-        {rotaPageSizeValues.map((size) => (
-          <NativeSelectOption key={size} value={String(size)}>
-            {size} / page
-          </NativeSelectOption>
-        ))}
-      </MobileFilterSelect>
-    </>
+    </div>
   )
 }
 
 function MobileFilterSelect({
   children,
-  disabled = false,
-  iconOnly = false,
+  icon: Icon,
   label,
-  value,
   onChange,
 }: {
   children: ReactNode
-  disabled?: boolean
-  iconOnly?: boolean
+  icon: ComponentType<{ className?: string }>
   label: string
-  value: string
   onChange: (value: string) => void
 }) {
   return (
-    <label className="relative shrink-0">
-      <span className="sr-only">{label}</span>
+    <label className="relative flex h-10 min-w-[6.5rem] items-center justify-center gap-2 rounded-[10px] border border-[#d7e0ed] bg-white px-3 text-[13px] font-semibold text-[#405782] shadow-[0_2px_8px_rgba(30,50,96,0.025)]">
+      <Icon className="size-[18px]" aria-hidden="true" />
+      <span>{label}</span>
       <NativeSelect
-        value={value}
-        disabled={disabled}
+        value=""
         onChange={(event) => onChange(event.target.value)}
-        className={cn(
-          "[&_select]:h-11 [&_select]:rounded-[10px] [&_select]:border-neutral-200 [&_select]:bg-white [&_select]:text-sm [&_select]:font-semibold [&_select]:text-neutral-900 [&_select]:shadow-xs [&_select]:shadow-neutral-200 [&_select]:focus-visible:border-neutral-300 [&_select]:focus-visible:ring-neutral-200",
-          "[&_[data-slot=native-select-icon]]:hidden",
-          iconOnly
-            ? "w-11 [&_select]:px-0 [&_select]:text-transparent"
-            : "min-w-28 [&_select]:pr-9 [&_select]:pl-3.5"
-        )}
+        aria-label={label}
+        className="absolute inset-0 opacity-0 [&_select]:h-full [&_select]:w-full [&_select]:cursor-pointer"
       >
+        <NativeSelectOption value="" disabled>
+          {label}
+        </NativeSelectOption>
         {children}
       </NativeSelect>
-      {iconOnly ? (
-        <SlidersHorizontalIcon className="pointer-events-none absolute top-1/2 left-1/2 size-4.5 -translate-x-1/2 -translate-y-1/2 text-blue-600" />
-      ) : (
-        <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-neutral-500" />
-      )}
     </label>
   )
 }

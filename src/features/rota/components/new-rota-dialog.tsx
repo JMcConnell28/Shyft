@@ -5,10 +5,10 @@ import { useForm, useStore } from "@tanstack/react-form"
 import { useNavigate } from "@tanstack/react-router"
 import {
   ArrowRightIcon,
-  Building2Icon,
   CalendarDaysIcon,
   CircleCheckIcon,
   FileStackIcon,
+  MapPinIcon,
   PlusCircleIcon,
   PlusIcon,
   XIcon,
@@ -228,7 +228,8 @@ function NewRotaDialog({
 
       <DialogContent
         showCloseButton={false}
-        className="w-[calc(100%-2rem)] max-w-[34rem] gap-0 overflow-hidden rounded-[18px] bg-white p-0 text-[#11245a] shadow-[0_18px_60px_rgba(15,23,42,0.18)] ring-1 ring-[#dfe5f0]"
+        overlayClassName="bg-[#101b31]/55 backdrop-blur-[1px]"
+        className="top-auto bottom-4 flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[34rem] translate-y-0 flex-col gap-0 overflow-hidden rounded-[26px] bg-white p-0 text-[#10285c] shadow-[0_20px_60px_rgba(8,18,38,0.28)] ring-0 sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 sm:rounded-[22px] sm:ring-1 sm:ring-[#dfe5f0] data-open:slide-in-from-bottom-6 data-closed:slide-out-to-bottom-6"
       >
         <DialogClose
           render={
@@ -236,7 +237,7 @@ function NewRotaDialog({
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute top-4 right-4 size-8 rounded-full bg-white text-[#11245a] hover:bg-[#f5f7fb]"
+              className="absolute top-5 right-5 size-9 rounded-full bg-[#f3f5f9] text-[#10285c] hover:bg-[#e9edf4]"
             />
           }
         >
@@ -244,25 +245,25 @@ function NewRotaDialog({
           <span className="sr-only">Close</span>
         </DialogClose>
 
-        <DialogHeader className="px-5 pt-5 pb-3 sm:px-6 sm:pt-6">
-          <DialogTitle className="text-xl leading-none font-bold">
+        <DialogHeader className="px-6 pt-8 pb-5 sm:px-7 sm:pt-7">
+          <DialogTitle className="text-[26px] leading-none font-bold tracking-[-0.035em] sm:text-2xl">
             New rota
           </DialogTitle>
-          <DialogDescription className="text-sm font-medium text-[#7a86a4]">
-            Choose the location, week, and starting point.
+          <DialogDescription className="mt-1 max-w-[calc(100%-2.5rem)] text-sm leading-5 font-medium text-[#526991]">
+            Choose a week, location and how you want to start
           </DialogDescription>
         </DialogHeader>
 
         <form
-          className="flex max-h-[min(82vh,43rem)] flex-col"
+          className="flex min-h-0 flex-1 flex-col"
           onSubmit={(event) => {
             event.preventDefault()
             event.stopPropagation()
             void form.handleSubmit()
           }}
         >
-          <div className="flex-1 space-y-3 overflow-y-auto px-5 pb-4 sm:px-6">
-            <div className="grid gap-2 sm:grid-cols-2">
+          <div className="flex-1 space-y-3 overflow-y-auto px-6 pb-5 sm:px-7">
+            <div className="grid gap-3 sm:grid-cols-2 sm:gap-2 [&>div:first-child]:order-2 sm:[&>div:first-child]:order-1 [&>div:nth-child(2)]:order-1 sm:[&>div:nth-child(2)]:order-2">
               <form.Field
                 name="locationId"
                 validators={{
@@ -274,12 +275,11 @@ function NewRotaDialog({
                 {(field) => (
                   <DialogSelectRow
                     id={field.name}
-                    icon={Building2Icon}
+                    icon={MapPinIcon}
                     iconTone="green"
                     label="Location"
                     value={field.state.value}
                     options={locationOptions}
-                    disabled={locations.length === 1}
                     error={getFieldError(field)}
                     onBlur={field.handleBlur}
                     onChange={(value) => {
@@ -361,14 +361,14 @@ function NewRotaDialog({
             <FormErrorMessage message={error ?? previewErrorMessage} />
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 border-t border-[#dfe5f0] bg-[#fbfcff] px-5 py-4 sm:px-6">
+          <div className="grid grid-cols-2 gap-2.5 bg-white px-6 pt-1 pb-6 sm:border-t sm:border-[#dfe5f0] sm:bg-[#fbfcff] sm:px-7 sm:py-4">
             <DialogClose
               render={
                 <Button
                   type="button"
                   variant="ghost"
                   size="default"
-                  className="h-9 rounded-[10px] bg-white text-xs font-bold text-[#0069ff] hover:bg-white"
+                  className="h-11 rounded-xl border border-[#b9c6da] bg-white text-sm font-semibold text-[#0765e8] hover:bg-[#f7f9fc]"
                 />
               }
             >
@@ -377,7 +377,7 @@ function NewRotaDialog({
             <Button
               type="submit"
               size="default"
-              className="h-9 gap-2 rounded-[10px] bg-[#00a84f] text-xs font-bold text-white shadow-[0_8px_18px_rgba(0,168,79,0.18)] hover:bg-[#009647]"
+              className="h-11 gap-2 rounded-xl bg-[#0868f7] text-sm font-semibold text-white shadow-[0_8px_18px_rgba(8,104,247,0.2)] hover:bg-[#005de2]"
               disabled={createRotaDraftMutation.isPending || isPreviewPending}
             >
               <PrimaryIcon className="size-4" />

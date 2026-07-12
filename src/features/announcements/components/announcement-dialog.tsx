@@ -3,14 +3,12 @@
 import * as React from "react"
 import { LoaderCircleIcon } from "lucide-react"
 
-import {
-  announcementFormSchema,
-  type AnnouncementFormInput,
-} from "@/features/announcements/schemas/announcement-schemas"
 import type {
+  AnnouncementFormInput,
   AnnouncementLocationTarget,
   AnnouncementSummary,
 } from "@/features/announcements/types"
+import { announcementFormSchema } from "@/features/announcements/schemas/announcement-schemas"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { Button } from "@/components/ui/button"
 import {
@@ -22,12 +20,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 
 type AnnouncementDialogProps = {
   announcement?: AnnouncementSummary | null
   canTargetOrganization: boolean
-  manageableLocations: AnnouncementLocationTarget[]
+  manageableLocations: Array<AnnouncementLocationTarget>
   onOpenChange: (open: boolean) => void
   onSubmit: (input: AnnouncementFormInput) => Promise<void>
   open: boolean
@@ -45,9 +44,14 @@ function AnnouncementDialog({
 }: AnnouncementDialogProps) {
   const [title, setTitle] = React.useState("")
   const [body, setBody] = React.useState("")
+  const [hasPoll, setHasPoll] = React.useState(false)
+  const [isPinned, setIsPinned] = React.useState(false)
+  const [pollOptions, setPollOptions] = React.useState<Array<string>>([])
   const [targetScope, setTargetScope] =
     React.useState<AnnouncementFormInput["targetScope"]>("locations")
-  const [targetLocationIds, setTargetLocationIds] = React.useState<string[]>([])
+  const [targetLocationIds, setTargetLocationIds] = React.useState<
+    Array<string>
+  >([])
   const [error, setError] = React.useState<string | null>(null)
   const isEditing = Boolean(announcement)
 
@@ -58,13 +62,18 @@ function AnnouncementDialog({
 
     setTitle(announcement?.title ?? "")
     setBody(announcement?.body ?? "")
+    setHasPoll(Boolean(announcement?.poll))
+    setIsPinned(announcement?.isPinned ?? false)
+    setPollOptions(
+      announcement?.poll?.options.map((option) => option.label) ?? []
+    )
     setTargetScope(
       announcement?.targetScope ??
-        (canTargetOrganization ? "organization" : "locations"),
+        (canTargetOrganization ? "organization" : "locations")
     )
     setTargetLocationIds(
       announcement?.targetLocations.map((location) => location.id) ??
-        manageableLocations.map((location) => location.id).slice(0, 1),
+        manageableLocations.map((location) => location.id).slice(0, 1)
     )
     setError(null)
   }, [announcement, canTargetOrganization, manageableLocations, open])
@@ -74,6 +83,8 @@ function AnnouncementDialog({
 
     const parsed = announcementFormSchema.safeParse({
       body,
+      isPinned,
+      pollOptions: hasPoll ? pollOptions : [],
       targetLocationIds,
       targetScope,
       title,
@@ -111,6 +122,89 @@ function AnnouncementDialog({
                 placeholder="Kitchen deep clean tonight"
               />
             </label>
+
+            <div className="grid gap-3 rounded-lg border border-border/70 p-3">
+              <label className="flex items-center justify-between gap-3 text-sm font-medium">
+                <span>
+                  Pin announcement
+                  <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                    Keep this announcement at the top of the feed.
+                  </span>
+                </span>
+                <Switch checked={isPinned} onCheckedChange={setIsPinned} />
+              </label>
+
+              <label className="flex items-center justify-between gap-3 border-t border-border/70 pt-3 text-sm font-medium">
+                <span>
+                  Add a poll
+                  <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                    Let each team member choose one option.
+                  </span>
+                </span>
+                <Switch
+                  checked={hasPoll}
+                  onCheckedChange={(checked) => {
+                    setHasPoll(checked)
+                    if (checked && pollOptions.length < 2) {
+                      setPollOptions(["", ""])
+                    }
+                  }}
+                />
+              </label>
+            </div>
+
+            {hasPoll ? (
+              <fieldset className="grid gap-2">
+                <legend className="text-sm font-medium">Poll options</legend>
+                {pollOptions.map((option, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input
+                      value={option}
+                      maxLength={120}
+                      placeholder={`Option ${index + 1}`}
+                      aria-label={`Poll option ${index + 1}`}
+                      onChange={(event) => {
+                        const value = event.target.value
+                        setPollOptions((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index ? value : item
+                          )
+                        )
+                      }}
+                    />
+                    {pollOptions.length > 2 ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setPollOptions((current) =>
+                            current.filter(
+                              (_, itemIndex) => itemIndex !== index
+                            )
+                          )
+                        }
+                      >
+                        Remove
+                      </Button>
+                    ) : null}
+                  </div>
+                ))}
+                {pollOptions.length < 6 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-fit"
+                    onClick={() =>
+                      setPollOptions((current) => [...current, ""])
+                    }
+                  >
+                    Add option
+                  </Button>
+                ) : null}
+              </fieldset>
+            ) : null}
 
             <label className="grid gap-1.5 text-sm font-medium">
               Message
@@ -160,7 +254,7 @@ function AnnouncementDialog({
                           setTargetLocationIds((current) =>
                             event.target.checked
                               ? [...current, location.id]
-                              : current.filter((id) => id !== location.id),
+                              : current.filter((id) => id !== location.id)
                           )
                         }}
                       />

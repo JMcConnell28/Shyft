@@ -62,6 +62,7 @@ function AuthShell({
         >
           <Link
             to="/"
+            data-pwa-hide
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
               compactOnMobile &&

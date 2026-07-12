@@ -8,7 +8,7 @@ const announcementWorkspaceInputShape = {
 }
 
 const announcementWorkspaceInputSchema = withWorkspaceScopeRefinement(
-  z.object(announcementWorkspaceInputShape),
+  z.object(announcementWorkspaceInputShape)
 )
 
 const announcementTitleSchema = z
@@ -29,15 +29,37 @@ const announcementTargetLocationIdsSchema = z
   .array(z.uuid())
   .max(50, "Choose fewer locations.")
 
+const announcementPollOptionsSchema = z
+  .array(
+    z
+      .string()
+      .trim()
+      .min(1, "Poll options cannot be empty.")
+      .max(120, "Keep poll options under 120 characters.")
+  )
+  .max(6, "Use no more than 6 poll options.")
+  .refine(
+    (options) => options.length === 0 || options.length >= 2,
+    "Add at least 2 poll options."
+  )
+  .refine(
+    (options) =>
+      new Set(options.map((option) => option.toLowerCase())).size ===
+      options.length,
+    "Poll options must be unique."
+  )
+
 const announcementFormShape = {
   body: announcementBodySchema,
+  isPinned: z.boolean(),
+  pollOptions: announcementPollOptionsSchema,
   targetLocationIds: announcementTargetLocationIdsSchema,
   targetScope: announcementTargetScopeSchema,
   title: announcementTitleSchema,
 }
 
 const announcementFormSchema = withTargetRefinement(
-  z.object(announcementFormShape),
+  z.object(announcementFormShape)
 )
 
 const createAnnouncementInputSchema = withTargetRefinement(
@@ -45,8 +67,8 @@ const createAnnouncementInputSchema = withTargetRefinement(
     z.object({
       ...announcementWorkspaceInputShape,
       ...announcementFormShape,
-    }),
-  ),
+    })
+  )
 )
 
 const updateAnnouncementInputSchema = withTargetRefinement(
@@ -55,38 +77,46 @@ const updateAnnouncementInputSchema = withTargetRefinement(
       ...announcementWorkspaceInputShape,
       ...announcementFormShape,
       announcementId: z.uuid(),
-    }),
-  ),
+    })
+  )
 )
 
 const archiveAnnouncementInputSchema = withWorkspaceScopeRefinement(
   z.object({
     ...announcementWorkspaceInputShape,
     announcementId: z.uuid(),
-  }),
+  })
 )
 
 const markAnnouncementReadInputSchema = withWorkspaceScopeRefinement(
   z.object({
     ...announcementWorkspaceInputShape,
     announcementId: z.uuid(),
-  }),
+  })
 )
 
 const markAllAnnouncementsReadInputSchema = announcementWorkspaceInputSchema
 
+const voteAnnouncementPollInputSchema = withWorkspaceScopeRefinement(
+  z.object({
+    ...announcementWorkspaceInputShape,
+    announcementId: z.uuid(),
+    optionId: z.uuid(),
+  })
+)
+
 function withWorkspaceScopeRefinement<
-  Schema extends z.ZodObject<z.core.$ZodLooseShape>,
->(schema: Schema) {
+  TSchema extends z.ZodObject<z.core.$ZodLooseShape>,
+>(schema: TSchema) {
   return schema.refine(
     (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
-    "Choose one workspace.",
+    "Choose one workspace."
   )
 }
 
 function withTargetRefinement<
-  Schema extends z.ZodObject<z.core.$ZodLooseShape>,
->(schema: Schema) {
+  TSchema extends z.ZodObject<z.core.$ZodLooseShape>,
+>(schema: TSchema) {
   return schema.refine(
     (value) =>
       value.targetScope === "organization" ||
@@ -95,7 +125,7 @@ function withTargetRefinement<
     {
       message: "Choose at least one location.",
       path: ["targetLocationIds"],
-    },
+    }
   )
 }
 
@@ -107,5 +137,5 @@ export {
   markAnnouncementReadInputSchema,
   announcementWorkspaceInputSchema,
   updateAnnouncementInputSchema,
+  voteAnnouncementPollInputSchema,
 }
-export type AnnouncementFormInput = z.infer<typeof announcementFormSchema>

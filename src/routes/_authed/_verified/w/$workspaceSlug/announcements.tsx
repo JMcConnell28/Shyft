@@ -4,7 +4,7 @@ import { AnnouncementsPage } from "@/features/announcements/components/announcem
 import { getAnnouncementsPageData } from "@/features/announcements/server-fns"
 
 export const Route = createFileRoute(
-  "/_authed/_verified/w/$workspaceSlug/announcements",
+  "/_authed/_verified/w/$workspaceSlug/announcements"
 )({
   loader: async ({ context }) => {
     const activeWorkspace = context.viewer.activeWorkspace
@@ -50,6 +50,7 @@ function WorkspaceAnnouncementsRoute() {
         activeWorkspace.type === "location" ? activeWorkspace.id : undefined
       }
       userId={viewer.user.id}
+      workspaceName={activeWorkspace.name}
     />
   )
 }

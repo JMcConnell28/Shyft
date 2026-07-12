@@ -52,6 +52,7 @@ function OnboardingShell({
         <div className="flex items-center justify-between gap-4">
           <Link
             to={showBackToDashboard ? "/dashboard" : "/"}
+            data-pwa-hide={!showBackToDashboard ? "true" : undefined}
             className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
           >
             <ArrowLeftIcon />
