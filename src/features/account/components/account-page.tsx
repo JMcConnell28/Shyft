@@ -31,6 +31,7 @@ import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 import { PasskeyCard } from "@/features/account/components/passkey-card"
 import { PwaInstallCard } from "@/features/pwa/components/pwa-install-card"
+import { NotificationSettingsCard } from "@/features/push-notifications/components/notification-settings-card"
 
 type AccountPageProps = {
   user: {
@@ -57,6 +58,7 @@ function AccountPage({ user }: AccountPageProps) {
         <PasswordResetCard email={user.email} />
         <PasskeyCard />
         <PwaInstallCard />
+        <NotificationSettingsCard />
       </div>
     </div>
   )

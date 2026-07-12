@@ -1,13 +1,15 @@
 import { Link } from "@tanstack/react-router"
+import { format, isTomorrow, parseISO } from "date-fns"
 import {
-  CalendarIcon,
+  CalendarDaysIcon,
+  ChevronRightIcon,
   Clock3Icon,
   MapPinIcon,
   UserRoundIcon,
 } from "lucide-react"
 
-import type { DashboardMobileContext } from "@/features/dashboard/components/dashboard-mobile-types"
 import type { DashboardAnnouncements } from "@/features/announcements/types"
+import type { DashboardMobileContext } from "@/features/dashboard/components/dashboard-mobile-types"
 import type {
   DashboardClockStatus,
   DashboardShiftSummary,
@@ -28,7 +30,7 @@ type MobileDashboardShellProps = {
   context: DashboardMobileContext
   nextShift: DashboardShiftSummary | null
   shifts: Array<DashboardShiftSummary>
-  weekRangeLabel: string
+  weekHoursLabel: string | null
 }
 
 function MobileDashboardShell({
@@ -38,13 +40,28 @@ function MobileDashboardShell({
   context,
   nextShift,
   shifts,
-  weekRangeLabel,
+  weekHoursLabel,
 }: MobileDashboardShellProps) {
+  const activeShift = shifts.find((shift) => shift.date === getLocalDateValue())
+
   return (
-    <div className="min-h-full bg-[#f7f8fb] text-[#142453] md:hidden">
-      <div className="mx-auto flex min-h-full max-w-md flex-col px-4 pt-3 pb-[max(2rem,env(safe-area-inset-bottom))]">
+    <div className="min-h-full bg-[#fffefe] text-[#0b1836] md:hidden">
+      <div className="mx-auto flex min-h-full max-w-md flex-col px-5 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <MobileDashboardHero userName={context.userName} />
-        <DashboardClockStatusPanel clockStatus={clockStatus} variant="mobile" />
+        <DashboardClockStatusPanel
+          clockStatus={clockStatus}
+          mobileDetailsHref={
+            activeShift
+              ? getRotaViewPath({
+                  shift: activeShift,
+                  workspaceSlug: context.workspaceSlug,
+                  workspaceType: context.workspaceType,
+                })
+              : undefined
+          }
+          mobileShift={activeShift}
+          variant="mobile"
+        />
         <DashboardAnnouncementsPanel
           announcements={announcements}
           href={announcementsHref}
@@ -54,7 +71,7 @@ function MobileDashboardShell({
         <WeeklyShiftPanel
           context={context}
           shifts={shifts}
-          weekRangeLabel={weekRangeLabel}
+          weekHoursLabel={weekHoursLabel}
         />
       </div>
     </div>
@@ -63,13 +80,12 @@ function MobileDashboardShell({
 
 function MobileDashboardHero({ userName }: { userName: string }) {
   return (
-    <section className="animate-in pb-6 duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
-      <h1 className="text-xl leading-[1.12] font-extrabold tracking-[-0.04em]">
-        {getDashboardGreeting()}, {userName.split(" ")[0]}{" "}
-        <span aria-hidden="true">{"\u{1F44B}"}</span>
+    <section className="animate-in pb-3 duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
+      <h1 className="text-[1.375rem] leading-[1.18] font-extrabold tracking-[-0.035em] text-[#0b1836]">
+        {getDashboardGreeting()}, {userName.split(" ")[0]}
       </h1>
-      <p className="mt-2 text-sm font-medium text-[#7b8195]">
-        Here&apos;s your shift overview.
+      <p className="mt-1 text-[0.9375rem] font-medium text-[#52617e]">
+        Here&apos;s what&apos;s happening today
       </p>
     </section>
   )
@@ -85,18 +101,10 @@ function NextShiftPanel({
   const date = shift ? getShiftDateParts(shift.date) : null
 
   return (
-    <section className="mt-3 animate-in rounded-[20px] bg-white p-4 shadow-[0_5px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7e9f0] duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-[#eef2ff] text-[#4d6ee8]">
-            <CalendarIcon className="size-5" />
-          </span>
-          <h2 className="text-[17px] font-extrabold tracking-[-0.02em]">
-            Next shift
-          </h2>
-        </div>
-        {shift ? <ScheduleLink context={context} shift={shift} /> : null}
-      </div>
+    <section className="mt-5 animate-in duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
+      <h2 className="text-lg leading-tight font-extrabold tracking-[-0.025em] text-[#0b1836]">
+        Next shift
+      </h2>
 
       {shift && date ? (
         <Link
@@ -105,53 +113,58 @@ function NextShiftPanel({
             workspaceSlug: context.workspaceSlug,
             workspaceType: context.workspaceType,
           })}
-          className="mt-4 grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 rounded-2xl transition-colors active:bg-[#f7f9ff]"
+          className="mt-2.5 grid grid-cols-[3.1rem_minmax(0,1fr)] gap-3 rounded-xl bg-white p-2.5 shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#e0e5ed] transition-colors active:bg-[#f8faff]"
         >
-          <div className="flex size-20 flex-col items-center justify-center rounded-2xl bg-[#f0f3ff]">
-            <span className="text-xs font-bold tracking-[0.08em] uppercase">
-              {date.day}
+          <ShiftDateTile date={date} />
+          <div className="flex min-w-0 flex-col">
+            <div className="flex items-start justify-between gap-3">
+              <p className="min-w-0 text-[0.9375rem] leading-tight font-extrabold tracking-[-0.02em] text-[#102044]">
+                {getNextShiftDateLabel(shift.date)}
+              </p>
+              {shift.durationLabel ? (
+                <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-[#596886]">
+                  <CalendarDaysIcon className="size-3.5 text-[#70809c]" />
+                  {shift.durationLabel}
+                </span>
+              ) : null}
+            </div>
+            <div className="mt-2 grid gap-1 text-sm font-medium text-[#53617d]">
+              <ShiftMeta icon={Clock3Icon} label={shift.timeLabel} />
+              <ShiftMeta icon={UserRoundIcon} label={shift.zoneName} />
+              <ShiftMeta icon={MapPinIcon} label={shift.locationName} />
+            </div>
+            <span className="mt-2 flex items-center justify-end gap-1 text-sm font-extrabold text-[#0865f5]">
+              View shift
+              <ChevronRightIcon className="size-4" strokeWidth={2.5} />
             </span>
-            <strong className="mt-0.5 text-[2rem] leading-none font-medium">
-              {date.dayNumber}
-            </strong>
-            <span className="mt-1 text-xs font-bold tracking-[0.08em] uppercase">
-              {date.month}
-            </span>
-          </div>
-
-          <div className="flex min-w-0 flex-col gap-2">
-            <ShiftMeta icon={Clock3Icon} label={shift.timeLabel} />
-            <ShiftMeta icon={UserRoundIcon} label={shift.zoneName} />
-            <ShiftMeta icon={MapPinIcon} label={shift.locationName} />
           </div>
         </Link>
       ) : (
-        <p className="mt-4 rounded-2xl bg-[#f4f6fc] px-4 py-6 text-center text-sm font-medium text-[#747b91]">
-          Published shifts assigned to you will appear here.
-        </p>
+        <div className="mt-2.5 rounded-xl bg-white px-4 py-6 text-center text-sm font-medium text-[#66738d] shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#e0e5ed]">
+          Your next assigned shift will appear here.
+        </div>
       )}
     </section>
   )
 }
 
-function ScheduleLink({
-  context,
-  shift,
+function ShiftDateTile({
+  date,
 }: {
-  context: DashboardMobileContext
-  shift: DashboardShiftSummary
+  date: ReturnType<typeof getShiftDateParts>
 }) {
   return (
-    <Link
-      to={getRotaViewPath({
-        shift,
-        workspaceSlug: context.workspaceSlug,
-        workspaceType: context.workspaceType,
-      })}
-      className="rounded-xl border border-[#cdd7f7] px-3 py-2 text-xs font-bold text-[#4265df] transition-colors active:bg-[#eef2ff]"
-    >
-      View full schedule
-    </Link>
+    <div className="overflow-hidden rounded-md border border-[#d9dfeb] text-center">
+      <p className="bg-[#0865f5] py-1 text-[0.625rem] font-extrabold tracking-[0.05em] text-white uppercase">
+        {date.month}
+      </p>
+      <p className="pt-2 text-[1.5rem] leading-none font-extrabold tracking-[-0.05em] text-[#102044]">
+        {date.dayNumber}
+      </p>
+      <p className="pt-1 pb-2 text-[0.625rem] font-extrabold tracking-[0.06em] text-[#0865f5] uppercase">
+        {date.day}
+      </p>
+    </div>
   )
 }
 
@@ -163,11 +176,27 @@ function ShiftMeta({
   label: string
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-2.5 text-sm font-semibold text-[#4c5675] first:pt-0">
-      <Icon className="size-4.5 shrink-0 text-[#5c7bea]" />
+    <p className="flex min-w-0 items-center gap-2">
+      <Icon className="size-4 shrink-0 text-[#0865f5]" />
       <span className="truncate">{label}</span>
-    </div>
+    </p>
   )
+}
+
+function getNextShiftDateLabel(date: string) {
+  const parsedDate = parseISO(date)
+
+  return isTomorrow(parsedDate)
+    ? `Tomorrow, ${format(parsedDate, "d MMMM")}`
+    : format(parsedDate, "EEEE, d MMMM")
+}
+
+function getLocalDateValue(date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+
+  return `${year}-${month}-${day}`
 }
 
 export { MobileDashboardShell }

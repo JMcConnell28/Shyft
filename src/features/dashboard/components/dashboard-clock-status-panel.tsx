@@ -1,8 +1,12 @@
 "use client"
 
-import { Building2Icon, Clock3Icon, ClockIcon, TimerIcon } from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import { Clock3Icon, ClockIcon, InfoIcon, TimerIcon } from "lucide-react"
 
-import type { DashboardClockStatus } from "@/features/dashboard/types"
+import type {
+  DashboardClockStatus,
+  DashboardShiftSummary,
+} from "@/features/dashboard/types"
 import { useLiveNow } from "@/features/time-clock/hooks/use-live-now"
 import {
   formatElapsedSummary,
@@ -17,9 +21,13 @@ import { cn } from "@/lib/utils"
 
 function DashboardClockStatusPanel({
   clockStatus,
+  mobileDetailsHref,
+  mobileShift,
   variant = "desktop",
 }: {
   clockStatus: DashboardClockStatus
+  mobileDetailsHref?: string
+  mobileShift?: DashboardShiftSummary | null
   variant?: "desktop" | "mobile"
 }) {
   const liveNow = useLiveNow(Boolean(clockStatus.openEntry))
@@ -33,7 +41,9 @@ function DashboardClockStatusPanel({
     return (
       <MobileClockStatus
         clockStatus={clockStatus}
+        detailsHref={mobileDetailsHref}
         openElapsedMs={openElapsedMs}
+        shift={mobileShift ?? null}
         totalTodayMs={totalTodayMs}
       />
     )
@@ -89,13 +99,11 @@ function DashboardClockStatusPanel({
             icon={TimerIcon}
             label="Today"
             value={formatElapsedSummary(totalTodayMs)}
-            variant={variant}
           />
           <ClockStat
             icon={ClockIcon}
             label="Entries"
             value={String(clockStatus.todayEntryCount)}
-            variant={variant}
           />
         </div>
       </div>
@@ -105,31 +113,31 @@ function DashboardClockStatusPanel({
 
 function MobileClockStatus({
   clockStatus,
+  detailsHref,
   openElapsedMs,
+  shift,
   totalTodayMs,
 }: {
   clockStatus: DashboardClockStatus
+  detailsHref?: string
   openElapsedMs: number
+  shift: DashboardShiftSummary | null
   totalTodayMs: number
 }) {
   const isClockedIn = Boolean(clockStatus.openEntry)
+  const locationLabel = shift
+    ? `${shift.locationName} · ${shift.zoneName}`
+    : (clockStatus.openEntry?.locationName ?? "No active workplace")
+  const timeLabel = shift?.timeLabel
 
   return (
-    <section className="animate-in rounded-[20px] bg-white p-4 shadow-[0_5px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7e9f0] duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-[#e7f8f1] text-[#24966a]">
-            <Clock3Icon className="size-5" />
-          </span>
-          <h2 className="text-[17px] font-extrabold tracking-[-0.02em]">
-            Time tracking
-          </h2>
-        </div>
+    <section className="animate-in overflow-hidden rounded-xl bg-white shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#dfe4ec] duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
+      <div className="flex items-center justify-between gap-3 px-3 pt-2.5">
         <span
           className={cn(
-            "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold",
+            "inline-flex items-center gap-2 rounded-[10px] px-2.5 py-1.5 text-sm font-bold",
             isClockedIn
-              ? "bg-[#e9f8f2] text-[#248964]"
+              ? "bg-[#e9f8ed] text-[#129238]"
               : "bg-[#f1f3f7] text-[#6f7688]"
           )}
         >
@@ -141,34 +149,53 @@ function MobileClockStatus({
           />
           {isClockedIn ? "Clocked in" : "Not clocked in"}
         </span>
-      </div>
-
-      <div className="mt-5 flex items-start gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#eef2ff] text-[#5575e7]">
-          <Building2Icon className="size-5" />
+        <span className="flex size-7 items-center justify-center rounded-lg bg-[#edf2ff] text-[#0865f5]">
+          <Clock3Icon className="size-[1.125rem]" />
         </span>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-extrabold">
-            {clockStatus.openEntry?.locationName ?? "No active workplace"}
-          </p>
-          <p className="mt-0.5 text-sm font-medium text-[#7b8195]">
-            {isClockedIn ? "Active time entry" : "Today so far"}
-          </p>
-        </div>
       </div>
 
-      <p className="mt-5 font-mono text-[2.65rem] leading-none font-medium tracking-[-0.04em] tabular-nums">
-        {isClockedIn
-          ? formatElapsedTime(openElapsedMs)
-          : formatElapsedTime(totalTodayMs)}
-      </p>
-      <p className="mt-2 text-sm font-medium text-[#7b8195]">
-        {clockStatus.openEntry
-          ? `Started at ${formatDateTime(clockStatus.openEntry.clockedInAt)}`
-          : clockStatus.todayEntryCount > 0
-            ? `${clockStatus.todayEntryCount} completed ${clockStatus.todayEntryCount === 1 ? "entry" : "entries"} today`
-            : "No time entries recorded today"}
-      </p>
+      <div className="px-4 pt-2 pb-3.5 text-center">
+        <p className="font-mono text-[2.5rem] leading-none font-semibold tracking-[-0.07em] text-[#071735] tabular-nums">
+          {isClockedIn
+            ? formatElapsedTime(openElapsedMs)
+            : formatElapsedTime(totalTodayMs)}
+        </p>
+        <p className="mt-2 truncate text-base font-extrabold tracking-[-0.02em] text-[#102044]">
+          {locationLabel}
+        </p>
+        {timeLabel ? (
+          <p className="mt-2 flex items-center justify-center gap-2 text-sm font-medium text-[#51607e]">
+            <ClockIcon className="size-4 text-[#0865f5]" />
+            {timeLabel}
+          </p>
+        ) : null}
+        <p className="mt-2 text-sm font-medium text-[#51607e]">
+          {clockStatus.openEntry
+            ? `Clocked in at ${formatDateTime(clockStatus.openEntry.clockedInAt)}`
+            : clockStatus.todayEntryCount > 0
+              ? `${clockStatus.todayEntryCount} completed ${clockStatus.todayEntryCount === 1 ? "entry" : "entries"} today`
+              : "No time entries recorded today"}
+        </p>
+      </div>
+
+      <div className="flex min-h-10 items-center justify-between gap-3 border-t border-[#e4e8ef] px-4 py-2.5">
+        <p className="flex min-w-0 items-center gap-2 text-[0.8125rem] font-medium text-[#53617d]">
+          <InfoIcon className="size-4 shrink-0 text-[#8590a8]" />
+          <span className="truncate">
+            {isClockedIn
+              ? "Use clock-in station to clock out"
+              : "Use a clock-in station to start your shift"}
+          </span>
+        </p>
+        {detailsHref ? (
+          <Link
+            to={detailsHref}
+            className="shrink-0 text-sm font-extrabold text-[#0865f5] transition-opacity active:opacity-70"
+          >
+            View shift details
+          </Link>
+        ) : null}
+      </div>
     </section>
   )
 }
@@ -177,39 +204,18 @@ function ClockStat({
   icon: Icon,
   label,
   value,
-  variant,
 }: {
   icon: typeof ClockIcon
   label: string
   value: string
-  variant: "desktop" | "mobile"
 }) {
-  const isMobile = variant === "mobile"
-
   return (
-    <div
-      className={cn(
-        "rounded-xl border px-3 py-3",
-        isMobile ? "border-[#dbe3ff] bg-white" : "border-[#edf0f6] bg-[#fbfcff]"
-      )}
-    >
-      <div
-        className={cn(
-          "flex items-center gap-1.5 text-xs font-bold uppercase",
-          isMobile ? "text-[#687087]" : "text-[#7a86a4]"
-        )}
-      >
+    <div className="rounded-xl border border-[#edf0f6] bg-[#fbfcff] px-3 py-3">
+      <div className="flex items-center gap-1.5 text-xs font-bold text-[#7a86a4] uppercase">
         <Icon className="size-3.5" />
         {label}
       </div>
-      <p
-        className={cn(
-          "mt-1 text-base font-bold",
-          isMobile ? "text-[#080d23]" : "text-[#11245a]"
-        )}
-      >
-        {value}
-      </p>
+      <p className="mt-1 text-base font-bold text-[#11245a]">{value}</p>
     </div>
   )
 }

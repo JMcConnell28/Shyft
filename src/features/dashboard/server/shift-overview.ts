@@ -41,19 +41,19 @@ type DashboardClockEntryRow = {
 }
 
 async function getDashboardShiftOverview(
-  input: ShiftOverviewInput,
+  input: ShiftOverviewInput
 ): Promise<DashboardShiftOverview> {
   const today = format(new Date(), "yyyy-MM-dd")
   const weekStart = format(
     startOfWeek(new Date(), {
       weekStartsOn: 1,
     }),
-    "yyyy-MM-dd",
+    "yyyy-MM-dd"
   )
   const weekEnd = format(addDays(parseISO(weekStart), 6), "yyyy-MM-dd")
   const weekRangeLabel = `${format(parseISO(weekStart), "d MMM")} - ${format(
     parseISO(weekEnd),
-    "d MMM",
+    "d MMM"
   )}`
   const locationIds = await listDashboardLocationIds(input)
 
@@ -62,6 +62,7 @@ async function getDashboardShiftOverview(
       clockStatus: getEmptyClockStatus(),
       nextShift: null,
       thisWeekShifts: [],
+      weekHoursLabel: null,
       weekRangeLabel,
     }
   }
@@ -76,6 +77,7 @@ async function getDashboardShiftOverview(
       clockStatus: getEmptyClockStatus(),
       nextShift: null,
       thisWeekShifts: [],
+      weekHoursLabel: null,
       weekRangeLabel,
     }
   }
@@ -102,25 +104,31 @@ async function getDashboardShiftOverview(
     }),
   ])
 
+  const thisWeekShifts = thisWeekRows.map(mapDashboardShiftRow)
+  const weekMinutes = thisWeekRows.reduce(
+    (total, shift) => total + (getShiftDurationMinutes(shift) ?? 0),
+    0
+  )
+
   return {
     clockStatus,
-    nextShift: nextShiftRows[0]
-      ? mapDashboardShiftRow(nextShiftRows[0])
-      : null,
-    thisWeekShifts: thisWeekRows.map(mapDashboardShiftRow),
+    nextShift: nextShiftRows[0] ? mapDashboardShiftRow(nextShiftRows[0]) : null,
+    thisWeekShifts,
+    weekHoursLabel:
+      thisWeekShifts.length > 0 ? formatDurationLabel(weekMinutes) : null,
     weekRangeLabel,
   }
 }
 
 async function getDashboardClockStatus(input: {
-  employeeIds: string[]
-  locationIds: string[]
+  employeeIds: Array<string>
+  locationIds: Array<string>
   now: Date
 }): Promise<DashboardClockStatus> {
   const todayStart = new Date(
     input.now.getFullYear(),
     input.now.getMonth(),
-    input.now.getDate(),
+    input.now.getDate()
   )
   const result = await getDatabase().query<DashboardClockEntryRow>(
     `select entry.id,
@@ -138,7 +146,7 @@ async function getDashboardClockStatus(input: {
          or entry.clocked_out_at is null
        )
      order by entry.clocked_in_at desc`,
-    [input.employeeIds, input.locationIds, todayStart.toISOString()],
+    [input.employeeIds, input.locationIds, todayStart.toISOString()]
   )
   const openEntry = result.rows.find((entry) => entry.clocked_out_at === null)
   const completedTodayMs = result.rows.reduce((total, entry) => {
@@ -149,7 +157,7 @@ async function getDashboardClockStatus(input: {
     return total + getEntryDurationMs(entry)
   }, 0)
   const todayEntryCount = result.rows.filter(
-    (entry) => new Date(entry.clocked_in_at) >= todayStart,
+    (entry) => new Date(entry.clocked_in_at) >= todayStart
   ).length
 
   return {
@@ -181,15 +189,17 @@ async function listDashboardLocationIds(input: ShiftOverviewInput) {
 
   const locations = await listAccessibleLocations(
     input.organizationId,
-    input.userId,
+    input.userId
   )
 
   return locations.map((location) => location.id)
 }
 
-async function listUserEmployeeIds(input: ShiftOverviewInput & {
-  locationIds: string[]
-}) {
+async function listUserEmployeeIds(
+  input: ShiftOverviewInput & {
+    locationIds: Array<string>
+  }
+) {
   const result = await getDatabase().query<{ id: string }>(
     `select distinct employee.id
      from public.employees employee
@@ -204,17 +214,17 @@ async function listUserEmployeeIds(input: ShiftOverviewInput & {
          ($3::text is not null and employee.organization_id = $3::text)
          or ($3::text is null and employee.organization_id is null)
        )`,
-    [input.userId, input.locationIds, input.organizationId],
+    [input.userId, input.locationIds, input.organizationId]
   )
 
   return result.rows.map((employee) => employee.id)
 }
 
 async function listAssignedPublishedShifts(input: {
-  employeeIds: string[]
+  employeeIds: Array<string>
   fromDate: string
   limit?: number
-  locationIds: string[]
+  locationIds: Array<string>
   organizationId: string | null
   toDate?: string
 }) {
@@ -255,7 +265,7 @@ async function listAssignedPublishedShifts(input: {
       input.toDate ?? null,
       input.organizationId,
       input.limit ?? 100,
-    ],
+    ]
   )
 
   return result.rows
@@ -267,6 +277,7 @@ function mapDashboardShiftRow(row: DashboardShiftRow): DashboardShiftSummary {
     date: row.day_date,
     dateLabel: format(parseISO(row.day_date), "d MMM"),
     dayLabel: format(parseISO(row.day_date), "EEE"),
+    durationLabel: getDurationLabel(row),
     locationName: row.location_name,
     locationSlug: row.location_slug,
     rotaId: row.rota_id,
@@ -297,7 +308,78 @@ function getTimeLabel(row: DashboardShiftRow) {
 }
 
 function formatTime(value: string | null) {
-  return value?.slice(0, 5) ?? "--:--"
+  if (!value) {
+    return "--:--"
+  }
+
+  const [hoursText = "0", minutesText = "0"] = value.split(":")
+  const hours = Number(hoursText)
+  const minutes = Number(minutesText)
+
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return "--:--"
+  }
+
+  const period = hours < 12 ? "AM" : "PM"
+  const displayHours = hours % 12 || 12
+
+  return `${displayHours}:${String(minutes).padStart(2, "0")} ${period}`
+}
+
+function getDurationLabel(row: DashboardShiftRow) {
+  const durationMinutes = getShiftDurationMinutes(row)
+
+  return durationMinutes === null ? null : formatDurationLabel(durationMinutes)
+}
+
+function getShiftDurationMinutes(row: DashboardShiftRow) {
+  if (row.shift_type === "split") {
+    if (
+      !row.end_time ||
+      !row.split_second_start_time ||
+      !row.split_second_end_time
+    ) {
+      return null
+    }
+
+    return (
+      getDurationBetweenTimes(row.start_time, row.end_time) +
+      getDurationBetweenTimes(
+        row.split_second_start_time,
+        row.split_second_end_time
+      )
+    )
+  }
+
+  return row.end_time
+    ? getDurationBetweenTimes(row.start_time, row.end_time)
+    : null
+}
+
+function getDurationBetweenTimes(startTime: string, endTime: string) {
+  const startMinutes = getMinutesFromTime(startTime)
+  const endMinutes = getMinutesFromTime(endTime)
+
+  return endMinutes >= startMinutes
+    ? endMinutes - startMinutes
+    : endMinutes + 24 * 60 - startMinutes
+}
+
+function getMinutesFromTime(value: string) {
+  const [hours = "0", minutes = "0"] = value.split(":")
+
+  return Number(hours) * 60 + Number(minutes)
+}
+
+function formatDurationLabel(totalMinutes: number) {
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+
+  if (minutes === 0) {
+    return `${hours} ${hours === 1 ? "hour" : "hours"}`
+  }
+
+  return `${hours}h ${minutes}m`
 }
 
 function getEntryDurationMs(entry: DashboardClockEntryRow) {
