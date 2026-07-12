@@ -27,6 +27,13 @@ const getPushSubscriptionStatus = createServerFn({ method: "POST" })
     return module.readCurrentPushSubscriptionState(data)
   })
 
+const getPushPublicConfig = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const module = await import("@/features/push-notifications/server/actions")
+    return module.readPushPublicConfig()
+  }
+)
+
 const sendTestPushToCurrentDevice = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => pushEndpointInputSchema.parse(input))
   .handler(async ({ data }) => {
@@ -42,6 +49,7 @@ const sendTestPushToCurrentUser = createServerFn({ method: "POST" }).handler(
 )
 
 export {
+  getPushPublicConfig,
   getPushSubscriptionStatus,
   removePushSubscription,
   savePushSubscription,

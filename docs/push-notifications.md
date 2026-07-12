@@ -13,14 +13,13 @@ npx web-push generate-vapid-keys --json
 Configure these values in Coolify for the app service:
 
 ```text
-VITE_VAPID_PUBLIC_KEY=<public key>
 VAPID_PUBLIC_KEY=<same public key>
 VAPID_PRIVATE_KEY=<private key>
 VAPID_SUBJECT=https://rocketrota.com
 PUSH_TESTING_ENABLED=true
 ```
 
-Only `VITE_VAPID_PUBLIC_KEY` is sent to browsers. The subject is a push-provider contact URI, not an email sender. Change it to a monitored `mailto:` address later if desired, but do not rotate the key pair.
+The public key is returned to authenticated clients by a server function when they enable notifications. The subject is a push-provider contact URI, not an email sender. Change it to a monitored `mailto:` address later if desired, but do not rotate the key pair.
 
 Apply `supabase/migrations/20260711202136_push_subscriptions.sql` to the hosted database. The table is in an unexposed private schema and has no browser grants.
 
