@@ -13,6 +13,8 @@ function isStandaloneDisplayMode() {
 
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
+    window.matchMedia("(display-mode: minimal-ui)").matches ||
+    document.referrer.startsWith("android-app://") ||
     navigatorWithStandalone.standalone === true
   )
 }
@@ -24,7 +26,10 @@ function isIosDevice() {
 function getPushSupport() {
   const serviceWorker = "serviceWorker" in navigator
   const notifications = "Notification" in window
-  const pushManager = "PushManager" in window
+  const pushManager =
+    "PushManager" in window ||
+    ("ServiceWorkerRegistration" in window &&
+      "pushManager" in ServiceWorkerRegistration.prototype)
 
   return {
     notifications,

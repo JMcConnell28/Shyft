@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start"
 import { BellIcon, SmartphoneIcon } from "lucide-react"
 
 import {
+  getPushPublicConfig,
   getPushSubscriptionStatus,
   removePushSubscription,
   savePushSubscription,
@@ -29,6 +30,7 @@ type DeviceState = {
   permission: NotificationPermission | "unavailable"
   serverActive: boolean
   supported: boolean
+  syncError: string | null
 }
 
 const initialState: DeviceState = {
@@ -38,12 +40,14 @@ const initialState: DeviceState = {
   permission: "unavailable",
   serverActive: false,
   supported: false,
+  syncError: null,
 }
 
 function NotificationSettingsCard() {
   const saveSubscription = useServerFn(savePushSubscription)
   const removeSubscription = useServerFn(removePushSubscription)
   const readStatus = useServerFn(getPushSubscriptionStatus)
+  const readPublicConfig = useServerFn(getPushPublicConfig)
   const sendTest = useServerFn(sendTestPushToCurrentDevice)
   const sendUserTest = useServerFn(sendTestPushToCurrentUser)
   const [state, setState] = React.useState<DeviceState>(initialState)
@@ -55,44 +59,69 @@ function NotificationSettingsCard() {
     const support = getPushSupport()
     const installed = isStandaloneDisplayMode()
     const isIos = isIosDevice()
+    const permission = support.notifications
+      ? Notification.permission
+      : "unavailable"
+
+    setState({
+      endpoint: null,
+      installed,
+      isIos,
+      permission,
+      serverActive: false,
+      supported: support.supported,
+      syncError: null,
+    })
 
     if (!support.supported) {
-      setState({ ...initialState, installed, isIos, supported: false })
       return
     }
 
     const registration = await navigator.serviceWorker.getRegistration()
     const subscription = await registration?.pushManager.getSubscription()
     const endpoint = subscription?.endpoint ?? null
-    const serverState = await readStatus({
-      data: { endpoint: endpoint ?? undefined },
-    })
-
-    if (subscription && !serverState.active) {
-      await syncSubscription(subscription, saveSubscription)
-    }
-
     setState({
       endpoint,
       installed,
       isIos,
-      permission: Notification.permission,
+      permission,
       serverActive: Boolean(subscription),
       supported: true,
+      syncError: null,
     })
+
+    try {
+      const serverState = await readStatus({
+        data: { endpoint: endpoint ?? undefined },
+      })
+
+      if (subscription && !serverState.active) {
+        await syncSubscription(subscription, saveSubscription)
+      }
+    } catch (error) {
+      setState((current) => ({
+        ...current,
+        syncError:
+          error instanceof Error
+            ? error.message
+            : "Notification server sync is unavailable.",
+      }))
+    }
   }, [readStatus, saveSubscription])
 
   React.useEffect(() => {
     void refresh().catch(() =>
-      setState((current) => ({ ...current, supported: false }))
+      setState((current) => ({
+        ...current,
+        syncError: "We could not read this device's notification state.",
+      }))
     )
   }, [refresh])
 
   const enable = async () => {
     setPendingAction("enable")
     try {
-      const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY
-      if (!publicKey) throw new Error("Notifications are not configured yet.")
+      const { publicKey } = await readPublicConfig()
 
       const permission = await Notification.requestPermission()
       if (permission !== "granted") {
@@ -213,6 +242,12 @@ function NotificationSettingsCard() {
         {!state.supported && !needsIosInstall ? (
           <p className="text-sm text-muted-foreground">
             This browser does not support Web Push notifications.
+          </p>
+        ) : null}
+        {state.syncError ? (
+          <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+            Browser support was detected, but RocketRota could not sync this
+            device with the notification server. {state.syncError}
           </p>
         ) : null}
 

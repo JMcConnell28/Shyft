@@ -20,13 +20,18 @@ import {
   sendPushToUser,
 } from "@/features/push-notifications/server/push-service"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
-import { getOptionalEnv } from "@/lib/env.server"
+import { getOptionalEnv, getRequiredEnv } from "@/lib/env.server"
 
 type SaveInput = z.infer<typeof savePushSubscriptionSchema>
 type EndpointInput = z.infer<typeof pushEndpointInputSchema>
 type StatusInput = z.infer<typeof pushStatusInputSchema>
 
 const lastTestAtByUser = new Map<string, number>()
+
+async function readPushPublicConfig() {
+  await requireVerifiedSessionOrThrow()
+  return { publicKey: getRequiredEnv("VAPID_PUBLIC_KEY") }
+}
 
 async function saveCurrentPushSubscription(input: SaveInput) {
   const { session } = await requireVerifiedSessionOrThrow()
@@ -102,6 +107,7 @@ function enforceTestRateLimit(userId: string) {
 }
 
 export {
+  readPushPublicConfig,
   readCurrentPushSubscriptionState,
   removeCurrentPushSubscription,
   saveCurrentPushSubscription,
