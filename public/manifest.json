@@ -1,7 +1,7 @@
 {
   "id": "/dashboard",
   "short_name": "RocketRota",
-  "name": "RocketRota Workforce",
+  "name": "RocketRota",
   "description": "Rotas, shifts and time tracking for your team.",
   "icons": [
     {
