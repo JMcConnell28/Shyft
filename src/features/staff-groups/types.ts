@@ -13,6 +13,7 @@ type StaffGroupSettingsEmployee = {
   id: string
   name: string
   email: string | null
+  role: string | null
   status: "active" | "inactive"
   groupId: string | null
   compensation:
@@ -24,6 +25,11 @@ type StaffGroupSettingsEmployee = {
         type: "salary"
         weeklySalaryPence: number
       }
+}
+
+type StaffGroupSettingsLocation = {
+  id: string
+  name: string
 }
 
 type EmployeeCompensationInput =
@@ -39,11 +45,14 @@ type EmployeeCompensationInput =
 type StaffGroupSettingsPageData = {
   groups: Array<StaffGroupSettingsGroup>
   employees: Array<StaffGroupSettingsEmployee>
+  locations: Array<StaffGroupSettingsLocation>
+  selectedLocationId: string | null
 }
 
 export type {
   StaffGroupSettingsEmployee,
   StaffGroupSettingsGroup,
+  StaffGroupSettingsLocation,
   StaffGroupSettingsPageData,
   EmployeeCompensationInput,
 }

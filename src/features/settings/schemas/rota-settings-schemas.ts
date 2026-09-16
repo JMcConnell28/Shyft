@@ -18,6 +18,21 @@ const getRotaSettingsInputSchema = workspaceScopedUserSchema.refine(
   "Choose either an organization or a location.",
 )
 
+const rotaSettingsValuesSchema = z.object({
+  allowEditAfterPublish: z.boolean(),
+  confirmShiftDelete: z.boolean(),
+  copyNotesByDefault: z.boolean(),
+  defaultZoneId: z.uuid("Choose a valid default zone.").nullable(),
+  notifyStaffOnPublish: z.boolean(),
+  showNotesToStaff: z.boolean(),
+})
+
+const updateRotaSettingsInputSchema = workspaceScopedUserSchema
+  .extend({
+    locationId: z.uuid("Choose a valid location."),
+  })
+  .extend(rotaSettingsValuesSchema.shape)
+
 const createZoneInputSchema = workspaceScopedUserSchema.extend({
   locationId: z.string().uuid("Choose a valid location."),
   name: zoneNameSchema,
@@ -59,6 +74,8 @@ export {
   deleteRotaTemplateInputSchema,
   getRotaSettingsInputSchema,
   renameRotaTemplateInputSchema,
+  rotaSettingsValuesSchema,
+  updateRotaSettingsInputSchema,
   updateZoneInputSchema,
   zoneNameSchema,
 }

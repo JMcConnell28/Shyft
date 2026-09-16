@@ -1,18 +1,16 @@
 import * as React from "react"
 import { useMutation } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { Link, createFileRoute } from "@tanstack/react-router"
 import { KeyRoundIcon } from "lucide-react"
 
+import {
+  AuthCard,
+  AuthStatusMessage,
+  authButtonClassName,
+} from "@/components/app/auth-card"
 import { AuthShell } from "@/components/app/auth-shell"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import {
   Field,
   FieldContent,
@@ -47,7 +45,7 @@ function ResetPasswordRoute() {
   const [newPassword, setNewPassword] = React.useState("")
   const [confirmPassword, setConfirmPassword] = React.useState("")
   const [error, setError] = React.useState<string | null>(
-    search.error ? "This reset link is invalid or has expired." : null,
+    search.error ? "This reset link is invalid or has expired." : null
   )
   const [didReset, setDidReset] = React.useState(false)
   const mutation = useMutation({
@@ -66,75 +64,70 @@ function ResetPasswordRoute() {
     },
     onError: (mutationError) => {
       setError(
-        getErrorMessage(mutationError, "We could not reset your password."),
+        getErrorMessage(mutationError, "We could not reset your password.")
       )
     },
   })
 
   return (
     <AuthShell
-      badge="Account security"
-      eyebrow="Reset password"
-      title="Choose a new password for your RocketRota account."
+      eyebrow="Account security"
+      title="Choose a new password"
       description="Use the secure link from your email to finish resetting your password."
       alternateLabel="Remembered your password?"
+      alternateAction="Back to sign in"
       alternateHref="/login"
     >
-      <Card className="border border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
-        <CardHeader>
-          <KeyRoundIcon className="size-5 text-muted-foreground" />
-          <CardTitle className="mt-2 text-2xl">Reset password</CardTitle>
-          <CardDescription>
-            Enter a new password. Once saved, use it next time you sign in.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {didReset ? (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Your password has been reset.
-              </p>
-              <Button
-                className="w-full"
-                nativeButton={false}
-                render={<Link to="/login" search={{ redirect: "/dashboard" }} />}
-              >
-                Sign in
-              </Button>
-            </div>
-          ) : (
-            <form
-              className="space-y-4"
-              onSubmit={(event) => {
-                event.preventDefault()
-                mutation.mutate()
-              }}
+      <AuthCard
+        icon={KeyRoundIcon}
+        title="Reset password"
+        description="Enter a new password to use the next time you sign in."
+      >
+        {didReset ? (
+          <div className="space-y-4">
+            <AuthStatusMessage>
+              <p>Your password has been reset.</p>
+            </AuthStatusMessage>
+            <Button
+              className={authButtonClassName}
+              nativeButton={false}
+              render={<Link to="/login" search={{ redirect: "/dashboard" }} />}
             >
-              <PasswordField
-                id="reset-new-password"
-                label="New password"
-                value={newPassword}
-                onChange={setNewPassword}
-              />
-              <PasswordField
-                id="reset-confirm-password"
-                label="Confirm new password"
-                value={confirmPassword}
-                onChange={setConfirmPassword}
-              />
-              <FieldError>{error}</FieldError>
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                disabled={mutation.isPending || !search.token}
-              >
-                {mutation.isPending ? "Resetting..." : "Reset password"}
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
+              Sign in
+            </Button>
+          </div>
+        ) : (
+          <form
+            className="space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault()
+              mutation.mutate()
+            }}
+          >
+            <PasswordField
+              id="reset-new-password"
+              label="New password"
+              value={newPassword}
+              onChange={setNewPassword}
+            />
+            <PasswordField
+              id="reset-confirm-password"
+              label="Confirm new password"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+            />
+            <FieldError>{error}</FieldError>
+            <Button
+              type="submit"
+              size="lg"
+              className={authButtonClassName}
+              disabled={mutation.isPending || !search.token}
+            >
+              {mutation.isPending ? "Resetting..." : "Reset password"}
+            </Button>
+          </form>
+        )}
+      </AuthCard>
     </AuthShell>
   )
 }

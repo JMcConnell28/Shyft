@@ -1,5 +1,19 @@
+import type { RotaSettingsValues } from "@/features/rota/types/settings"
+
 type GeneralSettingsPageData = {
-  estimatedClosingTime: string
+  contactEmail: string
+  contactPhone: string
+  locations: Array<GeneralSettingsLocation>
+  organization: {
+    name: string
+    slug: string
+  }
+}
+
+type GeneralSettingsLocation = {
+  id: string
+  name: string
+  slug: string
 }
 
 type LocationSettingsItem = {
@@ -32,6 +46,7 @@ type RotaSettingsLocation = {
   id: string
   name: string
   slug: string
+  settings: RotaSettingsValues
   zones: Array<RotaSettingsZone>
 }
 
@@ -86,12 +101,14 @@ type CreateOrganizationFromLocationResult = {
 
 export type {
   CreateOrganizationFromLocationResult,
+  GeneralSettingsLocation,
   GeneralSettingsPageData,
   LocationSettingsItem,
   LocationSettingsPageData,
   RotaSettingsLocation,
   RotaSettingsPageData,
   RotaSettingsTemplate,
+  RotaSettingsValues,
   RotaSettingsZone,
   WorkspaceConnectionLocation,
   WorkspaceConnectionOrganization,

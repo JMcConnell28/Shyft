@@ -336,12 +336,17 @@ async function createOwnerEmployeeForLocation({
        organization_id,
        employee_id,
        location_id,
+       staff_group_id,
        is_enabled
-     ) values ($1, $2, $3, true)
+     ) values ($1, $2, $3, $4, true)
      on conflict (employee_id, location_id)
      do update set is_enabled = true,
-                   disabled_at = null`,
-    [organizationId, employeeId, locationId]
+                   disabled_at = null,
+                   staff_group_id = coalesce(
+                     employee_location_assignments.staff_group_id,
+                     excluded.staff_group_id
+                   )`,
+    [organizationId, employeeId, locationId, staffGroupId]
   )
 }
 

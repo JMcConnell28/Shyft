@@ -558,6 +558,7 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
           organization_id: invite.organization_id,
           employee_id: employeeId,
           location_id: invite.location_id,
+          staff_group_id: invite.default_staff_group_id,
           is_enabled: true,
           disabled_at: null,
         },

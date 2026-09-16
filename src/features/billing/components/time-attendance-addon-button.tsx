@@ -5,13 +5,11 @@ import { useRouter } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 import { CalendarX2Icon, FlaskConicalIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import {
-  TimeAttendanceAddonDialog,
-  type TimeAttendanceDeliveryAddress,
-} from "@/features/billing/components/time-attendance-addon-dialog"
-import { updateTimeAttendanceAddon } from "@/features/billing/server-fns"
+import type { TimeAttendanceDeliveryAddress } from "@/features/billing/schemas/time-attendance-addon-schemas"
 import type { LocationAddon } from "@/features/billing/types"
+import { Button } from "@/components/ui/button"
+import { TimeAttendanceAddonDialog } from "@/features/billing/components/time-attendance-addon-dialog"
+import { updateTimeAttendanceAddon } from "@/features/billing/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
 type AddonAction = "activate" | "cancel" | "keep"
@@ -129,13 +127,14 @@ function AddonControls({
   if (isCanceling) {
     return (
       <div className="flex flex-col items-start gap-2 sm:items-end">
-        <p className="flex items-center gap-1.5 text-xs text-amber-700">
+        <p className="flex items-center gap-1.5 text-[10px] font-semibold text-amber-700">
           <CalendarX2Icon className="size-3.5" />
           Cancels {cancelAt ? `on ${formatDate(cancelAt)}` : "at renewal"}
         </p>
         <div className="flex flex-wrap gap-2">
           <TestAddFlowButton onClick={onTest} />
           <Button
+            className="h-8 rounded-lg px-3 text-[11px] font-bold"
             type="button"
             variant="outline"
             disabled={isPending}
@@ -152,6 +151,7 @@ function AddonControls({
     <div className="flex flex-wrap gap-2">
       {enabled ? <TestAddFlowButton onClick={onTest} /> : null}
       <Button
+        className="h-8 rounded-lg px-3 text-[11px] font-bold"
         type="button"
         variant={enabled ? "outline" : "default"}
         disabled={isPending}
@@ -171,7 +171,12 @@ function TestAddFlowButton({ onClick }: { onClick: () => void }) {
   if (!import.meta.env.DEV) return null
 
   return (
-    <Button type="button" variant="ghost" size="sm" onClick={onClick}>
+    <Button
+      className="h-8 rounded-lg px-2 text-[10px] font-bold"
+      onClick={onClick}
+      type="button"
+      variant="ghost"
+    >
       <FlaskConicalIcon className="size-3.5" />
       Test add flow
     </Button>

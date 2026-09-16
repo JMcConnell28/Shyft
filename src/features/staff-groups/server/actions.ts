@@ -13,6 +13,7 @@ import {
   isEmployeeStaffGroup,
   listStaffGroupsWithCounts,
   requireManagedStaffGroupsContext,
+  requireManagedStaffLocation,
   withDatabaseTransaction,
 } from "@/features/staff-groups/server/shared"
 
@@ -143,6 +144,14 @@ async function deleteStaffGroup(input: {
   await withDatabaseTransaction(async (client) => {
     if (group.employeeCount > 0) {
       await client.query(
+        `update public.employee_location_assignments
+         set staff_group_id = $1
+         where (($2::text is null and organization_id is null) or organization_id = $2::text)
+           and staff_group_id = $3::uuid`,
+        [fallbackGroup.id, context.organizationId, group.id]
+      )
+
+      await client.query(
         `update public.employees
          set staff_group_id = $1,
              updated_at = timezone('utc', now())
@@ -173,27 +182,33 @@ async function assignEmployeeStaffGroup(input: {
   userId: string
   employeeId: string
   groupId: string
+  selectedLocationId?: string
 }) {
   const context = await requireManagedStaffGroupsContext(input)
-  await Promise.all([
-    ensureEmployeeBelongsToWorkspace(context, input.employeeId),
+  const [locationId] = await Promise.all([
+    requireManagedStaffLocation(context, input.selectedLocationId),
     getStaffGroupOrThrow(context, input.groupId),
   ])
 
-  await getDatabase().query(
-    `update public.employees
-     set staff_group_id = $3,
-         updated_at = timezone('utc', now())
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
-       and (($2::uuid is null and location_id is null) or location_id = $2::uuid)
-       and id = $4::uuid`,
+  const result = await getDatabase().query(
+    `update public.employee_location_assignments
+     set staff_group_id = $1
+     where employee_id = $2::uuid
+       and location_id = $3::uuid
+       and (($4::text is null and organization_id is null) or organization_id = $4::text)
+       and is_enabled = true
+       and disabled_at is null`,
     [
-      context.organizationId,
-      context.locationId,
       input.groupId,
       input.employeeId,
+      locationId,
+      context.organizationId,
     ]
   )
+
+  if (result.rowCount !== 1) {
+    throw new Error("That team member is not active at this location.")
+  }
 
   return {
     employeeId: input.employeeId,
@@ -207,32 +222,39 @@ async function bulkAssignEmployeeStaffGroup(input: {
   userId: string
   employeeIds: Array<string>
   groupId: string
+  selectedLocationId?: string
 }) {
   const context = await requireManagedStaffGroupsContext(input)
-  await Promise.all([
-    ensureEmployeesBelongToWorkspace(context, input.employeeIds),
+  const employeeIds = Array.from(new Set(input.employeeIds))
+  const [locationId] = await Promise.all([
+    requireManagedStaffLocation(context, input.selectedLocationId),
     getStaffGroupOrThrow(context, input.groupId),
   ])
 
   await withDatabaseTransaction(async (client) => {
-    await client.query(
-      `update public.employees
-       set staff_group_id = $1,
-           updated_at = timezone('utc', now())
-       where (($2::text is null and organization_id is null) or organization_id = $2::text)
-         and (($3::uuid is null and location_id is null) or location_id = $3::uuid)
-         and id = any($4::uuid[])`,
+    const result = await client.query(
+      `update public.employee_location_assignments
+       set staff_group_id = $1
+       where employee_id = any($2::uuid[])
+         and location_id = $3::uuid
+         and (($4::text is null and organization_id is null) or organization_id = $4::text)
+         and is_enabled = true
+         and disabled_at is null`,
       [
         input.groupId,
+        employeeIds,
+        locationId,
         context.organizationId,
-        context.locationId,
-        input.employeeIds,
       ]
     )
+
+    if (result.rowCount !== employeeIds.length) {
+      throw new Error("One or more team members are not active at this location.")
+    }
   })
 
   return {
-    employeeIds: input.employeeIds,
+    employeeIds,
     groupId: input.groupId,
   }
 }

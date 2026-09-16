@@ -130,7 +130,8 @@
 }
 
 @layer components {
-  .settings-content [class~="rounded-xl"][class~="border"] {
+  .settings-content
+    [class~="rounded-xl"][class~="border"]:not([data-clock-settings-section]) {
     border-top-width: 0;
     border-right-width: 0;
     border-bottom-width: 1px;
@@ -175,9 +176,19 @@
       padding-top: 0;
     }
 
-    .settings-content [class~="rounded-xl"][class~="border"] {
+    .settings-content
+      [class~="rounded-xl"][class~="border"]:not(
+        [data-clock-settings-section]
+      ) {
       padding-right: 0 !important;
       padding-left: 0 !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .settings-layout-grid {
+      display: grid;
+      grid-template-columns: 13rem minmax(0, 1fr);
     }
   }
 }

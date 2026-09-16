@@ -1,4 +1,5 @@
 import type { PoolClient } from "pg"
+import type { StaffGroupSettingsGroup } from "@/features/staff-groups/types"
 
 import { requireLocationPermission } from "@/lib/auth/has-location-permission"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
@@ -14,7 +15,6 @@ import {
 } from "@/lib/supabase-errors"
 
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
-import type { StaffGroupSettingsGroup } from "@/features/staff-groups/types"
 
 const EMPLOYEE_STAFF_GROUP_NAME = "Employee"
 const EMPLOYEE_STAFF_GROUP_SLUG = "employee"
@@ -88,43 +88,78 @@ async function requireManagedStaffGroupsContext(input: {
   return context
 }
 
-async function listStaffGroupsWithCounts(scope: StaffGroupScope) {
+async function requireManagedStaffLocation(
+  scope: StaffGroupScope,
+  selectedLocationId?: string
+) {
+  const locationId = scope.locationId ?? selectedLocationId
+
+  if (!locationId) {
+    throw new Error("Choose a location before updating team groups.")
+  }
+
+  const result = await getDatabase().query<{ id: string }>(
+    `select id
+     from public.locations
+     where id = $1::uuid
+       and (
+         ($2::text is not null and organization_id = $2::text)
+         or ($2::text is null and organization_id is null)
+       )
+     limit 1`,
+    [locationId, scope.organizationId]
+  )
+
+  if (!result.rows.at(0)) {
+    throw new Error("That location is not available in this workspace.")
+  }
+
+  return locationId
+}
+
+async function listStaffGroupsWithCounts(
+  scope: StaffGroupScope,
+  activeLocationId?: string | null
+) {
   const supabase = createSupabaseServerClient()
   const groupsQuery = supabase
     .from("staff_groups")
     .select("id, name, slug, is_default, color")
     .order("name", { ascending: true })
-  const employeesQuery = supabase
-    .from("employees")
-    .select("staff_group_id")
-  const [groupsResult, employeesResult] = await Promise.all([
+  const [groupsResult, countsResult] = await Promise.all([
     scope.organizationId
       ? groupsQuery.eq("organization_id", scope.organizationId)
       : groupsQuery.is("organization_id", null).eq("location_id", scope.locationId ?? ""),
-    scope.organizationId
-      ? employeesQuery.eq("organization_id", scope.organizationId)
-      : employeesQuery.is("organization_id", null).eq("location_id", scope.locationId ?? ""),
+    getDatabase().query<{ staff_group_id: string; total: string }>(
+      `select assignment.staff_group_id, count(*) as total
+       from public.employee_location_assignments assignment
+       join public.staff_groups staff_group
+         on staff_group.id = assignment.staff_group_id
+       where assignment.staff_group_id is not null
+         and assignment.is_enabled = true
+         and assignment.disabled_at is null
+         and (
+           (
+             $1::text is not null
+             and assignment.organization_id = $1::text
+             and staff_group.organization_id = $1::text
+           )
+           or (
+             $1::text is null
+             and assignment.organization_id is null
+             and staff_group.organization_id is null
+             and staff_group.location_id = $2::uuid
+           )
+         )
+         and ($3::uuid is null or assignment.location_id = $3::uuid)
+       group by assignment.staff_group_id`,
+      [scope.organizationId, scope.locationId, activeLocationId ?? null]
+    ),
   ])
 
   assertSupabaseSuccess(groupsResult.error, "We could not load the staff groups.")
-  assertSupabaseSuccess(
-    employeesResult.error,
-    "We could not load the team member groups.",
-  )
-
-  const countsByGroupId = (employeesResult.data ?? []).reduce(
-    (counts, employee) => {
-      if (!employee.staff_group_id) {
-        return counts
-      }
-
-      counts.set(
-        employee.staff_group_id,
-        (counts.get(employee.staff_group_id) ?? 0) + 1,
-      )
-      return counts
-    },
-    new Map<string, number>(),
+  const countsByGroupId = new Map(
+    countsResult.rows.map((row) => [row.staff_group_id, Number(row.total)])
   )
 
   return (groupsResult.data ?? [])
@@ -347,7 +382,7 @@ async function ensureEmployeeBelongsToWorkspace(
 
 async function ensureEmployeesBelongToWorkspace(
   scope: StaffGroupScope,
-  employeeIds: string[],
+  employeeIds: Array<string>,
 ) {
   const supabase = createSupabaseServerClient()
   const query = supabase
@@ -470,6 +505,7 @@ export {
   getStaffGroupOrThrow,
   isEmployeeStaffGroup,
   listStaffGroupsWithCounts,
+  requireManagedStaffLocation,
   requireManagedStaffGroupsContext,
   withDatabaseTransaction,
 }

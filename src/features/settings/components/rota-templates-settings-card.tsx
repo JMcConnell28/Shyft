@@ -20,12 +20,12 @@ function RotaTemplatesSettingsCard({
   onDelete: (templateId: string) => Promise<void>
 }) {
   return (
-    <section className="rounded-xl bg-white p-4 shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
+    <section className="rounded-xl border border-[#dce3ef] bg-white p-4 shadow-[0_3px_12px_rgba(31,51,91,0.035)]">
       <div>
-        <h2 className="text-lg font-extrabold tracking-[-0.035em] text-[#11245a]">
-          Templates
+        <h2 className="text-sm font-bold tracking-[-0.015em] text-[#10204b]">
+          Saved templates
         </h2>
-        <p className="mt-1 text-sm font-semibold text-[#61709a]">
+        <p className="mt-1 text-[11px] font-medium text-[#7180a2]">
           Rename or remove saved shift patterns from the rota builder.
         </p>
       </div>

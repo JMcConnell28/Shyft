@@ -1,7 +1,9 @@
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { Link, createFileRoute, redirect } from "@tanstack/react-router"
+import { KeyRoundIcon, LogInIcon } from "lucide-react"
 
+import { AuthCard, authButtonClassName } from "@/components/app/auth-card"
 import { AuthShell } from "@/components/app/auth-shell"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
@@ -11,13 +13,6 @@ import { getSession } from "@/lib/auth-server"
 import { createZodFieldValidator } from "@/lib/validation"
 import { emailSchema, passwordSchema } from "@/lib/onboarding-schemas"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { FieldGroup } from "@/components/ui/field"
 
 export const Route = createFileRoute("/login")({
@@ -124,118 +119,100 @@ function LoginRoute() {
 
   return (
     <AuthShell
-      badge="Welcome back"
-      eyebrow="Sign in"
-      title="Sign in to manage schedules, staff, and venues."
-      description="Access your RocketRota workspace to publish rotas, review changes, and keep your team aligned."
+      eyebrow="Account access"
+      title="Welcome back"
+      description="Sign in to your RocketRota workspace to manage rotas, staff, and locations."
       alternateLabel="Need an account?"
+      alternateAction="Create one"
       alternateHref="/sign-up"
-      compactOnMobile
+      alternateRedirect={search.redirect}
     >
-      <Card className="gap-0 overflow-visible rounded-none border-0 bg-transparent py-0 shadow-none ring-0 lg:gap-4 lg:overflow-hidden lg:rounded-lg lg:border lg:border-border/60 lg:bg-background/90 lg:py-4 lg:shadow-2xl lg:ring-1 lg:shadow-slate-950/10 lg:ring-foreground/10 lg:backdrop-blur">
-        <CardHeader className="hidden px-0 lg:grid lg:px-6">
-          <CardTitle className="text-2xl">Sign in to RocketRota</CardTitle>
-          <CardDescription>
-            Enter your details to continue to your workspace.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6 px-0 lg:space-y-5 lg:px-6">
-          <form
-            className="space-y-6 lg:space-y-5"
-            onSubmit={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              void form.handleSubmit()
-            }}
-          >
-            <FieldGroup>
-              <form.Field
-                name="email"
-                validators={{
-                  onSubmit: createZodFieldValidator(emailSchema),
-                }}
-              >
-                {(field) => (
-                  <TextFormField
-                    field={field}
-                    label="Work email"
-                    type="email"
-                    placeholder="you@company.com"
-                    autoComplete="username webauthn"
-                    required
-                    className="gap-2"
-                    inputClassName="h-12 rounded-xl bg-muted/40 px-4 text-base shadow-none md:text-base lg:h-7 lg:rounded-md lg:px-2 lg:text-xs/relaxed"
-                  />
-                )}
-              </form.Field>
+      <AuthCard
+        icon={LogInIcon}
+        title="Sign in"
+        description="Enter your details to continue to your workspace."
+      >
+        <form
+          className="space-y-5"
+          onSubmit={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            void form.handleSubmit()
+          }}
+        >
+          <FieldGroup>
+            <form.Field
+              name="email"
+              validators={{
+                onSubmit: createZodFieldValidator(emailSchema),
+              }}
+            >
+              {(field) => (
+                <TextFormField
+                  field={field}
+                  label="Work email"
+                  type="email"
+                  placeholder="you@company.com"
+                  autoComplete="username webauthn"
+                  required
+                />
+              )}
+            </form.Field>
 
-              <form.Field
-                name="password"
-                validators={{
-                  onSubmit: createZodFieldValidator(passwordSchema),
-                }}
-              >
-                {(field) => (
-                  <TextFormField
-                    field={field}
-                    label="Password"
-                    type="password"
-                    placeholder="Enter your password"
-                    autoComplete="current-password webauthn"
-                    required
-                    className="gap-2"
-                    inputClassName="h-12 rounded-xl bg-muted/40 px-4 text-base shadow-none md:text-base lg:h-7 lg:rounded-md lg:px-2 lg:text-xs/relaxed"
-                  />
-                )}
-              </form.Field>
-            </FieldGroup>
+            <form.Field
+              name="password"
+              validators={{
+                onSubmit: createZodFieldValidator(passwordSchema),
+              }}
+            >
+              {(field) => (
+                <TextFormField
+                  field={field}
+                  label="Password"
+                  type="password"
+                  placeholder="Enter your password"
+                  autoComplete="current-password webauthn"
+                  required
+                />
+              )}
+            </form.Field>
+          </FieldGroup>
 
-            <FormErrorMessage message={error} />
+          <FormErrorMessage message={error} />
 
-            <div className="space-y-3 pt-1">
-              <div className="flex justify-end">
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="h-10 px-1 text-sm lg:h-auto lg:px-0 lg:text-xs/relaxed"
-                  nativeButton={false}
-                  render={<Link to="/forgot-password" />}
-                >
-                  Forgot password?
-                </Button>
-              </div>
-              <FormSubmitButton
-                className="h-12 w-full rounded-xl text-sm lg:h-8 lg:rounded-md lg:text-xs/relaxed"
-                isSubmitting={form.state.isSubmitting || isPasskeyPending}
-                submittingText="Signing in..."
-              >
-                Sign in
-              </FormSubmitButton>
+          <div className="space-y-3">
+            <div className="flex justify-end">
               <Button
-                variant="outline"
-                size="lg"
-                className="h-12 w-full rounded-xl text-sm lg:h-8 lg:rounded-md lg:text-xs/relaxed"
-                type="button"
-                onClick={() => void handlePasskeySignIn()}
-                disabled={form.state.isSubmitting || isPasskeyPending}
+                variant="link"
+                size="sm"
+                className="h-auto px-0 font-bold text-blue-600"
+                nativeButton={false}
+                render={<Link to="/forgot-password" />}
               >
-                Use passkey
+                Forgot password?
               </Button>
             </div>
-
-            <p className="text-center text-sm text-muted-foreground lg:hidden">
-              New to RocketRota?{" "}
-              <Link
-                to="/sign-up"
-                search={{ redirect: search.redirect }}
-                className="font-medium text-foreground underline underline-offset-4"
-              >
-                Create an account
-              </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
+            <FormSubmitButton
+              className={authButtonClassName}
+              isSubmitting={form.state.isSubmitting || isPasskeyPending}
+              submittingText="Signing in..."
+            >
+              Sign in
+            </FormSubmitButton>
+            <Button
+              variant="outline"
+              size="lg"
+              className={authButtonClassName}
+              type="button"
+              onClick={() => void handlePasskeySignIn()}
+              disabled={form.state.isSubmitting || isPasskeyPending}
+            >
+              <KeyRoundIcon />
+              Use passkey
+            </Button>
+          </div>
+        </form>
+      </AuthCard>
     </AuthShell>
   )
 }

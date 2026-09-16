@@ -9,6 +9,7 @@ import { getStaffGroupSettingsPageData } from "@/features/staff-groups/server-fn
 function useStaffGroupSettingsQuery(input: {
   organizationId?: string
   locationId?: string
+  selectedLocationId?: string
   userId: string
 }) {
   const getStaffGroupSettingsPageDataFn = useServerFn(

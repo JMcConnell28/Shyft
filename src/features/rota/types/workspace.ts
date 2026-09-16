@@ -1,5 +1,6 @@
 import type { StaffGroupColor } from "@/features/staff-groups/constants/staff-group-colors"
 import type { RotaTemplateSummary } from "@/features/rota/types"
+import type { RotaSettingsValues } from "@/features/rota/types/settings"
 
 type WorkspaceLocation = {
   id: string
@@ -156,6 +157,7 @@ type WorkspaceBoardMeta = {
   hasUnpublishedChanges: boolean
   publishedSnapshotAvailable: boolean
   budgetPence: number | null
+  settings: RotaSettingsValues
 }
 
 type WorkspaceBoardData = {

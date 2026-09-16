@@ -17,10 +17,11 @@ import {
 } from "@/features/settings/schemas/connection-settings-schemas"
 import {
   createZoneInputSchema,
-  deleteZoneInputSchema,
   deleteRotaTemplateInputSchema,
+  deleteZoneInputSchema,
   getRotaSettingsInputSchema,
   renameRotaTemplateInputSchema,
+  updateRotaSettingsInputSchema,
   updateZoneInputSchema,
 } from "@/features/settings/schemas/rota-settings-schemas"
 
@@ -112,6 +113,15 @@ const getRotaSettingsPageData = createServerFn({ method: "POST" })
     return module.getRotaSettingsPageData(data)
   })
 
+const updateRotaSettings = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    updateRotaSettingsInputSchema.parse(input),
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/settings/server/rota-actions")
+    return module.updateRotaSettings(data)
+  })
+
 const createZone = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => createZoneInputSchema.parse(input))
   .handler(async ({ data }) => {
@@ -166,5 +176,6 @@ export {
   renameRotaTemplate,
   updateGeneralSettings,
   updateLocationSettings,
+  updateRotaSettings,
   updateZone,
 }

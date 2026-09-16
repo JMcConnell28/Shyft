@@ -1,18 +1,17 @@
-import { buildTimesheetPage } from "@/features/timesheets/server/build-timesheet"
 import type {
   ScheduledShiftRow,
   TimeEntryRow,
   TimesheetEmployeeRow,
 } from "@/features/timesheets/server/row-types"
-import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import type {
   TimesheetExportableRota,
   TimesheetPageData,
   TimesheetScopeInput,
 } from "@/features/timesheets/types"
+import { buildTimesheetPage } from "@/features/timesheets/server/build-timesheet"
+import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import { getTimesheetWeek } from "@/features/timesheets/utils/timesheet-time"
 import { getCurrentWeekStart } from "@/features/rota/utils/week-utils"
-import type { TimesheetWeekDay } from "@/features/timesheets/utils/timesheet-time"
 import { getDatabase } from "@/lib/db"
 
 async function getTimesheetPageData(
@@ -48,13 +47,15 @@ async function getTimesheetPageData(
     }),
     scope.canManage
       ? listTimesheetEmployees(scope.locationIds)
-      : Promise.resolve<TimesheetEmployeeRow[]>([]),
+      : Promise.resolve<Array<TimesheetEmployeeRow>>([]),
     listScheduledShifts({
+      employeeUserId: scope.canManage ? null : scope.userId,
       locationIds: scope.locationIds,
       organizationId: scope.organizationId,
       weekStart: week.weekStart,
     }),
     listTimeEntries({
+      employeeUserId: scope.canManage ? null : scope.userId,
       locationIds: scope.locationIds,
       organizationId: scope.organizationId,
       weekStart: week.weekStart,
@@ -65,7 +66,7 @@ async function getTimesheetPageData(
           organizationId: scope.organizationId,
           weekStart: week.weekStart,
         })
-      : Promise.resolve<TimesheetExportableRota[]>([]),
+      : Promise.resolve<Array<TimesheetExportableRota>>([]),
   ])
 
   const employeeIds = employeeRows.map((employee) => employee.employee_id)
@@ -93,7 +94,7 @@ async function getTimesheetPageData(
 }
 
 async function listExportableRotas(input: {
-  locationIds: string[]
+  locationIds: Array<string>
   organizationId: string | null
   weekStart: string
 }) {
@@ -137,7 +138,7 @@ async function listExportableRotas(input: {
 }
 
 async function listUserEmployees(input: {
-  locationIds: string[]
+  locationIds: Array<string>
   organizationId: string | null
   userId: string
 }) {
@@ -167,7 +168,7 @@ async function listUserEmployees(input: {
   return result.rows
 }
 
-async function listTimesheetEmployees(locationIds: string[]) {
+async function listTimesheetEmployees(locationIds: Array<string>) {
   const result = await getDatabase().query<TimesheetEmployeeRow>(
     `select distinct
        employee.id as employee_id,
@@ -189,7 +190,8 @@ async function listTimesheetEmployees(locationIds: string[]) {
 }
 
 async function listScheduledShifts(input: {
-  locationIds: string[]
+  employeeUserId: string | null
+  locationIds: Array<string>
   organizationId: string | null
   weekStart: string
 }) {
@@ -225,15 +227,22 @@ async function listScheduledShifts(input: {
          ($3::text is not null and rota.organization_id = $3::text)
          or ($3::text is null)
        )
+       and ($4::text is null or employee.user_id = $4::text)
      order by employee.full_name asc, shift.day_date asc, shift.start_time asc`,
-    [input.locationIds, input.weekStart, input.organizationId]
+    [
+      input.locationIds,
+      input.weekStart,
+      input.organizationId,
+      input.employeeUserId,
+    ]
   )
 
   return result.rows
 }
 
 async function listTimeEntries(input: {
-  locationIds: string[]
+  employeeUserId: string | null
+  locationIds: Array<string>
   organizationId: string | null
   weekStart: string
 }) {
@@ -273,14 +282,22 @@ async function listTimeEntries(input: {
          ($3::text is not null and entry.organization_id = $3::text)
          or ($3::text is null)
        )
+       and ($4::text is null or employee.user_id = $4::text)
      order by employee.full_name asc, entry.clocked_in_at asc`,
-    [input.locationIds, input.weekStart, input.organizationId]
+    [
+      input.locationIds,
+      input.weekStart,
+      input.organizationId,
+      input.employeeUserId,
+    ]
   )
 
   return result.rows
 }
 
-function getEmptyEmployeeTimesheet(days: TimesheetWeekDay[]) {
+function getEmptyEmployeeTimesheet(
+  days: ReturnType<typeof getTimesheetWeek>["days"]
+) {
   return {
     actualMinutes: 0,
     days: days.map((day) => ({

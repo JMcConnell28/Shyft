@@ -39,6 +39,7 @@ function Shift({
     assignmentIdsByShiftId,
     assignmentsById,
     getEmployee,
+    meta,
     shiftsById,
     zones,
   } = useRotaWorkspace()
@@ -63,7 +64,7 @@ function Shift({
   function handleDeleteAction() {
     setMenuOpen(false)
 
-    if (assignmentIds.length === 0) {
+    if (!meta.settings.confirmShiftDelete && assignmentIds.length === 0) {
       void removeShift(shiftId)
       return
     }

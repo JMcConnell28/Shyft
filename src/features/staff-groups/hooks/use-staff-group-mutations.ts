@@ -3,8 +3,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
+import type { StaffGroupColor } from "@/features/staff-groups/constants/staff-group-colors"
 import type { EmployeeCompensationInput } from "@/features/staff-groups/types"
-import type {StaffGroupColor} from "@/features/staff-groups/constants/staff-group-colors";
 import { rotaQueryKeys } from "@/features/rota/query-keys"
 import { staffGroupQueryKeys } from "@/features/staff-groups/query-keys"
 import {
@@ -24,6 +24,7 @@ import { showErrorToast, showSuccessToast } from "@/lib/toast"
 function useStaffGroupMutations(input: {
   organizationId?: string
   locationId?: string
+  selectedLocationId?: string
   userId: string
 }) {
   const queryClient = useQueryClient()

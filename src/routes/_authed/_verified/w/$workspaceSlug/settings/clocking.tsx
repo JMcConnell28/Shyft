@@ -5,7 +5,7 @@ import { ClockSettingsPage } from "@/features/time-clock/components/clock-settin
 import { getClockSettingsPageData } from "@/features/time-clock/server-fns"
 
 export const Route = createFileRoute(
-  "/_authed/_verified/w/$workspaceSlug/settings/clocking",
+  "/_authed/_verified/w/$workspaceSlug/settings/clocking"
 )({
   loader: async ({ context }) => {
     const activeWorkspace = context.viewer.activeWorkspace
@@ -52,12 +52,15 @@ function WorkspaceClockingSettingsRoute() {
       <ClockSettingsPage
         initialData={data}
         organizationId={
-          activeWorkspace.type === "organization" ? activeWorkspace.id : undefined
+          activeWorkspace.type === "organization"
+            ? activeWorkspace.id
+            : undefined
         }
         locationId={
           activeWorkspace.type === "location" ? activeWorkspace.id : undefined
         }
         userId={viewer.user.id}
+        workspaceSlug={workspaceSlug}
       />
     </SettingsLayout>
   )

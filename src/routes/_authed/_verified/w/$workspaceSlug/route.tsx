@@ -98,6 +98,7 @@ function WorkspaceRoute() {
       title={shellConfig.title}
       description={shellConfig.description}
       backLink={shellConfig.backLink}
+      mobileBrandHeader={shellConfig.mobileBrandHeader}
       hasUnreadRotaUpdates={hasUnreadRotaUpdates}
       hasUnreadAnnouncements={hasUnreadAnnouncements}
       recentAnnouncements={recentAnnouncements}

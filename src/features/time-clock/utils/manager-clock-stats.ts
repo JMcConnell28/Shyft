@@ -2,10 +2,10 @@ import type { ManagerClockPageData } from "@/features/time-clock/types"
 import { getElapsedMilliseconds } from "@/features/time-clock/utils/elapsed-time"
 
 type ManagerClockStats = {
-  averageElapsedMs: number
-  longestElapsedMs: number
+  exceptionCount: number
   openCount: number
-  reviewCount: number
+  teamCount: number
+  trackedMs: number
 }
 
 function getManagerClockStats(
@@ -20,17 +20,17 @@ function getManagerClockStats(
     )
     .filter((duration): duration is number => duration !== null)
 
-  const totalElapsedMs = openDurations.reduce(
-    (total, duration) => total + duration,
-    0,
-  )
+  const trackedMs = data.activityEntries.reduce((total, entry) => {
+    const end = entry.clockedOutAt ? new Date(entry.clockedOutAt) : now
+
+    return total + getElapsedMilliseconds(entry.clockedInAt, end)
+  }, 0)
 
   return {
-    averageElapsedMs:
-      openDurations.length > 0 ? totalElapsedMs / openDurations.length : 0,
-    longestElapsedMs: Math.max(0, ...openDurations),
+    exceptionCount: data.reviewEntries.length + data.failedAttempts.length,
     openCount: openDurations.length,
-    reviewCount: data.reviewEntries.length,
+    teamCount: data.employees.length,
+    trackedMs,
   }
 }
 

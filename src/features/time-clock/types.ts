@@ -166,42 +166,54 @@ type ManagerClockPageData = {
   }>
 }
 
+type ClockSettingsValues = {
+  earlyClockInGraceMinutes: number
+  earlyStartReviewMinutes: number
+  forgottenClockOutAlertMinutes: number
+  hardReviewAfterMinutes: number
+  isEnabled: boolean
+  lateClockInGraceMinutes: number
+  lateClockOutGraceMinutes: number
+  lateFinishReviewMinutes: number
+  lateStartReviewMinutes: number
+  latitude: number | null
+  longitude: number | null
+  maxAccuracyMeters: number
+  radiusMeters: number
+  timezone: string
+}
+
+type ClockStationHealth = {
+  failedTapsToday: number
+  lastSuccessfulTapAt: string | null
+  registeredStations: number
+}
+
+type ClockSettingsLocation = ClockSettingsValues & {
+  id: string
+  name: string
+  timeAttendanceEnabled: boolean
+  timeAttendanceStatus:
+    | "legacy_pending"
+    | "trialing"
+    | "active"
+    | "canceling"
+    | "canceled"
+    | null
+  hardwareEntitlementStatus: "available" | "claimed" | "void" | null
+  hardwareFulfillmentStatus:
+    | "not_requested"
+    | "pending"
+    | "shipped"
+    | "delivered"
+    | "failed"
+    | null
+  ntagTags: Array<ClockTagSetupData>
+  stationHealth: ClockStationHealth
+}
+
 type ClockSettingsPageData = {
-  locations: Array<{
-    id: string
-    name: string
-    isEnabled: boolean
-    timeAttendanceEnabled: boolean
-    timeAttendanceStatus:
-      | "legacy_pending"
-      | "trialing"
-      | "active"
-      | "canceling"
-      | "canceled"
-      | null
-    hardwareEntitlementStatus: "available" | "claimed" | "void" | null
-    hardwareFulfillmentStatus:
-      | "not_requested"
-      | "pending"
-      | "shipped"
-      | "delivered"
-      | "failed"
-      | null
-    latitude: number | null
-    longitude: number | null
-    radiusMeters: number
-    maxAccuracyMeters: number
-    timezone: string
-    earlyClockInGraceMinutes: number
-    earlyStartReviewMinutes: number
-    forgottenClockOutAlertMinutes: number
-    hardReviewAfterMinutes: number
-    lateClockInGraceMinutes: number
-    lateClockOutGraceMinutes: number
-    lateFinishReviewMinutes: number
-    lateStartReviewMinutes: number
-    ntagTags: Array<ClockTagSetupData>
-  }>
+  locations: Array<ClockSettingsLocation>
 }
 
 export type {
@@ -210,7 +222,10 @@ export type {
   ClockAttemptSummary,
   ClockEntryStatus,
   ClockScanPageData,
+  ClockSettingsLocation,
   ClockSettingsPageData,
+  ClockSettingsValues,
+  ClockStationHealth,
   ClockInReviewPrompt,
   ClockReason,
   ClockShiftSummary,

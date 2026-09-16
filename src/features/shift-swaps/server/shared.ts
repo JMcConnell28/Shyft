@@ -191,14 +191,14 @@ async function getShiftSwapContext(input: ShiftSwapScopeInput) {
 
 async function listUserEmployees(context: ShiftSwapContext) {
   const result = await getDatabase().query<EmployeeAccessRow>(
-    `select employee.id,
-            employee.full_name,
-            employee.staff_group_id,
-            coalesce(staff_group.name, 'Team members') as staff_group_name,
-            assignment.location_id
+     `select employee.id,
+             employee.full_name,
+             assignment.staff_group_id,
+             coalesce(staff_group.name, 'Team members') as staff_group_name,
+             assignment.location_id
      from public.employee_location_assignments assignment
      join public.employees employee on employee.id = assignment.employee_id
-     left join public.staff_groups staff_group on staff_group.id = employee.staff_group_id
+     left join public.staff_groups staff_group on staff_group.id = assignment.staff_group_id
      where employee.user_id = $1
        and employee.status = 'active'
        and assignment.is_enabled = true
@@ -217,7 +217,7 @@ async function listPublishedShiftRows(context: ShiftSwapContext) {
             assignment.employee_id,
             employee.user_id as employee_user_id,
             employee.full_name as employee_name,
-            employee.staff_group_id,
+             location_assignment.staff_group_id,
             coalesce(staff_group.name, 'Team members') as staff_group_name,
             location.id as location_id,
             location.name as location_name,
@@ -244,7 +244,7 @@ async function listPublishedShiftRows(context: ShiftSwapContext) {
       and location_assignment.location_id = rota.location_id
       and location_assignment.is_enabled = true
       and location_assignment.disabled_at is null
-     left join public.staff_groups staff_group on staff_group.id = employee.staff_group_id
+     left join public.staff_groups staff_group on staff_group.id = location_assignment.staff_group_id
      left join public.location_clock_settings clock_settings on clock_settings.location_id = rota.location_id
      where rota.status = 'published'
        and rota.week_start >= $1::date

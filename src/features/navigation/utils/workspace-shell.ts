@@ -1,8 +1,9 @@
 import type { WorkspaceSummary } from "@/features/onboarding/types"
 import {
+  // eslint-disable-next-line import/consistent-type-specifier-style
+  type OrganizationAppRouteKey,
   getWorkspaceDashboardPath,
   getWorkspaceRotaPath,
-  type OrganizationAppRouteKey,
 } from "@/lib/organization-paths"
 
 type WorkspaceShellBackLink = {
@@ -15,12 +16,13 @@ type WorkspaceShellConfig = {
   title: string
   description: string
   backLink?: WorkspaceShellBackLink
+  mobileBrandHeader?: boolean
 }
 
 function getWorkspaceShellConfig(
   pathname: string,
   workspace: WorkspaceSummary,
-) {
+): WorkspaceShellConfig {
   const workspaceBasePath = `/w/${workspace.slug}`
   const workspacePath = pathname.startsWith(workspaceBasePath)
     ? pathname.slice(workspaceBasePath.length)
@@ -92,7 +94,7 @@ function getWorkspaceShellConfig(
   if (workspacePath.startsWith("/time-clock")) {
     return {
       routeKey: "timeClock",
-      title: "Time clock",
+      title: "Time tracking",
       description: "Monitor clock-ins, failed attempts, and manager overrides.",
       backLink: {
         href: getWorkspaceDashboardPath(workspace.slug),
@@ -116,6 +118,7 @@ function getWorkspaceShellConfig(
   if (workspacePath.startsWith("/account")) {
     return {
       routeKey: "dashboard",
+      mobileBrandHeader: true,
       title: "Account",
       description: "Manage your personal details and password.",
       backLink: {

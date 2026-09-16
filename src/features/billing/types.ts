@@ -109,11 +109,28 @@ type OrganizationBillingLocationSummary = {
   transfer: BillingTransfer | null
 }
 
+type BillingSettingsPageProps = {
+  billing: WorkspaceBillingState | null
+  trial: WorkspaceTrial | null
+  organizationId?: string | null
+  locationId?: string | null
+  organizationLocations?: Array<OrganizationBillingLocationSummary>
+}
+
+type BillingSettingsStatus = {
+  description: string
+  label: string
+  title: string
+  tone: "danger" | "neutral" | "positive" | "warning"
+}
+
 export type {
   BillingAccountSummary,
   BillingPeriodUsage,
   BillingTransfer,
   BillingSubscriptionStatus,
+  BillingSettingsPageProps,
+  BillingSettingsStatus,
   LocationAddon,
   LocationEntitlement,
   OrganizationBillingLocationSummary,

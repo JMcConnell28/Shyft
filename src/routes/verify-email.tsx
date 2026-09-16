@@ -4,18 +4,15 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 import { MailCheckIcon } from "lucide-react"
 
+import {
+  AuthCard,
+  AuthStatusMessage,
+  authButtonClassName,
+} from "@/components/app/auth-card"
 import { AuthShell } from "@/components/app/auth-shell"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { TextFormField } from "@/components/forms/text-form-field"
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { FieldGroup } from "@/components/ui/field"
 import { getSession } from "@/lib/auth-server"
 import { isEmailVerificationSatisfied } from "@/lib/email-verification"
@@ -44,9 +41,10 @@ export const Route = createFileRoute("/verify-email")({
       sent?: boolean | string
     }
     const search = {
-      email: typeof rawSearch.email === "string" && rawSearch.email.length > 0
-        ? rawSearch.email
-        : "",
+      email:
+        typeof rawSearch.email === "string" && rawSearch.email.length > 0
+          ? rawSearch.email
+          : "",
       redirect:
         typeof rawSearch.redirect === "string" && rawSearch.redirect.length > 0
           ? rawSearch.redirect
@@ -104,8 +102,8 @@ function VerifyEmailRoute() {
         setError(
           getErrorMessage(
             submissionError,
-            "We could not send another verification email.",
-          ),
+            "We could not send another verification email."
+          )
         )
       }
     },
@@ -113,33 +111,30 @@ function VerifyEmailRoute() {
 
   return (
     <AuthShell
-      badge="Almost there"
-      eyebrow="Verify email"
-      title="Check your inbox before you create or join a workplace."
+      eyebrow="Almost there"
+      title="Verify your email"
       description="We sent a verification link to your email. Once you confirm it, RocketRota will take you back to the right onboarding step automatically."
       alternateLabel="Need to use a different account?"
+      alternateAction="Back to sign in"
       alternateHref="/login"
+      alternateRedirect={loaderData.redirect}
     >
-      <Card className="border border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
-        <CardHeader>
-          <Badge variant="outline" className="w-fit">
-            <MailCheckIcon className="size-3" />
-            Email verification
-          </Badge>
-          <CardTitle className="mt-2 text-2xl">Verify your email</CardTitle>
-          <CardDescription>
-            {loaderData.sent
-              ? "We sent you a verification email. Open the link in that email to continue."
-              : "Use the link in your inbox to unlock workplace setup and invitation acceptance."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
+      <AuthCard
+        icon={MailCheckIcon}
+        title="Check your inbox"
+        description={
+          loaderData.sent
+            ? "Open the verification link we just sent to continue."
+            : "Use the link in your inbox to unlock workplace setup and invitations."
+        }
+      >
+        <div className="space-y-5">
           {loaderData.sent ? (
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm leading-6 text-emerald-700">
+            <AuthStatusMessage>
               Verification email sent to{" "}
-              <span className="font-medium">{loaderData.email}</span>. After
+              <span className="font-bold">{loaderData.email}</span>. After
               verifying, you will continue to the right onboarding step.
-            </div>
+            </AuthStatusMessage>
           ) : null}
 
           <form
@@ -173,7 +168,7 @@ function VerifyEmailRoute() {
 
             <div className="space-y-3">
               <FormSubmitButton
-                className="w-full"
+                className={authButtonClassName}
                 isSubmitting={form.state.isSubmitting}
                 submittingText="Sending email..."
               >
@@ -181,14 +176,14 @@ function VerifyEmailRoute() {
               </FormSubmitButton>
               <a
                 href={loaderData.redirect}
-                className="inline-flex h-8 w-full items-center justify-center rounded-md border border-border px-3 text-xs font-medium transition-colors hover:bg-input/50"
+                className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-[#dfe4ef] bg-white px-3 text-sm font-bold text-[#10204b] transition-colors hover:bg-[#f8faff]"
               >
                 I have already verified
               </a>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </AuthCard>
     </AuthShell>
   )
 }

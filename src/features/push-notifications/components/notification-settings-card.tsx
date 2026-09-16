@@ -19,7 +19,7 @@ import {
   urlBase64ToUint8Array,
 } from "@/features/push-notifications/utils/push-browser"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SettingsSection } from "@/features/settings/components/settings-section"
 import { Badge } from "@/components/ui/badge"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -216,19 +216,20 @@ function NotificationSettingsCard() {
   const needsIosInstall = state.isIos && !state.installed
 
   return (
-    <Card className="border-border/70 bg-background/95 shadow-sm">
-      <CardHeader className="pb-3">
+    <SettingsSection
+      title="Notifications"
+      icon={BellIcon}
+      description="Get updates about your rota on this device."
+    >
+      <div className="space-y-4 py-3">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <BellIcon className="size-4 text-muted-foreground" />
-            <CardTitle className="text-sm">Push notifications</CardTitle>
-          </div>
+          <p className="text-xs font-bold text-[#14214a]">
+            Notifications on this device
+          </p>
           <Badge variant={state.serverActive ? "outline" : "secondary"}>
             {state.serverActive ? "Active" : "Inactive"}
           </Badge>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
         <div className="grid gap-2 sm:grid-cols-3">
           <Status label="Supported" value={state.supported ? "Yes" : "No"} />
           <Status label="Permission" value={state.permission} />
@@ -292,8 +293,8 @@ function NotificationSettingsCard() {
             {pendingAction === "test" ? "Sending..." : "Send test notification"}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </SettingsSection>
   )
 }
 

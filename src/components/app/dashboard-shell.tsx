@@ -42,6 +42,7 @@ function DashboardShell({
   title,
   description,
   backLink,
+  mobileBrandHeader = false,
   children,
   hasUnreadRotaUpdates,
   hasUnreadAnnouncements,
@@ -59,6 +60,7 @@ function DashboardShell({
   routeKey: React.ComponentProps<typeof AppSidebar>["routeKey"]
   title: string
   description: string
+  mobileBrandHeader?: boolean
   backLink?: {
     href: string
     label: string
@@ -99,6 +101,7 @@ function DashboardShell({
   const isTimeClockHome = routeKey === "timeClock"
   const isAnnouncementsHome = routeKey === "announcements"
   const hasMobileBrandHeader =
+    mobileBrandHeader ||
     isDashboardHome ||
     isRotaListHome ||
     isSettingsHome ||
