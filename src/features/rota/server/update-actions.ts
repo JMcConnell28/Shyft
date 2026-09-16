@@ -15,6 +15,7 @@ import {
 import { getOrganizationSlugById } from "@/features/rota/server/lookups"
 import { sendRotaPublishedNotifications } from "@/features/rota/server/publish-notifications"
 import { requireRotaWriteAccess } from "@/features/rota/server/write-access"
+import { getLocationRotaSettings } from "@/features/rota/server/rota-settings"
 import { reapplyApprovedShiftSwapOverrides } from "@/features/shift-swaps/server/publish-overrides"
 
 const publishRotaVersion = createServerFn({ method: "POST" })
@@ -159,7 +160,10 @@ const publishRotaVersion = createServerFn({ method: "POST" })
       locationSlug: context.location.slug,
       rotaId: data.rotaId,
     }
-    const notificationResult = await sendRotaPublishedNotifications(target)
+    const rotaSettings = await getLocationRotaSettings(context.location.id)
+    const notificationResult = rotaSettings.notifyStaffOnPublish
+      ? await sendRotaPublishedNotifications(target)
+      : { errorMessage: undefined, sentCount: 0 }
 
     return {
       notificationEmailCount: notificationResult.sentCount,

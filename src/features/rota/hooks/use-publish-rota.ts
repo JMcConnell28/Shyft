@@ -3,11 +3,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
+import type { RotaListPageData } from "@/features/rota/types"
+import type { WorkspaceBoardData } from "@/features/rota/types/workspace"
+
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
 import { rotaQueryKeys } from "@/features/rota/query-keys"
 import { publishRotaVersion, saveRotaWorkspace } from "@/features/rota/server-fns"
-import type { RotaListPageData } from "@/features/rota/types"
-import type { WorkspaceBoardData } from "@/features/rota/types/workspace"
 import { buildSaveRotaWorkspacePayload } from "@/features/rota/utils/rota-workspace-payload"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -61,7 +62,9 @@ function usePublishRota() {
         queryKey: rotaQueryKeys.all,
       })
 
-      if (result.notificationEmailCount > 0) {
+      if (!meta.settings.notifyStaffOnPublish) {
+        showSuccessToast("Rota published.")
+      } else if (result.notificationEmailCount > 0) {
         showSuccessToast(
           `Rota published. ${result.notificationEmailCount} email${
             result.notificationEmailCount === 1 ? "" : "s"
@@ -114,7 +117,9 @@ function usePublishRota() {
     publishBlockedReason: mutation.isPending
       ? "Publishing is already in progress."
       : !meta.canEdit
-        ? "Past rotas are locked and can no longer be edited."
+        ? meta.status === "published" && !meta.settings.allowEditAfterPublish
+          ? "Published rotas are locked in the rota settings."
+          : "Past rotas are locked and can no longer be edited."
       : meta.status === "published" && !meta.hasUnpublishedChanges && !hasUnsavedChanges
         ? "No unpublished changes to publish yet."
         : null,
@@ -159,13 +164,14 @@ function updateListCaches(queryClient: ReturnType<typeof useQueryClient>, rotaId
         return currentData
       }
 
-      let didChange = false
+      if (!currentData.rows.some((row) => row.id === rotaId)) {
+        return currentData
+      }
+
       const nextRows = currentData.rows.map((row) => {
         if (row.id !== rotaId) {
           return row
         }
-
-        didChange = true
 
         return {
           ...row,
@@ -174,10 +180,6 @@ function updateListCaches(queryClient: ReturnType<typeof useQueryClient>, rotaId
           hasUnpublishedChanges: false,
         }
       })
-
-      if (!didChange) {
-        return currentData
-      }
 
       return {
         ...currentData,

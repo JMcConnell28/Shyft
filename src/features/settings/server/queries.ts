@@ -1,7 +1,6 @@
-import { getDatabase } from "@/lib/db"
-
 import type { GeneralSettingsPageData } from "@/features/settings/types"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
+import { getDatabase } from "@/lib/db"
 
 async function getGeneralSettingsPageData(input: {
   organizationId: string
@@ -17,19 +16,46 @@ async function getGeneralSettingsPageData(input: {
   })
 
   const database = getDatabase()
-  const result = await database.query<{
-    estimatedClosingTime: string
-  }>(
-    `select "estimatedClosingTime"
-     from public."organization"
-     where id = $1
-     limit 1`,
-    [input.organizationId],
-  )
+  const [organizationResult, locationsResult] = await Promise.all([
+    database.query<{
+      contactEmail: string | null
+      contactPhone: string | null
+      name: string
+      slug: string
+    }>(
+      `select
+         contact_email as "contactEmail",
+         contact_phone as "contactPhone",
+         name,
+         slug
+       from public."organization"
+       where id = $1
+       limit 1`,
+      [input.organizationId]
+    ),
+    database.query<{ id: string; name: string; slug: string }>(
+      `select id, name, slug
+       from public.locations
+       where organization_id = $1
+       order by name asc`,
+      [input.organizationId]
+    ),
+  ])
+
+  const organization = organizationResult.rows.at(0)
+
+  if (!organization) {
+    throw new Error("Organization not found.")
+  }
 
   return {
-    estimatedClosingTime:
-      result.rows[0]?.estimatedClosingTime?.slice(0, 5) ?? "23:00",
+    contactEmail: organization.contactEmail ?? "",
+    contactPhone: organization.contactPhone ?? "",
+    locations: locationsResult.rows,
+    organization: {
+      name: organization.name,
+      slug: organization.slug,
+    },
   }
 }
 

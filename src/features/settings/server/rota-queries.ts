@@ -1,8 +1,7 @@
-import { getDatabase } from "@/lib/db"
-
 import type { RotaSettingsPageData } from "@/features/settings/types"
-import { requireLocationPermission } from "@/lib/auth/has-location-permission"
-import { requireOrgPermission } from "@/lib/auth/has-org-permission"
+import { DEFAULT_ROTA_SETTINGS } from "@/features/rota/constants/rota-settings"
+import { requireRotaSettingsPermission } from "@/features/settings/server/rota-settings-shared"
+import { getDatabase } from "@/lib/db"
 
 async function getRotaSettingsPageData(input: {
   organizationId?: string
@@ -14,17 +13,39 @@ async function getRotaSettingsPageData(input: {
   const database = getDatabase()
   const [locationsResult, zonesResult, templatesResult] = await Promise.all([
     database.query<{
+      allow_edit_after_publish: boolean | null
+      confirm_shift_delete: boolean | null
+      copy_notes_by_default: boolean | null
+      default_zone_id: string | null
       id: string
       name: string
+      notify_staff_on_publish: boolean | null
+      show_notes_to_staff: boolean | null
       slug: string
     }>(
-      `select id, name, slug
-       from public.locations
+      `select
+         location.id,
+         location.name,
+         location.slug,
+         rota_settings.allow_edit_after_publish,
+         rota_settings.confirm_shift_delete,
+         rota_settings.copy_notes_by_default,
+         case
+           when default_zone.deleted_at is null then rota_settings.default_zone_id
+           else null
+         end as default_zone_id,
+         rota_settings.notify_staff_on_publish,
+         rota_settings.show_notes_to_staff
+       from public.locations location
+       left join public.location_rota_settings rota_settings
+         on rota_settings.location_id = location.id
+       left join public.zones default_zone
+         on default_zone.id = rota_settings.default_zone_id
        where (
-         ($1::text is not null and organization_id = $1::text)
-         or ($2::uuid is not null and id = $2::uuid)
+         ($1::text is not null and location.organization_id = $1::text)
+         or ($2::uuid is not null and location.id = $2::uuid)
        )
-       order by created_at asc, name asc`,
+       order by location.created_at asc, location.name asc`,
       [input.organizationId ?? null, input.locationId ?? null]
     ),
     database.query<{
@@ -90,6 +111,24 @@ async function getRotaSettingsPageData(input: {
       id: location.id,
       name: location.name,
       slug: location.slug,
+      settings: {
+        allowEditAfterPublish:
+          location.allow_edit_after_publish ??
+          DEFAULT_ROTA_SETTINGS.allowEditAfterPublish,
+        confirmShiftDelete:
+          location.confirm_shift_delete ??
+          DEFAULT_ROTA_SETTINGS.confirmShiftDelete,
+        copyNotesByDefault:
+          location.copy_notes_by_default ??
+          DEFAULT_ROTA_SETTINGS.copyNotesByDefault,
+        defaultZoneId: location.default_zone_id,
+        notifyStaffOnPublish:
+          location.notify_staff_on_publish ??
+          DEFAULT_ROTA_SETTINGS.notifyStaffOnPublish,
+        showNotesToStaff:
+          location.show_notes_to_staff ??
+          DEFAULT_ROTA_SETTINGS.showNotesToStaff,
+      },
       zones: zonesByLocationId.get(location.id) ?? [],
     })),
     templates: templatesResult.rows.map((template) => ({
@@ -100,37 +139,6 @@ async function getRotaSettingsPageData(input: {
       shiftCount: Number(template.shift_count),
     })),
   }
-}
-
-async function requireRotaSettingsPermission(input: {
-  organizationId?: string
-  locationId?: string
-  userId: string
-}) {
-  if (input.organizationId) {
-    await requireOrgPermission({
-      organizationId: input.organizationId,
-      userId: input.userId,
-      permissions: {
-        location: ["update"],
-      },
-      errorMessage: "You do not have permission to manage rota settings.",
-    })
-    return
-  }
-
-  if (!input.locationId) {
-    throw new Error("Choose a location.")
-  }
-
-  await requireLocationPermission({
-    locationId: input.locationId,
-    userId: input.userId,
-    permissions: {
-      location: ["update"],
-    },
-    errorMessage: "You do not have permission to manage rota settings.",
-  })
 }
 
 export { getRotaSettingsPageData }

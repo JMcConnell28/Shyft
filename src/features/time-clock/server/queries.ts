@@ -4,9 +4,9 @@ import type {
   ClockAction,
   ClockEntryStatus,
   ClockInReviewPrompt,
-  ClockSource,
   ClockSettingsPageData,
   ClockShiftSegment,
+  ClockSource,
   EmployeeClockPageData,
   ManagerClockPageData,
 } from "@/features/time-clock/types"
@@ -59,6 +59,13 @@ type ClockStationBillingRow = {
   time_attendance_status: ClockStationBillingStatus
   hardware_entitlement_status: ClockStationHardwareEntitlementStatus
   hardware_fulfillment_status: ClockStationHardwareFulfillmentStatus
+}
+
+type ClockStationHealthRow = {
+  failed_taps_today: number
+  last_successful_tap_at: string | null
+  location_id: string
+  registered_stations: number
 }
 
 type ClockRules = {
@@ -286,7 +293,7 @@ async function getManagerClockPageData(input: {
     failedAttempts: failedAttempts.map((attempt) => ({
       id: attempt.id,
       employeeName: attempt.employee_id
-        ? employeeNameById.get(attempt.employee_id) ?? null
+        ? (employeeNameById.get(attempt.employee_id) ?? null)
         : null,
       action:
         attempt.action === "clock_in" || attempt.action === "clock_out"
@@ -323,17 +330,22 @@ async function getClockSettingsPageData(input: {
   }
 
   const supabase = createSupabaseServerClient()
-  const [settings, tags, stationBillingStates] = await Promise.all([
-    listClockSettingsForLocations(supabase, locationIds),
-    listClockTagSetups(supabase, locationIds),
-    listClockStationBillingStates(locationIds),
-  ])
+  const [settings, tags, stationBillingStates, stationHealth] =
+    await Promise.all([
+      listClockSettingsForLocations(supabase, locationIds),
+      listClockTagSetups(supabase, locationIds),
+      listClockStationBillingStates(locationIds),
+      listClockStationHealth(locationIds),
+    ])
   const settingsByLocationId = new Map(
     settings.map((setting) => [setting.locationId, setting])
   )
   const tagsByLocationId = groupClockTagSetups(tags)
   const stationBillingStateByLocationId = new Map(
     stationBillingStates.map((state) => [state.locationId, state])
+  )
+  const stationHealthByLocationId = new Map(
+    stationHealth.map((health) => [health.locationId, health])
   )
 
   return {
@@ -350,8 +362,7 @@ async function getClockSettingsPageData(input: {
         isEnabled: setting?.isEnabled ?? false,
         timeAttendanceEnabled:
           stationBillingState?.timeAttendanceEnabled ?? false,
-        timeAttendanceStatus:
-          stationBillingState?.timeAttendanceStatus ?? null,
+        timeAttendanceStatus: stationBillingState?.timeAttendanceStatus ?? null,
         hardwareEntitlementStatus:
           stationBillingState?.hardwareEntitlementStatus ?? null,
         hardwareFulfillmentStatus:
@@ -370,6 +381,11 @@ async function getClockSettingsPageData(input: {
         lateFinishReviewMinutes: rules.lateFinishReviewMinutes,
         lateStartReviewMinutes: rules.lateStartReviewMinutes,
         ntagTags: tagsByLocationId.get(location.id) ?? [],
+        stationHealth: stationHealthByLocationId.get(location.id) ?? {
+          failedTapsToday: 0,
+          lastSuccessfulTapAt: null,
+          registeredStations: 0,
+        },
       }
     }),
   }
@@ -532,6 +548,49 @@ async function listClockStationBillingStates(locationIds: Array<string>) {
   }))
 }
 
+async function listClockStationHealth(locationIds: Array<string>) {
+  const result = await getDatabase().query<ClockStationHealthRow>(
+    `select
+       location.id as location_id,
+       coalesce(tag.registered_stations, 0)::integer as registered_stations,
+       tag.last_successful_tap_at::text,
+       coalesce(attempt.failed_taps_today, 0)::integer as failed_taps_today
+     from public.locations location
+     left join lateral (
+       select
+         count(*) filter (
+           where clock_tag.is_active = true
+             and clock_tag.disabled_at is null
+             and clock_tag.ntag_public_id is not null
+         ) as registered_stations,
+         max(clock_tag.updated_at) filter (
+           where clock_tag.is_active = true
+             and clock_tag.disabled_at is null
+             and clock_tag.ntag_last_seen_counter > 0
+         ) as last_successful_tap_at
+       from public.clock_tags clock_tag
+       where clock_tag.location_id = location.id
+     ) tag on true
+     left join lateral (
+       select count(*) as failed_taps_today
+       from public.clock_attempts clock_attempt
+       where clock_attempt.location_id = location.id
+         and clock_attempt.success = false
+         and clock_attempt.created_at >=
+           (date_trunc('day', now() at time zone 'utc') at time zone 'utc')
+     ) attempt on true
+     where location.id = any($1::uuid[])`,
+    [locationIds]
+  )
+
+  return result.rows.map((row) => ({
+    failedTapsToday: row.failed_taps_today,
+    lastSuccessfulTapAt: row.last_successful_tap_at,
+    locationId: row.location_id,
+    registeredStations: row.registered_stations,
+  }))
+}
+
 async function listClockTagSetups(
   supabase: SupabaseServer,
   locationIds: Array<string>
@@ -641,7 +700,10 @@ async function listActivityEntries(
   locationIds: Array<string>,
   selectedDate: string
 ) {
-  const nextDate = format(addDays(new Date(`${selectedDate}T00:00:00`), 1), "yyyy-MM-dd")
+  const nextDate = format(
+    addDays(new Date(`${selectedDate}T00:00:00`), 1),
+    "yyyy-MM-dd"
+  )
   const result = await supabase
     .from("time_entries")
     .select(
@@ -666,7 +728,7 @@ async function listActivityEntries(
   return entries.map((entry) => ({
     ...entry,
     zone_name: entry.rota_published_shift_id
-      ? zoneNameByShiftId.get(entry.rota_published_shift_id) ?? null
+      ? (zoneNameByShiftId.get(entry.rota_published_shift_id) ?? null)
       : null,
   }))
 }
@@ -732,7 +794,10 @@ async function getMatchedPublishedShift(input: {
   }
 
   const today = format(input.now, "yyyy-MM-dd")
-  const fromDate = format(addDays(new Date(`${today}T00:00:00`), -1), "yyyy-MM-dd")
+  const fromDate = format(
+    addDays(new Date(`${today}T00:00:00`), -1),
+    "yyyy-MM-dd"
+  )
   const toDate = format(addDays(new Date(`${today}T00:00:00`), 1), "yyyy-MM-dd")
   const shiftResult = await supabase
     .from("rota_published_shifts")
@@ -761,7 +826,9 @@ async function getMatchedPublishedShift(input: {
     .eq("status", "published")
 
   assertSupabaseSuccess(rotaResult.error, "We could not load your rota.")
-  const publishedRotaIds = new Set((rotaResult.data ?? []).map((rota) => rota.id))
+  const publishedRotaIds = new Set(
+    (rotaResult.data ?? []).map((rota) => rota.id)
+  )
   const candidates: Array<PublishedShiftCandidate> = shifts
     .filter((shift) => publishedRotaIds.has(shift.rota_id))
     .map((shift) => ({
@@ -882,7 +949,9 @@ function getClockSetupMessage(input: {
   return null
 }
 
-function groupClockTagSetups(rows: Awaited<ReturnType<typeof listClockTagSetups>>) {
+function groupClockTagSetups(
+  rows: Awaited<ReturnType<typeof listClockTagSetups>>
+) {
   const tagsByLocationId = new Map<
     string,
     ClockSettingsPageData["locations"][number]["ntagTags"]

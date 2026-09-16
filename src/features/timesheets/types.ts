@@ -15,6 +15,8 @@ type TimesheetScopeInput = {
   weekStart?: string | null
 }
 
+type TimesheetViewMode = "mine" | "team"
+
 type TimesheetLocation = {
   id: string
   name: string
@@ -66,31 +68,31 @@ type TimesheetDay = TimesheetTotals & {
   date: string
   dateLabel: string
   dayLabel: string
-  entries: TimesheetEntry[]
+  entries: Array<TimesheetEntry>
 }
 
 type EmployeeTimesheet = TimesheetTotals & {
   employeeId: string | null
   employeeName: string
-  days: TimesheetDay[]
+  days: Array<TimesheetDay>
 }
 
 type ManagerTimesheetEmployee = TimesheetTotals & {
   employeeId: string
   employeeName: string
-  locations: string[]
-  days: TimesheetDay[]
+  locations: Array<string>
+  days: Array<TimesheetDay>
 }
 
 type ManagerTimesheet = TimesheetTotals & {
-  employees: ManagerTimesheetEmployee[]
+  employees: Array<ManagerTimesheetEmployee>
 }
 
 type TimesheetPageData = {
   canManage: boolean
   employeeTimesheet: EmployeeTimesheet
-  exportableRotas: TimesheetExportableRota[]
-  locations: TimesheetLocation[]
+  exportableRotas: Array<TimesheetExportableRota>
+  locations: Array<TimesheetLocation>
   managerTimesheet: ManagerTimesheet | null
   weekEnd: string
   weekLabel: string
@@ -136,5 +138,6 @@ export type {
   TimesheetPageData,
   TimesheetScopeInput,
   TimesheetTotals,
+  TimesheetViewMode,
   UpdateTimesheetEntryInput,
 }

@@ -1180,6 +1180,7 @@ export type Database = {
           is_enabled: boolean
           location_id: string
           organization_id: string
+          staff_group_id: string | null
         }
         Insert: {
           created_at?: string
@@ -1189,6 +1190,7 @@ export type Database = {
           is_enabled?: boolean
           location_id: string
           organization_id: string
+          staff_group_id?: string | null
         }
         Update: {
           created_at?: string
@@ -1198,6 +1200,7 @@ export type Database = {
           is_enabled?: boolean
           location_id?: string
           organization_id?: string
+          staff_group_id?: string | null
         }
         Relationships: [
           {
@@ -1219,6 +1222,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_location_assignments_staff_group_id_fkey"
+            columns: ["staff_group_id"]
+            isOneToOne: false
+            referencedRelation: "staff_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -1701,6 +1711,8 @@ export type Database = {
       }
       organization: {
         Row: {
+          contact_email: string | null
+          contact_phone: string | null
           createdAt: string
           estimatedClosingTime: string
           id: string
@@ -1714,6 +1726,8 @@ export type Database = {
           stripeCustomerId: string | null
         }
         Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
           createdAt: string
           estimatedClosingTime?: string
           id: string
@@ -1727,6 +1741,8 @@ export type Database = {
           stripeCustomerId?: string | null
         }
         Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
           createdAt?: string
           estimatedClosingTime?: string
           id?: string
@@ -1843,6 +1859,7 @@ export type Database = {
           created_at: string
           location_id: string
           organization_id: string | null
+          staff_group_id: string | null
           rota_id: string
           updated_at: string
         }
@@ -1851,6 +1868,7 @@ export type Database = {
           created_at?: string
           location_id: string
           organization_id?: string | null
+          staff_group_id?: string | null
           rota_id: string
           updated_at?: string
         }
@@ -1859,6 +1877,7 @@ export type Database = {
           created_at?: string
           location_id?: string
           organization_id?: string | null
+          staff_group_id?: string | null
           rota_id?: string
           updated_at?: string
         }

@@ -1,10 +1,11 @@
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { useServerFn } from "@tanstack/react-start"
-import { createFileRoute, Link, redirect } from "@tanstack/react-router"
-import { ArrowRightIcon } from "lucide-react"
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import { ArrowRightIcon, UserPlusIcon } from "lucide-react"
 
-import { OnboardingShell } from "@/components/app/onboarding-shell"
+import { AuthCard, authButtonClassName } from "@/components/app/auth-card"
+import { AuthShell } from "@/components/app/auth-shell"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { TextFormField } from "@/components/forms/text-form-field"
@@ -14,8 +15,8 @@ import { getSession } from "@/lib/auth-server"
 import { isPublicDevelopmentEmailVerificationBypassed } from "@/lib/email-verification"
 import { saveOnboardingIntent } from "@/lib/onboarding"
 import {
-  emailSchema,
   dateOfBirthSchema,
+  emailSchema,
   firstNameSchema,
   lastNameSchema,
   passwordSchema,
@@ -122,136 +123,132 @@ function SignUpRoute() {
   })
 
   return (
-    <OnboardingShell
-      badge="Create account"
-      eyebrow="Step 1"
-      title="Start with your account."
-      description="Add the basics now. RocketRota will ask one setup question at a time after this."
-      progress={15}
-      showBackToDashboard={false}
+    <AuthShell
+      eyebrow="Get started"
+      title="Create your RocketRota account"
+      description="Add your details now, then we’ll guide you through the workplace setup that fits your team."
+      alternateLabel="Already have an account?"
+      alternateAction="Sign in"
+      alternateHref="/login"
+      alternateRedirect={redirectTarget}
+      contentWidth="wide"
     >
-      <form
-        className="rounded-xl border border-border/70 bg-background p-3 shadow-sm sm:p-4"
-        onSubmit={(event) => {
-          event.preventDefault()
-          event.stopPropagation()
-          void form.handleSubmit()
-        }}
+      <AuthCard
+        icon={UserPlusIcon}
+        title="Your details"
+        description="Use the email address you want connected to your workplace."
       >
-        <FieldGroup className="gap-3">
-          <div className="grid gap-3 sm:grid-cols-2">
+        <form
+          className="space-y-5"
+          onSubmit={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            void form.handleSubmit()
+          }}
+        >
+          <FieldGroup>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <form.Field
+                name="firstName"
+                validators={{
+                  onSubmit: createZodFieldValidator(firstNameSchema),
+                }}
+              >
+                {(field) => (
+                  <TextFormField
+                    field={field}
+                    label="First name"
+                    placeholder="Jane"
+                    autoComplete="given-name"
+                    required
+                  />
+                )}
+              </form.Field>
+
+              <form.Field
+                name="lastName"
+                validators={{
+                  onSubmit: createZodFieldValidator(lastNameSchema),
+                }}
+              >
+                {(field) => (
+                  <TextFormField
+                    field={field}
+                    label="Last name"
+                    placeholder="Smith"
+                    autoComplete="family-name"
+                    required
+                  />
+                )}
+              </form.Field>
+            </div>
+
             <form.Field
-              name="firstName"
+              name="dateOfBirth"
               validators={{
-                onSubmit: createZodFieldValidator(firstNameSchema),
+                onSubmit: createZodFieldValidator(dateOfBirthSchema),
               }}
             >
               {(field) => (
                 <TextFormField
                   field={field}
-                  label="First name"
-                  placeholder="Jane"
-                  autoComplete="given-name"
+                  label="Date of birth"
+                  type="date"
+                  autoComplete="bday"
                   required
                 />
               )}
             </form.Field>
 
             <form.Field
-              name="lastName"
+              name="email"
               validators={{
-                onSubmit: createZodFieldValidator(lastNameSchema),
+                onSubmit: createZodFieldValidator(emailSchema),
               }}
             >
               {(field) => (
                 <TextFormField
                   field={field}
-                  label="Last name"
-                  placeholder="Smith"
-                  autoComplete="family-name"
+                  label="Work email"
+                  type="email"
+                  placeholder="jane@company.com"
+                  autoComplete="email"
                   required
                 />
               )}
             </form.Field>
-          </div>
 
-          <form.Field
-            name="dateOfBirth"
-            validators={{
-              onSubmit: createZodFieldValidator(dateOfBirthSchema),
-            }}
-          >
-            {(field) => (
-              <TextFormField
-                field={field}
-                label="Date of birth"
-                type="date"
-                autoComplete="bday"
-                required
-              />
-            )}
-          </form.Field>
+            <form.Field
+              name="password"
+              validators={{
+                onSubmit: createZodFieldValidator(passwordSchema),
+              }}
+            >
+              {(field) => (
+                <TextFormField
+                  field={field}
+                  label="Password"
+                  type="password"
+                  placeholder="At least 8 characters"
+                  autoComplete="new-password"
+                  required
+                />
+              )}
+            </form.Field>
+          </FieldGroup>
 
-          <form.Field
-            name="email"
-            validators={{
-              onSubmit: createZodFieldValidator(emailSchema),
-            }}
-          >
-            {(field) => (
-              <TextFormField
-                field={field}
-                label="Work email"
-                type="email"
-                placeholder="jane@company.com"
-                autoComplete="email"
-                required
-              />
-            )}
-          </form.Field>
+          <FormErrorMessage message={error} />
 
-          <form.Field
-            name="password"
-            validators={{
-              onSubmit: createZodFieldValidator(passwordSchema),
-            }}
-          >
-            {(field) => (
-              <TextFormField
-                field={field}
-                label="Password"
-                type="password"
-                placeholder="At least 8 characters"
-                autoComplete="new-password"
-                required
-              />
-            )}
-          </form.Field>
-        </FieldGroup>
-
-        <FormErrorMessage message={error} />
-
-        <div className="mt-4 space-y-3">
           <FormSubmitButton
-            className="w-full"
+            className={authButtonClassName}
             isSubmitting={form.state.isSubmitting}
             submittingText="Creating account..."
           >
             Continue
             <ArrowRightIcon />
           </FormSubmitButton>
-          <p className="text-center text-xs text-muted-foreground">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              search={{ redirect: redirectTarget }}
-              className="font-medium text-primary underline-offset-4 hover:underline"
-            >
-              Sign in
-            </Link>
-          </p>
-        </div>
-      </form>
-    </OnboardingShell>
+        </form>
+      </AuthCard>
+    </AuthShell>
   )
 }

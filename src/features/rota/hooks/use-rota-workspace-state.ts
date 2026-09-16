@@ -37,7 +37,9 @@ function useRotaWorkspaceState({
   mode?: "default" | "demo"
 }) {
   const [meta, setMeta] = React.useState(boardData.meta)
-  const [selectedZoneId, setSelectedZoneId] = React.useState("all")
+  const [selectedZoneId, setSelectedZoneId] = React.useState(
+    boardData.meta.settings.defaultZoneId ?? "all"
+  )
   const [searchQuery, setSearchQuery] = React.useState("")
   const [shiftsById, setShiftsById] = React.useState(() =>
     mapById(boardData.shifts)
@@ -49,6 +51,7 @@ function useRotaWorkspaceState({
 
   React.useEffect(() => {
     setMeta(boardData.meta)
+    setSelectedZoneId(boardData.meta.settings.defaultZoneId ?? "all")
     setShiftsById(mapById(boardData.shifts))
     setAssignmentsById(mapById(boardData.assignments))
     setHasUnsavedChanges(false)

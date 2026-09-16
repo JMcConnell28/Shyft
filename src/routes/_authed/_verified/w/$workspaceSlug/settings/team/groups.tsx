@@ -43,6 +43,7 @@ function WorkspaceGroupsSettingsRoute() {
         }
         locationId={workspace.type === "location" ? workspace.id : undefined}
         userId={viewer.user.id}
+        workspaceSlug={workspaceSlug}
       />
     </SettingsLayout>
   )

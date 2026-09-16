@@ -1,10 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Building2Icon, Clock3Icon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { WorkplaceContactSection } from "@/features/settings/components/workplace-contact-section"
+import { WorkplaceLocationsSection } from "@/features/settings/components/workplace-locations-section"
+import { WorkplaceOverviewSection } from "@/features/settings/components/workplace-overview-section"
 import { useGeneralSettingsQuery } from "@/features/settings/hooks/use-general-settings-query"
 import { useUpdateGeneralSettings } from "@/features/settings/hooks/use-update-general-settings"
 
@@ -20,87 +20,55 @@ function GeneralSettingsPage({
     organizationId,
     userId,
   })
-  const [estimatedClosingTime, setEstimatedClosingTime] =
-    React.useState("23:00")
+  const [contactEmail, setContactEmail] = React.useState("")
+  const [contactPhone, setContactPhone] = React.useState("")
 
   React.useEffect(() => {
-    if (settingsQuery.data) {
-      setEstimatedClosingTime(settingsQuery.data.estimatedClosingTime)
-    }
+    if (!settingsQuery.data) return
+
+    setContactEmail(settingsQuery.data.contactEmail)
+    setContactPhone(settingsQuery.data.contactPhone)
   }, [settingsQuery.data])
 
   if (settingsQuery.isPending) {
-    return <GeneralSettingsState message="Loading general settings..." />
+    return <GeneralSettingsState message="Loading workplace settings..." />
   }
 
   if (settingsQuery.isError) {
     return (
-      <GeneralSettingsState message="We could not load general settings right now." />
+      <GeneralSettingsState message="We could not load workplace settings right now." />
     )
   }
 
+  const data = settingsQuery.data
   const hasChanges =
-    estimatedClosingTime !== settingsQuery.data.estimatedClosingTime
+    contactEmail !== data.contactEmail || contactPhone !== data.contactPhone
 
   return (
-    <section className="rounded-xl bg-white p-4 text-[#11245a] shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
-      <div>
-        <h2 className="text-lg font-extrabold tracking-[-0.035em]">
-          Workspace details
-        </h2>
-        <p className="mt-1 text-sm font-semibold text-[#61709a]">
-          Update operating defaults for this workspace.
-        </p>
-      </div>
-
-      <div className="mt-4 divide-y divide-[#edf0f6]">
-        <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 py-3 first:pt-0">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-[#eef3ff] text-[#0069ff]">
-            <Building2Icon className="size-5" />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-sm font-extrabold">Workspace type</span>
-            <span className="mt-0.5 block text-sm font-semibold text-[#61709a]">
-              Organization
-            </span>
-          </span>
-        </div>
-
-        <label className="grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 py-3 last:pb-0">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-[#eef3ff] text-[#0069ff]">
-            <Clock3Icon className="size-5" />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-sm font-extrabold">Default close</span>
-            <Input
-              className="mt-1 h-9 max-w-36 rounded-lg border-[#dfe5f0] text-sm font-bold text-[#11245a]"
-              type="time"
-              step={900}
-              value={estimatedClosingTime}
-              onChange={(event) => setEstimatedClosingTime(event.target.value)}
-            />
-          </span>
-        </label>
-      </div>
-
-      <div className="mt-4 flex justify-end">
-        <Button
-          className="h-10 rounded-xl px-4 text-sm font-extrabold"
-          disabled={!hasChanges || isSaving}
-          onClick={() => {
-            void saveGeneralSettings(estimatedClosingTime)
-          }}
-        >
-          {isSaving ? "Saving..." : "Save changes"}
-        </Button>
-      </div>
-    </section>
+    <div className="space-y-3">
+      <WorkplaceOverviewSection
+        organizationName={data.organization.name}
+        organizationSlug={data.organization.slug}
+      />
+      <WorkplaceLocationsSection locations={data.locations} />
+      <WorkplaceContactSection
+        contactEmail={contactEmail}
+        contactPhone={contactPhone}
+        hasChanges={hasChanges}
+        isSaving={isSaving}
+        onContactEmailChange={setContactEmail}
+        onContactPhoneChange={setContactPhone}
+        onSave={() => {
+          void saveGeneralSettings({ contactEmail, contactPhone })
+        }}
+      />
+    </div>
   )
 }
 
 function GeneralSettingsState({ message }: { message: string }) {
   return (
-    <section className="rounded-xl bg-white p-4 text-sm font-semibold text-[#61709a] shadow-[0_8px_24px_rgba(30,50,96,0.06)] ring-1 ring-[#e7eaf2]">
+    <section className="rounded-xl border border-[#dce3ef] bg-white px-4 py-8 text-center text-xs font-semibold text-[#7180a2]">
       {message}
     </section>
   )

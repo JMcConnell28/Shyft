@@ -12,13 +12,13 @@ import {
   TriangleAlertIcon,
 } from "lucide-react"
 
-import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
-import { rotaQueryKeys } from "@/features/rota/query-keys"
-import { copyRotaBoard } from "@/features/rota/server-fns"
 import type {
   CopyRotaBoardMode,
   CopyRotaBoardResult,
 } from "@/features/rota/types"
+import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
+import { rotaQueryKeys } from "@/features/rota/query-keys"
+import { copyRotaBoard } from "@/features/rota/server-fns"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +41,26 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
+const COPY_OPTIONS: Array<{
+  description: string
+  icon: typeof CalendarRange
+  label: string
+  mode: CopyRotaBoardMode
+}> = [
+  {
+    description: "Replace with shifts, staff assignments, and notes.",
+    icon: CalendarRange,
+    label: "Full rota",
+    mode: "full",
+  },
+  {
+    description: "Replace with shifts only and leave notes unchanged.",
+    icon: SquareChartGantt,
+    label: "Shifts only",
+    mode: "shifts-only",
+  },
+]
+
 function RotaCopyMenu() {
   const queryClient = useQueryClient()
   const copyRotaBoardFn = useServerFn(copyRotaBoard)
@@ -59,6 +79,9 @@ function RotaCopyMenu() {
     React.useState<Extract<CopyRotaBoardResult, { status: "success" }> | null>(
       null,
     )
+  const copyOptions = meta.settings.copyNotesByDefault
+    ? COPY_OPTIONS
+    : [...COPY_OPTIONS].reverse()
 
   const copyMutation = useMutation({
     meta: {
@@ -145,30 +168,32 @@ function RotaCopyMenu() {
         <DropdownMenuContent>
           <DropdownMenuGroup>
             <DropdownMenuLabel>Previous week</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => handleSelectMode("full")}
-              className="items-start py-2"
-            >
-              <CalendarRange className="mt-0.5" />
-              <div className="min-w-0">
-                <div className="font-medium">Full rota</div>
-                <div className="text-[11px] text-muted-foreground">
-                  Replace with shifts, staff assignments, and notes.
-                </div>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => handleSelectMode("shifts-only")}
-              className="items-start py-2"
-            >
-              <SquareChartGantt className="mt-0.5" />
-              <div className="min-w-0">
-                <div className="font-medium">Shifts only</div>
-                <div className="text-[11px] text-muted-foreground">
-                  Replace with shifts only and leave notes unchanged.
-                </div>
-              </div>
-            </DropdownMenuItem>
+            {copyOptions.map((option, index) => {
+              const Icon = option.icon
+
+              return (
+                <DropdownMenuItem
+                  className="items-start py-2"
+                  key={option.mode}
+                  onClick={() => handleSelectMode(option.mode)}
+                >
+                  <Icon className="mt-0.5" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 font-medium">
+                      {option.label}
+                      {index === 0 ? (
+                        <span className="text-[9px] font-bold tracking-wide text-blue-600 uppercase">
+                          Default
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {option.description}
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+              )
+            })}
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -3,13 +3,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
-import { updateTimeAttendanceAddon } from "@/features/billing/server-fns"
 import type {
   ClockAction,
   ClockReason,
+  ClockSettingsValues,
   ClockShiftSegment,
   EarlyClockInMode,
 } from "@/features/time-clock/types"
+import { updateTimeAttendanceAddon } from "@/features/billing/server-fns"
 import { timeClockQueryKeys } from "@/features/time-clock/query-keys"
 import {
   approveTimeEntryAsRecorded,
@@ -186,23 +187,11 @@ function useClockSettingsMutations(input: {
       },
     }),
     updateSettingsMutation: useMutation({
-      mutationFn: (variables: {
-        isEnabled: boolean
-        latitude: number | null
-        locationId: string
-        longitude: number | null
-        maxAccuracyMeters: number
-        radiusMeters: number
-        timezone: string
-        earlyClockInGraceMinutes: number
-        earlyStartReviewMinutes: number
-        forgottenClockOutAlertMinutes: number
-        hardReviewAfterMinutes: number
-        lateClockInGraceMinutes: number
-        lateClockOutGraceMinutes: number
-        lateFinishReviewMinutes: number
-        lateStartReviewMinutes: number
-      }) =>
+      mutationFn: (
+        variables: ClockSettingsValues & {
+          locationId: string
+        }
+      ) =>
         updateClockSettingsFn({
           data: {
             ...input,
@@ -211,9 +200,9 @@ function useClockSettingsMutations(input: {
         }),
       onSuccess: async () => {
         await invalidate()
-        showSuccessToast("Clock settings saved.")
       },
-      onError: (error) => {
+      onError: async (error) => {
+        await invalidate()
         showErrorToast(error, {
           fallbackMessage: "We could not save clock settings.",
         })

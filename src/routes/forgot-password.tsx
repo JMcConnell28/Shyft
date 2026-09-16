@@ -4,15 +4,13 @@ import { useServerFn } from "@tanstack/react-start"
 import { createFileRoute } from "@tanstack/react-router"
 import { MailIcon } from "lucide-react"
 
+import {
+  AuthCard,
+  AuthStatusMessage,
+  authButtonClassName,
+} from "@/components/app/auth-card"
 import { AuthShell } from "@/components/app/auth-shell"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import {
   Field,
   FieldContent,
@@ -60,67 +58,64 @@ function ForgotPasswordRoute() {
       setError(
         getErrorMessage(
           mutationError,
-          "We could not send a password reset email.",
-        ),
+          "We could not send a password reset email."
+        )
       )
     },
   })
 
   return (
     <AuthShell
-      badge="Account recovery"
-      eyebrow="Forgot password"
-      title="Get back into your RocketRota account."
+      eyebrow="Account recovery"
+      title="Forgot your password?"
       description="Enter your email and we will send a secure reset link if the account exists."
       alternateLabel="Remembered your password?"
+      alternateAction="Back to sign in"
       alternateHref="/login"
     >
-      <Card className="border border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
-        <CardHeader>
-          <MailIcon className="size-5 text-muted-foreground" />
-          <CardTitle className="mt-2 text-2xl">Reset by email</CardTitle>
-          <CardDescription>
-            The link expires automatically for account safety.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {didSend ? (
-            <p className="text-sm text-muted-foreground">
-              If that email exists, a reset link is on its way.
-            </p>
-          ) : (
-            <form
-              className="space-y-4"
-              onSubmit={(event) => {
-                event.preventDefault()
-                mutation.mutate()
-              }}
+      <AuthCard
+        icon={MailIcon}
+        title="Reset by email"
+        description="The link expires automatically for account safety."
+      >
+        {didSend ? (
+          <AuthStatusMessage>
+            <p>If that email exists, a reset link is on its way.</p>
+          </AuthStatusMessage>
+        ) : (
+          <form
+            className="space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault()
+              mutation.mutate()
+            }}
+          >
+            <Field>
+              <FieldLabel htmlFor="forgot-email">Work email</FieldLabel>
+              <FieldContent>
+                <Input
+                  id="forgot-email"
+                  value={email}
+                  type="email"
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  required
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+                <FieldError>{error}</FieldError>
+              </FieldContent>
+            </Field>
+            <Button
+              type="submit"
+              size="lg"
+              className={authButtonClassName}
+              disabled={mutation.isPending}
             >
-              <Field>
-                <FieldLabel htmlFor="forgot-email">Email</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="forgot-email"
-                    value={email}
-                    type="email"
-                    autoComplete="email"
-                    onChange={(event) => setEmail(event.target.value)}
-                  />
-                  <FieldError>{error}</FieldError>
-                </FieldContent>
-              </Field>
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                disabled={mutation.isPending}
-              >
-                {mutation.isPending ? "Sending..." : "Send reset link"}
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
+              {mutation.isPending ? "Sending..." : "Send reset link"}
+            </Button>
+          </form>
+        )}
+      </AuthCard>
     </AuthShell>
   )
 }

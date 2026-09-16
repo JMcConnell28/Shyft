@@ -45,6 +45,14 @@ const demoRotaBoardData = {
     publishedVersion: 0,
     hasUnpublishedChanges: false,
     publishedSnapshotAvailable: false,
+    settings: {
+      allowEditAfterPublish: true,
+      confirmShiftDelete: true,
+      copyNotesByDefault: true,
+      defaultZoneId: null,
+      notifyStaffOnPublish: true,
+      showNotesToStaff: true,
+    },
     budgetPence: 475000,
   },
   location: {

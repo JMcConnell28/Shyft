@@ -15,6 +15,7 @@ import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 import { listAccessibleLocations } from "@/features/rota/server/access"
 import { getMembershipRole } from "@/features/rota/server/membership"
 import { requireVerifiedSessionOrThrow } from "@/features/rota/server/request-session"
+import { getLocationRotaSettings } from "@/features/rota/server/rota-settings"
 import {
   buildWorkspaceDays,
   buildWorkspaceLocation,
@@ -149,6 +150,7 @@ async function getRotaWorkspaceData({
     employeesResult,
     groupsResult,
     templates,
+    rotaSettings,
   ] = await Promise.all([
     database.query<{
       close_time: string
@@ -169,7 +171,7 @@ async function getRotaWorkspaceData({
       .order("name", { ascending: true }),
     supabase
       .from("employee_location_assignments")
-      .select("employee_id")
+      .select("employee_id, staff_group_id")
       .eq("location_id", selectedLocation.id)
       .eq("is_enabled", true)
       .is("disabled_at", null),
@@ -183,6 +185,7 @@ async function getRotaWorkspaceData({
           .is("organization_id", null)
           .eq("location_id", selectedLocation.id),
     getTemplatesForLocation(workspaceOrganizationId, selectedLocation.id),
+    getLocationRotaSettings(selectedLocation.id),
   ])
 
   assertSupabaseSuccess(zonesResult.error, "We could not load the rota zones.")
@@ -209,6 +212,12 @@ async function getRotaWorkspaceData({
   const enabledEmployeeIds = new Set(
     (assignmentResult.data ?? []).map((entry) => entry.employee_id)
   )
+  const locationGroupByEmployeeId = new Map(
+    (assignmentResult.data ?? []).map((entry) => [
+      entry.employee_id,
+      entry.staff_group_id,
+    ])
+  )
   const employees = (employeesResult.data ?? [])
     .filter((employee) => enabledEmployeeIds.has(employee.id))
     .sort((left, right) => left.full_name.localeCompare(right.full_name))
@@ -230,7 +239,12 @@ async function getRotaWorkspaceData({
     color: normalizeStaffGroupColor(group.color),
   }))
 
-  if (employees.some((employee) => !employee.staff_group_id)) {
+  if (
+    employees.some(
+      (employee) =>
+        !(locationGroupByEmployeeId.get(employee.id) ?? employee.staff_group_id)
+    )
+  ) {
     employeeGroups.push({
       id: "ungrouped",
       name: "Team members",
@@ -288,11 +302,14 @@ async function getRotaWorkspaceData({
       rotaId: rota.id,
       status: rota.status === "published" ? "published" : "draft",
       canManage: capabilities.canManageRota,
-      canEdit: capabilities.canManageRota && !isPastRota,
+      canEdit:
+        capabilities.canManageRota &&
+        !isPastRota &&
+        (rota.status !== "published" || rotaSettings.allowEditAfterPublish),
       organizationId: workspaceOrganizationId,
       userId,
       workspaceType: locationId ? "location" : "organization",
-      note: rota.note,
+      note: publishedOnly && !rotaSettings.showNotesToStaff ? null : rota.note,
       weekStart: rota.week_start,
       weekEnd: days[6]?.isoDate ?? rota.week_start,
       weekLabel: buildWeekLabel(rota.week_start),
@@ -300,20 +317,26 @@ async function getRotaWorkspaceData({
       hasUnpublishedChanges: rota.has_unpublished_changes,
       publishedSnapshotAvailable: rota.published_snapshot_version > 0,
       budgetPence,
+      settings: rotaSettings,
     },
     location,
     days,
     zones,
     employeeGroups,
-    employees: employees.map((employee) => ({
-      id: employee.id,
-      name: employee.full_name,
-      groupId: employee.staff_group_id ?? "ungrouped",
-      groupColor:
-        groupColorById.get(employee.staff_group_id ?? "ungrouped") ?? "slate",
-      weeklyHours: 0,
-      rotaNotes: rotaNotesByEmployeeId.get(employee.id) ?? [],
-      compensation: (() => {
+    employees: employees.map((employee) => {
+      const groupId =
+        locationGroupByEmployeeId.get(employee.id) ??
+        employee.staff_group_id ??
+        "ungrouped"
+
+      return {
+        id: employee.id,
+        name: employee.full_name,
+        groupId,
+        groupColor: groupColorById.get(groupId) ?? "slate",
+        weeklyHours: 0,
+        rotaNotes: rotaNotesByEmployeeId.get(employee.id) ?? [],
+        compensation: (() => {
         const compensation = compensationByEmployeeId.get(employee.id)
         return compensation?.pay_type === "salary"
           ? {
@@ -325,8 +348,9 @@ async function getRotaWorkspaceData({
               hourlyRatePence:
                 compensation?.hourly_rate_pence ?? DEFAULT_MINIMUM_WAGE_PENCE,
             }
-      })(),
-    })),
+        })(),
+      }
+    }),
     templates,
     shifts,
     assignments,

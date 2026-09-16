@@ -15,22 +15,22 @@ function useUpdateGeneralSettings(input: {
   const updateGeneralSettingsFn = useServerFn(updateGeneralSettings)
 
   const mutation = useMutation({
-    mutationFn: (estimatedClosingTime: string) =>
+    mutationFn: (values: { contactEmail: string; contactPhone: string }) =>
       updateGeneralSettingsFn({
         data: {
           ...input,
-          estimatedClosingTime,
+          ...values,
         },
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: settingsQueryKeys.all,
       })
-      showSuccessToast("General settings saved.")
+      showSuccessToast("Workplace contact details saved.")
     },
     onError: (error) => {
       showErrorToast(error, {
-        fallbackMessage: "We could not save general settings.",
+        fallbackMessage: "We could not save workplace contact details.",
       })
     },
   })

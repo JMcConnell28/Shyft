@@ -1,10 +1,13 @@
+import type { OrganizationPermissionRequest } from "@/lib/auth/has-org-permission"
+
 import { ensureLocationAccessOrThrow } from "@/features/rota/server/access"
 import { isRotaWeekBeforeCurrentWeek } from "@/features/rota/utils/week-utils"
 import { requireLocationPaidWriteAccess } from "@/features/billing/server/entitlements"
 import { requireVerifiedSessionOrThrow } from "@/features/rota/server/request-session"
+import { getLocationRotaSettings } from "@/features/rota/server/rota-settings"
 import { requireLocationPermission } from "@/lib/auth/has-location-permission"
+// eslint-disable-next-line no-duplicate-imports
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
-import type { OrganizationPermissionRequest } from "@/lib/auth/has-org-permission"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import {
   assertSupabaseSuccess,
@@ -84,6 +87,17 @@ async function requireRotaWriteAccess({
     rota.location_id,
     role
   )
+
+  if (permission === "update" && rota.status === "published") {
+    const rotaSettings = await getLocationRotaSettings(rota.location_id)
+
+    if (!rotaSettings.allowEditAfterPublish) {
+      throw new Error(
+        "Published rotas are locked for this location. Update the rota settings to edit them."
+      )
+    }
+  }
+
   await requireLocationPaidWriteAccess(rota.location_id)
 
   return {

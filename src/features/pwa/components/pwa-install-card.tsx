@@ -4,7 +4,7 @@ import * as React from "react"
 import { DownloadIcon, SmartphoneIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SettingsSection } from "@/features/settings/components/settings-section"
 import {
   getInstallPrompt,
   setInstallPrompt,
@@ -32,14 +32,12 @@ function PwaInstallCard() {
   }
 
   return (
-    <Card className="border-border/70 bg-background/95 shadow-sm">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <SmartphoneIcon className="size-4 text-muted-foreground" />
-          <CardTitle className="text-sm">RocketRota app</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <SettingsSection
+      title="RocketRota app"
+      icon={SmartphoneIcon}
+      description="Keep your rota a tap away on your home screen."
+    >
+      <div className="space-y-4 py-3">
         <p className="text-sm leading-6 text-muted-foreground">
           Install RocketRota for an app-like experience with quick access to
           your dashboard and rotas.
@@ -57,8 +55,8 @@ function PwaInstallCard() {
               ? "Install RocketRota"
               : "Use your browser install menu"}
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </SettingsSection>
   )
 }
 

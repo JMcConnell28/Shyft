@@ -75,17 +75,17 @@ async function listRequestRows(locationIds: string[]) {
             request.manager_note,
             requester.id as requester_employee_id,
             requester.full_name as requester_name,
-            requester.staff_group_id as requester_staff_group_id,
+            requester_location_assignment.staff_group_id as requester_staff_group_id,
             coalesce(requester_group.name, 'Team members') as requester_staff_group_name,
             response.id as response_id,
             responder.id as responder_employee_id,
             responder.full_name as responder_name,
-            responder.staff_group_id as responder_staff_group_id,
+            responder_location_assignment.staff_group_id as responder_staff_group_id,
             coalesce(responder_group.name, 'Team members') as responder_staff_group_name,
             source_assignment.id as source_assignment_id,
             source_assignment.employee_id as source_employee_id,
             source_employee.full_name as source_employee_name,
-            source_employee.staff_group_id as source_staff_group_id,
+            source_location_assignment.staff_group_id as source_staff_group_id,
             coalesce(source_group.name, 'Team members') as source_staff_group_name,
             source_shift.id as source_published_shift_id,
             source_shift.working_shift_id as source_working_shift_id,
@@ -105,7 +105,7 @@ async function listRequestRows(locationIds: string[]) {
             target_assignment.id as target_assignment_id,
             target_assignment.employee_id as target_employee_id,
             target_employee.full_name as target_employee_name,
-            target_employee.staff_group_id as target_staff_group_id,
+            target_location_assignment.staff_group_id as target_staff_group_id,
             coalesce(target_group.name, 'Team members') as target_staff_group_name,
             target_shift.id as target_published_shift_id,
             target_shift.working_shift_id as target_working_shift_id,
@@ -124,29 +124,45 @@ async function listRequestRows(locationIds: string[]) {
             ((target_shift.day_date + target_shift.start_time) at time zone coalesce(target_clock.timezone, 'Europe/London'))::text as target_starts_at
      from public.shift_swap_requests request
      join public.employees requester on requester.id = request.requester_employee_id
-     left join public.staff_groups requester_group on requester_group.id = requester.staff_group_id
+     left join public.employee_location_assignments requester_location_assignment
+       on requester_location_assignment.employee_id = requester.id
+      and requester_location_assignment.location_id = request.location_id
+     left join public.staff_groups requester_group
+       on requester_group.id = requester_location_assignment.staff_group_id
      join public.rota_published_shift_assignments source_assignment
        on source_assignment.id = request.source_assignment_id
      join public.employees source_employee on source_employee.id = source_assignment.employee_id
-     left join public.staff_groups source_group on source_group.id = source_employee.staff_group_id
      join public.rota_published_shifts source_shift
        on source_shift.id = request.source_published_shift_id
      join public.rotas source_rota on source_rota.id = source_shift.rota_id
+     left join public.employee_location_assignments source_location_assignment
+       on source_location_assignment.employee_id = source_employee.id
+      and source_location_assignment.location_id = source_rota.location_id
+     left join public.staff_groups source_group
+       on source_group.id = source_location_assignment.staff_group_id
      join public.locations source_location on source_location.id = source_rota.location_id
      left join public.location_clock_settings source_clock on source_clock.location_id = source_rota.location_id
      left join public.rota_published_shift_assignments target_assignment
        on target_assignment.id = request.target_assignment_id
      left join public.employees target_employee on target_employee.id = target_assignment.employee_id
-     left join public.staff_groups target_group on target_group.id = target_employee.staff_group_id
      left join public.rota_published_shifts target_shift
        on target_shift.id = request.target_published_shift_id
      left join public.rotas target_rota on target_rota.id = target_shift.rota_id
+     left join public.employee_location_assignments target_location_assignment
+       on target_location_assignment.employee_id = target_employee.id
+      and target_location_assignment.location_id = target_rota.location_id
+     left join public.staff_groups target_group
+       on target_group.id = target_location_assignment.staff_group_id
      left join public.locations target_location on target_location.id = target_rota.location_id
      left join public.location_clock_settings target_clock on target_clock.location_id = target_rota.location_id
      left join public.shift_swap_responses response
        on response.id = request.accepted_response_id
      left join public.employees responder on responder.id = response.responder_employee_id
-     left join public.staff_groups responder_group on responder_group.id = responder.staff_group_id
+     left join public.employee_location_assignments responder_location_assignment
+       on responder_location_assignment.employee_id = responder.id
+      and responder_location_assignment.location_id = request.location_id
+     left join public.staff_groups responder_group
+       on responder_group.id = responder_location_assignment.staff_group_id
      where request.location_id = any($1::uuid[])
        and request.created_at >= timezone('utc', now()) - interval '90 days'
      order by request.created_at desc`,

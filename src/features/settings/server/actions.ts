@@ -2,9 +2,10 @@ import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 import { getDatabase } from "@/lib/db"
 
 async function updateGeneralSettings(input: {
+  contactEmail: string
+  contactPhone: string
   organizationId: string
   userId: string
-  estimatedClosingTime: string
 }) {
   await requireOrgPermission({
     organizationId: input.organizationId,
@@ -18,13 +19,16 @@ async function updateGeneralSettings(input: {
   const database = getDatabase()
   await database.query(
     `update public."organization"
-     set "estimatedClosingTime" = $2
+     set
+       contact_email = nullif($2, ''),
+       contact_phone = nullif($3, '')
      where id = $1`,
-    [input.organizationId, input.estimatedClosingTime],
+    [input.organizationId, input.contactEmail, input.contactPhone]
   )
 
   return {
-    estimatedClosingTime: input.estimatedClosingTime,
+    contactEmail: input.contactEmail,
+    contactPhone: input.contactPhone,
   }
 }
 

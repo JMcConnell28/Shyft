@@ -6,6 +6,7 @@ import { getStaffGroupSettingsPageData } from "@/features/staff-groups/server-fn
 type StaffGroupSettingsInput = {
   organizationId?: string
   locationId?: string
+  selectedLocationId?: string
   userId: string
 }
 
@@ -20,6 +21,7 @@ function staffGroupSettingsQueryOptions(
   return queryOptions({
     queryKey: staffGroupQueryKeys.settings(input),
     queryFn: () => fetcher({ data: input }),
+    placeholderData: (previousData) => previousData,
     staleTime: 2 * 60_000,
   })
 }

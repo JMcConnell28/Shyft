@@ -1,7 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { Building2Icon, Layers3Icon, UsersIcon } from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import {
+  ArrowLeftIcon,
+  Building2Icon,
+  Layers3Icon,
+  MapPinIcon,
+  UsersIcon,
+} from "lucide-react"
 
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { StaffGroupDialog } from "@/features/staff-groups/components/staff-group-dialog"
@@ -20,23 +27,38 @@ function StaffGroupsSettingsPage({
   organizationId,
   locationId,
   userId,
+  workspaceSlug,
 }: {
   organizationId?: string
   locationId?: string
   userId: string
+  workspaceSlug: string
 }) {
   const [search, setSearch] = React.useState("")
   const [color, setColor] = React.useState("all")
+  const [selectedLocationId, setSelectedLocationId] = React.useState(
+    locationId ?? ""
+  )
   const query = useStaffGroupSettingsQuery({
     organizationId,
     locationId,
+    selectedLocationId: selectedLocationId || undefined,
     userId,
   })
+  const resolvedLocationId =
+    selectedLocationId || query.data?.selectedLocationId || ""
   const mutations = useStaffGroupMutations({
     organizationId,
     locationId,
+    selectedLocationId: resolvedLocationId || undefined,
     userId,
   })
+
+  React.useEffect(() => {
+    if (!selectedLocationId && query.data?.selectedLocationId) {
+      setSelectedLocationId(query.data.selectedLocationId)
+    }
+  }, [query.data?.selectedLocationId, selectedLocationId])
 
   if (query.isPending) return <GroupsState message="Loading groups..." />
   if (query.isError)
@@ -55,6 +77,14 @@ function StaffGroupsSettingsPage({
 
   return (
     <div className="space-y-5 text-[#11245a]">
+      <Link
+        to="/w/$workspaceSlug/settings/team"
+        params={{ workspaceSlug }}
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#61709a] transition-colors hover:text-[#0968f5]"
+      >
+        <ArrowLeftIcon className="size-3.5" />
+        Back to team
+      </Link>
       <ResourcePageHeader
         title="Groups"
         description="Organise staff on the rota with colour-coded groups."
@@ -98,7 +128,22 @@ function StaffGroupsSettingsPage({
         />
       </div>
 
-      <div className="flex gap-2">
+      <div className="grid gap-2 sm:grid-cols-[minmax(12rem,auto)_1fr_auto]">
+        <div className="relative">
+          <MapPinIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-[#60709a]" />
+          <NativeSelect
+            aria-label="Group location"
+            className="w-full [&_select]:h-10 [&_select]:rounded-lg [&_select]:border-[#dfe5f0] [&_select]:bg-white [&_select]:pr-8 [&_select]:pl-9 [&_select]:text-xs [&_select]:font-semibold"
+            value={resolvedLocationId}
+            onChange={(event) => setSelectedLocationId(event.target.value)}
+          >
+            {query.data.locations.map((location) => (
+              <NativeSelectOption key={location.id} value={location.id}>
+                {location.name}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </div>
         <ResourceSearch
           value={search}
           onChange={setSearch}
@@ -106,7 +151,7 @@ function StaffGroupsSettingsPage({
         />
         <NativeSelect
           aria-label="Filter groups by colour"
-          className="h-10 w-32 rounded-lg border-[#dfe5f0] bg-white text-xs sm:w-40"
+          className="h-10 w-full rounded-lg border-[#dfe5f0] bg-white text-xs sm:w-40"
           value={color}
           onChange={(event) => setColor(event.target.value)}
         >
@@ -139,8 +184,8 @@ function StaffGroupsSettingsPage({
       />
 
       <ResourceInfo>
-        Groups organise staff on the rota and provide visual identification
-        only. They do not affect permissions or access.
+        Groups are shared across your workspace. Staff counts reflect the
+        selected location, and colours appear throughout rota planning.
       </ResourceInfo>
     </div>
   )

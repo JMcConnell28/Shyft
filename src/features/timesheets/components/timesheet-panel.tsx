@@ -3,7 +3,7 @@ import type { LucideIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-function DesktopTimesheetPanel({
+function TimesheetPanel({
   children,
   className,
 }: {
@@ -13,7 +13,7 @@ function DesktopTimesheetPanel({
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-[14px] border border-[#dfe5f0] bg-card shadow-[0_8px_24px_rgba(30,50,96,0.045)]",
+        "overflow-hidden rounded-2xl border border-[#e0e5ef] bg-white shadow-[0_8px_28px_rgba(26,43,83,0.045)]",
         className
       )}
     >
@@ -22,7 +22,7 @@ function DesktopTimesheetPanel({
   )
 }
 
-function DesktopTimesheetPanelHeader({
+function TimesheetPanelHeader({
   action,
   icon: Icon,
   subtitle,
@@ -34,19 +34,19 @@ function DesktopTimesheetPanelHeader({
   title: string
 }) {
   return (
-    <div className="flex min-h-14 items-center justify-between gap-3 border-b border-[#edf0f6] px-4 py-3">
+    <div className="flex min-h-14 items-center justify-between gap-3 border-b border-[#edf0f6] px-4 py-3 sm:px-5">
       <div className="flex min-w-0 items-center gap-3">
         {Icon ? (
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#eef3ff] text-[#0069ff]">
-            <Icon className="size-4.5" />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#eef3ff] text-[#236cff]">
+            <Icon className="size-4" />
           </span>
         ) : null}
         <div className="min-w-0">
-          <h3 className="truncate text-[15px] font-semibold tracking-[-0.01em] text-[#11245a]">
+          <h2 className="truncate text-[15px] font-semibold tracking-[-0.01em]">
             {title}
-          </h3>
+          </h2>
           {subtitle ? (
-            <p className="mt-0.5 truncate text-xs font-medium text-[#7a86a4]">
+            <p className="mt-0.5 truncate text-xs font-medium text-[#7481a0]">
               {subtitle}
             </p>
           ) : null}
@@ -57,7 +57,7 @@ function DesktopTimesheetPanelHeader({
   )
 }
 
-function DesktopTimesheetPill({
+function TimesheetPill({
   children,
   className,
 }: {
@@ -67,7 +67,7 @@ function DesktopTimesheetPill({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-[10px] border border-[#dfe5f0] bg-[#fbfcff] px-2.5 py-1 text-[11px] font-semibold text-[#61709a]",
+        "inline-flex items-center gap-1.5 rounded-lg border border-[#dfe4ef] bg-[#fafbfe] px-2.5 py-1 text-[11px] font-semibold text-[#617096]",
         className
       )}
     >
@@ -76,8 +76,4 @@ function DesktopTimesheetPill({
   )
 }
 
-export {
-  DesktopTimesheetPanel,
-  DesktopTimesheetPanelHeader,
-  DesktopTimesheetPill,
-}
+export { TimesheetPanel, TimesheetPanelHeader, TimesheetPill }

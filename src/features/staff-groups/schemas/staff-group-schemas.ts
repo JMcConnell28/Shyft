@@ -9,6 +9,10 @@ const workspaceScopedUserSchema = z.object({
     .min(1, "Choose an organization.")
     .optional(),
   locationId: z.string().uuid("Choose a valid location.").optional(),
+  selectedLocationId: z
+    .string()
+    .uuid("Choose a valid team location.")
+    .optional(),
   userId: z.string().trim().min(1, "Choose a user."),
 })
 

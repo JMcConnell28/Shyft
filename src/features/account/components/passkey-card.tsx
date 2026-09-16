@@ -1,104 +1,111 @@
 "use client"
 
-import type { Passkey } from "@better-auth/passkey"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { FingerprintIcon, PlusIcon } from "lucide-react"
-import * as React from "react"
+import type { Passkey } from "@better-auth/passkey"
 
+import type { PasskeySupport } from "@/features/account/hooks/use-passkey-support"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SettingsSection } from "@/features/settings/components/settings-section"
+import { usePasskeySettings } from "@/features/account/hooks/use-passkey-settings"
 import { Input } from "@/components/ui/input"
 import { PasskeyRow } from "@/features/account/components/passkey-row"
-import {
-  listPasskeys,
-  passkeyQueryKey,
-} from "@/features/account/queries/passkey-queries"
-import { usePasskeySupport } from "@/features/account/hooks/use-passkey-support"
-import { authClient } from "@/lib/auth-client"
-import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
 function PasskeyCard() {
-  const queryClient = useQueryClient()
-  const [name, setName] = React.useState("")
-  const passkeySupport = usePasskeySupport()
-  const isSupported = passkeySupport === "supported"
-  const passkeysQuery = useQuery({
-    queryKey: passkeyQueryKey,
-    queryFn: listPasskeys,
-  })
-  const addMutation = useMutation({
-    mutationFn: async () => {
-      const result = await authClient.passkey.addPasskey({
-        name: name.trim() || "My device",
-        authenticatorAttachment: "platform",
-      })
-
-      if (result.error) throw new Error(result.error.message)
-      return result.data
-    },
-    onSuccess: async () => {
-      setName("")
-      await queryClient.invalidateQueries({ queryKey: passkeyQueryKey })
-      showSuccessToast("Passkey added.")
-    },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not add the passkey.",
-      })
-    },
-  })
+  const {
+    name,
+    setName,
+    passkeySupport,
+    isSupported,
+    passkeysQuery,
+    addMutation,
+  } = usePasskeySettings()
 
   return (
-    <Card className="border-border/70 bg-background/95 shadow-sm xl:col-span-2">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <FingerprintIcon className="size-4 text-muted-foreground" />
-          <CardTitle className="text-sm">Passkeys</CardTitle>
+    <SettingsSection
+      title="Face ID & fingerprint"
+      icon={FingerprintIcon}
+      description="Sign in using your face, fingerprint or device PIN."
+    >
+      <div className="space-y-4 py-3">
+        <div className="space-y-2 text-xs leading-5 text-[#657398]">
+          <p>
+            Use Face ID, Touch ID, Windows Hello or your device PIN instead of
+            typing your password. The options depend on your device.
+          </p>
+          <p>
+            This creates a{" "}
+            <strong className="font-semibold text-[#14214a]">passkey</strong> —
+            a secure sign-in saved by your device or password manager.
+            RocketRota never receives your face or fingerprint data. You can
+            still use your password.
+          </p>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Input
-            value={name}
-            maxLength={80}
-            placeholder="Passkey name, e.g. Work laptop"
-            aria-label="Passkey name"
-            onChange={(event) => setName(event.target.value)}
-          />
-          <Button
-            type="button"
-            className="sm:shrink-0"
-            disabled={!isSupported || addMutation.isPending}
-            onClick={() => addMutation.mutate()}
-          >
-            <PlusIcon />
-            {addMutation.isPending ? "Adding..." : "Add passkey"}
-          </Button>
+        <div>
+          <label htmlFor="device-sign-in-name" className="mb-2 block text-xs font-semibold text-[#14214a]">
+            Name for this sign-in (optional)
+          </label>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              id="device-sign-in-name"
+              value={name}
+              maxLength={80}
+              placeholder="e.g. My iPhone"
+              aria-label="Name for this sign-in (optional)"
+              onChange={(event) => setName(event.target.value)}
+            />
+            <Button
+              type="button"
+              className="sm:shrink-0"
+              disabled={!isSupported || addMutation.isPending}
+              onClick={() => addMutation.mutate()}
+            >
+              <PlusIcon />
+              {addMutation.isPending
+                ? "Setting up..."
+                : "Set up on this device"}
+            </Button>
+          </div>
         </div>
-
+        <p className="text-[11px] leading-5 text-[#7180a2]">
+          Your device will guide you through setup and ask you to confirm it is
+          you.
+        </p>
         <PasskeySupportMessage support={passkeySupport} />
 
-        <PasskeyList
-          passkeys={passkeysQuery.data ?? []}
-          isLoading={passkeysQuery.isPending}
-        />
-      </CardContent>
-    </Card>
+        {passkeysQuery.isError ? (
+          <div role="alert" className="text-xs text-destructive">
+            We could not load your saved sign-ins.
+            <Button
+              type="button"
+              variant="link"
+              onClick={() => void passkeysQuery.refetch()}
+            >
+              Try again
+            </Button>
+          </div>
+        ) : (
+          <PasskeyList
+            passkeys={passkeysQuery.data ?? []}
+            isLoading={passkeysQuery.isPending}
+          />
+        )}
+      </div>
+    </SettingsSection>
   )
 }
 
 function PasskeySupportMessage({
   support,
 }: {
-  support: ReturnType<typeof usePasskeySupport>
+  support: PasskeySupport
 }) {
   if (support === "checking" || support === "supported") return null
 
   return (
     <p className="text-sm text-muted-foreground">
       {support === "insecure"
-        ? "Passkeys require HTTPS. Open RocketRota on its hosted HTTPS address rather than a local network IP address."
-        : "Passkeys are unavailable in this browser. Check that Chrome and Google Play services are up to date."}
+        ? "Open RocketRota at its secure website address to set up device sign-in."
+        : "Device sign-in is not available in this browser. Try an updated browser or another device. You can still sign in with your password."}
     </p>
   )
 }
@@ -107,18 +114,19 @@ function PasskeyList({
   passkeys,
   isLoading,
 }: {
-  passkeys: Passkey[]
+  passkeys: Array<Passkey>
   isLoading: boolean
 }) {
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading passkeys...</p>
+    return (
+      <p className="text-sm text-muted-foreground">Loading saved sign-ins...</p>
+    )
   }
 
   if (passkeys.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-border px-4 py-5 text-sm text-muted-foreground">
-        No passkeys yet. Add one to sign in with your device PIN, fingerprint,
-        or face recognition.
+      <div className="text-xs text-[#7180a2]">
+        No saved sign-ins yet. Choose “Set up on this device” to get started.
       </div>
     )
   }

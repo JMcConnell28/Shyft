@@ -85,12 +85,24 @@ async function updateCompanyEmployeeLocationActivity(input: {
        employee_id,
        organization_id,
        location_id,
+       staff_group_id,
        is_enabled,
        disabled_at
-     ) values ($1, $2, $3, $4, case when $4 then null else timezone('utc', now()) end)
+     ) values (
+       $1,
+       $2,
+       $3,
+       (select staff_group_id from public.employees where id = $1::uuid),
+       $4,
+       case when $4 then null else timezone('utc', now()) end
+     )
      on conflict (employee_id, location_id)
      do update set is_enabled = excluded.is_enabled,
-                   disabled_at = excluded.disabled_at`,
+                   disabled_at = excluded.disabled_at,
+                   staff_group_id = coalesce(
+                     employee_location_assignments.staff_group_id,
+                     excluded.staff_group_id
+                   )`,
     [
       employee.id,
       context.organizationId,
@@ -166,14 +178,26 @@ async function rehireCompanyEmployee(input: {
          employee_id,
          organization_id,
          location_id,
+         staff_group_id,
          is_enabled,
          disabled_at
        )
-       select $1::uuid, $2::text, location_id, true, null
+       select $1::uuid,
+              $2::text,
+              location_id,
+              employee.staff_group_id,
+              true,
+              null
        from unnest($3::uuid[]) location_id
+       cross join public.employees employee
+       where employee.id = $1::uuid
        on conflict (employee_id, location_id)
        do update set is_enabled = true,
-                     disabled_at = null`,
+                     disabled_at = null,
+                     staff_group_id = coalesce(
+                       employee_location_assignments.staff_group_id,
+                       excluded.staff_group_id
+                     )`,
       [employee.id, context.organizationId, input.locationIds]
     )
 
