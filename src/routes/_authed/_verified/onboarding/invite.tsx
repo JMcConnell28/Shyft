@@ -1,13 +1,13 @@
-import { createFileRoute, getRouteApi, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
 import { InviteTeamPage } from "@/features/onboarding/components/invite-team-page"
 import { getPendingOnboardingPath } from "@/features/onboarding/utils/viewer-route-redirects"
 
-const verifiedRouteApi = getRouteApi("/_authed/_verified")
+import { loadDefaultViewer } from "@/features/navigation/load-navigation-context"
 
 export const Route = createFileRoute("/_authed/_verified/onboarding/invite")({
-  beforeLoad: ({ context }) => {
-    const viewer = context.viewer
+  beforeLoad: async ({ context }) => {
+    const viewer = await loadDefaultViewer(context)
 
     if (!viewer.activeOrganization && !viewer.activeWorkspace) {
       throw redirect({ to: "/dashboard" })
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/invite")({
     if (pendingOnboardingPath === "/onboarding/location") {
       throw redirect({ to: pendingOnboardingPath })
     }
+    return { viewer }
   },
   head: () => ({
     meta: [
@@ -33,7 +34,7 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/invite")({
 })
 
 function InviteTeamRoute() {
-  const { viewer } = verifiedRouteApi.useRouteContext()
+  const { viewer } = Route.useRouteContext()
 
   return <InviteTeamPage viewer={viewer} />
 }

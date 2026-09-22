@@ -2,6 +2,7 @@ import type { PoolClient } from "pg"
 
 import { getDatabase } from "@/lib/db"
 import { slugify } from "@/lib/slug"
+import { refreshLocationClosingShiftSummaries } from "@/features/rota/server/location-summary-refresh"
 
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 import { requireLocationPermission } from "@/lib/auth/has-location-permission"
@@ -175,6 +176,15 @@ async function updateLocationSettings(input: {
         parameters,
       )
     }
+
+    await refreshLocationClosingShiftSummaries({
+      client,
+      closingTimes: input.daySettings,
+      estimatedClosingTime: input.estimatedClosingTime,
+      estimatedClosingTimeNextDay: input.estimatedClosingTimeNextDay,
+      locationId: input.locationId,
+      organizationId: input.organizationId ?? null,
+    })
 
     await client.query("COMMIT")
   } catch (error) {

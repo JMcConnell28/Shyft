@@ -83,6 +83,8 @@ function DashboardShell({
   capabilities: OrganizationCapabilities
 }) {
   const [isSigningOut, setIsSigningOut] = React.useState(false)
+  const [isTrialBannerDismissed, setIsTrialBannerDismissed] =
+    React.useState(false)
   const resolvedActiveWorkspace =
     activeWorkspace ??
     (activeOrganization
@@ -138,6 +140,17 @@ function DashboardShell({
           hasUnreadRotaUpdates={hasUnreadRotaUpdates}
           hasUnreadAnnouncements={hasUnreadAnnouncements}
           canInviteTeamMembers={canInviteTeamMembers}
+          mobileTrialBanner={
+            canViewTrialBanner ? (
+              <TrialBanner
+                billing={billing ?? null}
+                isDismissed={isTrialBannerDismissed}
+                onDismiss={() => setIsTrialBannerDismissed(true)}
+                trial={trial ?? null}
+                variant="sidebar"
+              />
+            ) : null
+          }
           user={user}
           organizations={organizations}
           activeOrganization={activeOrganization}
@@ -235,12 +248,23 @@ function DashboardShell({
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <NotificationMenu
-              announcements={recentAnnouncements}
-              hasUnreadRotaUpdates={Boolean(hasUnreadRotaUpdates)}
-              prominent={hasMobileBrandHeader}
-              workspaceSlug={activeWorkspace?.slug ?? ""}
-            />
+            <div className="ml-auto flex items-center gap-2">
+              {canViewTrialBanner ? (
+                <TrialBanner
+                  billing={billing ?? null}
+                  isDismissed={isTrialBannerDismissed}
+                  onDismiss={() => setIsTrialBannerDismissed(true)}
+                  trial={trial ?? null}
+                  variant="header"
+                />
+              ) : null}
+              <NotificationMenu
+                announcements={recentAnnouncements}
+                hasUnreadRotaUpdates={Boolean(hasUnreadRotaUpdates)}
+                prominent={hasMobileBrandHeader}
+                workspaceSlug={activeWorkspace?.slug ?? ""}
+              />
+            </div>
             {capabilities.canManageSettings &&
             activeWorkspace?.type === "location" ? (
               <Button
@@ -289,9 +313,6 @@ function DashboardShell({
               "no-scrollbar flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
             )}
           >
-            {canViewTrialBanner ? (
-              <TrialBanner billing={billing ?? null} trial={trial ?? null} />
-            ) : null}
             {canInviteTeamMembers ? (
               <>
                 <PastDueBillingNotice

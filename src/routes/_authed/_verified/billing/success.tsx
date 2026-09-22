@@ -1,4 +1,4 @@
-import { createFileRoute, getRouteApi, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { z } from "zod"
 
 import { BrandLockup } from "@/components/app/brand"
@@ -9,17 +9,20 @@ import {
   getOrganizationDashboardPath,
 } from "@/lib/organization-paths"
 
-const verifiedRouteApi = getRouteApi("/_authed/_verified")
+import { loadDefaultViewer } from "@/features/navigation/load-navigation-context"
+
 const billingSuccessSearchSchema = z.object({
   session_id: z.string().optional(),
 })
 
 export const Route = createFileRoute("/_authed/_verified/billing/success")({
   validateSearch: (search) => billingSuccessSearchSchema.parse(search),
-  beforeLoad: ({ context }) => {
-    if (!context.viewer.activeWorkspace) {
+  beforeLoad: async ({ context }) => {
+    const viewer = await loadDefaultViewer(context)
+    if (!viewer.activeWorkspace) {
       throw redirect({ to: "/onboarding/setup" })
     }
+    return { viewer }
   },
   head: () => ({
     meta: [
@@ -34,7 +37,7 @@ export const Route = createFileRoute("/_authed/_verified/billing/success")({
 })
 
 function BillingSuccessRoute() {
-  const { viewer } = verifiedRouteApi.useRouteContext()
+  const { viewer } = Route.useRouteContext()
   const search = Route.useSearch()
   const workspace = viewer.activeWorkspace
   const dashboardHref =
@@ -59,8 +62,12 @@ function BillingSuccessRoute() {
                 checkoutSessionId={search.session_id}
                 dashboardHref={dashboardHref}
                 initialBilling={viewer.billing}
-                organizationId={workspace?.type === "organization" ? workspace.id : null}
-                locationId={workspace?.type === "location" ? workspace.id : null}
+                organizationId={
+                  workspace?.type === "organization" ? workspace.id : null
+                }
+                locationId={
+                  workspace?.type === "location" ? workspace.id : null
+                }
               />
             </CardContent>
           </Card>

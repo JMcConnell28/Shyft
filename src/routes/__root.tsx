@@ -11,7 +11,7 @@ import type { QueryClient } from "@tanstack/react-query"
 import { RootErrorState } from "@/components/errors/root-error-state"
 import { AppToaster } from "@/components/providers/app-toaster"
 import { PwaAppController } from "@/features/pwa/components/pwa-app-controller"
-
+import { NavigationCacheController } from "@/features/navigation/components/navigation-cache-controller"
 
 type RouterContext = {
   queryClient: QueryClient
@@ -87,6 +87,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <PwaAppController />
+        <NavigationCacheController />
         {children}
         <AppToaster />
         <TanStackDevtools

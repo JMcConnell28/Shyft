@@ -2,10 +2,12 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 
 import { CreateOrganizationPage } from "@/features/onboarding/components/create-organization-page"
 import { getExistingOrganizationRedirect } from "@/features/onboarding/utils/viewer-route-redirects"
+import { loadDefaultViewer } from "@/features/navigation/load-navigation-context"
 
 export const Route = createFileRoute("/_authed/_verified/onboarding/org")({
-  beforeLoad: ({ context }) => {
-    const redirectTarget = getExistingOrganizationRedirect(context.viewer)
+  beforeLoad: async ({ context }) => {
+    const viewer = await loadDefaultViewer(context)
+    const redirectTarget = getExistingOrganizationRedirect(viewer)
 
     if (redirectTarget) {
       throw redirect({ href: redirectTarget })

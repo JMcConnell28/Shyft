@@ -1,4 +1,4 @@
-import { Link, createFileRoute, getRouteApi, redirect } from "@tanstack/react-router"
+import { Link, createFileRoute, redirect } from "@tanstack/react-router"
 import {
   AlertTriangleIcon,
   CheckCircle2Icon,
@@ -6,12 +6,12 @@ import {
   ReceiptTextIcon,
 } from "lucide-react"
 
+import type { WorkspaceBillingState } from "@/features/billing/types"
 import { BrandLockup } from "@/components/app/brand"
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button"
 import { CheckoutButton } from "@/features/billing/components/checkout-button"
 import { hasPaidWorkspaceAccess } from "@/features/billing/utils/billing-access"
 import { PAST_DUE_GRACE_DAYS } from "@/features/billing/constants"
-import type { WorkspaceBillingState } from "@/features/billing/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -20,9 +20,12 @@ import {
   getWorkspaceAccountPath,
 } from "@/lib/organization-paths"
 
-const verifiedRouteApi = getRouteApi("/_authed/_verified")
+import { loadDefaultViewer } from "@/features/navigation/load-navigation-context"
 
-type BillingBlockedAction = "choose-plan" | "update-payment-method" | "manage-billing"
+type BillingBlockedAction =
+  | "choose-plan"
+  | "update-payment-method"
+  | "manage-billing"
 
 type BillingBlockedState = {
   label: string
@@ -36,10 +39,12 @@ type BillingBlockedState = {
 }
 
 export const Route = createFileRoute("/_authed/_verified/billing/expired")({
-  beforeLoad: ({ context }) => {
-    if (!context.viewer.activeWorkspace) {
+  beforeLoad: async ({ context }) => {
+    const viewer = await loadDefaultViewer(context)
+    if (!viewer.activeWorkspace) {
       throw redirect({ to: "/onboarding/setup" })
     }
+    return { viewer }
   },
   head: () => ({
     meta: [
@@ -54,7 +59,7 @@ export const Route = createFileRoute("/_authed/_verified/billing/expired")({
 })
 
 function BillingExpiredRoute() {
-  const { viewer } = verifiedRouteApi.useRouteContext()
+  const { viewer } = Route.useRouteContext()
   const workspace = viewer.activeWorkspace
   const hasSubscription = hasPaidWorkspaceAccess(viewer.billing)
   const canOpenPortal = Boolean(viewer.billing?.stripeCustomerId)
@@ -70,7 +75,9 @@ function BillingExpiredRoute() {
       : workspace
         ? getOrganizationDashboardPath(workspace.slug)
         : "/dashboard"
-  const accountHref = workspace ? getWorkspaceAccountPath(workspace.slug) : "/account"
+  const accountHref = workspace
+    ? getWorkspaceAccountPath(workspace.slug)
+    : "/account"
 
   return (
     <main className="min-h-svh bg-muted/20 px-4 py-5 sm:px-6">
@@ -101,7 +108,7 @@ function BillingExpiredRoute() {
                 )}
               </div>
               <div className="space-y-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                   {blockedState.label}
                 </p>
                 <CardTitle className="text-2xl">{blockedState.title}</CardTitle>
@@ -133,24 +140,36 @@ function BillingExpiredRoute() {
                 {blockedState.action === "choose-plan" ? (
                   <CheckoutButton
                     className="w-full sm:w-auto"
-                    organizationId={workspace?.type === "organization" ? workspace.id : null}
-                    locationId={workspace?.type === "location" ? workspace.id : null}
+                    organizationId={
+                      workspace?.type === "organization" ? workspace.id : null
+                    }
+                    locationId={
+                      workspace?.type === "location" ? workspace.id : null
+                    }
                   >
                     Choose plan
                   </CheckoutButton>
                 ) : blockedState.action === "update-payment-method" ? (
                   <BillingPortalButton
                     className="w-full sm:w-auto"
-                    organizationId={workspace?.type === "organization" ? workspace.id : null}
-                    locationId={workspace?.type === "location" ? workspace.id : null}
+                    organizationId={
+                      workspace?.type === "organization" ? workspace.id : null
+                    }
+                    locationId={
+                      workspace?.type === "location" ? workspace.id : null
+                    }
                   >
                     Update payment method
                   </BillingPortalButton>
                 ) : (
                   <BillingPortalButton
                     className="w-full sm:w-auto"
-                    organizationId={workspace?.type === "organization" ? workspace.id : null}
-                    locationId={workspace?.type === "location" ? workspace.id : null}
+                    organizationId={
+                      workspace?.type === "organization" ? workspace.id : null
+                    }
+                    locationId={
+                      workspace?.type === "location" ? workspace.id : null
+                    }
                   />
                 )}
                 {blockedState.canGoBack ? (
