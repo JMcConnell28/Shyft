@@ -1,5 +1,5 @@
 import * as React from "react"
-import { createFileRoute, Link, redirect } from "@tanstack/react-router"
+import { Link, createFileRoute, redirect } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 import { BadgeCheckIcon, Building2Icon } from "lucide-react"
 
@@ -96,6 +96,7 @@ function JoinInviteRoute() {
         title="This invite link is no longer valid."
         description="Ask your manager for a fresh RocketRota invite link and try again."
         progress={10}
+        showSignOut={Boolean(loaderData.viewer)}
       >
         <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
           <CardContent className="pt-6">
@@ -118,6 +119,7 @@ function JoinInviteRoute() {
       title={`Join ${loaderData.preview.organizationName} on RocketRota.`}
       description="This invite will place you into the correct workplace, location, and default staff group."
       progress={80}
+      showSignOut={Boolean(loaderData.viewer)}
     >
       <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
         <CardHeader>
