@@ -5,8 +5,10 @@ import { useServerFn } from "@tanstack/react-start"
 import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 import { updateAccountProfile } from "@/features/account/server-fns"
+import { useRefreshNavigation } from "@/features/navigation/hooks/use-refresh-navigation"
 
 function useAccountProfile(initialName: string) {
+  const refreshNavigation = useRefreshNavigation()
   const updateProfileFn = useServerFn(updateAccountProfile)
   const [name, setName] = React.useState(initialName)
   const [error, setError] = React.useState<string | null>(null)
@@ -17,8 +19,9 @@ function useAccountProfile(initialName: string) {
           name: name.trim(),
         },
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       setError(null)
+      await refreshNavigation()
       showSuccessToast("Profile updated.")
     },
     onError: (mutationError) => {

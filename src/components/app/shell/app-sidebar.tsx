@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 
 import LocationName from "./location-name"
+import type { ReactNode } from "react"
 import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
 import type { OrganizationAppRouteKey } from "@/lib/organization-paths"
 import type { OrganizationSummary, WorkspaceSummary } from "@/lib/onboarding"
@@ -32,6 +33,7 @@ function AppSidebar({
   hasUnreadRotaUpdates,
   hasUnreadAnnouncements,
   canInviteTeamMembers,
+  mobileTrialBanner,
   user,
   activeOrganization,
   activeWorkspace,
@@ -43,6 +45,7 @@ function AppSidebar({
   hasUnreadRotaUpdates?: boolean
   hasUnreadAnnouncements?: boolean
   canInviteTeamMembers?: boolean
+  mobileTrialBanner?: ReactNode
   user: {
     name: string
     email: string
@@ -67,7 +70,7 @@ function AppSidebar({
         />
       </SidebarHeader>
 
-      <SidebarContent className="max-md:overflow-hidden">
+      <SidebarContent>
         <SidebarGroup className="max-md:px-6 max-md:py-0">
           <SidebarGroupContent>
             <SidebarMenu className="gap-1.5 max-md:gap-3">
@@ -112,6 +115,8 @@ function AppSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {mobileTrialBanner}
       </SidebarContent>
 
       <SidebarFooter className="group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2 max-md:gap-4 max-md:p-4">

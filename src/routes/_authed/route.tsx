@@ -1,21 +1,13 @@
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
+import { Outlet, createFileRoute } from "@tanstack/react-router"
 
-import { getViewerState } from "@/lib/onboarding"
+import { loadNavigationSession } from "@/features/navigation/load-navigation-context"
 
 export const Route = createFileRoute("/_authed")({
-  beforeLoad: async ({ location }) => {
-    const viewer = await getViewerState()
-
-    if (!viewer) {
-      throw redirect({
-        to: "/login",
-        search: {
-          redirect: location.href,
-        },
-      })
-    }
-
-    return { viewer }
-  },
+  beforeLoad: async ({ context, location }) => ({
+    navigationSession: await loadNavigationSession(
+      context.queryClient,
+      location.href
+    ),
+  }),
   component: Outlet,
 })

@@ -20,6 +20,7 @@ import {
   setStaffGroupColor,
 } from "@/features/staff-groups/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
+import { navigationQueryKeys } from "@/features/navigation/query-keys"
 
 function useStaffGroupMutations(input: {
   organizationId?: string
@@ -203,6 +204,9 @@ function useStaffGroupMutations(input: {
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Team member removed.")
+      await queryClient.invalidateQueries({
+        queryKey: navigationQueryKeys.viewers,
+      })
     },
     onError: (error) => {
       showErrorToast(error, {

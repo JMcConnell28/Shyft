@@ -1,4 +1,4 @@
-import { createFileRoute, getRouteApi, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 
 import { OnboardingShell } from "@/components/app/onboarding-shell"
@@ -9,11 +9,11 @@ import {
 } from "@/features/onboarding/utils/viewer-route-redirects"
 import { createFirstLocationAndZone } from "@/lib/onboarding"
 
-const verifiedRouteApi = getRouteApi("/_authed/_verified")
+import { loadDefaultViewer } from "@/features/navigation/load-navigation-context"
 
 export const Route = createFileRoute("/_authed/_verified/onboarding/location")({
-  beforeLoad: ({ context }) => {
-    const viewer = context.viewer
+  beforeLoad: async ({ context }) => {
+    const viewer = await loadDefaultViewer(context)
 
     if (viewer.onboarding?.hasLocation) {
       const redirectTarget =
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/location")({
         throw redirect({ href: redirectTarget })
       }
     }
+    return { viewer }
   },
   head: () => ({
     meta: [
@@ -38,7 +39,7 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/location")({
 })
 
 function CreateLocationRoute() {
-  const { viewer } = verifiedRouteApi.useRouteContext()
+  const { viewer } = Route.useRouteContext()
   const createFirstLocationFn = useServerFn(createFirstLocationAndZone)
 
   return (

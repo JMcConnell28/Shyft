@@ -14,6 +14,7 @@ import { createZodFieldValidator } from "@/lib/validation"
 import { emailSchema, passwordSchema } from "@/lib/onboarding-schemas"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
+import { navigationQueryKeys } from "@/features/navigation/query-keys"
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search) => ({
@@ -22,7 +23,8 @@ export const Route = createFileRoute("/login")({
         ? search.redirect
         : "/dashboard",
   }),
-  beforeLoad: async () => {
+  beforeLoad: async ({ context }) => {
+    context.queryClient.removeQueries({ queryKey: navigationQueryKeys.all })
     const session = await getSession()
 
     if (session) {

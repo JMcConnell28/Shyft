@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 import { CalendarX2Icon, FlaskConicalIcon } from "lucide-react"
 
 import type { TimeAttendanceDeliveryAddress } from "@/features/billing/schemas/time-attendance-addon-schemas"
 import type { LocationAddon } from "@/features/billing/types"
+import { useRefreshNavigation } from "@/features/navigation/hooks/use-refresh-navigation"
 import { Button } from "@/components/ui/button"
 import { TimeAttendanceAddonDialog } from "@/features/billing/components/time-attendance-addon-dialog"
 import { updateTimeAttendanceAddon } from "@/features/billing/server-fns"
@@ -31,7 +31,7 @@ function TimeAttendanceAddonButton({
   const [isTestMode, setIsTestMode] = React.useState(false)
   const [isPending, setIsPending] = React.useState(false)
   const updateAddon = useServerFn(updateTimeAttendanceAddon)
-  const router = useRouter()
+  const refreshNavigation = useRefreshNavigation()
 
   async function update(
     action: AddonAction,
@@ -48,7 +48,7 @@ function TimeAttendanceAddonButton({
         },
       })
       closeDialog()
-      await router.invalidate()
+      await refreshNavigation()
     } catch (error) {
       showErrorToast(error, {
         fallbackMessage: "We could not update Time & Attendance.",

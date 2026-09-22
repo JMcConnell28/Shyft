@@ -25,6 +25,7 @@ import {
   updateCompanyEmployeeRotaNote,
 } from "@/features/company/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
+import { navigationQueryKeys } from "@/features/navigation/query-keys"
 
 type RotaNoteMutationInput = {
   note: {
@@ -76,6 +77,9 @@ function useCompanyMutations(input: {
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Role updated.")
+      await queryClient.invalidateQueries({
+        queryKey: navigationQueryKeys.viewers,
+      })
     },
     onError: (error) => {
       showErrorToast(error, {
@@ -93,6 +97,9 @@ function useCompanyMutations(input: {
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Location activity updated.")
+      await queryClient.invalidateQueries({
+        queryKey: navigationQueryKeys.viewers,
+      })
     },
     onError: (error) => {
       showErrorToast(error, {
@@ -107,6 +114,9 @@ function useCompanyMutations(input: {
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Employee removed from the organisation.")
+      await queryClient.invalidateQueries({
+        queryKey: navigationQueryKeys.viewers,
+      })
     },
     onError: (error) => {
       showErrorToast(error, {
@@ -116,11 +126,16 @@ function useCompanyMutations(input: {
   })
 
   const rehireEmployeeMutation = useMutation({
-    mutationFn: (variables: { employeeId: string; locationIds: Array<string> }) =>
-      rehireEmployeeFn({ data: { ...input, ...variables } }),
+    mutationFn: (variables: {
+      employeeId: string
+      locationIds: Array<string>
+    }) => rehireEmployeeFn({ data: { ...input, ...variables } }),
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Employee rehired.")
+      await queryClient.invalidateQueries({
+        queryKey: navigationQueryKeys.viewers,
+      })
     },
     onError: (error) => {
       showErrorToast(error, {

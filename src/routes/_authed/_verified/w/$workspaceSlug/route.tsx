@@ -1,32 +1,18 @@
-import {
-  Outlet,
-  createFileRoute,
-  redirect,
-  useLocation,
-} from "@tanstack/react-router"
+import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router"
 
 import { DashboardShell } from "@/components/app/dashboard-shell"
 import { getDashboardAnnouncements } from "@/features/announcements/server-fns"
 import { getWorkspaceShellConfig } from "@/features/navigation/utils/workspace-shell"
 import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
-import { getViewerStateForWorkspaceSlug } from "@/lib/onboarding"
+import { loadWorkspaceViewer } from "@/features/navigation/load-navigation-context"
 import { getHasUnreadRotaUpdates } from "@/lib/rota"
 
 export const Route = createFileRoute("/_authed/_verified/w/$workspaceSlug")({
-  beforeLoad: async ({ context, params }) => {
-    const currentViewer = context.viewer
-    const viewer =
-      currentViewer.activeWorkspace?.slug === params.workspaceSlug
-        ? currentViewer
-        : await getViewerStateForWorkspaceSlug({
-            data: {
-              workspaceSlug: params.workspaceSlug,
-            },
-          })
-
-    if (!viewer?.activeWorkspace) {
-      throw redirect({ to: "/dashboard" })
-    }
+  beforeLoad: async ({ context, params, preload, location }) => {
+    const viewer = await loadWorkspaceViewer(context, params.workspaceSlug, {
+      preload,
+      href: location.href,
+    })
 
     const capabilities = getOrgCapabilitiesForRole(viewer.activeRole)
 

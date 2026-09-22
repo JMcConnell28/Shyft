@@ -10,21 +10,24 @@ import {
   moveLocationToOrganizationBilling,
 } from "@/features/settings/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
+import { useRefreshNavigation } from "@/features/navigation/hooks/use-refresh-navigation"
 
 function useWorkspaceConnectionMutations() {
   const queryClient = useQueryClient()
+  const refreshNavigation = useRefreshNavigation()
   const createOrganizationFromLocationFn = useServerFn(
-    createOrganizationFromLocation,
+    createOrganizationFromLocation
   )
   const moveLocationToOrganizationFn = useServerFn(moveLocationToOrganization)
   const moveLocationToOrganizationBillingFn = useServerFn(
-    moveLocationToOrganizationBilling,
+    moveLocationToOrganizationBilling
   )
 
   const invalidateSettings = async () => {
     await queryClient.invalidateQueries({
       queryKey: settingsQueryKeys.all,
     })
+    await refreshNavigation()
   }
 
   const moveLocationMutation = useMutation({
@@ -39,8 +42,7 @@ function useWorkspaceConnectionMutations() {
     onSuccess: async (result) => {
       await invalidateSettings()
       showSuccessToast(
-        result.stripeSyncWarning ??
-          "Location connection updated.",
+        result.stripeSyncWarning ?? "Location connection updated."
       )
     },
     onError: (error) => {
@@ -64,7 +66,7 @@ function useWorkspaceConnectionMutations() {
       await invalidateSettings()
       showSuccessToast(
         result.stripeSyncWarning ??
-          "Organization created and location connected.",
+          "Organization created and location connected."
       )
     },
     onError: (error) => {
@@ -75,19 +77,13 @@ function useWorkspaceConnectionMutations() {
   })
 
   const moveBillingMutation = useMutation({
-    mutationFn: (input: {
-      locationId: string
-      organizationId: string
-    }) =>
+    mutationFn: (input: { locationId: string; organizationId: string }) =>
       moveLocationToOrganizationBillingFn({
         data: input,
       }),
     onSuccess: async (result) => {
       await invalidateSettings()
-      showSuccessToast(
-        result.stripeSyncWarning ??
-          "Location billing moved.",
-      )
+      showSuccessToast(result.stripeSyncWarning ?? "Location billing moved.")
     },
     onError: (error) => {
       showErrorToast(error, {
