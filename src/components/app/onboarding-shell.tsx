@@ -1,11 +1,11 @@
-import * as React from "react"
 import { Link } from "@tanstack/react-router"
 import { ArrowLeftIcon } from "lucide-react"
+import type { ReactNode } from "react"
 
 import { BrandLockup } from "@/components/app/brand"
+import { SignOutButton } from "@/components/app/sign-out-button"
 import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { authClient } from "@/lib/auth-client"
+import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 type OnboardingShellProps = {
@@ -14,7 +14,7 @@ type OnboardingShellProps = {
   title: string
   description: string
   progress?: number
-  children: React.ReactNode
+  children: ReactNode
   contentWidth?: "default" | "wide"
   showBackToDashboard?: boolean
   showSignOut?: boolean
@@ -31,21 +31,6 @@ function OnboardingShell({
   showBackToDashboard = true,
   showSignOut = false,
 }: OnboardingShellProps) {
-  const [isSigningOut, setIsSigningOut] = React.useState(false)
-
-  async function handleSignOut() {
-    setIsSigningOut(true)
-
-    const result = await authClient.signOut()
-
-    if (result.error) {
-      setIsSigningOut(false)
-      return
-    }
-
-    window.location.href = "/login"
-  }
-
   return (
     <div className="min-h-svh bg-muted/20">
       <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-3 sm:px-5 lg:px-8">
@@ -60,16 +45,7 @@ function OnboardingShell({
           </Link>
           <div className="flex items-center gap-2">
             <BrandLockup compact />
-            {showSignOut ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => void handleSignOut()}
-                disabled={isSigningOut}
-              >
-                {isSigningOut ? "Signing out..." : "Log out"}
-              </Button>
-            ) : null}
+            {showSignOut ? <SignOutButton /> : null}
           </div>
         </div>
 

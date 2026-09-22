@@ -65,6 +65,7 @@ export const Route = createFileRoute("/verify-email")({
       email: search.email || session?.user.email || "",
       redirect: search.redirect,
       sent: search.sent,
+      hasSession: Boolean(session),
     }
   },
   head: () => ({
@@ -116,10 +117,12 @@ function VerifyEmailRoute() {
       eyebrow="Almost there"
       title="Verify your email"
       description="We sent a verification link to your email. Once you confirm it, RocketRota will take you back to the right onboarding step automatically."
-      alternateLabel="Need to use a different account?"
+      alternateLabel="Already verified?"
       alternateAction="Back to sign in"
       alternateHref="/login"
       alternateRedirect={loaderData.redirect}
+      hideAlternate={loaderData.hasSession}
+      showSignOut={loaderData.hasSession}
     >
       <AuthCard
         icon={MailCheckIcon}

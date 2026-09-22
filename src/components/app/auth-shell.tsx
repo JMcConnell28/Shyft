@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { ArrowLeftIcon } from "lucide-react"
 
 import { BrandLockup } from "@/components/app/brand"
+import { SignOutButton } from "@/components/app/sign-out-button"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -14,6 +15,8 @@ type AuthShellProps = {
   alternateHref: "/login" | "/sign-up"
   alternateRedirect?: string
   contentWidth?: "default" | "wide"
+  hideAlternate?: boolean
+  showSignOut?: boolean
   children: React.ReactNode
 }
 
@@ -26,6 +29,8 @@ function AuthShell({
   alternateHref,
   alternateRedirect = "/dashboard",
   contentWidth = "default",
+  hideAlternate = false,
+  showSignOut = false,
   children,
 }: AuthShellProps) {
   return (
@@ -35,17 +40,22 @@ function AuthShell({
           <Link to="/" aria-label="RocketRota home">
             <BrandLockup compact />
           </Link>
-          <Link
-            to="/"
-            data-pwa-hide
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "sm" }),
-              "text-[#53617f] hover:bg-[#f5f7fb] hover:text-[#10204b]"
-            )}
-          >
-            <ArrowLeftIcon />
-            Back to site
-          </Link>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Link
+              to="/"
+              data-pwa-hide
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "sm" }),
+                "text-[#53617f] hover:bg-[#f5f7fb] hover:text-[#10204b]"
+              )}
+            >
+              <ArrowLeftIcon />
+              Back to site
+            </Link>
+            {showSignOut ? (
+              <SignOutButton className="text-[#53617f] hover:bg-[#f5f7fb] hover:text-[#10204b]" />
+            ) : null}
+          </div>
         </div>
       </header>
 
@@ -68,16 +78,18 @@ function AuthShell({
 
           {children}
 
-          <p className="mt-5 text-center text-xs font-medium text-[#7180a2]">
-            {alternateLabel}{" "}
-            <Link
-              to={alternateHref}
-              search={{ redirect: alternateRedirect }}
-              className="font-bold text-blue-600 underline-offset-4 hover:underline"
-            >
-              {alternateAction}
-            </Link>
-          </p>
+          {!hideAlternate ? (
+            <p className="mt-5 text-center text-xs font-medium text-[#7180a2]">
+              {alternateLabel}{" "}
+              <Link
+                to={alternateHref}
+                search={{ redirect: alternateRedirect }}
+                className="font-bold text-blue-600 underline-offset-4 hover:underline"
+              >
+                {alternateAction}
+              </Link>
+            </p>
+          ) : null}
         </div>
       </main>
     </div>

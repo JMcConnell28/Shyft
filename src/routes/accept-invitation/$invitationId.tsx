@@ -1,5 +1,5 @@
 import * as React from "react"
-import { createFileRoute, Link, redirect } from "@tanstack/react-router"
+import { Link, createFileRoute, redirect } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 import { MailPlusIcon } from "lucide-react"
 
@@ -85,6 +85,7 @@ function AcceptInvitationRoute() {
       title="Join your organization on RocketRota."
       description="Manager and admin invites are handled through Better Auth. Once accepted, you will land in the right active workspace."
       progress={75}
+      showSignOut={Boolean(loaderData.session)}
     >
       <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
         <CardHeader>
