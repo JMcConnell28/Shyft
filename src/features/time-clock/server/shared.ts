@@ -8,7 +8,6 @@ import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 import { getAuthRequestHeaders } from "@/lib/auth-session.server"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
-import { requireTimeAttendanceAccess } from "@/features/billing/server/entitlements"
 
 type ClockScope = {
   organizationId: string | null
@@ -63,8 +62,6 @@ async function requireClockManagerScope(input: {
     },
     errorMessage: "You do not have permission to manage the time clock.",
   })
-  await requireTimeAttendanceAccess(input.locationId)
-
   return {
     organizationId: null,
     locationId: input.locationId,
@@ -113,8 +110,6 @@ async function requireClockSettingsScope(input: {
     },
     errorMessage: "You do not have permission to update clock settings.",
   })
-  await requireTimeAttendanceAccess(input.locationId)
-
   return {
     organizationId: null,
     locationId: input.locationId,

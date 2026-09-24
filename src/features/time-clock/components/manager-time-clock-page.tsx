@@ -51,10 +51,7 @@ function ManagerTimeClockPage({
     { action: "clock_in", employeeKey: "" }
   )
 
-  function openOverride(
-    action: ClockAction,
-    employee?: ManagerClockEmployee
-  ) {
+  function openOverride(action: ClockAction, employee?: ManagerClockEmployee) {
     setOverrideRequest({
       action,
       employeeKey: employee ? getManagerClockEmployeeKey(employee) : "",
@@ -69,16 +66,16 @@ function ManagerTimeClockPage({
         isApproving={approveAsRecordedMutation.isPending}
         isRefreshing={query.isFetching}
         liveNow={liveNow}
-        onApprove={(entryId) =>
-          approveAsRecordedMutation.mutate({ entryId })
-        }
+        onApprove={(entryId) => approveAsRecordedMutation.mutate({ entryId })}
         onManualAction={openOverride}
         onRefresh={() => void query.refetch()}
         stats={stats}
         workspaceSlug={workspaceSlug}
       />
       <ManagerClockOverrideDialog
-        employees={data.employees}
+        employees={data.employees.filter((employee) =>
+          data.writableLocationIds.includes(employee.locationId)
+        )}
         initialAction={overrideRequest.action}
         initialEmployeeKey={overrideRequest.employeeKey}
         isPending={overrideMutation.isPending}

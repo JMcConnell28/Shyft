@@ -21,7 +21,7 @@ import { resendVerificationEmail } from "@/lib/onboarding"
 import { emailSchema } from "@/lib/onboarding-schemas"
 import { showSuccessToast } from "@/lib/toast"
 import { createZodFieldValidator } from "@/lib/validation"
-import { navigationQueryKeys } from "@/features/navigation/query-keys"
+import { invalidateNavigationCache } from "@/features/navigation/invalidate-navigation-cache"
 
 export const Route = createFileRoute("/verify-email")({
   validateSearch: (search) => ({
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/verify-email")({
     sent: search.sent === "1" || search.sent === true,
   }),
   loader: async ({ context, location }) => {
-    context.queryClient.removeQueries({ queryKey: navigationQueryKeys.all })
+    await invalidateNavigationCache(context.queryClient)
     const rawSearch = location.search as {
       email?: string
       redirect?: string

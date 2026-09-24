@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
+import { requireWorkspaceWriteAccess } from "@/features/billing/server/workspace-write-access"
 
 import {
   announcementWorkspaceInputSchema,
@@ -42,6 +43,7 @@ const createAnnouncement = createServerFn({ method: "POST" })
     createAnnouncementInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/announcements/server/actions")
     return module.createAnnouncement(data)
   })
@@ -51,6 +53,7 @@ const updateAnnouncement = createServerFn({ method: "POST" })
     updateAnnouncementInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/announcements/server/actions")
     return module.updateAnnouncement(data)
   })
@@ -60,6 +63,7 @@ const archiveAnnouncement = createServerFn({ method: "POST" })
     archiveAnnouncementInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/announcements/server/actions")
     return module.archiveAnnouncement(data)
   })
@@ -87,6 +91,7 @@ const voteAnnouncementPoll = createServerFn({ method: "POST" })
     voteAnnouncementPollInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/announcements/server/actions")
     return module.voteAnnouncementPoll(data)
   })

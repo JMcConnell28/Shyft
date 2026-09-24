@@ -75,7 +75,9 @@ async function updateCompanyEmployeeLocationActivity(input: {
   const employee = await getEmployeeAccount(context, input.employeeId)
 
   if (employee.offboarded_at) {
-    throw new Error("Rehire this employee before changing their location activity.")
+    throw new Error(
+      "Rehire this employee before changing their location activity."
+    )
   }
 
   await assertLocationInScope(context, input.targetLocationId)
@@ -120,6 +122,64 @@ async function updateCompanyEmployeeLocationActivity(input: {
   }
 }
 
+async function updateCompanyEmployeeRotaVisibility(input: {
+  employeeId: string
+  locationId?: string
+  organizationId?: string
+  showOnRota: boolean
+  targetLocationId: string
+  userId: string
+}) {
+  const context = await requireCompanyAdminContext(input)
+  const employee = await getEmployeeAccount(context, input.employeeId)
+  await assertLocationInScope(context, input.targetLocationId)
+
+  if (!input.showOnRota) {
+    const upcoming = await getDatabase().query<{ assigned: boolean }>(
+      `select exists (
+         select 1 from public.rota_shift_assignments assignment
+         join public.rota_shifts shift on shift.id = assignment.rota_shift_id
+         join public.rotas rota on rota.id = shift.rota_id
+         where assignment.employee_id = $1::uuid
+           and rota.location_id = $2::uuid
+           and shift.day_date >= date_trunc('week', current_date)::date
+         union all
+         select 1 from public.rota_published_shift_assignments assignment
+         join public.rota_published_shifts shift on shift.id = assignment.rota_published_shift_id
+         join public.rotas rota on rota.id = shift.rota_id
+         where assignment.employee_id = $1::uuid
+           and rota.location_id = $2::uuid
+           and shift.day_date >= date_trunc('week', current_date)::date
+       ) as assigned`,
+      [employee.id, input.targetLocationId]
+    )
+    if (upcoming.rows[0]?.assigned) {
+      throw new Error(
+        "Remove this member's upcoming shifts before hiding them from the rota."
+      )
+    }
+  }
+
+  const result = await getDatabase().query<{ employee_id: string }>(
+    `update public.employee_location_assignments
+     set show_on_rota = $3
+     where employee_id = $1::uuid
+       and location_id = $2::uuid
+       and is_enabled = true
+       and disabled_at is null
+     returning employee_id`,
+    [employee.id, input.targetLocationId, input.showOnRota]
+  )
+  if (!result.rows[0])
+    throw new Error("Activate this member at the location first.")
+
+  return {
+    employeeId: employee.id,
+    locationId: input.targetLocationId,
+    showOnRota: input.showOnRota,
+  }
+}
+
 async function removeCompanyEmployee(input: {
   employeeId: string
   locationId?: string
@@ -129,7 +189,9 @@ async function removeCompanyEmployee(input: {
   const context = await requireCompanyAdminContext(input)
 
   if (!context.organizationId) {
-    throw new Error("Employees can only be removed from an organisation workspace.")
+    throw new Error(
+      "Employees can only be removed from an organisation workspace."
+    )
   }
 
   const result = await removeEmployeeFromScope({
@@ -151,7 +213,9 @@ async function rehireCompanyEmployee(input: {
   const context = await requireCompanyAdminContext(input)
 
   if (!context.organizationId) {
-    throw new Error("Employees can only be rehired from an organisation workspace.")
+    throw new Error(
+      "Employees can only be rehired from an organisation workspace."
+    )
   }
 
   const employee = await getEmployeeAccount(context, input.employeeId)
@@ -161,7 +225,9 @@ async function rehireCompanyEmployee(input: {
   }
 
   await Promise.all(
-    input.locationIds.map((locationId) => assertLocationInScope(context, locationId))
+    input.locationIds.map((locationId) =>
+      assertLocationInScope(context, locationId)
+    )
   )
 
   await withDatabaseTransaction(async (client) => {
@@ -405,7 +471,7 @@ async function archiveCompanyEmployeeRotaNote(input: {
 async function bulkUpdateCompanyEmployeePayrollIds(input: {
   locationId?: string
   organizationId?: string
-  updates: CompanyEmployeePayrollUpdate[]
+  updates: Array<CompanyEmployeePayrollUpdate>
   userId: string
 }) {
   return updateCompanyEmployeePayrollIds(input)
@@ -414,7 +480,7 @@ async function bulkUpdateCompanyEmployeePayrollIds(input: {
 async function updateCompanyEmployeePayrollIds(input: {
   locationId?: string
   organizationId?: string
-  updates: CompanyEmployeePayrollUpdate[]
+  updates: Array<CompanyEmployeePayrollUpdate>
   userId: string
 }) {
   const context = await requireCompanyAdminContext(input)
@@ -462,7 +528,7 @@ async function getEmployeeAccount(
 
 async function assertEmployeesInScope(
   context: CompanyActionScope,
-  employeeIds: string[]
+  employeeIds: Array<string>
 ) {
   const result = await getDatabase().query<{ id: string }>(
     `select id
@@ -765,7 +831,7 @@ function normalizePrimaryRole(role: string | null) {
   return role?.split(",")[0]?.trim() ?? null
 }
 
-function normalizePayrollUpdates(updates: CompanyEmployeePayrollUpdate[]) {
+function normalizePayrollUpdates(updates: Array<CompanyEmployeePayrollUpdate>) {
   const employeeIds = new Set<string>()
   const payrollIds = new Set<string>()
 
@@ -801,6 +867,7 @@ export {
   removeCompanyEmployee,
   updateCompanyEmployeeCompensation,
   updateCompanyEmployeeLocationActivity,
+  updateCompanyEmployeeRotaVisibility,
   updateCompanyEmployeePayrollId,
   updateCompanyEmployeeRotaNote,
   updateCompanyEmployeeRole,

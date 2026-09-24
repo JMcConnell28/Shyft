@@ -20,16 +20,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  businessTypeOptions,
-  getDefaultZoneNames,
-  getPlanningModeForBusinessType,
-} from "@/features/onboarding/constants/location-setup-options"
 import type {
   OnboardingBusinessType,
   OnboardingPlanningMode,
@@ -53,33 +44,16 @@ function CreateLocationDialog({
 }) {
   const [open, setOpen] = React.useState(false)
   const [name, setName] = React.useState("")
-  const [businessType, setBusinessType] =
-    React.useState<OnboardingBusinessType>("hospitality")
   const [zoneText, setZoneText] = React.useState("Main area")
-  const [worksiteName, setWorksiteName] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
-  const planningMode = getPlanningModeForBusinessType(businessType)
 
   React.useEffect(() => {
     if (!open) {
       setName("")
-      setBusinessType("hospitality")
       setZoneText("Main area")
-      setWorksiteName("")
       setError(null)
     }
   }, [open])
-
-  function handleBusinessTypeChange(value: string) {
-    const nextBusinessType = value as OnboardingBusinessType
-    setBusinessType(nextBusinessType)
-
-    if (getPlanningModeForBusinessType(nextBusinessType) === "fixed_location") {
-      setZoneText(getDefaultZoneNames(nextBusinessType).slice(0, 2).join("\n"))
-    } else {
-      setZoneText("")
-    }
-  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -92,7 +66,7 @@ function CreateLocationDialog({
       return
     }
 
-    if (planningMode === "fixed_location" && zoneNames.length === 0) {
+    if (zoneNames.length === 0) {
       setError("Add at least one zone for this location.")
       return
     }
@@ -100,11 +74,10 @@ function CreateLocationDialog({
     try {
       await onSubmit({
         name: locationName,
-        businessType,
-        planningMode,
-        zoneNames: planningMode === "fixed_location" ? zoneNames : [],
-        worksiteName:
-          planningMode === "variable_location" ? worksiteName.trim() : "",
+        businessType: "hospitality",
+        planningMode: "fixed_location",
+        zoneNames,
+        worksiteName: "",
       })
       setOpen(false)
     } catch (submissionError) {
@@ -136,7 +109,10 @@ function CreateLocationDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={(event) => void handleSubmit(event)}>
+        <form
+          className="space-y-4"
+          onSubmit={(event) => void handleSubmit(event)}
+        >
           <Field>
             <FieldLabel htmlFor="location-name">Location name</FieldLabel>
             <FieldContent>
@@ -152,52 +128,17 @@ function CreateLocationDialog({
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="location-business-type">Location type</FieldLabel>
+            <FieldLabel htmlFor="location-zones">Initial zones</FieldLabel>
             <FieldContent>
-              <NativeSelect
-                id="location-business-type"
-                className="w-full"
-                value={businessType}
-                onChange={(event) => handleBusinessTypeChange(event.target.value)}
-              >
-                {businessTypeOptions.map((option) => (
-                  <NativeSelectOption key={option.value} value={option.value}>
-                    {option.label}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+              <Textarea
+                id="location-zones"
+                value={zoneText}
+                rows={3}
+                placeholder={"Main area\nBar\nKitchen"}
+                onChange={(event) => setZoneText(event.target.value)}
+              />
             </FieldContent>
           </Field>
-
-          {planningMode === "fixed_location" ? (
-            <Field>
-              <FieldLabel htmlFor="location-zones">Initial zones</FieldLabel>
-              <FieldContent>
-                <Textarea
-                  id="location-zones"
-                  value={zoneText}
-                  rows={4}
-                  placeholder={"Main area\nBar\nKitchen"}
-                  onChange={(event) => setZoneText(event.target.value)}
-                />
-              </FieldContent>
-            </Field>
-          ) : (
-            <Field>
-              <FieldLabel htmlFor="location-worksite">
-                First worksite
-              </FieldLabel>
-              <FieldContent>
-                <Input
-                  id="location-worksite"
-                  value={worksiteName}
-                  maxLength={80}
-                  placeholder="Client site"
-                  onChange={(event) => setWorksiteName(event.target.value)}
-                />
-              </FieldContent>
-            </Field>
-          )}
 
           <FieldError>{error}</FieldError>
 

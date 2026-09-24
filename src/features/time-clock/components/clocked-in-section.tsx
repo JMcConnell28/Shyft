@@ -31,28 +31,28 @@ function ClockedInSection({
   employees,
   liveNow,
   onClockOut,
+  writableLocationIds,
 }: {
   employees: Array<ManagerClockEmployee>
   liveNow: Date
   onClockOut: (employee: ManagerClockEmployee) => void
+  writableLocationIds: Array<string>
 }) {
   const clockedInEmployees = employees.filter(isClockedInEmployee)
 
   return (
     <TimeClockPanel>
       <TimeClockPanelHeader
-        action={
-          <TimeClockPill>
-            {clockedInEmployees.length} live
-          </TimeClockPill>
-        }
+        action={<TimeClockPill>{clockedInEmployees.length} live</TimeClockPill>}
         icon={UsersRoundIcon}
         subtitle="Live attendance across your locations"
         title="Currently clocked in"
       />
       {clockedInEmployees.length === 0 ? (
         <div className="p-4">
-          <TimeClockEmptyState>No one is clocked in right now.</TimeClockEmptyState>
+          <TimeClockEmptyState>
+            No one is clocked in right now.
+          </TimeClockEmptyState>
         </div>
       ) : (
         <Table>
@@ -105,6 +105,9 @@ function ClockedInSection({
                 </TableCell>
                 <TableCell className="pr-4 text-right">
                   <Button
+                    disabled={
+                      !writableLocationIds.includes(employee.locationId)
+                    }
                     className="h-8 rounded-lg border-[#dfe4ef] bg-white px-3 text-[#33456f] shadow-none hover:bg-rose-50 hover:text-rose-700"
                     onClick={() => onClockOut(employee)}
                     size="sm"

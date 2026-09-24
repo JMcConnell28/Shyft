@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
+import type { LocationAddress } from "@/features/locations/schemas/location-address-schema"
 
 import { rotaQueryKeys } from "@/features/rota/query-keys"
 import { settingsQueryKeys } from "@/features/settings/query-keys"
@@ -18,6 +19,7 @@ function useUpdateLocationSettings(input: {
 
   const mutation = useMutation({
     mutationFn: (data: {
+      address: LocationAddress | null
       daySettings: Array<{
         closeTime: string
         closeTimeNextDay: boolean

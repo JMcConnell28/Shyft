@@ -20,6 +20,7 @@ import {
   removeCompanyEmployee,
   updateCompanyEmployeeCompensation,
   updateCompanyEmployeeLocationActivity,
+  updateCompanyEmployeeRotaVisibility,
   updateCompanyEmployeePayrollId,
   updateCompanyEmployeeRole,
   updateCompanyEmployeeRotaNote,
@@ -49,6 +50,9 @@ function useCompanyMutations(input: {
   const updateRoleFn = useServerFn(updateCompanyEmployeeRole)
   const updateLocationActivityFn = useServerFn(
     updateCompanyEmployeeLocationActivity
+  )
+  const updateRotaVisibilityFn = useServerFn(
+    updateCompanyEmployeeRotaVisibility
   )
   const updateCompensationFn = useServerFn(updateCompanyEmployeeCompensation)
   const updatePayrollIdFn = useServerFn(updateCompanyEmployeePayrollId)
@@ -104,6 +108,23 @@ function useCompanyMutations(input: {
     onError: (error) => {
       showErrorToast(error, {
         fallbackMessage: "We could not update that location.",
+      })
+    },
+  })
+
+  const rotaVisibilityMutation = useMutation({
+    mutationFn: (variables: {
+      employeeId: string
+      showOnRota: boolean
+      targetLocationId: string
+    }) => updateRotaVisibilityFn({ data: { ...input, ...variables } }),
+    onSuccess: async () => {
+      await invalidate()
+      showSuccessToast("Rota visibility updated.")
+    },
+    onError: (error) => {
+      showErrorToast(error, {
+        fallbackMessage: "We could not update rota visibility.",
       })
     },
   })
@@ -236,6 +257,7 @@ function useCompanyMutations(input: {
     archiveRotaNoteMutation,
     createRotaNoteMutation,
     locationActivityMutation,
+    rotaVisibilityMutation,
     payrollIdMutation,
     payrollImportMutation,
     rehireEmployeeMutation,

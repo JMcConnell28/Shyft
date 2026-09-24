@@ -19,6 +19,10 @@ import {
   getTrialValue,
 } from "@/features/billing/utils/billing-settings"
 import { getTrialDisplayState } from "@/features/billing/utils/trial-state"
+import {
+  CORE_MONTHLY_PRICE_PENCE,
+  formatMonthlyPrice,
+} from "@/features/billing/utils/monthly-pricing"
 import { SettingsSection } from "@/features/settings/components/settings-section"
 
 function BillingSubscriptionSection({
@@ -48,7 +52,7 @@ function BillingSubscriptionSection({
       title="Subscription"
     >
       <BillingSettingRow
-        description="£25 per month, including the first 10 used employees."
+        description={`${formatMonthlyPrice(CORE_MONTHLY_PRICE_PENCE)} per month, including the first 10 used employees.`}
         title="Plan"
       >
         <BillingSettingValue>{getPlanValue(billing)}</BillingSettingValue>

@@ -19,6 +19,10 @@ import {
 import { isPastForgottenClockOutAlert } from "@/features/time-clock/utils/pay-rules"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
 import { getDatabase } from "@/lib/db"
+import {
+  getLocationEntitlement,
+  listLocationEntitlements,
+} from "@/features/billing/server/entitlements"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import {
   assertSupabaseSuccess,
@@ -109,16 +113,18 @@ async function buildEmployeeClockPageData(
   scanSession: ClockSessionContext,
   now: Date
 ): Promise<EmployeeClockPageData> {
-  const [location, tag, settings, employee, openEntries] = await Promise.all([
-    getLocation(supabase, scanSession.locationId),
-    getClockTag(supabase, scanSession.clockTagId),
-    getLocationClockSettings(supabase, scanSession.locationId),
-    getEmployee(supabase, scanSession.employeeId),
-    listOpenEntries({
-      employeeId: scanSession.employeeId,
-      locationId: scanSession.locationId,
-    }),
-  ])
+  const [location, tag, settings, employee, openEntries, entitlement] =
+    await Promise.all([
+      getLocation(supabase, scanSession.locationId),
+      getClockTag(supabase, scanSession.clockTagId),
+      getLocationClockSettings(supabase, scanSession.locationId),
+      getEmployee(supabase, scanSession.employeeId),
+      listOpenEntries({
+        employeeId: scanSession.employeeId,
+        locationId: scanSession.locationId,
+      }),
+      getLocationEntitlement(scanSession.locationId),
+    ])
 
   if (openEntries.length > 1) {
     throw new Error("Your time clock needs manager review before continuing.")
@@ -145,6 +151,7 @@ async function buildEmployeeClockPageData(
       name: employee.full_name,
     },
     isClockingEnabled,
+    isWorkspaceReadOnly: !entitlement.canWrite,
     location: {
       id: location.id,
       latitude: settings.latitude,
@@ -194,6 +201,7 @@ async function getManagerClockPageData(input: {
   if (locationIds.length === 0) {
     return {
       selectedDate,
+      writableLocationIds: [],
       locations: [],
       employees: [],
       activityEntries: [],
@@ -203,14 +211,21 @@ async function getManagerClockPageData(input: {
   }
 
   const supabase = createSupabaseServerClient()
-  const [settings, employees, openEntries, activityEntries, failedAttempts] =
-    await Promise.all([
-      listClockSettingsForLocations(supabase, locationIds),
-      listAssignedEmployees(supabase, locationIds),
-      listOpenEntriesForLocations(supabase, locationIds),
-      listActivityEntries(supabase, locationIds, selectedDate),
-      listFailedAttempts(supabase, locationIds),
-    ])
+  const [
+    settings,
+    employees,
+    openEntries,
+    activityEntries,
+    failedAttempts,
+    entitlements,
+  ] = await Promise.all([
+    listClockSettingsForLocations(supabase, locationIds),
+    listAssignedEmployees(supabase, locationIds),
+    listOpenEntriesForLocations(supabase, locationIds),
+    listActivityEntries(supabase, locationIds, selectedDate),
+    listFailedAttempts(supabase, locationIds),
+    listLocationEntitlements(locationIds),
+  ])
   const employeeNameById = new Map(
     employees.map((employee) => [employee.id, employee.full_name])
   )
@@ -229,6 +244,12 @@ async function getManagerClockPageData(input: {
 
   return {
     selectedDate,
+    writableLocationIds: entitlements
+      .filter(
+        (entitlement) =>
+          entitlement.canWrite && entitlement.timeAttendanceEnabled
+      )
+      .map((entitlement) => entitlement.locationId),
     locations: locations.map((location) => ({
       id: location.id,
       name: location.name,
@@ -308,6 +329,7 @@ async function getManagerClockPageData(input: {
       .filter((entry) => entry.status === "requires_review")
       .map((entry) => ({
         id: entry.id,
+        locationId: entry.location_id,
         employeeName: employeeNameById.get(entry.employee_id) ?? "Unknown",
         clockedInAt: entry.clocked_in_at,
         clockedOutAt: entry.clocked_out_at,

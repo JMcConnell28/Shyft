@@ -36,6 +36,7 @@ type LocationRow = {
   id: string
   is_active: boolean
   name: string
+  show_on_rota: boolean
 }
 
 type NoteLocationRow = {
@@ -111,6 +112,7 @@ async function getCompanyEmployeePageData(input: {
         id: location.id,
         isActive: location.is_active,
         name: location.name,
+        showOnRota: location.show_on_rota,
       })),
       rotaNoteLocations: noteLocations.map(mapNoteLocation),
       rotaNotes: rotaNotes.map(mapEmployeeRotaNote),
@@ -249,7 +251,8 @@ async function listEmployeeLocations(
               coalesce(
                 assignment.is_enabled = true and assignment.disabled_at is null,
                 false
-              ) as is_active
+              ) as is_active,
+              coalesce(assignment.show_on_rota, true) as show_on_rota
        from public.locations location
        left join public.employee_location_assignments assignment
          on assignment.location_id = location.id
@@ -268,7 +271,8 @@ async function listEmployeeLocations(
             coalesce(
               assignment.is_enabled = true and assignment.disabled_at is null,
               false
-            ) as is_active
+            ) as is_active,
+            coalesce(assignment.show_on_rota, true) as show_on_rota
      from public.locations location
      left join public.employee_location_assignments assignment
        on assignment.location_id = location.id
@@ -415,7 +419,9 @@ function mapDetailEmployee(
   }
 }
 
-function mapEmployeeRotaNote(row: EmployeeRotaNoteRow): CompanyEmployeeRotaNote {
+function mapEmployeeRotaNote(
+  row: EmployeeRotaNoteRow
+): CompanyEmployeeRotaNote {
   return {
     body: row.body,
     category: normalizeNoteCategory(row.category),

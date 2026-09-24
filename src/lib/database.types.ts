@@ -1178,6 +1178,7 @@ export type Database = {
           employee_id: string
           id: string
           is_enabled: boolean
+          show_on_rota: boolean
           location_id: string
           organization_id: string
           staff_group_id: string | null
@@ -1188,6 +1189,7 @@ export type Database = {
           employee_id: string
           id?: string
           is_enabled?: boolean
+          show_on_rota?: boolean
           location_id: string
           organization_id: string
           staff_group_id?: string | null
@@ -1198,6 +1200,7 @@ export type Database = {
           employee_id?: string
           id?: string
           is_enabled?: boolean
+          show_on_rota?: boolean
           location_id?: string
           organization_id?: string
           staff_group_id?: string | null
@@ -1615,6 +1618,12 @@ export type Database = {
       }
       locations: {
         Row: {
+          address_city: string | null
+          address_country: string | null
+          address_county: string | null
+          address_line1: string | null
+          address_line2: string | null
+          address_postcode: string | null
           billing_account_id: string
           business_type: string
           created_at: string
@@ -1628,6 +1637,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address_city?: string | null
+          address_country?: string | null
+          address_county?: string | null
+          address_line1?: string | null
+          address_line2?: string | null
+          address_postcode?: string | null
           billing_account_id: string
           business_type?: string
           created_at?: string
@@ -1641,6 +1656,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address_city?: string | null
+          address_country?: string | null
+          address_county?: string | null
+          address_line1?: string | null
+          address_line2?: string | null
+          address_postcode?: string | null
           billing_account_id?: string
           business_type?: string
           created_at?: string

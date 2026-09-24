@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
+import { requireWorkspaceWriteAccess } from "@/features/billing/server/workspace-write-access"
 
 import {
   cancelShiftSwapRequestInputSchema,
@@ -20,7 +21,9 @@ import {
 } from "@/features/shift-swaps/server/actions"
 
 const getShiftSwapPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => listShiftSwapPageDataInputSchema.parse(input))
+  .inputValidator((input: unknown) =>
+    listShiftSwapPageDataInputSchema.parse(input)
+  )
   .handler(async ({ data }) => {
     const module = await import("@/features/shift-swaps/server/queries")
     return module.listShiftSwapPageData(data)
@@ -28,31 +31,62 @@ const getShiftSwapPageData = createServerFn({ method: "POST" })
 
 const createShiftSwapRequest = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => createSwapRequestInputSchema.parse(input))
-  .handler(async ({ data }) => createSwapRequest(data))
+  .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
+    return createSwapRequest(data)
+  })
 
 const createShiftCoverRequest = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createCoverRequestInputSchema.parse(input))
-  .handler(async ({ data }) => createCoverRequest(data))
+  .inputValidator((input: unknown) =>
+    createCoverRequestInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
+    return createCoverRequest(data)
+  })
 
 const respondToShiftSwapRequest = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => respondToSwapRequestInputSchema.parse(input))
-  .handler(async ({ data }) => respondToSwapRequest(data))
+  .inputValidator((input: unknown) =>
+    respondToSwapRequestInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
+    return respondToSwapRequest(data)
+  })
 
 const offerShiftCover = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => offerCoverInputSchema.parse(input))
-  .handler(async ({ data }) => offerCover(data))
+  .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
+    return offerCover(data)
+  })
 
 const cancelShiftSwap = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => cancelShiftSwapRequestInputSchema.parse(input))
-  .handler(async ({ data }) => cancelShiftSwapRequest(data))
+  .inputValidator((input: unknown) =>
+    cancelShiftSwapRequestInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
+    return cancelShiftSwapRequest(data)
+  })
 
 const approveShiftSwap = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => managerShiftSwapActionInputSchema.parse(input))
-  .handler(async ({ data }) => approveShiftSwapRequest(data))
+  .inputValidator((input: unknown) =>
+    managerShiftSwapActionInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
+    return approveShiftSwapRequest(data)
+  })
 
 const denyShiftSwap = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => managerShiftSwapActionInputSchema.parse(input))
-  .handler(async ({ data }) => denyShiftSwapRequest(data))
+  .inputValidator((input: unknown) =>
+    managerShiftSwapActionInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
+    return denyShiftSwapRequest(data)
+  })
 
 export {
   approveShiftSwap,

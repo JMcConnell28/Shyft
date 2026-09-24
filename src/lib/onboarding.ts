@@ -15,7 +15,6 @@ export {
   acceptOrganizationInvitation,
   acceptStaffInvite,
   activateOrganization,
-  checkOrganizationSlugAvailability,
   createFirstLocationAndZone,
   createOrganizationWithBootstrap,
   createStaffInviteLink,

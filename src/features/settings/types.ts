@@ -1,4 +1,5 @@
 import type { RotaSettingsValues } from "@/features/rota/types/settings"
+import type { LocationAddress } from "@/features/locations/schemas/location-address-schema"
 
 type GeneralSettingsPageData = {
   contactEmail: string
@@ -17,6 +18,7 @@ type GeneralSettingsLocation = {
 }
 
 type LocationSettingsItem = {
+  address: LocationAddress | null
   daySettings: Array<{
     closeTime: string
     closeTimeNextDay: boolean

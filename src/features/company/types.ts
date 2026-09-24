@@ -20,6 +20,7 @@ type CompanyEmployeeLocation = {
   id: string
   name: string
   isActive: boolean
+  showOnRota: boolean
 }
 
 type CompanyEmployeeRotaNoteCategory =

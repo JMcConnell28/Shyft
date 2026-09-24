@@ -2,6 +2,7 @@ import "@tanstack/react-start/server-only"
 import "reflect-metadata"
 
 import { betterAuth } from "better-auth"
+import { createAuthMiddleware } from "better-auth/api"
 import { passkey } from "@better-auth/passkey"
 import { stripe as stripePlugin } from "@better-auth/stripe"
 import { organization } from "better-auth/plugins"
@@ -9,6 +10,7 @@ import { tanstackStartCookies } from "better-auth/tanstack-start"
 import Stripe from "stripe"
 
 import { ac, roles } from "@/lib/auth/permissions"
+import { requireSignUpAccessCode } from "@/lib/auth/sign-up-access.server"
 import { authUserAdditionalFields } from "@/lib/auth-fields"
 import { getDatabase } from "@/lib/db"
 import { isDevelopmentEmailVerificationBypassed } from "@/lib/email-verification"
@@ -83,6 +85,19 @@ const auth = betterAuth({
         resetUrl: url,
         userName: user.name,
       })
+    },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === "/sign-up/email") {
+        requireSignUpAccessCode(ctx.headers?.get("x-signup-access-code"))
+      }
+    }),
+  },
+  rateLimit: {
+    enabled: true,
+    customRules: {
+      "/sign-up/email": { window: 15 * 60, max: 5 },
     },
   },
   plugins: [

@@ -3,18 +3,18 @@
 import * as React from "react"
 import { ClockIcon, HelpCircleIcon, MapPinIcon } from "lucide-react"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Card, CardContent } from "@/components/ui/card"
-import { HoldToConfirmButton } from "@/features/time-clock/components/hold-to-confirm-button"
-import { useLiveNow } from "@/features/time-clock/hooks/use-live-now"
-import { useEmployeeClockMutation } from "@/features/time-clock/hooks/use-time-clock-mutations"
-import { useEmployeeClockQuery } from "@/features/time-clock/hooks/use-time-clock-query"
 import type {
   ClockReason,
   ClockShiftSegment,
   EarlyClockInMode,
   EmployeeClockPageData,
 } from "@/features/time-clock/types"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Card, CardContent } from "@/components/ui/card"
+import { HoldToConfirmButton } from "@/features/time-clock/components/hold-to-confirm-button"
+import { useLiveNow } from "@/features/time-clock/hooks/use-live-now"
+import { useEmployeeClockMutation } from "@/features/time-clock/hooks/use-time-clock-mutations"
+import { useEmployeeClockQuery } from "@/features/time-clock/hooks/use-time-clock-query"
 import {
   formatElapsedTime,
   getElapsedMilliseconds,
@@ -68,7 +68,8 @@ function EmployeeClockPage({
       data.reviewPrompt.kind === "unmatched" ||
       data.reviewPrompt.kind === "late" ||
       (data.reviewPrompt.kind === "early" && earlyClockInMode === "now"))
-  const canSubmit = data.isClockingEnabled && !mutation.isPending
+  const canSubmit =
+    data.isClockingEnabled && !data.isWorkspaceReadOnly && !mutation.isPending
   const isSplitClockIn =
     data.nextAction === "clock_in" && data.matchedShift?.shiftType === "split"
   const splitSegmentStates =
@@ -118,6 +119,14 @@ function EmployeeClockPage({
 
   return (
     <ClockShell>
+      {data.isWorkspaceReadOnly ? (
+        <Alert className="border-red-200 bg-red-50 text-red-950">
+          <AlertTitle>Clocking is temporarily unavailable</AlertTitle>
+          <AlertDescription>
+            This workspace is currently view-only. Ask your manager for help.
+          </AlertDescription>
+        </Alert>
+      ) : null}
       {data.setupMessage ? (
         <Alert className="border-border/70 bg-background">
           <AlertTitle>{data.setupMessage}</AlertTitle>
@@ -304,7 +313,7 @@ function getSplitSegmentStates({
   completedSegments,
   segments,
 }: {
-  completedSegments: ClockShiftSegment[]
+  completedSegments: Array<ClockShiftSegment>
   segments: NonNullable<EmployeeClockPageData["matchedShift"]>["segments"]
 }) {
   const firstComplete = completedSegments.includes("split_first")

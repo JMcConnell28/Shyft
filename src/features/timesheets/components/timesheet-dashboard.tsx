@@ -41,7 +41,11 @@ function TimesheetDashboard({
           workspaceSlug={workspaceSlug}
         />
         {activeView === "team" && data.managerTimesheet ? (
-          <TeamTimesheetView input={input} timesheet={data.managerTimesheet} />
+          <TeamTimesheetView
+            input={input}
+            timesheet={data.managerTimesheet}
+            writableLocationIds={data.writableLocationIds}
+          />
         ) : (
           <MyTimesheetView timesheet={data.employeeTimesheet} />
         )}

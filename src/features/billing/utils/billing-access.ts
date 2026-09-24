@@ -5,12 +5,14 @@ import type {
 import { getTrialDisplayState } from "@/features/billing/utils/trial-state"
 
 function hasPaidWorkspaceAccess(
-  billing: WorkspaceBillingState | null | undefined,
+  billing: WorkspaceBillingState | null | undefined
 ) {
+  const graceEndsAt = billing?.pastDueGraceEndsAt
   return Boolean(
     billing?.hasActiveSubscription ||
-      (billing?.subscriptionStatus === "past_due" &&
-        billing.isPastDueGraceActive),
+    (billing?.subscriptionStatus === "past_due" &&
+      graceEndsAt &&
+      new Date(graceEndsAt).getTime() > Date.now())
   )
 }
 
@@ -19,8 +21,16 @@ function isWorkspaceBillingBlocked(input: {
   billing: WorkspaceBillingState | null | undefined
 }) {
   const trialState = getTrialDisplayState(input.trial)
+  const isMissedPayment =
+    (input.billing?.subscriptionStatus === "past_due" &&
+      !hasPaidWorkspaceAccess(input.billing)) ||
+    input.billing?.subscriptionStatus === "unpaid" ||
+    input.billing?.subscriptionStatus === "incomplete_expired"
 
-  return Boolean(trialState?.isExpired && !hasPaidWorkspaceAccess(input.billing))
+  return Boolean(
+    isMissedPayment ||
+    (trialState?.isExpired && !hasPaidWorkspaceAccess(input.billing))
+  )
 }
 
 export { hasPaidWorkspaceAccess, isWorkspaceBillingBlocked }

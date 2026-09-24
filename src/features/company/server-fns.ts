@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
+import { requireWorkspaceWriteAccess } from "@/features/billing/server/workspace-write-access"
 
 import {
   archiveCompanyEmployeeRotaNoteInputSchema,
@@ -10,6 +11,7 @@ import {
   removeCompanyEmployeeInputSchema,
   updateCompanyEmployeeCompensationInputSchema,
   updateCompanyEmployeeLocationInputSchema,
+  updateCompanyEmployeeRotaVisibilityInputSchema,
   updateCompanyEmployeePayrollIdInputSchema,
   updateCompanyEmployeeRoleInputSchema,
   updateCompanyEmployeeRotaNoteInputSchema,
@@ -34,6 +36,7 @@ const updateCompanyEmployeeRole = createServerFn({ method: "POST" })
     updateCompanyEmployeeRoleInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.updateCompanyEmployeeRole(data)
   })
@@ -43,8 +46,19 @@ const updateCompanyEmployeeLocationActivity = createServerFn({ method: "POST" })
     updateCompanyEmployeeLocationInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.updateCompanyEmployeeLocationActivity(data)
+  })
+
+const updateCompanyEmployeeRotaVisibility = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    updateCompanyEmployeeRotaVisibilityInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
+    const module = await import("@/features/company/server/actions")
+    return module.updateCompanyEmployeeRotaVisibility(data)
   })
 
 const removeCompanyEmployee = createServerFn({ method: "POST" })
@@ -52,6 +66,7 @@ const removeCompanyEmployee = createServerFn({ method: "POST" })
     removeCompanyEmployeeInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.removeCompanyEmployee(data)
   })
@@ -61,6 +76,7 @@ const rehireCompanyEmployee = createServerFn({ method: "POST" })
     rehireCompanyEmployeeInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.rehireCompanyEmployee(data)
   })
@@ -70,6 +86,7 @@ const updateCompanyEmployeeCompensation = createServerFn({ method: "POST" })
     updateCompanyEmployeeCompensationInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.updateCompanyEmployeeCompensation(data)
   })
@@ -79,6 +96,7 @@ const updateCompanyEmployeePayrollId = createServerFn({ method: "POST" })
     updateCompanyEmployeePayrollIdInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.updateCompanyEmployeePayrollId(data)
   })
@@ -88,6 +106,7 @@ const createCompanyEmployeeRotaNote = createServerFn({ method: "POST" })
     createCompanyEmployeeRotaNoteInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.createCompanyEmployeeRotaNote(data)
   })
@@ -97,6 +116,7 @@ const updateCompanyEmployeeRotaNote = createServerFn({ method: "POST" })
     updateCompanyEmployeeRotaNoteInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.updateCompanyEmployeeRotaNote(data)
   })
@@ -106,6 +126,7 @@ const archiveCompanyEmployeeRotaNote = createServerFn({ method: "POST" })
     archiveCompanyEmployeeRotaNoteInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.archiveCompanyEmployeeRotaNote(data)
   })
@@ -115,6 +136,7 @@ const bulkUpdateCompanyEmployeePayrollIds = createServerFn({ method: "POST" })
     bulkUpdateCompanyEmployeePayrollIdsInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
     return module.bulkUpdateCompanyEmployeePayrollIds(data)
   })
@@ -129,6 +151,7 @@ export {
   removeCompanyEmployee,
   updateCompanyEmployeeCompensation,
   updateCompanyEmployeeLocationActivity,
+  updateCompanyEmployeeRotaVisibility,
   updateCompanyEmployeePayrollId,
   updateCompanyEmployeeRotaNote,
   updateCompanyEmployeeRole,

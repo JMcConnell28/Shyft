@@ -1,7 +1,9 @@
 import { z } from "zod"
 
 import { timeAttendanceDeliveryAddressSchema } from "@/features/billing/schemas/time-attendance-addon-schemas"
+import { locationAddressSchema } from "@/features/locations/schemas/location-address-schema"
 import { assignableOrganizationRoles } from "@/lib/auth/permissions"
+import { signUpAccessCodeSchema } from "@/lib/auth/sign-up-access-schema"
 import { slugify } from "@/lib/slug"
 
 const personNameSchema = z
@@ -137,6 +139,7 @@ const signUpSchema = z.object({
   dateOfBirth: dateOfBirthSchema,
   email: emailSchema,
   password: passwordSchema,
+  accessCode: signUpAccessCodeSchema,
 })
 
 const onboardingIntentSchema = z.enum(["manage", "join"])
@@ -149,6 +152,10 @@ const saveOnboardingIntentSchema = z.object({
 const organizationSetupSchema = z.object({
   name: organizationNameSchema,
   slug: organizationSlugSchema,
+})
+
+const onboardingOrganizationSchema = organizationSetupSchema.pick({
+  name: true,
 })
 
 const fixedBusinessTypes = [
@@ -178,7 +185,7 @@ const locationSetupSchema = z
       .max(80, "Worksite name is too long.")
       .optional()
       .default(""),
-    includeOwnerAsEmployee: z.boolean().default(false),
+    locationAddress: locationAddressSchema.optional(),
     timeAttendanceEnabled: z.boolean().default(false),
     timeAttendanceDeliveryAddress:
       timeAttendanceDeliveryAddressSchema.optional(),
@@ -235,6 +242,14 @@ const locationSetupSchema = z
         code: "custom",
         path: ["timeAttendanceDeliveryAddress"],
         message: "Enter a delivery address for the clock-in station.",
+      })
+    }
+
+    if (value.timeAttendanceEnabled && !value.locationAddress) {
+      context.addIssue({
+        code: "custom",
+        path: ["locationAddress"],
+        message: "Enter the address of this location.",
       })
     }
   })
@@ -337,6 +352,7 @@ export {
   normalizeOrganizationSlug,
   normalizeZoneName,
   onboardingBusinessTypeSchema,
+  onboardingOrganizationSchema,
   organizationMemberInviteSchema,
   organizationNameSchema,
   organizationRouteParamsSchema,

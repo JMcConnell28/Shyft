@@ -14,6 +14,8 @@ import { AppSidebar } from "@/components/app/shell/app-sidebar"
 import { ShellBody } from "@/components/app/shell/shell-body"
 import { PastDueBillingNotice } from "@/features/billing/components/past-due-billing-notice"
 import { TrialBanner } from "@/features/billing/components/trial-banner"
+import { WorkspaceRecoveryNotice } from "@/features/billing/components/workspace-recovery-notice"
+import { isWorkspaceBillingBlocked } from "@/features/billing/utils/billing-access"
 import { NotificationMenu } from "@/features/notifications/components/notification-menu"
 import { authClient } from "@/lib/auth-client"
 import {
@@ -111,7 +113,8 @@ function DashboardShell({
     isTimeClockHome ||
     isAnnouncementsHome
   const canViewTrialBanner =
-    capabilities.canManageRota || Boolean(canInviteTeamMembers)
+    (capabilities.canManageRota || Boolean(canInviteTeamMembers)) &&
+    !isWorkspaceBillingBlocked({ trial, billing })
 
   const handleSignOut = React.useCallback(async () => {
     setIsSigningOut(true)
@@ -313,6 +316,24 @@ function DashboardShell({
               "no-scrollbar flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
             )}
           >
+            <WorkspaceRecoveryNotice
+              billing={billing ?? null}
+              trial={trial ?? null}
+              isManager={
+                capabilities.canManageRota || capabilities.canManageSettings
+              }
+              canManageBilling={capabilities.role === "owner"}
+              organizationId={
+                resolvedActiveWorkspace?.type === "organization"
+                  ? resolvedActiveWorkspace.id
+                  : null
+              }
+              locationId={
+                resolvedActiveWorkspace?.type === "location"
+                  ? resolvedActiveWorkspace.id
+                  : null
+              }
+            />
             {canInviteTeamMembers ? (
               <>
                 <PastDueBillingNotice

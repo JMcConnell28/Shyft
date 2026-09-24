@@ -31,6 +31,7 @@ function TeamTimesheetTable(props: TeamTimesheetTableProps) {
       <div className="divide-y divide-[#edf0f6] md:hidden">
         {props.employees.map((employee) => (
           <MobileEmployeeRow
+            canEditEntry={props.canEditEntry}
             employee={employee}
             isExpanded={props.expandedEmployeeId === employee.employeeId}
             key={employee.employeeId}
@@ -44,11 +45,13 @@ function TeamTimesheetTable(props: TeamTimesheetTableProps) {
 }
 
 function MobileEmployeeRow({
+  canEditEntry,
   employee,
   isExpanded,
   onEdit,
   onToggle,
 }: {
+  canEditEntry: (entry: TimesheetEntry) => boolean
   employee: ManagerTimesheetEmployee
   isExpanded: boolean
   onEdit: (entry: TimesheetEntry) => void
@@ -83,7 +86,11 @@ function MobileEmployeeRow({
       </div>
       {isExpanded ? (
         <div className="border-t border-[#edf0f6] bg-[#fafbfe] p-3">
-          <EmployeeWeekDetails employee={employee} onEdit={onEdit} />
+          <EmployeeWeekDetails
+            canEditEntry={canEditEntry}
+            employee={employee}
+            onEdit={onEdit}
+          />
         </div>
       ) : null}
     </div>

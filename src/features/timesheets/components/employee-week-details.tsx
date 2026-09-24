@@ -13,9 +13,11 @@ import {
 import { cn } from "@/lib/utils"
 
 function EmployeeWeekDetails({
+  canEditEntry,
   employee,
   onEdit,
 }: {
+  canEditEntry: (entry: TimesheetEntry) => boolean
   employee: ManagerTimesheetEmployee
   onEdit: (entry: TimesheetEntry) => void
 }) {
@@ -41,11 +43,11 @@ function EmployeeWeekDetails({
         <button
           className={cn(
             "flex min-w-0 items-center gap-3 rounded-xl border border-[#dfe4ef] bg-white p-3 text-left transition-colors",
-            entry.id
+            entry.id && canEditEntry(entry)
               ? "hover:border-[#b8c9ee] hover:bg-blue-50/30"
               : "cursor-default"
           )}
-          disabled={!entry.id}
+          disabled={!entry.id || !canEditEntry(entry)}
           key={key}
           onClick={() => onEdit(entry)}
           type="button"

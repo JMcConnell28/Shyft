@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 
-import { OnboardingShell } from "@/components/app/onboarding-shell"
 import { LocationSetupWizard } from "@/features/onboarding/components/location-setup-wizard"
+import { SetupArtworkShell } from "@/features/onboarding/components/setup-artwork-shell"
 import {
   getExistingOrganizationRedirect,
   getPendingOnboardingPath,
@@ -43,17 +43,13 @@ function CreateLocationRoute() {
   const createFirstLocationFn = useServerFn(createFirstLocationAndZone)
 
   return (
-    <OnboardingShell
-      badge="Workspace setup"
-      eyebrow={viewer.activeWorkspace?.name ?? "Step 3"}
-      title="Create your first workspace."
-      description="Set the rota pattern, choose any starter areas, and add Time & Attendance if you want a clock-in station."
-      contentWidth="wide"
-      showSignOut
-    >
+    <SetupArtworkShell>
       <LocationSetupWizard
+        organizationName={
+          viewer.activeOrganization?.name ?? "Your organisation"
+        }
         onSubmit={(input) => createFirstLocationFn({ data: input })}
       />
-    </OnboardingShell>
+    </SetupArtworkShell>
   )
 }

@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { locationAddressSchema } from "@/features/locations/schemas/location-address-schema"
 
 import {
   onboardingBusinessTypeSchema,
@@ -7,7 +8,11 @@ import {
 import { shiftTimePattern } from "@/features/rota/utils/shift-time"
 
 const organizationScopedUserSchema = z.object({
-  organizationId: z.string().trim().min(1, "Choose an organization.").optional(),
+  organizationId: z
+    .string()
+    .trim()
+    .min(1, "Choose an organization.")
+    .optional(),
   locationId: z.uuid().optional(),
   userId: z.string().trim().min(1, "Choose a user."),
 })
@@ -46,6 +51,7 @@ const createLocationInputSchema = organizationScopedUserSchema.extend({
 })
 
 const updateLocationSettingsInputSchema = organizationScopedUserSchema.extend({
+  address: locationAddressSchema.nullable(),
   locationId: z.string().uuid("Choose a valid location."),
   estimatedClosingTime: estimatedClosingTimeSchema,
   estimatedClosingTimeNextDay: z.boolean(),
@@ -54,7 +60,7 @@ const updateLocationSettingsInputSchema = organizationScopedUserSchema.extend({
       weekday: z.number().int().min(1).max(7),
       closeTime: estimatedClosingTimeSchema,
       closeTimeNextDay: z.boolean(),
-    }),
+    })
   ),
 })
 

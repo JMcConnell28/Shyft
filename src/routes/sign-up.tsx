@@ -2,10 +2,12 @@ import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { useServerFn } from "@tanstack/react-start"
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { ArrowRightIcon, UserPlusIcon } from "lucide-react"
+import { ArrowRightIcon } from "lucide-react"
 
-import { AuthCard, authButtonClassName } from "@/components/app/auth-card"
-import { AuthShell } from "@/components/app/auth-shell"
+import {
+  SetupAuthShell,
+  setupAuthPrimaryButtonClassName,
+} from "@/components/app/setup-auth-shell"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { TextFormField } from "@/components/forms/text-form-field"
@@ -22,6 +24,7 @@ import {
   passwordSchema,
   signUpSchema,
 } from "@/lib/onboarding-schemas"
+import { signUpAccessCodeSchema } from "@/lib/auth/sign-up-access-schema"
 import { createZodFieldValidator } from "@/lib/validation"
 
 type SignupIntent = "manage" | "join"
@@ -72,6 +75,7 @@ function SignUpRoute() {
       dateOfBirth: "",
       email: "",
       password: "",
+      accessCode: "",
     },
     onSubmit: async ({ value }) => {
       setError(null)
@@ -84,13 +88,18 @@ function SignUpRoute() {
       }
 
       const fullName = `${parsed.data.firstName} ${parsed.data.lastName}`
-      const signUpResult = await authClient.signUp.email({
-        name: fullName,
-        email: parsed.data.email,
-        password: parsed.data.password,
-        dateOfBirth: parsed.data.dateOfBirth,
-        callbackURL: redirectTarget,
-      })
+      const signUpResult = await authClient.signUp.email(
+        {
+          name: fullName,
+          email: parsed.data.email,
+          password: parsed.data.password,
+          dateOfBirth: parsed.data.dateOfBirth,
+          callbackURL: redirectTarget,
+        },
+        {
+          headers: { "x-signup-access-code": parsed.data.accessCode },
+        }
+      )
 
       if (signUpResult.error) {
         setError(signUpResult.error.message ?? "Unable to create account.")
@@ -123,101 +132,95 @@ function SignUpRoute() {
   })
 
   return (
-    <AuthShell
-      eyebrow="Get started"
-      title="Create your RocketRota account"
-      description="Add your details now, then we’ll guide you through the workplace setup that fits your team."
+    <SetupAuthShell
+      title="Create your account"
+      description="Sign-up is currently limited to people with an access code."
       alternateLabel="Already have an account?"
       alternateAction="Sign in"
       alternateHref="/login"
       alternateRedirect={redirectTarget}
-      contentWidth="wide"
     >
-      <AuthCard
-        icon={UserPlusIcon}
-        title="Your details"
-        description="Use the email address you want connected to your workplace."
+      <form
+        className="space-y-4"
+        onSubmit={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          void form.handleSubmit()
+        }}
       >
-        <form
-          className="space-y-5"
-          onSubmit={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            void form.handleSubmit()
-          }}
-        >
-          <FieldGroup>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <form.Field
-                name="firstName"
-                validators={{
-                  onSubmit: createZodFieldValidator(firstNameSchema),
-                }}
-              >
-                {(field) => (
-                  <TextFormField
-                    field={field}
-                    label="First name"
-                    placeholder="Jane"
-                    autoComplete="given-name"
-                    required
-                  />
-                )}
-              </form.Field>
-
-              <form.Field
-                name="lastName"
-                validators={{
-                  onSubmit: createZodFieldValidator(lastNameSchema),
-                }}
-              >
-                {(field) => (
-                  <TextFormField
-                    field={field}
-                    label="Last name"
-                    placeholder="Smith"
-                    autoComplete="family-name"
-                    required
-                  />
-                )}
-              </form.Field>
-            </div>
-
+        <FieldGroup className="gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <form.Field
-              name="dateOfBirth"
+              name="firstName"
               validators={{
-                onSubmit: createZodFieldValidator(dateOfBirthSchema),
+                onSubmit: createZodFieldValidator(firstNameSchema),
               }}
             >
               {(field) => (
                 <TextFormField
                   field={field}
-                  label="Date of birth"
-                  type="date"
-                  autoComplete="bday"
+                  label="First name"
+                  placeholder="Jane"
+                  autoComplete="given-name"
                   required
                 />
               )}
             </form.Field>
 
             <form.Field
-              name="email"
+              name="lastName"
               validators={{
-                onSubmit: createZodFieldValidator(emailSchema),
+                onSubmit: createZodFieldValidator(lastNameSchema),
               }}
             >
               {(field) => (
                 <TextFormField
                   field={field}
-                  label="Work email"
-                  type="email"
-                  placeholder="jane@company.com"
-                  autoComplete="email"
+                  label="Last name"
+                  placeholder="Smith"
+                  autoComplete="family-name"
                   required
                 />
               )}
             </form.Field>
+          </div>
 
+          <form.Field
+            name="dateOfBirth"
+            validators={{
+              onSubmit: createZodFieldValidator(dateOfBirthSchema),
+            }}
+          >
+            {(field) => (
+              <TextFormField
+                field={field}
+                label="Date of birth"
+                type="date"
+                autoComplete="bday"
+                required
+              />
+            )}
+          </form.Field>
+
+          <form.Field
+            name="email"
+            validators={{
+              onSubmit: createZodFieldValidator(emailSchema),
+            }}
+          >
+            {(field) => (
+              <TextFormField
+                field={field}
+                label="Work email"
+                type="email"
+                placeholder="jane@company.com"
+                autoComplete="email"
+                required
+              />
+            )}
+          </form.Field>
+
+          <div className="grid gap-3 sm:grid-cols-2">
             <form.Field
               name="password"
               validators={{
@@ -235,20 +238,39 @@ function SignUpRoute() {
                 />
               )}
             </form.Field>
-          </FieldGroup>
 
-          <FormErrorMessage message={error} />
+            <form.Field
+              name="accessCode"
+              validators={{
+                onSubmit: createZodFieldValidator(signUpAccessCodeSchema),
+              }}
+            >
+              {(field) => (
+                <TextFormField
+                  field={field}
+                  label="Access code"
+                  placeholder="Six-digit code"
+                  inputMode="numeric"
+                  maxLength={6}
+                  autoComplete="off"
+                  required
+                />
+              )}
+            </form.Field>
+          </div>
+        </FieldGroup>
 
-          <FormSubmitButton
-            className={authButtonClassName}
-            isSubmitting={form.state.isSubmitting}
-            submittingText="Creating account..."
-          >
-            Continue
-            <ArrowRightIcon />
-          </FormSubmitButton>
-        </form>
-      </AuthCard>
-    </AuthShell>
+        <FormErrorMessage message={error} />
+
+        <FormSubmitButton
+          className={setupAuthPrimaryButtonClassName}
+          isSubmitting={form.state.isSubmitting}
+          submittingText="Creating account..."
+        >
+          Continue
+          <ArrowRightIcon className="size-4" />
+        </FormSubmitButton>
+      </form>
+    </SetupAuthShell>
   )
 }

@@ -6,6 +6,7 @@ import { getManagerClockStats } from "@/features/time-clock/utils/manager-clock-
 describe("getManagerClockStats", () => {
   it("summarises live, tracked, team, and exception counts", () => {
     const data: ManagerClockPageData = {
+      writableLocationIds: [],
       selectedDate: "2026-07-13",
       locations: [{ id: "location-1", name: "Main Bar" }],
       employees: [
@@ -82,6 +83,7 @@ describe("getManagerClockStats", () => {
           clockedOutAt: null,
           employeeName: "Alex Turner",
           id: "entry-1",
+          locationId: "location-1",
           source: "employee_nfc",
         },
       ],

@@ -5,10 +5,11 @@ import type {
   RotaListSearch,
   RotaStatus,
 } from "@/features/rota/schemas/rota-schemas"
-import {
-  getOrgCapabilitiesForRole,
-  type OrganizationCapabilities,
-} from "@/lib/auth/get-org-capabilities"
+import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
+import { getLocationEntitlement } from "@/features/billing/server/entitlements"
+// TanStack Start needs the capability type stripped before server imports.
+// eslint-disable-next-line no-duplicate-imports
+import { getOrgCapabilitiesForRole } from "@/lib/auth/get-org-capabilities"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 import { normalizeWeekStart } from "@/lib/rota-schemas"
@@ -56,6 +57,7 @@ function buildEmptyRotaListPageData({
     workspaceType: organizationId ? "organization" : "location",
     locationWorkspaceSlug: locationSlug,
     capabilities,
+    canWriteSelectedLocation: false,
     locations,
     selectedLocation: null,
     filters: search,
@@ -153,7 +155,7 @@ async function getRotaListPageData({
     })
   }
 
-  const [allLocationRotas, filteredRotas, templates, zoneCounts] =
+  const [allLocationRotas, filteredRotas, templates, zoneCounts, entitlement] =
     await Promise.all([
       listLocationRotas({
         organizationId: workspaceOrganizationId,
@@ -170,6 +172,7 @@ async function getRotaListPageData({
         ? Promise.resolve([])
         : getTemplatesForLocation(workspaceOrganizationId, selectedLocation.id),
       getZoneCountByLocationIds([selectedLocation.id]),
+      getLocationEntitlement(selectedLocation.id),
     ])
 
   const seenVersions = await getSeenPublishedVersionsMap(
@@ -210,6 +213,7 @@ async function getRotaListPageData({
     workspaceType: isOrganizationWorkspace ? "organization" : "location",
     locationWorkspaceSlug: locationSlug,
     capabilities,
+    canWriteSelectedLocation: entitlement.canWrite,
     locations,
     selectedLocation,
     filters: {

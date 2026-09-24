@@ -1,4 +1,5 @@
 import type { PoolClient } from "pg"
+import type { LocationAddress } from "@/features/locations/schemas/location-address-schema"
 
 import { getDatabase } from "@/lib/db"
 import { slugify } from "@/lib/slug"
@@ -89,6 +90,7 @@ async function createLocation(input: {
 }
 
 async function updateLocationSettings(input: {
+  address: LocationAddress | null
   organizationId?: string
   workspaceLocationId?: string
   locationId: string
@@ -129,7 +131,13 @@ async function updateLocationSettings(input: {
 
     await client.query(
       `update public.locations
-       set estimated_closing_time = $3,
+       set address_line1 = $5,
+           address_line2 = $6,
+           address_city = $7,
+           address_county = $8,
+           address_postcode = $9,
+           address_country = $10,
+           estimated_closing_time = $3,
            estimated_closing_time_next_day = $4,
            updated_at = timezone('utc', now())
        where id = $1
@@ -139,20 +147,26 @@ async function updateLocationSettings(input: {
         input.organizationId ?? null,
         input.estimatedClosingTime,
         input.estimatedClosingTimeNextDay,
-      ],
+        input.address?.line1 ?? null,
+        input.address?.line2 ?? null,
+        input.address?.city ?? null,
+        input.address?.county ?? null,
+        input.address?.postcode.toUpperCase() ?? null,
+        input.address?.country ?? null,
+      ]
     )
 
     await client.query(
       `delete from public.location_operating_hours
        where location_id = $1`,
-      [input.locationId],
+      [input.locationId]
     )
 
     if (input.daySettings.length > 0) {
       const values = input.daySettings
         .map(
           (_, index) =>
-            `($1, $2, $${index * 3 + 3}, $${index * 3 + 4}, $${index * 3 + 5})`,
+            `($1, $2, $${index * 3 + 3}, $${index * 3 + 4}, $${index * 3 + 5})`
         )
         .join(", ")
       const parameters = [
@@ -173,7 +187,7 @@ async function updateLocationSettings(input: {
            close_time,
            close_time_next_day
          ) values ${values}`,
-        parameters,
+        parameters
       )
     }
 
@@ -250,7 +264,8 @@ async function createInitialPlaces(input: {
   worksiteName: string
 }) {
   if (input.planningMode === "fixed_location") {
-    const zoneNames = input.zoneNames.length > 0 ? input.zoneNames : ["Main area"]
+    const zoneNames =
+      input.zoneNames.length > 0 ? input.zoneNames : ["Main area"]
 
     for (const [sortOrder, zoneName] of zoneNames.entries()) {
       await input.client.query(

@@ -102,9 +102,9 @@ function AnnouncementDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader className="px-5 pt-5">
+      <DialogContent className="flex max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-2xl flex-col gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)]">
+        <form className="flex min-h-0 flex-col" onSubmit={handleSubmit}>
+          <DialogHeader className="shrink-0 border-b border-[#e7ebf3] px-4 py-4 pr-12 sm:px-5">
             <DialogTitle>
               {isEditing ? "Edit announcement" : "New announcement"}
             </DialogTitle>
@@ -113,10 +113,11 @@ function AnnouncementDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 px-5 py-5">
+          <div className="grid min-h-0 gap-4 overflow-y-auto px-4 py-4 sm:px-5 sm:py-5">
             <label className="grid gap-1.5 text-sm font-medium">
               Title
               <Input
+                className="h-10 rounded-lg border-[#dfe5f0] bg-white px-3 text-base sm:text-sm"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Kitchen deep clean tonight"
@@ -157,8 +158,9 @@ function AnnouncementDialog({
               <fieldset className="grid gap-2">
                 <legend className="text-sm font-medium">Poll options</legend>
                 {pollOptions.map((option, index) => (
-                  <div key={index} className="flex items-center gap-2">
+                  <div key={index} className="flex min-w-0 items-center gap-2">
                     <Input
+                      className="h-10 min-w-0 flex-1 rounded-lg border-[#dfe5f0] bg-white px-3 text-base sm:text-sm"
                       value={option}
                       maxLength={120}
                       placeholder={`Option ${index + 1}`}
@@ -177,6 +179,7 @@ function AnnouncementDialog({
                         type="button"
                         variant="ghost"
                         size="sm"
+                        className="shrink-0"
                         onClick={() =>
                           setPollOptions((current) =>
                             current.filter(
@@ -209,7 +212,7 @@ function AnnouncementDialog({
             <label className="grid gap-1.5 text-sm font-medium">
               Message
               <Textarea
-                className="min-h-32"
+                className="min-h-32 rounded-lg border-[#dfe5f0] bg-white px-3 py-2.5 text-base sm:text-sm"
                 value={body}
                 onChange={(event) => setBody(event.target.value)}
                 placeholder="Share the update your team needs to know."
@@ -219,18 +222,22 @@ function AnnouncementDialog({
             <fieldset className="grid gap-2">
               <legend className="text-sm font-medium">Audience</legend>
               {canTargetOrganization ? (
-                <label className="flex items-center gap-2 rounded-md border border-border/70 px-3 py-2 text-sm">
+                <label className="flex min-h-11 items-center gap-2 rounded-lg border border-[#dfe5f0] px-3 py-2 text-sm">
                   <input
                     type="radio"
+                    name="announcement-audience"
+                    className="size-4 shrink-0 accent-[#0968f5]"
                     checked={targetScope === "organization"}
                     onChange={() => setTargetScope("organization")}
                   />
                   Everyone in the organisation
                 </label>
               ) : null}
-              <label className="flex items-center gap-2 rounded-md border border-border/70 px-3 py-2 text-sm">
+              <label className="flex min-h-11 items-center gap-2 rounded-lg border border-[#dfe5f0] px-3 py-2 text-sm">
                 <input
                   type="radio"
+                  name="announcement-audience"
+                  className="size-4 shrink-0 accent-[#0968f5]"
                   checked={targetScope === "locations"}
                   onChange={() => setTargetScope("locations")}
                 />
@@ -245,10 +252,11 @@ function AnnouncementDialog({
                   {manageableLocations.map((location) => (
                     <label
                       key={location.id}
-                      className="flex items-center gap-2 rounded-md border border-border/70 px-3 py-2 text-sm"
+                      className="flex min-h-11 min-w-0 items-center gap-2 rounded-lg border border-[#dfe5f0] px-3 py-2 text-sm"
                     >
                       <input
                         type="checkbox"
+                        className="size-4 shrink-0 accent-[#0968f5]"
                         checked={targetLocationIds.includes(location.id)}
                         onChange={(event) => {
                           setTargetLocationIds((current) =>
@@ -258,7 +266,9 @@ function AnnouncementDialog({
                           )
                         }}
                       />
-                      {location.name}
+                      <span className="min-w-0 [overflow-wrap:anywhere]">
+                        {location.name}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -268,15 +278,20 @@ function AnnouncementDialog({
             <FormErrorMessage message={error} />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="shrink-0 bg-white pb-[max(1rem,env(safe-area-inset-bottom))]">
             <Button
               type="button"
               variant="outline"
+              className="w-full sm:w-auto"
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={pending}>
+            <Button
+              type="submit"
+              className="w-full sm:w-auto"
+              disabled={pending}
+            >
               {pending ? <LoaderCircleIcon className="animate-spin" /> : null}
               {isEditing ? "Save changes" : "Publish"}
             </Button>

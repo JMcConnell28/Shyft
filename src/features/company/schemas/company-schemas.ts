@@ -46,6 +46,12 @@ const updateCompanyEmployeeLocationInputSchema =
     isActive: z.boolean(),
   })
 
+const updateCompanyEmployeeRotaVisibilityInputSchema =
+  companyEmployeeInputSchema.extend({
+    targetLocationId: z.string().uuid("Choose a valid location."),
+    showOnRota: z.boolean(),
+  })
+
 const updateCompanyEmployeeCompensationInputSchema =
   companyEmployeeInputSchema.extend({
     compensation: employeeCompensationSchema,
@@ -132,5 +138,6 @@ export {
   updateCompanyEmployeePayrollIdInputSchema,
   updateCompanyEmployeeCompensationInputSchema,
   updateCompanyEmployeeLocationInputSchema,
+  updateCompanyEmployeeRotaVisibilityInputSchema,
   updateCompanyEmployeeRoleInputSchema,
 }

@@ -31,6 +31,7 @@ const TEAM_TABLE_COLUMNS = [
 ] as const
 
 function DesktopTeamTimesheetTable({
+  canEditEntry,
   employees,
   expandedEmployeeId,
   onEdit,
@@ -92,7 +93,11 @@ function DesktopTeamTimesheetTable({
               {isExpanded ? (
                 <TableRow className="border-[#edf0f6] hover:bg-white">
                   <TableCell className="bg-[#fafbfe] p-4" colSpan={8}>
-                    <EmployeeWeekDetails employee={employee} onEdit={onEdit} />
+                    <EmployeeWeekDetails
+                      canEditEntry={canEditEntry}
+                      employee={employee}
+                      onEdit={onEdit}
+                    />
                   </TableCell>
                 </TableRow>
               ) : null}

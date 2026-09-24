@@ -16,6 +16,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { WeeklyClosingTimes } from "@/features/settings/components/weekly-closing-times"
+import {
+  LocationAddressFields,
+  getLocationAddressDraft,
+  toLocationAddress,
+} from "@/features/locations/components/location-address-fields"
+import { locationAddressSchema } from "@/features/locations/schemas/location-address-schema"
 import { useUpdateLocationSettings } from "@/features/settings/hooks/use-update-location-settings"
 
 function LocationSettingsDialog({
@@ -30,6 +36,7 @@ function LocationSettingsDialog({
   userId: string
 }) {
   const [open, setOpen] = React.useState(false)
+  const [addressError, setAddressError] = React.useState<string | null>(null)
   const { isSaving, saveLocationSettings } = useUpdateLocationSettings({
     organizationId,
     locationId,
@@ -38,13 +45,31 @@ function LocationSettingsDialog({
   const form = useForm({
     defaultValues: getLocationDefaults(location),
     onSubmit: async ({ value }) => {
-      await saveLocationSettings({ locationId: location.id, ...value })
+      const address = toLocationAddress(value.address)
+      const parsedAddress = address
+        ? locationAddressSchema.safeParse(address)
+        : null
+      if (parsedAddress && !parsedAddress.success) {
+        setAddressError(
+          parsedAddress.error.issues[0]?.message ?? "Check the address."
+        )
+        return
+      }
+      setAddressError(null)
+      await saveLocationSettings({
+        locationId: location.id,
+        ...value,
+        address: parsedAddress?.data ?? null,
+      })
       setOpen(false)
     },
   })
 
   React.useEffect(() => {
-    if (!open) form.reset(getLocationDefaults(location))
+    if (!open) {
+      form.reset(getLocationDefaults(location))
+      setAddressError(null)
+    }
   }, [form, location, open])
 
   return (
@@ -65,7 +90,7 @@ function LocationSettingsDialog({
         <DialogHeader>
           <DialogTitle>{location.name}</DialogTitle>
           <DialogDescription>
-            Update opening and closing times for this location.
+            Update the location address and closing times.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -77,6 +102,30 @@ function LocationSettingsDialog({
           <form.Subscribe selector={(state) => state.values}>
             {(values) => (
               <>
+                <div className="mb-5 space-y-3 rounded-xl border border-[#dfe5f0] p-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-[#14214a]">
+                      Location address
+                    </h3>
+                    <p className="mt-1 text-xs text-[#61709a]">
+                      Used for Time & Attendance. You can leave it blank until
+                      you need it.
+                    </p>
+                  </div>
+                  <LocationAddressFields
+                    idPrefix={`location-${location.id}`}
+                    value={values.address}
+                    onChange={(address) => {
+                      setAddressError(null)
+                      form.setFieldValue("address", address)
+                    }}
+                  />
+                  {addressError ? (
+                    <p role="alert" className="text-xs text-destructive">
+                      {addressError}
+                    </p>
+                  ) : null}
+                </div>
                 <WeeklyClosingTimes
                   days={values.daySettings}
                   fallbackTime={values.estimatedClosingTime}
@@ -126,6 +175,7 @@ function LocationSettingsDialog({
 
 function getLocationDefaults(location: LocationSettingsItem) {
   return {
+    address: getLocationAddressDraft(location.address),
     daySettings: location.daySettings,
     estimatedClosingTime: location.estimatedClosingTime,
     estimatedClosingTimeNextDay: location.estimatedClosingTimeNextDay,

@@ -1,14 +1,10 @@
 import { z } from "zod"
+import { ukPostcodeSchema } from "@/features/locations/schemas/location-address-schema"
 
 const SUPPORTED_CLOCK_STATION_POSTCODE_PREFIXES = ["BT47", "BT48"] as const
 
 const CLOCK_STATION_REGION_UNAVAILABLE_MESSAGE =
   "Clock-in stations are currently unavailable in this region."
-
-const ukPostcodeSchema = z
-  .string()
-  .trim()
-  .regex(/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i, "Enter a valid UK postcode.")
 
 const supportedClockStationPostcodeSchema = ukPostcodeSchema.refine(
   isSupportedClockStationPostcode,

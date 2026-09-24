@@ -38,6 +38,12 @@ async function getLocationSettingsPageData(input: {
         employee_count: string
         estimated_closing_time: string
         estimated_closing_time_next_day: boolean
+        address_line1: string | null
+        address_line2: string | null
+        address_city: string | null
+        address_county: string | null
+        address_postcode: string | null
+        address_country: string | null
         id: string
         name: string
         slug: string
@@ -48,6 +54,12 @@ async function getLocationSettingsPageData(input: {
               location.slug,
               location.estimated_closing_time,
               location.estimated_closing_time_next_day,
+              location.address_line1,
+              location.address_line2,
+              location.address_city,
+              location.address_county,
+              location.address_postcode,
+              location.address_country,
               count(distinct assignment.employee_id) filter (
                 where assignment.is_enabled = true and assignment.disabled_at is null
               ) as employee_count,
@@ -90,6 +102,19 @@ async function getLocationSettingsPageData(input: {
 
   return {
     locations: locationsResult.rows.map((location) => ({
+      address:
+        location.address_line1 &&
+        location.address_city &&
+        location.address_postcode
+          ? {
+              line1: location.address_line1,
+              line2: location.address_line2 ?? undefined,
+              city: location.address_city,
+              county: location.address_county ?? undefined,
+              postcode: location.address_postcode,
+              country: "GB" as const,
+            }
+          : null,
       daySettings: buildDaySettings(
         location.id,
         location.estimated_closing_time.slice(0, 5),

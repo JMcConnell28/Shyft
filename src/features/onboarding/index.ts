@@ -16,7 +16,6 @@ export {
 export { getViewerState } from "@/features/onboarding/server/viewer"
 export {
   activateOrganization,
-  checkOrganizationSlugAvailability,
   createFirstLocationAndZone,
   createOrganizationWithBootstrap,
   resendVerificationEmail,

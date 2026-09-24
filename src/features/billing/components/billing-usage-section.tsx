@@ -1,11 +1,17 @@
 import { UsersRoundIcon } from "lucide-react"
 
 import type { WorkspaceBillingState } from "@/features/billing/types"
+import { BillingMonthlyPrice } from "@/features/billing/components/billing-monthly-price"
 import {
   BillingSettingRow,
   BillingSettingValue,
 } from "@/features/billing/components/billing-setting-row"
 import { getEmployeeDescription } from "@/features/billing/utils/billing-settings"
+import {
+  EXTRA_EMPLOYEE_MONTHLY_PRICE_PENCE,
+  TIME_ATTENDANCE_MONTHLY_PRICE_PENCE,
+  formatMonthlyPrice,
+} from "@/features/billing/utils/monthly-pricing"
 import { SettingsSection } from "@/features/settings/components/settings-section"
 
 function BillingUsageSection({
@@ -28,7 +34,7 @@ function BillingUsageSection({
         </BillingSettingValue>
       </BillingSettingRow>
       <BillingSettingRow
-        description="£2.50 per used employee above the included allowance."
+        description={`${formatMonthlyPrice(EXTRA_EMPLOYEE_MONTHLY_PRICE_PENCE)} per used employee above the included allowance.`}
         title="Extra employees"
       >
         <BillingSettingValue>
@@ -36,17 +42,14 @@ function BillingUsageSection({
         </BillingSettingValue>
       </BillingSettingRow>
       <BillingSettingRow
-        description="£1 per used employee in enabled locations."
+        description={`${formatMonthlyPrice(TIME_ATTENDANCE_MONTHLY_PRICE_PENCE)} per used employee in enabled locations.`}
         title="Time & Attendance"
       >
         <BillingSettingValue>
           {billing?.timeAttendanceQuantity ?? 0} employees
         </BillingSettingValue>
       </BillingSettingRow>
-      <p className="py-3 text-[10px] leading-4 font-medium text-[#7180a2] sm:text-[11px]">
-        Fixed fees are billed in advance. Employee usage is billed in arrears,
-        plus VAT where applicable.
-      </p>
+      <BillingMonthlyPrice billing={billing} />
     </SettingsSection>
   )
 }

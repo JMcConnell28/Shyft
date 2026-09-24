@@ -103,6 +103,7 @@ function RotaWorkspaceRoute() {
       ) : (
         <RotaListPage
           data={rotaListQuery.data}
+          userId={viewer.user.id}
           onLocationChange={(locationSlug) =>
             updateSearch({ location: locationSlug }, { resetPage: true })
           }

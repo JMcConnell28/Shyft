@@ -17,10 +17,7 @@ type TimeClockDashboardProps = {
   isRefreshing: boolean
   liveNow: Date
   onApprove: (entryId: string) => void
-  onManualAction: (
-    action: ClockAction,
-    employee?: ManagerClockEmployee
-  ) => void
+  onManualAction: (action: ClockAction, employee?: ManagerClockEmployee) => void
   onRefresh: () => void
   stats: ManagerClockStats
   workspaceSlug: string
@@ -53,13 +50,15 @@ function TimeClockDashboard({
             <ClockedInSection
               employees={data.employees}
               liveNow={liveNow}
-              onClockOut={(employee) =>
-                onManualAction("clock_out", employee)
-              }
+              writableLocationIds={data.writableLocationIds}
+              onClockOut={(employee) => onManualAction("clock_out", employee)}
             />
           </div>
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-            <ManualClockActions onAction={onManualAction} />
+            <ManualClockActions
+              disabled={data.writableLocationIds.length === 0}
+              onAction={onManualAction}
+            />
             <TimeClockExceptionsSection
               data={data}
               isApproving={isApproving}

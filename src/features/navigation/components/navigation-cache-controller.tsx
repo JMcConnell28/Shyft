@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 
-import { navigationQueryKeys } from "@/features/navigation/query-keys"
+import { invalidateNavigationCache } from "@/features/navigation/invalidate-navigation-cache"
 
 function NavigationCacheController() {
   const queryClient = useQueryClient()
@@ -10,10 +10,7 @@ function NavigationCacheController() {
     // Another tab may have changed the session or workspace while this tab
     // was inactive. Revalidate on the next navigation without polling.
     const invalidate = () => {
-      void queryClient.invalidateQueries({
-        queryKey: navigationQueryKeys.all,
-        refetchType: "none",
-      })
+      void invalidateNavigationCache(queryClient)
     }
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") invalidate()

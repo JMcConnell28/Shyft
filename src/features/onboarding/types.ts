@@ -4,6 +4,12 @@ import type {
 } from "@/features/billing/types"
 import type { OrganizationRole } from "@/lib/auth/permissions"
 
+export type {
+  LocationSetupInput,
+  OnboardingBusinessType,
+  OnboardingPlanningMode,
+} from "@/features/onboarding/schemas/onboarding-schemas"
+
 type OrganizationSummary = {
   id: string
   name: string

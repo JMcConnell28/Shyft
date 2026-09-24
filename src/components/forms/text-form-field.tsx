@@ -17,6 +17,8 @@ type TextFormFieldProps = {
   type?: React.ComponentProps<typeof Input>["type"]
   placeholder?: string
   autoComplete?: string
+  inputMode?: React.ComponentProps<typeof Input>["inputMode"]
+  maxLength?: number
   description?: string
   required?: boolean
   className?: string
@@ -29,6 +31,8 @@ function TextFormField({
   type = "text",
   placeholder,
   autoComplete,
+  inputMode,
+  maxLength,
   description,
   required = false,
   className,
@@ -47,6 +51,8 @@ function TextFormField({
           onBlur={field.handleBlur}
           onChange={(event) => field.handleChange(event.target.value)}
           autoComplete={autoComplete}
+          inputMode={inputMode}
+          maxLength={maxLength}
           required={required}
           className={cn(inputClassName)}
         />

@@ -4,8 +4,7 @@ import type { PoolClient } from "pg"
 import {
   activateOrganizationSchema,
   locationSetupSchema,
-  normalizeOrganizationSlug,
-  organizationSetupSchema,
+  onboardingOrganizationSchema,
   verifyEmailSchema,
 } from "@/lib/onboarding-schemas"
 import {
@@ -28,6 +27,7 @@ import {
   ensureDefaultStaffGroup,
   upsertOnboardingState,
 } from "@/features/onboarding/server/state"
+import { createOrganizationWithGeneratedSlug } from "@/features/onboarding/server/organization-slug"
 import { sendWorkspaceWelcomeNotification } from "@/features/onboarding/server/workspace-welcome"
 import { getMinimumWagePenceForDateOfBirth } from "@/features/staff-groups/utils/minimum-wage"
 
@@ -44,24 +44,6 @@ const resendVerificationEmail = createServerFn({ method: "POST" })
     return { success: true }
   })
 
-const checkOrganizationSlugAvailability = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    organizationSetupSchema.pick({ slug: true }).parse(input)
-  )
-  .handler(async ({ data }) => {
-    const { headers } = await requireSessionOrThrow()
-    const result = await auth.api.checkOrganizationSlug({
-      headers,
-      body: {
-        slug: normalizeOrganizationSlug(data.slug),
-      },
-    })
-
-    return {
-      available: Boolean(result.status),
-    }
-  })
-
 const activateOrganization = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => activateOrganizationSchema.parse(input))
   .handler(async ({ data }) => {
@@ -73,34 +55,19 @@ const activateOrganization = createServerFn({ method: "POST" })
   })
 
 const createOrganizationWithBootstrap = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => organizationSetupSchema.parse(input))
+  .inputValidator((input: unknown) => onboardingOrganizationSchema.parse(input))
   .handler(async ({ data }) => {
     const { headers } = await requireVerifiedSessionOrThrow()
     const organizationName = data.name.trim()
-    const slug = normalizeOrganizationSlug(data.slug)
-
-    const availability = await auth.api.checkOrganizationSlug({
-      headers,
-      body: { slug },
-    })
-
-    if (!availability.status) {
-      throw new Error("That organization URL is already in use.")
-    }
-
-    const trialEndsAt = new Date()
+    const trialStartedAt = new Date()
+    const trialEndsAt = new Date(trialStartedAt)
     trialEndsAt.setDate(trialEndsAt.getDate() + FREE_TRIAL_DAYS)
 
-    const organization = await auth.api.createOrganization({
+    const organization = await createOrganizationWithGeneratedSlug({
       headers,
-      body: {
-        name: organizationName,
-        slug,
-        metadata: {
-          trialStartedAt: new Date().toISOString(),
-          trialEndsAt: trialEndsAt.toISOString(),
-        },
-      },
+      name: organizationName,
+      trialStartedAt,
+      trialEndsAt,
     })
 
     if (!organization) {
@@ -161,8 +128,14 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
            name,
            slug,
            business_type,
-           planning_mode
-         ) values ($1, $2, $3, $4, $5)
+           planning_mode,
+           address_line1,
+           address_line2,
+           address_city,
+           address_county,
+           address_postcode,
+           address_country
+         ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
          returning id`,
         [
           organizationId,
@@ -170,6 +143,12 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
           locationSlug,
           data.businessType,
           data.planningMode,
+          data.locationAddress?.line1 ?? null,
+          data.locationAddress?.line2 ?? null,
+          data.locationAddress?.city ?? null,
+          data.locationAddress?.county ?? null,
+          data.locationAddress?.postcode.toUpperCase() ?? null,
+          data.locationAddress?.country ?? null,
         ]
       )
       const locationId = locationResult.rows.at(0)?.id
@@ -187,16 +166,14 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
         worksiteName,
       })
 
-      if (data.includeOwnerAsEmployee) {
-        await createOwnerEmployeeForLocation({
-          client,
-          organizationId,
-          locationId,
-          userId: session.user.id,
-          userName: session.user.name,
-          userEmail: session.user.email,
-        })
-      }
+      await createOwnerEmployeeForLocation({
+        client,
+        organizationId,
+        locationId,
+        userId: session.user.id,
+        userName: session.user.name,
+        userEmail: session.user.email,
+      })
 
       if (data.timeAttendanceEnabled && data.timeAttendanceDeliveryAddress) {
         await requestOnboardingTimeAttendanceAddon({
@@ -501,7 +478,6 @@ async function getRequiredOrganizationWorkspace(organizationId: string) {
 
 export {
   activateOrganization,
-  checkOrganizationSlugAvailability,
   createFirstLocationAndZone,
   createOrganizationWithBootstrap,
   resendVerificationEmail,

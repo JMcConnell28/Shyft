@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authed/_verified/onboarding/org")({
       { title: "Create Organization | RocketRota" },
       {
         name: "description",
-        content: "Create your RocketRota organization and choose its URL slug.",
+        content: "Create your RocketRota organisation and set up your team.",
       },
     ],
   }),

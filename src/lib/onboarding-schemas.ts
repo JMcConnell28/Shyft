@@ -13,6 +13,7 @@ export {
   normalizeOrganizationSlug,
   normalizeZoneName,
   onboardingBusinessTypeSchema,
+  onboardingOrganizationSchema,
   organizationMemberInviteSchema,
   organizationNameSchema,
   onboardingIntentSchema,

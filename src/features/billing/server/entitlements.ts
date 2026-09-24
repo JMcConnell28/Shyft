@@ -1,7 +1,7 @@
 import "@tanstack/react-start/server-only"
 
-import { PAST_DUE_GRACE_DAYS } from "@/features/billing/constants"
 import type { LocationEntitlement } from "@/features/billing/types"
+import { PAST_DUE_GRACE_DAYS } from "@/features/billing/constants"
 import { getDatabase } from "@/lib/db"
 
 type LocationEntitlementRow = {
@@ -57,11 +57,15 @@ function mapLocationEntitlement(
   const isGrace =
     row.subscription_status === "past_due" &&
     Boolean(graceEndsAt && graceEndsAt.getTime() > now)
+  const isPaymentBlocked =
+    (row.subscription_status === "past_due" && !isGrace) ||
+    row.subscription_status === "unpaid" ||
+    row.subscription_status === "incomplete_expired"
   const accessState = isPaid
     ? "active"
     : isGrace
       ? "grace"
-      : trialEndsAt.getTime() > now
+      : !isPaymentBlocked && trialEndsAt.getTime() > now
         ? "trial"
         : "recovery"
   const addon = row.addon_status
@@ -105,7 +109,9 @@ function mapLocationEntitlement(
   }
 }
 
-async function getLocationEntitlement(locationId: string) {
+async function listLocationEntitlements(locationIds: Array<string>) {
+  if (locationIds.length === 0) return []
+
   const result = await getDatabase().query<LocationEntitlementRow>(
     `select
        location.id as location_id,
@@ -144,14 +150,18 @@ async function getLocationEntitlement(locationId: string) {
        order by created_at desc
        limit 1
      ) transfer on true
-     where location.id = $1`,
-    [locationId]
+     where location.id = any($1::uuid[])`,
+    [locationIds]
   )
-  const row = result.rows.at(0)
 
-  if (!row)
+  if (result.rows.length !== new Set(locationIds).size)
     throw new Error("We could not load billing access for this location.")
-  return mapLocationEntitlement(row)
+  return result.rows.map(mapLocationEntitlement)
+}
+
+async function getLocationEntitlement(locationId: string) {
+  const entitlements = await listLocationEntitlements([locationId])
+  return entitlements[0]
 }
 
 async function requireLocationPaidWriteAccess(locationId: string) {
@@ -159,7 +169,7 @@ async function requireLocationPaidWriteAccess(locationId: string) {
 
   if (!entitlement.canWrite) {
     throw new Error(
-      "This location is in recovery mode. Update billing to make changes."
+      "This workspace is currently view-only. Ask a manager for help."
     )
   }
 
@@ -178,6 +188,7 @@ async function requireTimeAttendanceAccess(locationId: string) {
 
 export {
   getLocationEntitlement,
+  listLocationEntitlements,
   requireLocationPaidWriteAccess,
   requireTimeAttendanceAccess,
 }

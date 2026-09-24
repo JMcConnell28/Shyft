@@ -3,6 +3,8 @@
 import * as React from "react"
 import { FileUpIcon, LoaderCircleIcon } from "lucide-react"
 
+import type { CompanyEmployeeListItem } from "@/features/company/types"
+import type { SageEmployeeImportPreview } from "@/features/company/utils/sage-employee-import"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,17 +15,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import type { CompanyEmployeeListItem } from "@/features/company/types"
 import { useCompanyMutations } from "@/features/company/hooks/use-company-mutations"
-import {
-  buildSageEmployeeImportPreview,
-  type SageEmployeeImportPreview,
-} from "@/features/company/utils/sage-employee-import"
+// The preview type and parser are exported from the same module.
+// eslint-disable-next-line no-duplicate-imports
+import { buildSageEmployeeImportPreview } from "@/features/company/utils/sage-employee-import"
 import { SageEmployeeImportPreviewTable } from "@/features/company/components/sage-employee-import-preview"
 import { getErrorMessage } from "@/lib/errors"
 
 type SageEmployeeImportDialogProps = {
-  employees: CompanyEmployeeListItem[]
+  employees: Array<CompanyEmployeeListItem>
   locationId?: string
   organizationId?: string
   userId: string
@@ -93,7 +93,10 @@ function SageEmployeeImportDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button type="button" variant="outline" className="h-9 rounded-xl" />
+          <Button
+            type="button"
+            className="h-10 rounded-lg bg-[#0867f2] text-white hover:bg-[#075edc]"
+          />
         }
       >
         <FileUpIcon data-icon="inline-start" />

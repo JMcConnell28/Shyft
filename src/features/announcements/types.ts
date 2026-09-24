@@ -4,6 +4,7 @@ import type { announcementFormSchema } from "@/features/announcements/schemas/an
 
 type AnnouncementTargetScope = "organization" | "locations"
 type AnnouncementStatus = "active" | "archived"
+type AnnouncementFilter = "all" | "unread" | "pinned"
 
 type AnnouncementLocationTarget = {
   id: string
@@ -76,6 +77,7 @@ type AnnouncementScopeInput = {
 }
 
 export type {
+  AnnouncementFilter,
   AnnouncementFormInput,
   AnnouncementLocationTarget,
   AnnouncementPoll,

@@ -3,14 +3,16 @@ import "@tanstack/react-start/server-only"
 import type {
   ClockAction,
   ClockReason,
-  ClockShiftSummary,
   ClockShiftSegment,
+  ClockShiftSummary,
 } from "@/features/time-clock/types"
+import type {
+  ClockPayRuleSettings,
+  ScheduledClockWindow,
+} from "@/features/time-clock/utils/pay-rules"
 import {
   getPayableClockIn,
   getPayableClockOut,
-  type ClockPayRuleSettings,
-  type ScheduledClockWindow,
 } from "@/features/time-clock/utils/pay-rules"
 import {
   getEmployeeClockPageData,
@@ -161,6 +163,7 @@ async function managerClockOverride(input: {
 }) {
   const scope = await requireClockManagerScope(input)
   const location = await ensureLocationInScope(scope, input.locationId)
+  await requireTimeAttendanceAccess(location.id)
   const employee = await getEmployeeForOverride({
     employeeId: input.employeeId,
     locationId: input.locationId,
@@ -289,6 +292,7 @@ async function updateClockSettings(input: {
 }) {
   const scope = await requireClockSettingsScope(input)
   const location = await ensureLocationInScope(scope, input.locationId)
+  await requireTimeAttendanceAccess(location.id)
 
   if ((input.latitude === null) !== (input.longitude === null)) {
     throw new Error("Set both latitude and longitude, or leave both empty.")
@@ -329,6 +333,18 @@ async function approveTimeEntryAsRecorded(input: {
 }) {
   const scope = await requireClockManagerScope(input)
   const supabase = createSupabaseServerClient()
+  const entryResult = await supabase
+    .from("time_entries")
+    .select("location_id")
+    .eq("id", input.entryId)
+    .single()
+  assertSupabaseSuccess(entryResult.error, "We could not load that time entry.")
+  const entry = getRequiredSupabaseRow(
+    entryResult.data,
+    "We could not load that time entry."
+  )
+  await ensureLocationInScope(scope, entry.location_id)
+  await requireTimeAttendanceAccess(entry.location_id)
   const result = await supabase.rpc("approve_time_entry_as_recorded", {
     p_entry_id: input.entryId,
     p_user_id: scope.userId,

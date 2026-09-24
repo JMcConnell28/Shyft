@@ -1,7 +1,8 @@
 import type { PoolClient } from "pg"
 
-import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import type { UpdateTimesheetEntryInput } from "@/features/timesheets/types"
+import { requireLocationPaidWriteAccess } from "@/features/billing/server/entitlements"
+import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import { getDatabase } from "@/lib/db"
 
 type EditableEntryRow = {
@@ -28,12 +29,12 @@ async function updateTimesheetEntry(input: UpdateTimesheetEntryInput) {
       ...input,
       scopedLocationIds: scope.locationIds,
       userId: scope.userId,
-    }),
+    })
   )
 }
 
 async function withTimesheetTransaction<T>(
-  run: (client: PoolClient) => Promise<T>,
+  run: (client: PoolClient) => Promise<T>
 ) {
   const client = await getDatabase().connect()
 
@@ -53,14 +54,16 @@ async function withTimesheetTransaction<T>(
 async function updateTimesheetEntryInTransaction(
   client: PoolClient,
   input: UpdateTimesheetEntryInput & {
-    scopedLocationIds: string[]
-  },
+    scopedLocationIds: Array<string>
+  }
 ) {
   const existing = await getEditableEntry(client, input.entryId)
 
   if (!input.scopedLocationIds.includes(existing.location_id)) {
     throw new Error("Choose a time entry you can manage.")
   }
+
+  await requireLocationPaidWriteAccess(existing.location_id)
 
   const updated = await updateEntry(client, {
     ...input,
@@ -96,9 +99,9 @@ async function getEditableEntry(client: PoolClient, entryId: string) {
      from public.time_entries
      where id = $1::uuid
      for update`,
-    [entryId],
+    [entryId]
   )
-  const entry = result.rows[0]
+  const entry = result.rows.at(0)
 
   if (!entry) {
     throw new Error("Choose a valid time entry.")
@@ -111,7 +114,7 @@ async function updateEntry(
   client: PoolClient,
   input: UpdateTimesheetEntryInput & {
     existing: EditableEntryRow
-  },
+  }
 ) {
   const result = await client.query<EditableEntryRow>(
     `update public.time_entries
@@ -147,9 +150,9 @@ async function updateEntry(
       input.status,
       `Manager edit: ${input.reason}`,
       input.userId,
-    ],
+    ]
   )
-  const entry = result.rows[0]
+  const entry = result.rows.at(0)
 
   if (!entry) {
     throw new Error("We could not update that timesheet entry.")
@@ -169,7 +172,7 @@ async function insertAdjustmentEvent(
     performedByUserId: string
     reason: string
     updated: EditableEntryRow
-  },
+  }
 ) {
   await client.query(
     `insert into public.clock_events (
@@ -193,7 +196,7 @@ async function insertAdjustmentEvent(
         before: getAuditSnapshot(input.existing),
         after: getAuditSnapshot(input.updated),
       }),
-    ],
+    ]
   )
 }
 

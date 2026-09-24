@@ -4,6 +4,7 @@ import type {
   WorkspaceShift,
   WorkspaceZone,
 } from "@/features/rota/types/workspace"
+import { getLocationEntitlement } from "@/features/billing/server/entitlements"
 import { DEFAULT_MINIMUM_WAGE_PENCE } from "@/features/staff-groups/utils/minimum-wage"
 import { normalizeStaffGroupColor } from "@/features/staff-groups/constants/staff-group-colors"
 import { getOrgCapabilitiesForRole } from "@/lib/auth/get-org-capabilities"
@@ -108,6 +109,8 @@ async function getRotaWorkspaceData({
     throw new Error("You do not have access to that location.")
   }
 
+  const entitlement = await getLocationEntitlement(selectedLocation.id)
+
   const supabase = createSupabaseServerClient()
   const rotaQuery = supabase
     .from("rotas")
@@ -171,7 +174,7 @@ async function getRotaWorkspaceData({
       .order("name", { ascending: true }),
     supabase
       .from("employee_location_assignments")
-      .select("employee_id, staff_group_id")
+      .select("employee_id, staff_group_id, show_on_rota")
       .eq("location_id", selectedLocation.id)
       .eq("is_enabled", true)
       .is("disabled_at", null),
@@ -210,7 +213,9 @@ async function getRotaWorkspaceData({
     hoursResult.rows
   )
   const enabledEmployeeIds = new Set(
-    (assignmentResult.data ?? []).map((entry) => entry.employee_id)
+    (assignmentResult.data ?? [])
+      .filter((entry) => isPastRota || entry.show_on_rota)
+      .map((entry) => entry.employee_id)
   )
   const locationGroupByEmployeeId = new Map(
     (assignmentResult.data ?? []).map((entry) => [
@@ -301,9 +306,10 @@ async function getRotaWorkspaceData({
     meta: {
       rotaId: rota.id,
       status: rota.status === "published" ? "published" : "draft",
-      canManage: capabilities.canManageRota,
+      canManage: capabilities.canManageRota && entitlement.canWrite,
       canEdit:
         capabilities.canManageRota &&
+        entitlement.canWrite &&
         !isPastRota &&
         (rota.status !== "published" || rotaSettings.allowEditAfterPublish),
       organizationId: workspaceOrganizationId,
@@ -337,17 +343,17 @@ async function getRotaWorkspaceData({
         weeklyHours: 0,
         rotaNotes: rotaNotesByEmployeeId.get(employee.id) ?? [],
         compensation: (() => {
-        const compensation = compensationByEmployeeId.get(employee.id)
-        return compensation?.pay_type === "salary"
-          ? {
-              type: "salary" as const,
-              weeklySalaryPence: compensation.weekly_salary_pence ?? 0,
-            }
-          : {
-              type: "hourly" as const,
-              hourlyRatePence:
-                compensation?.hourly_rate_pence ?? DEFAULT_MINIMUM_WAGE_PENCE,
-            }
+          const compensation = compensationByEmployeeId.get(employee.id)
+          return compensation?.pay_type === "salary"
+            ? {
+                type: "salary" as const,
+                weeklySalaryPence: compensation.weekly_salary_pence ?? 0,
+              }
+            : {
+                type: "hourly" as const,
+                hourlyRatePence:
+                  compensation?.hourly_rate_pence ?? DEFAULT_MINIMUM_WAGE_PENCE,
+              }
         })(),
       }
     }),
@@ -362,9 +368,9 @@ function buildWorkspaceZones({
   preferShiftSnapshots,
   shifts,
 }: {
-  activeZones: WorkspaceZone[]
+  activeZones: Array<WorkspaceZone>
   preferShiftSnapshots: boolean
-  shifts: WorkspaceShift[]
+  shifts: Array<WorkspaceShift>
 }) {
   const zoneById = new Map<string, WorkspaceZone>()
 
@@ -409,7 +415,7 @@ type EmployeeCompensationRow = {
   weekly_salary_pence: number | null
 }
 
-async function getEmployeeCompensationById(employeeIds: string[]) {
+async function getEmployeeCompensationById(employeeIds: Array<string>) {
   if (employeeIds.length === 0) {
     return new Map<string, EmployeeCompensationRow>()
   }
@@ -458,7 +464,7 @@ async function getLocationEstimatedClosingTime(locationId: string) {
 
 async function loadWorkingAssignments(
   supabase: ReturnType<typeof createSupabaseServerClient>,
-  shiftIds: string[]
+  shiftIds: Array<string>
 ) {
   const result = await supabase
     .from("rota_shift_assignments")
@@ -479,7 +485,7 @@ async function loadWorkingAssignments(
 
 async function loadPublishedAssignments(
   supabase: ReturnType<typeof createSupabaseServerClient>,
-  shiftIds: string[]
+  shiftIds: Array<string>
 ) {
   const result = await supabase
     .from("rota_published_shift_assignments")
@@ -499,11 +505,11 @@ async function loadPublishedAssignments(
 }
 
 async function getEmployeeRotaNotesByEmployeeId(
-  employeeIds: string[],
+  employeeIds: Array<string>,
   locationId: string
 ) {
   if (employeeIds.length === 0) {
-    return new Map<string, WorkspaceEmployeeRotaNote[]>()
+    return new Map<string, Array<WorkspaceEmployeeRotaNote>>()
   }
 
   const result = await getDatabase().query<EmployeeRotaNoteRow>(
@@ -539,7 +545,7 @@ async function getEmployeeRotaNotesByEmployeeId(
     [employeeIds, locationId]
   )
 
-  const notesByEmployeeId = new Map<string, WorkspaceEmployeeRotaNote[]>()
+  const notesByEmployeeId = new Map<string, Array<WorkspaceEmployeeRotaNote>>()
 
   for (const row of result.rows) {
     const notes = notesByEmployeeId.get(row.employee_id) ?? []

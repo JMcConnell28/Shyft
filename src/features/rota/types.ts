@@ -1,4 +1,8 @@
-import type { NewRotaSource, RotaListSearch, RotaStatus } from "@/lib/rota-schemas"
+import type {
+  NewRotaSource,
+  RotaListSearch,
+  RotaStatus,
+} from "@/lib/rota-schemas"
 import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
 import type { OrganizationRole } from "@/lib/auth/permissions"
 
@@ -62,6 +66,7 @@ type RotaListPageData = {
   workspaceType?: "organization" | "location"
   locationWorkspaceSlug?: string
   capabilities: OrganizationCapabilities
+  canWriteSelectedLocation: boolean
   locations: Array<AccessibleRotaLocation>
   selectedLocation: AccessibleRotaLocation | null
   filters: RotaListSearch

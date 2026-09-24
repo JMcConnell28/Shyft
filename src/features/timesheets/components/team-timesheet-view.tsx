@@ -22,9 +22,11 @@ import { filterTeamTimesheetEmployees } from "@/features/timesheets/utils/timesh
 function TeamTimesheetView({
   input,
   timesheet,
+  writableLocationIds,
 }: {
   input: TimesheetScopeInput
   timesheet: ManagerTimesheet
+  writableLocationIds: Array<string>
 }) {
   const [search, setSearch] = React.useState("")
   const [location, setLocation] = React.useState("all")
@@ -88,6 +90,9 @@ function TeamTimesheetView({
           />
         </div>
         <TeamTimesheetTable
+          canEditEntry={(entry) =>
+            writableLocationIds.includes(entry.locationId)
+          }
           employees={employees}
           expandedEmployeeId={expandedEmployeeId}
           onEdit={setSelectedEntry}

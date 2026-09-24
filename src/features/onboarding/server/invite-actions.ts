@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
 
 import { createServerFn } from "@tanstack/react-start"
+import { requireWorkspaceWriteAccess } from "@/features/billing/server/workspace-write-access"
 
 import {
   acceptInviteSchema,
@@ -72,6 +73,8 @@ const createStaffInviteLink = createServerFn({ method: "POST" })
         errorMessage: "You do not have permission to create invite links.",
       })
     }
+
+    await requireWorkspaceWriteAccess({ locationId: data.locationId })
 
     const supabase = createSupabaseServerClient()
     const now = new Date()
@@ -302,6 +305,8 @@ const inviteOrganizationMemberByEmail = createServerFn({ method: "POST" })
       },
       errorMessage: "You do not have permission to invite team members.",
     })
+
+    await requireWorkspaceWriteAccess({ organizationId })
 
     await auth.api.createInvitation({
       headers,

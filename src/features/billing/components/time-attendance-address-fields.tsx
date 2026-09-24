@@ -2,9 +2,9 @@
 
 import { PackageCheckIcon } from "lucide-react"
 
+import type { TimeAttendanceDeliveryAddress } from "@/features/billing/schemas/time-attendance-addon-schemas"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { TimeAttendanceDeliveryAddress } from "@/features/billing/schemas/time-attendance-addon-schemas"
 
 type TimeAttendanceAddressValue = {
   name: string
@@ -31,12 +31,14 @@ function TimeAttendanceAddressFields({
   onChange,
   onPostcodeChange,
   postcodeMessage,
+  mode = "delivery",
   value,
 }: {
   idPrefix: string
   onChange: (value: TimeAttendanceAddressValue) => void
   onPostcodeChange?: () => void
   postcodeMessage?: string
+  mode?: "delivery" | "location"
   value: TimeAttendanceAddressValue
 }) {
   function updateField(field: TimeAttendanceAddressField, nextValue: string) {
@@ -51,22 +53,42 @@ function TimeAttendanceAddressFields({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-start gap-3 rounded-lg border border-border/70 bg-muted/30 p-4">
-        <PackageCheckIcon className="mt-0.5 size-4 shrink-0 text-primary" />
-        <p className="text-xs leading-5 text-muted-foreground">
-          Clock-in station delivery is currently limited by region. Enter the
-          delivery postcode and we will confirm availability before activation.
-        </p>
-      </div>
+    <div
+      className={
+        mode === "location" ? "grid grid-cols-2 gap-x-3 gap-y-2" : "space-y-4"
+      }
+    >
+      {mode === "delivery" ? (
+        <div className="flex items-start gap-3 rounded-lg border border-border/70 bg-muted/30 p-4">
+          <PackageCheckIcon className="mt-0.5 size-4 shrink-0 text-primary" />
+          <p className="text-xs leading-5 text-muted-foreground">
+            Clock-in station delivery is currently limited by region. Enter the
+            delivery postcode and we will confirm availability before
+            activation.
+          </p>
+        </div>
+      ) : null}
       <AddressField
         idPrefix={idPrefix}
         name="name"
-        label="Recipient name"
+        label={mode === "location" ? "Delivery contact" : "Recipient name"}
         autoComplete="name"
         value={value.name}
         onChange={updateField}
+        className={mode === "location" ? "col-span-2 sm:col-span-1" : undefined}
       />
+      {mode === "location" ? (
+        <AddressField
+          idPrefix={idPrefix}
+          name="postcode"
+          label="Postcode"
+          autoComplete="postal-code"
+          error={postcodeMessage}
+          value={value.postcode}
+          onChange={updateField}
+          className="col-span-2 sm:col-span-1"
+        />
+      ) : null}
       <AddressField
         idPrefix={idPrefix}
         name="line1"
@@ -74,6 +96,7 @@ function TimeAttendanceAddressFields({
         autoComplete="address-line1"
         value={value.line1}
         onChange={updateField}
+        className={mode === "location" ? "col-span-2 sm:col-span-1" : undefined}
       />
       <AddressField
         idPrefix={idPrefix}
@@ -83,8 +106,15 @@ function TimeAttendanceAddressFields({
         required={false}
         value={value.line2}
         onChange={updateField}
+        className={mode === "location" ? "col-span-2 sm:col-span-1" : undefined}
       />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div
+        className={
+          mode === "location"
+            ? "col-span-2 grid grid-cols-2 gap-3"
+            : "grid gap-4 sm:grid-cols-2"
+        }
+      >
         <AddressField
           idPrefix={idPrefix}
           name="city"
@@ -103,27 +133,30 @@ function TimeAttendanceAddressFields({
           onChange={updateField}
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <AddressField
-          idPrefix={idPrefix}
-          name="postcode"
-          label="Postcode"
-          autoComplete="postal-code"
-          error={postcodeMessage}
-          value={value.postcode}
-          onChange={updateField}
-        />
-        <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-country`}>Country</Label>
-          <Input id={`${idPrefix}-country`} value="United Kingdom" disabled />
+      {mode === "delivery" ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <AddressField
+            idPrefix={idPrefix}
+            name="postcode"
+            label="Postcode"
+            autoComplete="postal-code"
+            error={postcodeMessage}
+            value={value.postcode}
+            onChange={updateField}
+          />
+          <div className="space-y-2">
+            <Label htmlFor={`${idPrefix}-country`}>Country</Label>
+            <Input id={`${idPrefix}-country`} value="United Kingdom" disabled />
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }
 
 function AddressField({
   autoComplete,
+  className,
   error,
   idPrefix,
   label,
@@ -133,6 +166,7 @@ function AddressField({
   value,
 }: {
   autoComplete: string
+  className?: string
   error?: string
   idPrefix: string
   label: string
@@ -145,8 +179,10 @@ function AddressField({
   const errorId = `${inputId}-error`
 
   return (
-    <div className="space-y-2">
-      <Label htmlFor={inputId}>{label}</Label>
+    <div className={`space-y-1 ${className ?? ""}`}>
+      <Label htmlFor={inputId} className="text-xs">
+        {label}
+      </Label>
       <Input
         id={inputId}
         name={name}
@@ -155,6 +191,7 @@ function AddressField({
         aria-invalid={error ? true : undefined}
         required={required}
         maxLength={120}
+        className="h-8"
         value={value}
         onChange={(event) => onChange(name, event.target.value)}
       />

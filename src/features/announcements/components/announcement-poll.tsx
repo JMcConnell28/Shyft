@@ -21,7 +21,7 @@ function AnnouncementPoll({
   const hasVoted = Boolean(poll.selectedOptionId)
 
   return (
-    <fieldset className="mt-3 grid gap-2">
+    <fieldset className="mt-4 grid max-w-3xl gap-2">
       <legend className="sr-only">Announcement poll</legend>
       {poll.options.map((option) => {
         const isSelected = poll.selectedOptionId === option.id
@@ -38,7 +38,7 @@ function AnnouncementPoll({
             aria-pressed={isSelected}
             onClick={() => onVote({ announcementId, optionId: option.id })}
             className={cn(
-              "relative isolate flex min-h-10 items-center justify-between overflow-hidden rounded-[10px] border px-3 text-left text-xs font-semibold transition-colors",
+              "relative isolate flex min-h-11 w-full items-center justify-between gap-3 overflow-hidden rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
               isSelected
                 ? "border-[#0868f7] text-[#075dcc]"
                 : "border-[#dce4f0] text-[#263b66] hover:border-[#b8c7dc]"
@@ -55,9 +55,11 @@ function AnnouncementPoll({
             ) : null}
             <span className="flex min-w-0 items-center gap-2">
               {isSelected ? <CheckIcon className="size-3.5 shrink-0" /> : null}
-              <span className="truncate">{option.label}</span>
+              <span className="[overflow-wrap:anywhere]">{option.label}</span>
             </span>
-            {hasVoted ? <span className="ml-3">{percentage}%</span> : null}
+            {hasVoted ? (
+              <span className="shrink-0 text-xs">{percentage}%</span>
+            ) : null}
           </button>
         )
       })}

@@ -1,10 +1,13 @@
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { Link, createFileRoute, redirect } from "@tanstack/react-router"
-import { KeyRoundIcon, LogInIcon } from "lucide-react"
+import { KeyRoundIcon } from "lucide-react"
 
-import { AuthCard, authButtonClassName } from "@/components/app/auth-card"
-import { AuthShell } from "@/components/app/auth-shell"
+import {
+  SetupAuthShell,
+  setupAuthPrimaryButtonClassName,
+  setupAuthSecondaryButtonClassName,
+} from "@/components/app/setup-auth-shell"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { TextFormField } from "@/components/forms/text-form-field"
@@ -14,7 +17,7 @@ import { createZodFieldValidator } from "@/lib/validation"
 import { emailSchema, passwordSchema } from "@/lib/onboarding-schemas"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
-import { navigationQueryKeys } from "@/features/navigation/query-keys"
+import { invalidateNavigationCache } from "@/features/navigation/invalidate-navigation-cache"
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search) => ({
@@ -24,7 +27,7 @@ export const Route = createFileRoute("/login")({
         : "/dashboard",
   }),
   beforeLoad: async ({ context }) => {
-    context.queryClient.removeQueries({ queryKey: navigationQueryKeys.all })
+    await invalidateNavigationCache(context.queryClient)
     const session = await getSession()
 
     if (session) {
@@ -120,101 +123,94 @@ function LoginRoute() {
   }
 
   return (
-    <AuthShell
-      eyebrow="Account access"
+    <SetupAuthShell
       title="Welcome back"
-      description="Sign in to your RocketRota workspace to manage rotas, staff, and locations."
+      description="Sign in to manage your rota and team."
       alternateLabel="Need an account?"
       alternateAction="Create one"
       alternateHref="/sign-up"
       alternateRedirect={search.redirect}
     >
-      <AuthCard
-        icon={LogInIcon}
-        title="Sign in"
-        description="Enter your details to continue to your workspace."
+      <form
+        className="space-y-3"
+        onSubmit={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          void form.handleSubmit()
+        }}
       >
-        <form
-          className="space-y-5"
-          onSubmit={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            void form.handleSubmit()
-          }}
-        >
-          <FieldGroup>
-            <form.Field
-              name="email"
-              validators={{
-                onSubmit: createZodFieldValidator(emailSchema),
-              }}
-            >
-              {(field) => (
-                <TextFormField
-                  field={field}
-                  label="Work email"
-                  type="email"
-                  placeholder="you@company.com"
-                  autoComplete="username webauthn"
-                  required
-                />
-              )}
-            </form.Field>
+        <FieldGroup className="gap-3">
+          <form.Field
+            name="email"
+            validators={{
+              onSubmit: createZodFieldValidator(emailSchema),
+            }}
+          >
+            {(field) => (
+              <TextFormField
+                field={field}
+                label="Work email"
+                type="email"
+                placeholder="you@company.com"
+                autoComplete="username webauthn"
+                required
+              />
+            )}
+          </form.Field>
 
-            <form.Field
-              name="password"
-              validators={{
-                onSubmit: createZodFieldValidator(passwordSchema),
-              }}
-            >
-              {(field) => (
-                <TextFormField
-                  field={field}
-                  label="Password"
-                  type="password"
-                  placeholder="Enter your password"
-                  autoComplete="current-password webauthn"
-                  required
-                />
-              )}
-            </form.Field>
-          </FieldGroup>
+          <form.Field
+            name="password"
+            validators={{
+              onSubmit: createZodFieldValidator(passwordSchema),
+            }}
+          >
+            {(field) => (
+              <TextFormField
+                field={field}
+                label="Password"
+                type="password"
+                placeholder="Enter your password"
+                autoComplete="current-password webauthn"
+                required
+              />
+            )}
+          </form.Field>
+        </FieldGroup>
 
-          <FormErrorMessage message={error} />
+        <FormErrorMessage message={error} />
 
-          <div className="space-y-3">
-            <div className="flex justify-end">
-              <Button
-                variant="link"
-                size="sm"
-                className="h-auto px-0 font-bold text-blue-600"
-                nativeButton={false}
-                render={<Link to="/forgot-password" />}
-              >
-                Forgot password?
-              </Button>
-            </div>
-            <FormSubmitButton
-              className={authButtonClassName}
-              isSubmitting={form.state.isSubmitting || isPasskeyPending}
-              submittingText="Signing in..."
-            >
-              Sign in
-            </FormSubmitButton>
+        <div className="space-y-2">
+          <div className="flex justify-end">
             <Button
-              variant="outline"
-              size="lg"
-              className={authButtonClassName}
-              type="button"
-              onClick={() => void handlePasskeySignIn()}
-              disabled={form.state.isSubmitting || isPasskeyPending}
+              variant="link"
+              size="sm"
+              className="h-auto px-0 text-xs font-semibold text-[#075fe6]"
+              nativeButton={false}
+              render={<Link to="/forgot-password" />}
             >
-              <KeyRoundIcon />
-              Use passkey
+              Forgot password?
             </Button>
           </div>
-        </form>
-      </AuthCard>
-    </AuthShell>
+          <FormSubmitButton
+            className={setupAuthPrimaryButtonClassName}
+            isSubmitting={form.state.isSubmitting || isPasskeyPending}
+            submittingText="Signing in..."
+          >
+            Sign in
+          </FormSubmitButton>
+          <Button
+            variant="outline"
+            size="lg"
+            className={setupAuthSecondaryButtonClassName}
+            type="button"
+            onClick={() => void handlePasskeySignIn()}
+            disabled={form.state.isSubmitting || isPasskeyPending}
+          >
+            <KeyRoundIcon />
+            Use passkey
+          </Button>
+        </div>
+      </form>
+    </SetupAuthShell>
   )
 }

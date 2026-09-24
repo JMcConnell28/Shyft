@@ -125,6 +125,7 @@ function MarketingHeader({
         <Link
           to={isAuthenticated ? "/dashboard" : "/login"}
           search={isAuthenticated ? undefined : { redirect: "/dashboard" }}
+          reloadDocument={isAuthenticated}
           className={cn(
             buttonVariants({ variant: "pill", size: "lg" }),
             marketingLoginButtonClassName,

@@ -9,6 +9,7 @@ import type {
   TimesheetScopeInput,
 } from "@/features/timesheets/types"
 import { buildTimesheetPage } from "@/features/timesheets/server/build-timesheet"
+import { listLocationEntitlements } from "@/features/billing/server/entitlements"
 import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import { getTimesheetWeek } from "@/features/timesheets/utils/timesheet-time"
 import { getCurrentWeekStart } from "@/features/rota/utils/week-utils"
@@ -23,6 +24,7 @@ async function getTimesheetPageData(
   if (scope.locationIds.length === 0) {
     return {
       canManage: false,
+      writableLocationIds: [],
       employeeTimesheet: getEmptyEmployeeTimesheet(week.days),
       exportableRotas: [],
       locations: [],
@@ -39,6 +41,7 @@ async function getTimesheetPageData(
     scheduledRows,
     entryRows,
     exportableRotas,
+    entitlements,
   ] = await Promise.all([
     listUserEmployees({
       locationIds: scope.locationIds,
@@ -67,6 +70,9 @@ async function getTimesheetPageData(
           weekStart: week.weekStart,
         })
       : Promise.resolve<Array<TimesheetExportableRota>>([]),
+    scope.canManage
+      ? listLocationEntitlements(scope.locationIds)
+      : Promise.resolve([]),
   ])
 
   const employeeIds = employeeRows.map((employee) => employee.employee_id)
@@ -83,6 +89,9 @@ async function getTimesheetPageData(
 
   return {
     canManage: scope.canManage,
+    writableLocationIds: entitlements
+      .filter((entitlement) => entitlement.canWrite)
+      .map((entitlement) => entitlement.locationId),
     employeeTimesheet: shaped.employeeTimesheet,
     exportableRotas,
     locations: scope.locations,

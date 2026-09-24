@@ -1043,6 +1043,7 @@ async function listValidEmployeeIdsForLocation(
     .select("employee_id")
     .eq("location_id", context.location.id)
     .eq("is_enabled", true)
+    .eq("show_on_rota", true)
     .is("disabled_at", null)
   const result = await (context.organizationId
     ? query.eq("organization_id", context.organizationId)

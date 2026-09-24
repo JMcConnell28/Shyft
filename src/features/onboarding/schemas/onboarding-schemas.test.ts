@@ -51,6 +51,7 @@ describe("onboarding schemas", () => {
         dateOfBirth: "1998-04-12",
         email: "jane@example.com",
         password: "password123",
+        accessCode: "522562",
       }).success
     ).toBe(true)
   })
@@ -66,6 +67,7 @@ describe("onboarding schemas", () => {
         dateOfBirth: futureDate.toISOString().slice(0, 10),
         email: "jane@example.com",
         password: "password123",
+        accessCode: "522562",
       }).success
     ).toBe(false)
   })
@@ -91,6 +93,12 @@ describe("onboarding schemas", () => {
         zoneNames: ["Bar"],
         worksiteName: "",
         timeAttendanceEnabled: true,
+        locationAddress: {
+          city: "Launch City",
+          country: "GB",
+          line1: "1 Strand Road",
+          postcode: "BT48 6DQ",
+        },
         timeAttendanceDeliveryAddress: {
           city: "Launch City",
           country: "GB",
@@ -113,6 +121,30 @@ describe("onboarding schemas", () => {
         timeAttendanceEnabled: true,
       }).success
     ).toBe(false)
+  })
+
+  it("requires a saved location address when Time & Attendance is enabled", () => {
+    const result = locationSetupSchema.safeParse({
+      businessType: "hospitality",
+      planningMode: "fixed_location",
+      locationName: "The Crown",
+      zoneNames: ["Bar"],
+      timeAttendanceEnabled: true,
+      timeAttendanceDeliveryAddress: {
+        city: "Derry",
+        country: "GB",
+        line1: "1 Strand Road",
+        name: "Alex Manager",
+        postcode: "BT48 6DQ",
+      },
+    })
+
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(
+        result.error.issues.some((issue) => issue.path[0] === "locationAddress")
+      ).toBe(true)
+    }
   })
 
   it("rejects fixed-location setup without areas", () => {

@@ -92,6 +92,7 @@ type EmployeeClockPageData = {
   reviewPrompt: ClockInReviewPrompt
   nextAction: ClockAction
   isClockingEnabled: boolean
+  isWorkspaceReadOnly: boolean
   setupMessage: string | null
 }
 
@@ -150,6 +151,7 @@ type ManagerClockActivityEntry = {
 
 type ManagerClockPageData = {
   selectedDate: string
+  writableLocationIds: Array<string>
   locations: Array<{
     id: string
     name: string
@@ -159,6 +161,7 @@ type ManagerClockPageData = {
   failedAttempts: Array<ClockAttemptSummary>
   reviewEntries: Array<{
     id: string
+    locationId: string
     employeeName: string
     clockedInAt: string
     clockedOutAt: string | null

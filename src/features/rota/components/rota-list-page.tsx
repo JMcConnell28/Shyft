@@ -31,6 +31,7 @@ import {
 import { MobileRotaList } from "@/features/rota/components/mobile-rota-list"
 import { RotaListFilters } from "@/features/rota/components/rota-list-filters"
 import { RotaListRow } from "@/features/rota/components/rota-list-row"
+import { RotaWelcomeDialog } from "@/features/rota/components/rota-welcome-dialog"
 import { useDeleteDraftRota } from "@/features/rota/hooks/use-delete-draft-rota"
 import { useUnpublishRota } from "@/features/rota/hooks/use-unpublish-rota"
 import { isRotaWeekBeforeCurrentWeek } from "@/features/rota/utils/week-utils"
@@ -38,6 +39,7 @@ import { rotaPageSizeValues } from "@/lib/rota-schemas"
 
 type RotaListPageProps = {
   data: RotaListPageData
+  userId: string
   onLocationChange: (locationSlug: string) => void
   onStatusChange: (status: RotaStatusFilter) => void
   onRangeChange: (range: RotaRangeFilter) => void
@@ -48,6 +50,7 @@ type RotaListPageProps = {
 
 function RotaListPage({
   data,
+  userId,
   onLocationChange,
   onStatusChange,
   onRangeChange,
@@ -57,9 +60,12 @@ function RotaListPage({
 }: RotaListPageProps) {
   const deleteDraftMutation = useDeleteDraftRota()
   const unpublishMutation = useUnpublishRota()
-  const canEditRotas = data.capabilities.canManageRota
+  const canEditRotas =
+    data.capabilities.canManageRota && data.canWriteSelectedLocation
   const canCreateRota =
-    data.capabilities.canCreateRota && Boolean(data.selectedLocation)
+    data.capabilities.canCreateRota &&
+    data.canWriteSelectedLocation &&
+    Boolean(data.selectedLocation)
   const [pendingLifecycleAction, setPendingLifecycleAction] = React.useState<{
     rotaId: string
     type: "delete-draft" | "unpublish"
@@ -89,6 +95,12 @@ function RotaListPage({
 
   return (
     <div className="flex flex-1 flex-col overflow-x-hidden">
+      {data.capabilities.canManageRota ? (
+        <RotaWelcomeDialog
+          organizationId={data.organizationId}
+          userId={userId}
+        />
+      ) : null}
       <MobileRotaList
         data={data}
         canCreateRota={canCreateRota}

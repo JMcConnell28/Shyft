@@ -90,6 +90,7 @@ type ManagerTimesheet = TimesheetTotals & {
 
 type TimesheetPageData = {
   canManage: boolean
+  writableLocationIds: Array<string>
   employeeTimesheet: EmployeeTimesheet
   exportableRotas: Array<TimesheetExportableRota>
   locations: Array<TimesheetLocation>

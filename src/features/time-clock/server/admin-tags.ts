@@ -8,6 +8,7 @@ import {
   NTAG_PUBLIC_ID_RANDOM_BYTES,
 } from "@/features/time-clock/constants/ntag-clock"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
+import { requireLocationPaidWriteAccess } from "@/features/billing/server/entitlements"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import {
   assertSupabaseSuccess,
@@ -68,7 +69,7 @@ async function getAdminClockTagsPageData(input: {
       name: location.name,
       organizationId: location.organization_id,
       organizationName: location.organization_id
-        ? organizationNameById.get(location.organization_id) ?? null
+        ? (organizationNameById.get(location.organization_id) ?? null)
         : null,
     })),
     tags: (tagsResult.data ?? [])
@@ -97,11 +98,15 @@ async function generateAdminClockTagSetup(input: {
     .eq("id", input.locationId)
     .maybeSingle()
 
-  assertSupabaseSuccess(locationResult.error, "We could not load that location.")
+  assertSupabaseSuccess(
+    locationResult.error,
+    "We could not load that location."
+  )
   const location = getRequiredSupabaseRow(
     locationResult.data,
     "Choose a valid location."
   )
+  await requireLocationPaidWriteAccess(location.id)
   const publicId = generateNtagPublicId()
   const aesKeyHex = randomBytes(16).toString("hex").toUpperCase()
   const legacyToken = randomBytes(24).toString("base64url")
@@ -124,7 +129,10 @@ async function generateAdminClockTagSetup(input: {
     )
     .single()
 
-  assertSupabaseSuccess(tagResult.error, "We could not generate tag setup data.")
+  assertSupabaseSuccess(
+    tagResult.error,
+    "We could not generate tag setup data."
+  )
   const tag = getRequiredSupabaseRow(
     tagResult.data,
     "We could not generate tag setup data."
