@@ -18,6 +18,7 @@ export {
   createFirstLocationAndZone,
   createOrganizationWithBootstrap,
   createStaffInviteLink,
+  ensureActiveStaffInviteLink,
   getActiveStaffInviteLink,
   getStaffInvitePreview,
   getViewerState,

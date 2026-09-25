@@ -5,16 +5,20 @@ import { BrandMark } from "@/components/app/brand"
 function BrandedArtworkShell({
   children,
   headerAction,
+  showArtwork = true,
 }: {
   children: ReactNode
   headerAction: ReactNode
+  showArtwork?: boolean
 }) {
   return (
     <main className="relative isolate h-svh overflow-hidden bg-[#f7fbff] px-3 py-3 text-[#111f45] sm:px-5 sm:py-4">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-10 bg-[url('/brand/onboarding-mobile.png')] bg-[length:100%_100%] bg-center bg-no-repeat lg:bg-[url('/brand/onboarding-desktop.png')] lg:bg-cover"
-      />
+      {showArtwork ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 -z-10 bg-[url('/brand/onboarding-mobile.png')] bg-[length:100%_100%] bg-center bg-no-repeat lg:bg-[url('/brand/onboarding-desktop.png')] lg:bg-cover"
+        />
+      ) : null}
       <div className="mx-auto flex h-full min-h-0 w-full max-w-[700px] flex-col items-center">
         <header className="relative mb-3 flex w-full shrink-0 items-center justify-center">
           <div className="flex items-center gap-2" aria-label="RocketRota">

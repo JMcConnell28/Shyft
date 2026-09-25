@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { formatMobileRotaUpdatedLabel } from "@/features/rota/utils/mobile-rota-list"
+import { formatRotaUpdatedLabel } from "@/features/rota/utils/rota-list-format"
 
-describe("formatMobileRotaUpdatedLabel", () => {
+describe("formatRotaUpdatedLabel", () => {
   it("removes the time from published rota metadata", () => {
     expect(
-      formatMobileRotaUpdatedLabel({
+      formatRotaUpdatedLabel({
         status: "published",
         updatedAt: "5 Jul 2025, 14:30",
       })
@@ -14,7 +14,7 @@ describe("formatMobileRotaUpdatedLabel", () => {
 
   it("uses today for drafts edited on the current date", () => {
     expect(
-      formatMobileRotaUpdatedLabel(
+      formatRotaUpdatedLabel(
         {
           status: "draft",
           updatedAt: "12 Jul 2026, 09:15",

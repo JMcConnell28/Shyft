@@ -2,14 +2,13 @@ import * as React from "react"
 import { useMutation } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 import { createFileRoute } from "@tanstack/react-router"
-import { MailIcon } from "lucide-react"
+import { ArrowRightIcon } from "lucide-react"
 
+import { AuthStatusMessage } from "@/components/app/auth-card"
 import {
-  AuthCard,
-  AuthStatusMessage,
-  authButtonClassName,
-} from "@/components/app/auth-card"
-import { AuthShell } from "@/components/app/auth-shell"
+  SetupAuthShell,
+  setupAuthPrimaryButtonClassName,
+} from "@/components/app/setup-auth-shell"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -65,57 +64,53 @@ function ForgotPasswordRoute() {
   })
 
   return (
-    <AuthShell
-      eyebrow="Account recovery"
+    <SetupAuthShell
       title="Forgot your password?"
       description="Enter your email and we will send a secure reset link if the account exists."
       alternateLabel="Remembered your password?"
       alternateAction="Back to sign in"
       alternateHref="/login"
+      alternateRedirect="/dashboard"
+      showArtwork={false}
     >
-      <AuthCard
-        icon={MailIcon}
-        title="Reset by email"
-        description="The link expires automatically for account safety."
-      >
-        {didSend ? (
-          <AuthStatusMessage>
-            <p>If that email exists, a reset link is on its way.</p>
-          </AuthStatusMessage>
-        ) : (
-          <form
-            className="space-y-5"
-            onSubmit={(event) => {
-              event.preventDefault()
-              mutation.mutate()
-            }}
+      {didSend ? (
+        <AuthStatusMessage tone="neutral">
+          <p>If that email exists, a reset link is on its way.</p>
+        </AuthStatusMessage>
+      ) : (
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault()
+            mutation.mutate()
+          }}
+        >
+          <Field>
+            <FieldLabel htmlFor="forgot-email">Email</FieldLabel>
+            <FieldContent>
+              <Input
+                id="forgot-email"
+                value={email}
+                type="email"
+                placeholder="you@company.com"
+                autoComplete="email"
+                required
+                onChange={(event) => setEmail(event.target.value)}
+              />
+              <FieldError>{error}</FieldError>
+            </FieldContent>
+          </Field>
+          <Button
+            type="submit"
+            size="lg"
+            className={setupAuthPrimaryButtonClassName}
+            disabled={mutation.isPending}
           >
-            <Field>
-              <FieldLabel htmlFor="forgot-email">Work email</FieldLabel>
-              <FieldContent>
-                <Input
-                  id="forgot-email"
-                  value={email}
-                  type="email"
-                  placeholder="you@company.com"
-                  autoComplete="email"
-                  required
-                  onChange={(event) => setEmail(event.target.value)}
-                />
-                <FieldError>{error}</FieldError>
-              </FieldContent>
-            </Field>
-            <Button
-              type="submit"
-              size="lg"
-              className={authButtonClassName}
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending ? "Sending..." : "Send reset link"}
-            </Button>
-          </form>
-        )}
-      </AuthCard>
-    </AuthShell>
+            {mutation.isPending ? "Sending..." : "Send reset link"}
+            {!mutation.isPending ? <ArrowRightIcon className="size-4" /> : null}
+          </Button>
+        </form>
+      )}
+    </SetupAuthShell>
   )
 }

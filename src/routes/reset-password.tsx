@@ -2,14 +2,13 @@ import * as React from "react"
 import { useMutation } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { KeyRoundIcon } from "lucide-react"
+import { ArrowRightIcon } from "lucide-react"
 
+import { AuthStatusMessage } from "@/components/app/auth-card"
 import {
-  AuthCard,
-  AuthStatusMessage,
-  authButtonClassName,
-} from "@/components/app/auth-card"
-import { AuthShell } from "@/components/app/auth-shell"
+  SetupAuthShell,
+  setupAuthPrimaryButtonClassName,
+} from "@/components/app/setup-auth-shell"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -70,65 +69,63 @@ function ResetPasswordRoute() {
   })
 
   return (
-    <AuthShell
-      eyebrow="Account security"
+    <SetupAuthShell
       title="Choose a new password"
       description="Use the secure link from your email to finish resetting your password."
       alternateLabel="Remembered your password?"
       alternateAction="Back to sign in"
       alternateHref="/login"
+      alternateRedirect="/dashboard"
+      showArtwork={false}
+      hideAlternate={didReset}
     >
-      <AuthCard
-        icon={KeyRoundIcon}
-        title="Reset password"
-        description="Enter a new password to use the next time you sign in."
-      >
-        {didReset ? (
-          <div className="space-y-4">
-            <AuthStatusMessage>
-              <p>Your password has been reset.</p>
-            </AuthStatusMessage>
-            <Button
-              className={authButtonClassName}
-              nativeButton={false}
-              render={<Link to="/login" search={{ redirect: "/dashboard" }} />}
-            >
-              Sign in
-            </Button>
-          </div>
-        ) : (
-          <form
-            className="space-y-5"
-            onSubmit={(event) => {
-              event.preventDefault()
-              mutation.mutate()
-            }}
+      {didReset ? (
+        <div className="space-y-4">
+          <AuthStatusMessage tone="neutral">
+            <p>Your password has been reset.</p>
+          </AuthStatusMessage>
+          <Button
+            className={setupAuthPrimaryButtonClassName}
+            nativeButton={false}
+            render={<Link to="/login" search={{ redirect: "/dashboard" }} />}
           >
-            <PasswordField
-              id="reset-new-password"
-              label="New password"
-              value={newPassword}
-              onChange={setNewPassword}
-            />
-            <PasswordField
-              id="reset-confirm-password"
-              label="Confirm new password"
-              value={confirmPassword}
-              onChange={setConfirmPassword}
-            />
-            <FieldError>{error}</FieldError>
-            <Button
-              type="submit"
-              size="lg"
-              className={authButtonClassName}
-              disabled={mutation.isPending || !search.token}
-            >
-              {mutation.isPending ? "Resetting..." : "Reset password"}
-            </Button>
-          </form>
-        )}
-      </AuthCard>
-    </AuthShell>
+            Sign in
+            <ArrowRightIcon className="size-4" />
+          </Button>
+        </div>
+      ) : (
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault()
+            mutation.mutate()
+          }}
+        >
+          <PasswordField
+            id="reset-new-password"
+            label="New password"
+            value={newPassword}
+            onChange={setNewPassword}
+          />
+          <PasswordField
+            id="reset-confirm-password"
+            label="Confirm new password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+          />
+          <FieldError>{error}</FieldError>
+          <Button
+            type="submit"
+            size="lg"
+            className={setupAuthPrimaryButtonClassName}
+            disabled={mutation.isPending || !search.token}
+          >
+            {mutation.isPending ? "Resetting..." : "Reset password"}
+            {!mutation.isPending ? <ArrowRightIcon className="size-4" /> : null}
+          </Button>
+        </form>
+      )}
+    </SetupAuthShell>
   )
 }
 

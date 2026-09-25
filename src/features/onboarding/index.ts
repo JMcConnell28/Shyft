@@ -21,6 +21,7 @@ export {
   resendVerificationEmail,
 } from "@/features/onboarding/server/organization-actions"
 export { saveOnboardingIntent } from "@/features/onboarding/server/intent-actions"
+export { ensureActiveStaffInviteLink } from "@/features/onboarding/server/ensure-staff-invite-link"
 export {
   acceptOrganizationInvitation,
   acceptStaffInvite,

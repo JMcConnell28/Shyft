@@ -11,6 +11,8 @@ type SetupAuthShellProps = {
   alternateAction: string
   alternateHref: "/login" | "/sign-up"
   alternateRedirect: string
+  showArtwork?: boolean
+  hideAlternate?: boolean
   children: ReactNode
 }
 
@@ -27,10 +29,13 @@ function SetupAuthShell({
   alternateAction,
   alternateHref,
   alternateRedirect,
+  showArtwork = true,
+  hideAlternate = false,
   children,
 }: SetupAuthShellProps) {
   return (
     <BrandedArtworkShell
+      showArtwork={showArtwork}
       headerAction={
         <Link
           to="/"
@@ -53,16 +58,18 @@ function SetupAuthShell({
           </p>
         </div>
         {children}
-        <p className="mt-4 text-center text-xs text-[#657797]">
-          {alternateLabel}{" "}
-          <Link
-            to={alternateHref}
-            search={{ redirect: alternateRedirect }}
-            className="font-semibold text-[#075fe6] underline underline-offset-4 hover:text-[#064cb8]"
-          >
-            {alternateAction}
-          </Link>
-        </p>
+        {!hideAlternate ? (
+          <p className="mt-4 text-center text-xs text-[#657797]">
+            {alternateLabel}{" "}
+            <Link
+              to={alternateHref}
+              search={{ redirect: alternateRedirect }}
+              className="font-semibold text-[#075fe6] underline underline-offset-4 hover:text-[#064cb8]"
+            >
+              {alternateAction}
+            </Link>
+          </p>
+        ) : null}
       </div>
     </BrandedArtworkShell>
   )

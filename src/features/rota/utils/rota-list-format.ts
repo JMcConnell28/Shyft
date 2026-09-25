@@ -2,7 +2,7 @@ import { format } from "date-fns"
 
 import type { RotaListItem } from "@/features/rota/types"
 
-function formatMobileRotaUpdatedLabel(
+function formatRotaUpdatedLabel(
   row: Pick<RotaListItem, "status" | "updatedAt">,
   now = new Date()
 ) {
@@ -15,4 +15,4 @@ function formatMobileRotaUpdatedLabel(
   return `Last edited ${updatedDate === format(now, "d MMM yyyy") ? "today" : updatedDate}`
 }
 
-export { formatMobileRotaUpdatedLabel }
+export { formatRotaUpdatedLabel }

@@ -71,14 +71,6 @@ function RotaListPage({
     type: "delete-draft" | "unpublish"
     weekLabel: string
   } | null>(null)
-  const compactOverview = [
-    `${data.pagination.totalItems} rotas`,
-    canEditRotas ? `${data.overview.draftRotas} drafts` : null,
-    `${data.overview.publishedRotas} published`,
-    data.overview.unreadPublishedRotas > 0
-      ? `${data.overview.unreadPublishedRotas} unread`
-      : null,
-  ].filter(Boolean) as Array<string>
   const firstVisibleItem =
     data.pagination.totalItems === 0
       ? 0
@@ -111,110 +103,84 @@ function RotaListPage({
         onStatusChange={onStatusChange}
       />
 
-      <div className="hidden flex-1 flex-col overflow-x-hidden bg-[#f7f8fb] text-[#11245a] md:flex">
-        <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-5 py-5">
-          <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="min-w-0">
-              <h1 className="text-[2.4rem] leading-none font-extrabold tracking-[-0.055em]">
-                Rotas
-              </h1>
-              <p className="mt-2 text-sm font-semibold text-[#61709a]">
-                {data.selectedLocation?.name ?? "Choose a location"}
-              </p>
+      <div className="hidden flex-1 flex-col overflow-x-hidden bg-white text-[#10285c] md:flex">
+        <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-8 lg:px-10">
+          <header>
+            <h1 className="text-[30px] leading-none font-bold tracking-[-0.035em]">
+              Rota list
+            </h1>
+            <p className="mt-2.5 text-sm font-medium text-[#526991]">
+              View, edit and manage your rotas.
+            </p>
+          </header>
 
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {compactOverview.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-[#61709a] ring-1 ring-[#e7eaf2]"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
+          <section className="mt-7 flex flex-wrap items-end gap-3">
+            <div className="min-w-0 flex-1">
+              <RotaListFilters
+                locations={data.locations}
+                selectedLocationId={data.selectedLocation?.id}
+                status={data.filters.status}
+                range={data.filters.range}
+                from={data.filters.from}
+                to={data.filters.to}
+                pageSize={data.filters.pageSize}
+                showStatusFilter={canEditRotas}
+                pageSizeOptions={rotaPageSizeValues}
+                onLocationChange={onLocationChange}
+                onStatusChange={onStatusChange}
+                onRangeChange={onRangeChange}
+                onPageSizeChange={onPageSizeChange}
+                onCustomRangeChange={onCustomRangeChange}
+              />
             </div>
-
             {canCreateRota ? (
-              <div className="flex flex-wrap gap-2">
-                <NewRotaDialog
-                  locations={data.locations}
-                  selectedLocation={data.selectedLocation}
-                  triggerLabel="New rota"
-                  triggerIcon="plus"
-                  disabled={!canCreateRota}
-                  defaultSourceType="blank"
-                  workspaceType={data.workspaceType}
-                />
-              </div>
+              <NewRotaDialog
+                locations={data.locations}
+                selectedLocation={data.selectedLocation}
+                triggerLabel="New rota"
+                triggerIcon="plus"
+                triggerClassName="h-10 shrink-0 rounded-[10px] border-0 bg-[#0868f7] px-4 text-[13px] font-semibold text-white shadow-[0_7px_16px_rgba(8,104,247,0.18)] hover:bg-[#005de2]"
+                defaultSourceType="blank"
+                workspaceType={data.workspaceType}
+              />
             ) : null}
           </section>
 
-          {data.latestDraft && canEditRota(data.latestDraft.weekStart) ? (
-            <section className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-neutral-200 bg-white px-4 py-3 shadow-sm">
-              <div className="min-w-0">
-                <p className="text-[11px] font-extrabold tracking-[0.08em] text-[#7a86a4] uppercase">
-                  Latest draft
-                </p>
-                <p className="mt-1 truncate text-sm font-extrabold text-[#11245a]">
-                  {data.latestDraft.weekLabel}
-                </p>
-                <p className="mt-0.5 text-xs font-medium text-[#7a86a4]">
-                  Updated {data.latestDraft.updatedAt}
-                </p>
-              </div>
-              <Button
-                variant="base"
-                nativeButton={false}
-                render={
-                  <Link
-                    to={
-                      data.workspaceType === "location"
-                        ? "/w/$workspaceSlug/rota/$rotaId"
-                        : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
-                    }
-                    params={
-                      data.workspaceType === "location"
-                        ? {
-                            workspaceSlug:
-                              data.locationWorkspaceSlug ??
-                              data.latestDraft.locationSlug,
-                            rotaId: data.latestDraft.id,
-                          }
-                        : {
-                            workspaceSlug: data.orgSlug,
-                            locationSlug: data.latestDraft.locationSlug,
-                            rotaId: data.latestDraft.id,
-                          }
-                    }
-                  />
+          <div className="mt-7 mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.055em] text-[#526991] uppercase">
+              <span>All rotas</span>
+              <span className="flex size-7 items-center justify-center rounded-full bg-[#f0f3f9] tracking-normal">
+                {data.pagination.totalItems}
+              </span>
+            </div>
+            {data.latestDraft && canEditRota(data.latestDraft.weekStart) ? (
+              <Link
+                to={
+                  data.workspaceType === "location"
+                    ? "/w/$workspaceSlug/rota/$rotaId"
+                    : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
                 }
-                className="h-9 gap-1.5 text-xs font-extrabold text-[#0069ff] hover:bg-[#f7f8fb] hover:text-[#0069ff] focus-visible:ring-[#0069ff] active:bg-[#e6f0ff] active:text-[#0069ff]"
+                params={
+                  data.workspaceType === "location"
+                    ? {
+                        workspaceSlug:
+                          data.locationWorkspaceSlug ??
+                          data.latestDraft.locationSlug,
+                        rotaId: data.latestDraft.id,
+                      }
+                    : {
+                        workspaceSlug: data.orgSlug,
+                        locationSlug: data.latestDraft.locationSlug,
+                        rotaId: data.latestDraft.id,
+                      }
+                }
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0868f7] hover:underline"
               >
-                Resume draft
+                Resume latest draft
                 <ArrowUpRightIcon className="size-3.5" />
-              </Button>
-            </section>
-          ) : null}
-
-          <section className="rounded-[22px] bg-white shadow-[0_8px_24px_rgba(30,50,96,0.05)] ring-1 ring-[#e7eaf2]">
-            <RotaListFilters
-              locations={data.locations}
-              selectedLocationId={data.selectedLocation?.id}
-              status={data.filters.status}
-              range={data.filters.range}
-              from={data.filters.from}
-              to={data.filters.to}
-              pageSize={data.filters.pageSize}
-              totalItems={data.pagination.totalItems}
-              showStatusFilter={canEditRotas}
-              pageSizeOptions={rotaPageSizeValues}
-              onLocationChange={onLocationChange}
-              onStatusChange={onStatusChange}
-              onRangeChange={onRangeChange}
-              onPageSizeChange={onPageSizeChange}
-              onCustomRangeChange={onCustomRangeChange}
-            />
-          </section>
+              </Link>
+            ) : null}
+          </div>
 
           {!data.selectedLocation ? (
             <DesktopEmptyState
@@ -238,7 +204,7 @@ function RotaListPage({
                     selectedLocation={data.selectedLocation}
                     triggerLabel="Create rota"
                     triggerIcon="plus"
-                    triggerClassName="h-10 rounded-2xl border-0 bg-[#00a84f] px-4 text-sm font-extrabold text-white shadow-[0_10px_22px_rgba(0,168,79,0.18)] hover:bg-[#009647]"
+                    triggerClassName="h-10 rounded-[10px] border-0 bg-[#0868f7] px-4 text-sm font-semibold text-white hover:bg-[#005de2]"
                     defaultSourceType="blank"
                     workspaceType={data.workspaceType}
                   />
@@ -280,8 +246,8 @@ function RotaListPage({
                 />
               ))}
 
-              <div className="flex flex-col gap-3 rounded-[18px] bg-white px-4 py-3 shadow-[0_8px_24px_rgba(30,50,96,0.04)] ring-1 ring-[#e7eaf2] sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs font-semibold text-[#7a86a4]">
+              <div className="flex flex-col gap-3 border-t border-[#e0e7f1] px-1 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs font-medium text-[#607399]">
                   Showing {firstVisibleItem} to {lastVisibleItem} of{" "}
                   {data.pagination.totalItems} rotas
                 </p>
@@ -289,8 +255,8 @@ function RotaListPage({
                   <Button
                     size="sm"
                     type="button"
-                    variant="pill"
-                    className="h-8 rounded-xl border-[#e1e7f2] bg-white px-3 text-xs font-extrabold text-[#0069ff] shadow-none"
+                    variant="outline"
+                    className="h-8 rounded-lg border-[#d8e2f0] bg-white px-3 text-xs font-semibold text-[#0765e8] shadow-none"
                     onClick={() => onPageChange(data.pagination.page - 1)}
                     disabled={data.pagination.page <= 1}
                   >
@@ -299,8 +265,8 @@ function RotaListPage({
                   <Button
                     size="sm"
                     type="button"
-                    variant="pill"
-                    className="h-8 rounded-xl border-[#e1e7f2] bg-white px-3 text-xs font-extrabold text-[#0069ff] shadow-none"
+                    variant="outline"
+                    className="h-8 rounded-lg border-[#d8e2f0] bg-white px-3 text-xs font-semibold text-[#0765e8] shadow-none"
                     onClick={() => onPageChange(data.pagination.page + 1)}
                     disabled={
                       data.pagination.page >= data.pagination.totalPages
@@ -402,14 +368,14 @@ function DesktopEmptyState({
   title: string
 }) {
   return (
-    <div className="rounded-[22px] border border-dashed border-[#dfe5f0] bg-white px-6 py-12 text-center shadow-[0_8px_24px_rgba(30,50,96,0.05)]">
-      <span className="mx-auto flex size-11 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#0069ff]">
+    <div className="rounded-[11px] border border-dashed border-[#d7e0ed] bg-white px-6 py-12 text-center shadow-[0_3px_10px_rgba(30,50,96,0.065)]">
+      <span className="mx-auto flex size-11 items-center justify-center rounded-[10px] border border-blue-100 bg-blue-50 text-[#0868f7]">
         <Icon className="size-5" />
       </span>
-      <h2 className="mt-4 text-base font-extrabold tracking-[-0.025em] text-[#11245a]">
+      <h2 className="mt-4 text-base font-semibold tracking-[-0.01em] text-[#10285c]">
         {title}
       </h2>
-      <p className="mx-auto mt-1.5 max-w-md text-sm font-medium text-[#61709a]">
+      <p className="mx-auto mt-1.5 max-w-md text-sm font-medium text-[#526991]">
         {message}
       </p>
       {action ? <div className="mt-5 flex justify-center">{action}</div> : null}

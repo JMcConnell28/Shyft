@@ -1,9 +1,9 @@
-import { CalendarDaysIcon } from "lucide-react"
+import { MapPinIcon } from "lucide-react"
 
 import type { RotaListItem, RotaListPageData } from "@/features/rota/types"
 import { MobileRotaCardActions } from "@/features/rota/components/mobile-rota-card-actions"
-import { formatMobileRotaUpdatedLabel } from "@/features/rota/utils/mobile-rota-list"
-import { cn } from "@/lib/utils"
+import { RotaListStatusBadge } from "@/features/rota/components/rota-list-status-badge"
+import { formatRotaUpdatedLabel } from "@/features/rota/utils/rota-list-format"
 
 type MobileRotaCardProps = {
   canEdit: boolean
@@ -13,17 +13,17 @@ type MobileRotaCardProps = {
 
 function MobileRotaCard({ canEdit, data, row }: MobileRotaCardProps) {
   return (
-    <article className="relative grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 rounded-[11px] border border-[#e0e7f1] bg-white p-3 text-[#10285c] shadow-[0_3px_10px_rgba(30,50,96,0.065)]">
-      <span className="flex size-11 items-center justify-center rounded-xl bg-[#edf3ff] text-[#0868f7]">
-        <CalendarDaysIcon className="size-5" strokeWidth={2.2} />
-      </span>
-
+    <article className="relative rounded-[11px] border border-[#e0e7f1] bg-white p-3 text-[#10285c] shadow-[0_3px_10px_rgba(30,50,96,0.065)]">
       <div className="min-w-0">
+        <p className="mb-1 flex min-w-0 items-center gap-1.5 pr-6 text-xs font-semibold text-[#0868f7]">
+          <MapPinIcon className="size-3.5 shrink-0" aria-hidden="true" />
+          <span className="truncate">{row.locationName}</span>
+        </p>
         <div className="flex items-start justify-between gap-2 pr-6">
           <h2 className="min-w-0 text-[16px] leading-6 font-semibold tracking-[-0.02em]">
             {row.weekLabel}
           </h2>
-          <StatusBadge status={row.status} />
+          <RotaListStatusBadge status={row.status} className="mt-0.5" />
         </div>
 
         <p className="mt-0.5 text-xs font-medium text-[#526991]">
@@ -43,7 +43,7 @@ function MobileRotaCard({ canEdit, data, row }: MobileRotaCardProps) {
 
         <div className="mt-2 flex items-end justify-between gap-2">
           <p className="min-w-0 truncate pb-0.5 text-[11px] font-medium text-[#607399]">
-            {formatMobileRotaUpdatedLabel(row)}
+            {formatRotaUpdatedLabel(row)}
             <span className="px-1.5" aria-hidden="true">
               •
             </span>
@@ -53,27 +53,6 @@ function MobileRotaCard({ canEdit, data, row }: MobileRotaCardProps) {
         </div>
       </div>
     </article>
-  )
-}
-
-function StatusBadge({ status }: { status: RotaListItem["status"] }) {
-  return (
-    <span
-      className={cn(
-        "mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] leading-4 font-semibold",
-        status === "published"
-          ? "bg-[#e9f8ee] text-[#20984d]"
-          : "bg-[#fff3d9] text-[#c77b00]"
-      )}
-    >
-      <span
-        className={cn(
-          "size-1.5 rounded-full",
-          status === "published" ? "bg-[#39c76b]" : "bg-[#f2a900]"
-        )}
-      />
-      {status === "published" ? "Published" : "Draft"}
-    </span>
   )
 }
 

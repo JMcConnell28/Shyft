@@ -1,9 +1,4 @@
-import {
-  CalendarRangeIcon,
-  ListFilterIcon,
-  MapPinIcon,
-  Rows3Icon,
-} from "lucide-react"
+import { CalendarRangeIcon, MapPinIcon, Rows3Icon } from "lucide-react"
 
 import type {
   RotaPageSize,
@@ -45,7 +40,6 @@ function RotaListFilters({
   from,
   to,
   pageSize,
-  totalItems,
   showStatusFilter = true,
   pageSizeOptions,
   onLocationChange,
@@ -61,7 +55,6 @@ function RotaListFilters({
   from?: string
   to?: string
   pageSize: RotaPageSize
-  totalItems: number
   showStatusFilter?: boolean
   pageSizeOptions: ReadonlyArray<RotaPageSize>
   onLocationChange: (locationSlug: string) => void
@@ -71,17 +64,7 @@ function RotaListFilters({
   onCustomRangeChange: (value: { from?: string; to?: string }) => void
 }) {
   return (
-    <div className="flex flex-col gap-3 px-4 py-3">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium text-neutral-500">
-        <span className="inline-flex items-center gap-2 font-medium text-neutral-700">
-          <ListFilterIcon className="size-3.5 text-blue-600" />
-          Newest weeks first
-        </span>
-        <span className="rounded-[10px] border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600">
-          {totalItems} rotas
-        </span>
-      </div>
-
+    <div className="flex flex-col gap-3">
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_8rem]">
         <label className="relative">
           <MapPinIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-3.5 -translate-y-1/2 text-blue-600" />

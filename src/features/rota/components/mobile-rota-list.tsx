@@ -31,12 +31,12 @@ function MobileRotaList({
   onRangeChange,
 }: MobileRotaListProps) {
   return (
-    <div className="flex flex-1 flex-col bg-white px-[18px] pt-5 pb-[max(2rem,env(safe-area-inset-bottom))] text-[#10285c] md:hidden">
+    <div className="flex flex-1 flex-col bg-white pt-5 pr-[max(18px,env(safe-area-inset-right))] pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(18px,env(safe-area-inset-left))] text-[#10285c] md:hidden">
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
         <MobileRotaHeader />
 
         <div className="animate-in pb-6 duration-300 fade-in motion-reduce:animate-none">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-3">
             <MobileRotaFilters
               canEditRotas={canEditRotas}
               data={data}
@@ -51,7 +51,7 @@ function MobileRotaList({
                 locations={data.locations}
                 selectedLocation={data.selectedLocation}
                 triggerLabel="New rota"
-                triggerClassName="h-10 shrink-0 gap-2 rounded-[10px] border-0 bg-[#0868f7] px-3.5 text-[13px] font-semibold text-white shadow-[0_7px_16px_rgba(8,104,247,0.18)] hover:bg-[#005de2]"
+                triggerClassName="ml-auto h-10 shrink-0 gap-2 rounded-[10px] border-0 bg-[#0868f7] px-3.5 text-[13px] font-semibold text-white shadow-[0_7px_16px_rgba(8,104,247,0.18)] hover:bg-[#005de2]"
                 triggerIcon="plus"
                 disabled={!canCreateRota}
                 defaultSourceType="blank"

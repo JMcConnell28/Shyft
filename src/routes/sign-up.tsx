@@ -211,7 +211,7 @@ function SignUpRoute() {
             {(field) => (
               <TextFormField
                 field={field}
-                label="Work email"
+                label="Email"
                 type="email"
                 placeholder="jane@company.com"
                 autoComplete="email"

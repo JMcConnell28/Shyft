@@ -149,7 +149,7 @@ function LoginRoute() {
             {(field) => (
               <TextFormField
                 field={field}
-                label="Work email"
+                label="Email"
                 type="email"
                 placeholder="you@company.com"
                 autoComplete="username webauthn"
