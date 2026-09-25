@@ -45,7 +45,7 @@ function MobileDashboardShell({
   const activeShift = shifts.find((shift) => shift.date === getLocalDateValue())
 
   return (
-    <div className="min-h-full bg-[#fffefe] text-[#0b1836] md:hidden">
+    <div className="min-h-full bg-background/95 text-[#0b1836] md:hidden">
       <div className="mx-auto flex min-h-full max-w-md flex-col px-5 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <MobileDashboardHero userName={context.userName} />
         <DashboardClockStatusPanel

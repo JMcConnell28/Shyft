@@ -31,7 +31,7 @@ function MobileRotaList({
   onRangeChange,
 }: MobileRotaListProps) {
   return (
-    <div className="flex flex-1 flex-col bg-white pt-5 pr-[max(18px,env(safe-area-inset-right))] pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(18px,env(safe-area-inset-left))] text-[#10285c] md:hidden">
+    <div className="flex flex-1 flex-col bg-background/95 pt-5 pr-[max(18px,env(safe-area-inset-right))] pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(18px,env(safe-area-inset-left))] text-[#10285c] md:hidden">
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
         <MobileRotaHeader />
 

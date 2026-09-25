@@ -103,7 +103,7 @@ function RotaListPage({
         onStatusChange={onStatusChange}
       />
 
-      <div className="hidden flex-1 flex-col overflow-x-hidden bg-white text-[#10285c] md:flex">
+      <div className="no-scrollbar hidden flex-1 flex-col overflow-x-hidden bg-background/95 text-[#10285c] md:flex">
         <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-8 lg:px-10">
           <header>
             <h1 className="text-[30px] leading-none font-bold tracking-[-0.035em]">
