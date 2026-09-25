@@ -3,28 +3,58 @@ import "@tanstack/react-start/server-only"
 import { emailAssetBaseUrlSchema } from "@/features/email/schemas/email-asset-schemas"
 import { getOptionalEnv } from "@/lib/env.server"
 
-type VerificationEmailImageUrls = {
+type BrandedEmailImageUrls = {
   graphic: string
   logo: string
 }
 
 const defaultEmailAssetBaseUrl = "https://rocketrota.com"
 
-function buildVerificationEmailImageUrls(
-  assetBaseUrl: string
-): VerificationEmailImageUrls {
+function buildBrandedEmailImageUrls(
+  assetBaseUrl: string,
+  graphicPath: string
+): BrandedEmailImageUrls {
   const baseUrl = new URL(emailAssetBaseUrlSchema.parse(assetBaseUrl))
 
   return {
-    graphic: new URL("/brand/email-verification.png", baseUrl).toString(),
+    graphic: new URL(graphicPath, baseUrl).toString(),
     logo: new URL("/pwa/icon-192.png", baseUrl).toString(),
   }
 }
 
-function getVerificationEmailImageUrls(): VerificationEmailImageUrls {
-  return buildVerificationEmailImageUrls(
-    getOptionalEnv("EMAIL_ASSET_BASE_URL") ?? defaultEmailAssetBaseUrl
+function getEmailAssetBaseUrl(): string {
+  return getOptionalEnv("EMAIL_ASSET_BASE_URL") ?? defaultEmailAssetBaseUrl
+}
+
+function buildVerificationEmailImageUrls(
+  assetBaseUrl: string
+): BrandedEmailImageUrls {
+  return buildBrandedEmailImageUrls(
+    assetBaseUrl,
+    "/brand/email-verification.png"
   )
 }
 
-export { buildVerificationEmailImageUrls, getVerificationEmailImageUrls }
+function getVerificationEmailImageUrls(): BrandedEmailImageUrls {
+  return buildVerificationEmailImageUrls(getEmailAssetBaseUrl())
+}
+
+function buildOrganizationWelcomeImageUrls(
+  assetBaseUrl: string
+): BrandedEmailImageUrls {
+  return buildBrandedEmailImageUrls(
+    assetBaseUrl,
+    "/brand/organization-welcome.png"
+  )
+}
+
+function getOrganizationWelcomeImageUrls(): BrandedEmailImageUrls {
+  return buildOrganizationWelcomeImageUrls(getEmailAssetBaseUrl())
+}
+
+export {
+  buildOrganizationWelcomeImageUrls,
+  buildVerificationEmailImageUrls,
+  getOrganizationWelcomeImageUrls,
+  getVerificationEmailImageUrls,
+}
