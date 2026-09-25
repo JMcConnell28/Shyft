@@ -2,6 +2,7 @@ import "@tanstack/react-start/server-only"
 
 import type { z } from "zod"
 
+import type { sendDevTestEmailInputSchema } from "@/features/email/schemas/dev-email-schemas"
 import {
   sendOrganizationInvitationEmail,
   sendPasswordResetEmail,
@@ -13,7 +14,6 @@ import {
 } from "@/features/email/server/billing-emails"
 import { sendRotaPublishedEmail } from "@/features/email/server/rota-emails"
 import { sendWorkspaceWelcomeEmail } from "@/features/email/server/workspace-emails"
-import { sendDevTestEmailInputSchema } from "@/features/email/schemas/dev-email-schemas"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
 import { buildAppUrl } from "@/lib/app-url.server"
 
@@ -42,7 +42,6 @@ async function sendDevTestEmail(input: SendDevTestEmailInput) {
   } else if (input.emailType === "reset-password") {
     await sendPasswordResetEmail({
       to: testRecipient,
-      userName: "Alex Manager",
       resetUrl: buildAppUrl("/reset-password?token=test-token"),
     })
   } else if (input.emailType === "organization-invitation") {
@@ -58,7 +57,9 @@ async function sendDevTestEmail(input: SendDevTestEmailInput) {
       dashboardUrl: buildAppUrl(workspacePath),
       userName: "Alex Manager",
       workspaceName:
-        workspaceType === "organization" ? "The Crown Group" : "The Crown Tavern",
+        workspaceType === "organization"
+          ? "The Crown Group"
+          : "The Crown Tavern",
       workspaceType,
     })
   } else if (input.emailType === "rota-published") {

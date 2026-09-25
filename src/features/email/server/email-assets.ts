@@ -18,12 +18,21 @@ function buildBrandedEmailImageUrls(
 
   return {
     graphic: new URL(graphicPath, baseUrl).toString(),
-    logo: new URL("/pwa/icon-192.png", baseUrl).toString(),
+    logo: buildBrandedEmailLogoUrl(assetBaseUrl),
   }
+}
+
+function buildBrandedEmailLogoUrl(assetBaseUrl: string): string {
+  const baseUrl = new URL(emailAssetBaseUrlSchema.parse(assetBaseUrl))
+  return new URL("/pwa/icon-192.png", baseUrl).toString()
 }
 
 function getEmailAssetBaseUrl(): string {
   return getOptionalEnv("EMAIL_ASSET_BASE_URL") ?? defaultEmailAssetBaseUrl
+}
+
+function getBrandedEmailLogoUrl(): string {
+  return buildBrandedEmailLogoUrl(getEmailAssetBaseUrl())
 }
 
 function buildVerificationEmailImageUrls(
@@ -53,8 +62,10 @@ function getOrganizationWelcomeImageUrls(): BrandedEmailImageUrls {
 }
 
 export {
+  buildBrandedEmailLogoUrl,
   buildOrganizationWelcomeImageUrls,
   buildVerificationEmailImageUrls,
+  getBrandedEmailLogoUrl,
   getOrganizationWelcomeImageUrls,
   getVerificationEmailImageUrls,
 }

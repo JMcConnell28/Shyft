@@ -1,6 +1,10 @@
 import "@tanstack/react-start/server-only"
 
-import { getVerificationEmailImageUrls } from "@/features/email/server/email-assets"
+import { passwordResetExpiryHours } from "@/features/email/constants/password-reset"
+import {
+  getBrandedEmailLogoUrl,
+  getVerificationEmailImageUrls,
+} from "@/features/email/server/email-assets"
 import { OrganizationInvitationEmail } from "@/features/email/templates/organization-invitation"
 import { ResetPasswordEmail } from "@/features/email/templates/reset-password"
 import { VerifyEmail } from "@/features/email/templates/verify-email"
@@ -16,7 +20,6 @@ type SendVerificationEmailInput = {
 type SendPasswordResetEmailInput = {
   resetUrl: string
   to: string
-  userName: string
 }
 
 type SendOrganizationInvitationEmailInput = {
@@ -50,13 +53,18 @@ async function sendVerificationEmail({
 async function sendPasswordResetEmail({
   resetUrl,
   to,
-  userName,
 }: SendPasswordResetEmailInput) {
   await sendTransactionalEmail({
     to,
     subject: `Reset your ${appName} password`,
-    react: <ResetPasswordEmail resetUrl={resetUrl} userName={userName} />,
-    text: `Reset your ${appName} password by opening this link: ${resetUrl}`,
+    react: (
+      <ResetPasswordEmail
+        brandLogoUrl={getBrandedEmailLogoUrl()}
+        helpUrl={new URL("/help", resetUrl).toString()}
+        resetUrl={resetUrl}
+      />
+    ),
+    text: `We received a request to reset your ${appName} password. Open this link to create a new password: ${resetUrl}\n\nThis link will expire in ${passwordResetExpiryHours} hour for security reasons. If you didn't request a password reset, you can safely ignore this email.`,
   })
 }
 

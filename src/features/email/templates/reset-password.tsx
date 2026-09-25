@@ -1,45 +1,95 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import {
+  Button,
+  Heading,
+  Hr,
+  Link,
+  Section,
+  Text,
+} from "@react-email/components"
 
-import { AuthEmailLayout } from "@/features/email/templates/auth-email-layout"
-import { appName, button, heading, link, text } from "@/features/email/templates/email-styles"
+import { passwordResetExpiryHours } from "@/features/email/constants/password-reset"
+import { BrandedEmailLayout } from "@/features/email/templates/branded-email-layout"
+import {
+  button,
+  divider,
+  footerLink,
+  footerText,
+} from "@/features/email/templates/branded-email-styles"
+import { appName } from "@/features/email/templates/email-styles"
+import {
+  content,
+  expiry,
+  fallback,
+  heading,
+  message,
+  note,
+} from "@/features/email/templates/reset-password-styles"
 
 type ResetPasswordEmailProps = {
+  brandLogoUrl: string
+  helpUrl: string
   resetUrl: string
-  userName: string
 }
 
-function ResetPasswordEmail({ resetUrl, userName }: ResetPasswordEmailProps) {
+function ResetPasswordEmail({
+  brandLogoUrl,
+  helpUrl,
+  resetUrl,
+}: ResetPasswordEmailProps) {
   return (
-    <AuthEmailLayout preview={`Reset your ${appName} password`}>
-      <Heading as="h1" style={heading}>
-        Reset your password
-      </Heading>
-      <Text style={text}>Hi {userName},</Text>
-      <Text style={text}>
-        Use this secure link to choose a new password for your {appName}
-        account.
-      </Text>
-      <Button
-        href={resetUrl}
-        rel="noopener noreferrer"
-        style={button}
-        target="_blank"
-      >
-        Reset password
-      </Button>
-      <Text style={{ ...text, marginTop: "22px" }}>
-        If the button does not work, copy and paste this link into a new tab:
-        <br />
-        <Link
+    <BrandedEmailLayout
+      brandLogoUrl={brandLogoUrl}
+      preview={`Reset your ${appName} password`}
+    >
+      <Section style={content}>
+        <Heading as="h1" style={heading}>
+          Reset your password
+        </Heading>
+        <Text style={message}>
+          We received a request to reset your {appName} password. Click the
+          button below to create a new password.
+        </Text>
+        <Button
           href={resetUrl}
           rel="noopener noreferrer"
-          style={link}
+          style={{ ...button, margin: "0", maxWidth: "260px" }}
           target="_blank"
         >
-          {resetUrl}
-        </Link>
-      </Text>
-    </AuthEmailLayout>
+          Reset password&nbsp;&nbsp;→
+        </Button>
+        <Text style={expiry}>
+          This link will expire in {passwordResetExpiryHours} hour for security
+          reasons.
+        </Text>
+
+        <Hr style={{ ...divider, margin: "26px 0" }} />
+        <Text style={note}>
+          If you didn&apos;t request a password reset, you can safely ignore
+          this email. Your password won&apos;t be changed.
+        </Text>
+        <Text style={fallback}>
+          Button not working?{" "}
+          <Link
+            href={resetUrl}
+            rel="noopener noreferrer"
+            style={footerLink}
+            target="_blank"
+          >
+            Open the reset link.
+          </Link>
+        </Text>
+
+        <Hr style={{ ...divider, margin: "26px 0 18px" }} />
+        <Text style={{ ...footerText, textAlign: "left" }}>
+          <Link href={helpUrl} style={footerLink}>
+            Help Centre
+          </Link>
+        </Text>
+        <Text style={{ ...footerText, marginBottom: "0", textAlign: "left" }}>
+          © {new Date().getFullYear()} {appName}. All rights reserved.
+        </Text>
+      </Section>
+    </BrandedEmailLayout>
   )
 }
 

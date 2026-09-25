@@ -9,6 +9,7 @@ import { organization } from "better-auth/plugins"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import Stripe from "stripe"
 
+import { passwordResetExpiryHours } from "@/features/email/constants/password-reset"
 import { ac, roles } from "@/lib/auth/permissions"
 import { requireSignUpAccessCode } from "@/lib/auth/sign-up-access.server"
 import { authUserAdditionalFields } from "@/lib/auth-fields"
@@ -79,11 +80,11 @@ const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
+    resetPasswordTokenExpiresIn: passwordResetExpiryHours * 60 * 60,
     sendResetPassword: async ({ user, url }) => {
       await sendPasswordResetEmail({
         to: user.email,
         resetUrl: url,
-        userName: user.name,
       })
     },
   },
