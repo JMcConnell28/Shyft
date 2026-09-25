@@ -1,9 +1,6 @@
 import "@tanstack/react-start/server-only"
 
-import {
-  getVerificationEmailFontDataUrl,
-  getVerificationEmailImageUrls,
-} from "@/features/email/server/email-assets"
+import { getVerificationEmailImageUrls } from "@/features/email/server/email-assets"
 import { OrganizationInvitationEmail } from "@/features/email/templates/organization-invitation"
 import { ResetPasswordEmail } from "@/features/email/templates/reset-password"
 import { VerifyEmail } from "@/features/email/templates/verify-email"
@@ -35,16 +32,14 @@ async function sendVerificationEmail({
   verificationUrl,
 }: SendVerificationEmailInput) {
   const imageUrls = getVerificationEmailImageUrls()
-  const fontDataUrl = await getVerificationEmailFontDataUrl()
 
   await sendTransactionalEmail({
     to,
     subject: `Verify your ${appName} account`,
     react: (
       <VerifyEmail
-        brandWordmarkUrl={imageUrls.wordmark}
+        brandLogoUrl={imageUrls.logo}
         emailGraphicUrl={imageUrls.graphic}
-        fontUrl={fontDataUrl}
         verificationUrl={verificationUrl}
       />
     ),

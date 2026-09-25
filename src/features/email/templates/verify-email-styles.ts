@@ -1,59 +1,76 @@
 const page = {
   backgroundColor: "#f2f7ff",
   color: "#0b2a63",
-  fontFamily:
-    'Manrope, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  fontFamily: "Arial, Helvetica, sans-serif",
   margin: "0",
-  padding: "24px 12px",
+  padding: "16px 12px",
 }
 
 const card = {
   backgroundColor: "#ffffff",
   border: "1px solid #e4edfb",
-  borderRadius: "24px",
-  boxShadow: "0 18px 55px rgba(39, 105, 190, 0.14)",
+  borderRadius: "16px",
   margin: "0 auto",
-  maxWidth: "600px",
-  overflow: "hidden" as const,
+  maxWidth: "560px",
+  width: "100%",
 }
 
 const header = {
-  padding: "10px 42px",
+  padding: "20px 28px",
+}
+
+const logoColumn = {
+  width: "56px",
+}
+
+const wordmark = {
+  fontSize: "25px",
+  fontWeight: "800",
+  letterSpacing: "-1px",
+  lineHeight: "30px",
+  margin: "0",
+}
+
+const wordmarkFirst = {
+  color: "#102f69",
+}
+
+const wordmarkSecond = {
+  color: "#1768f6",
 }
 
 const content = {
-  padding: "28px 48px 42px",
+  padding: "24px 28px 30px",
   textAlign: "center" as const,
 }
 
 const heading = {
   color: "#0a2456",
-  fontSize: "38px",
+  fontSize: "30px",
   fontWeight: "800",
-  letterSpacing: "-1.2px",
-  lineHeight: "46px",
-  margin: "12px 0 14px",
+  letterSpacing: "-0.8px",
+  lineHeight: "38px",
+  margin: "16px 0 12px",
 }
 
 const message = {
   color: "#4b6391",
-  fontSize: "18px",
-  lineHeight: "29px",
-  margin: "0 auto 28px",
-  maxWidth: "440px",
+  fontSize: "15px",
+  lineHeight: "24px",
+  margin: "0 auto 24px",
+  maxWidth: "390px",
 }
 
 const button = {
   backgroundColor: "#0f6fff",
-  borderRadius: "12px",
-  boxShadow: "0 10px 24px rgba(15, 111, 255, 0.22)",
+  borderRadius: "8px",
   color: "#ffffff",
   display: "block",
-  fontSize: "17px",
+  fontSize: "15px",
   fontWeight: "700",
   margin: "0 auto",
-  maxWidth: "330px",
-  padding: "16px 24px",
+  maxWidth: "250px",
+  padding: "14px 20px",
   textAlign: "center" as const,
   textDecoration: "none",
 }
@@ -76,7 +93,7 @@ const fallbackText = {
 
 const fallbackLink = {
   color: "#5076b5",
-  wordBreak: "break-all" as const,
+  textDecoration: "underline",
 }
 
 export {
@@ -88,6 +105,10 @@ export {
   footerText,
   header,
   heading,
+  logoColumn,
   message,
   page,
+  wordmark,
+  wordmarkFirst,
+  wordmarkSecond,
 }

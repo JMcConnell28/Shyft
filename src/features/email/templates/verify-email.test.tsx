@@ -1,25 +1,27 @@
-import { renderToStaticMarkup } from "react-dom/server"
+import { render } from "@react-email/components"
 import { describe, expect, it } from "vitest"
 
 import { VerifyEmail } from "@/features/email/templates/verify-email"
 
 describe("VerifyEmail", () => {
-  it("renders the verification design without the removed tagline", () => {
-    const html = renderToStaticMarkup(
+  it("keeps the complete message below Gmail's clipping threshold", async () => {
+    const html = await render(
       <VerifyEmail
-        brandWordmarkUrl="https://example.com/brand/rocketrota-wordmark.png"
+        brandLogoUrl="https://example.com/pwa/icon-192.png"
         emailGraphicUrl="https://example.com/brand/email-verification.png"
-        fontUrl="https://example.com/manrope.woff2"
         verificationUrl="https://example.com/verify"
       />
     )
 
     expect(html).toContain("Verify your email")
-    expect(html).toContain("https://example.com/brand/rocketrota-wordmark.png")
+    expect(html).toContain("https://example.com/pwa/icon-192.png")
     expect(html).toContain("https://example.com/brand/email-verification.png")
-    expect(html).toContain("https://example.com/manrope.woff2")
-    expect(html).toContain("font-family:Manrope")
     expect(html).toContain("https://example.com/verify")
+    expect(html).toContain("Rocket")
+    expect(html).toContain("Rota")
+    expect(html).toContain('width="128"')
+    expect(Buffer.byteLength(html, "utf8")).toBeLessThan(90 * 1024)
+    expect(html).not.toContain("data:font")
     expect(html).not.toContain("cid:")
     expect(html).not.toContain("localhost")
     expect(html).not.toContain("People. Shifts. Simplified")

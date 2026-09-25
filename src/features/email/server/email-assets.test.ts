@@ -6,7 +6,7 @@ describe("verification email image URLs", () => {
   it("uses a public HTTPS origin for both images", () => {
     expect(buildVerificationEmailImageUrls("https://example.com")).toEqual({
       graphic: "https://example.com/brand/email-verification.png",
-      wordmark: "https://example.com/brand/rocketrota-wordmark.png",
+      logo: "https://example.com/pwa/icon-192.png",
     })
   })
 

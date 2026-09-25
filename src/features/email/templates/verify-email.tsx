@@ -1,8 +1,8 @@
 import {
   Body,
   Button,
+  Column,
   Container,
-  Font,
   Head,
   Heading,
   Hr,
@@ -10,6 +10,7 @@ import {
   Img,
   Link,
   Preview,
+  Row,
   Section,
   Text,
 } from "@react-email/components"
@@ -24,14 +25,17 @@ import {
   footerText,
   header,
   heading,
+  logoColumn,
   message,
   page,
+  wordmark,
+  wordmarkFirst,
+  wordmarkSecond,
 } from "@/features/email/templates/verify-email-styles"
 
 type VerifyEmailProps = {
-  brandWordmarkUrl: string
+  brandLogoUrl: string
   emailGraphicUrl: string
-  fontUrl: string
   verificationUrl: string
 }
 
@@ -41,47 +45,34 @@ const divider = {
 }
 
 function VerifyEmail({
-  brandWordmarkUrl,
+  brandLogoUrl,
   emailGraphicUrl,
-  fontUrl,
   verificationUrl,
 }: VerifyEmailProps) {
   return (
     <Html lang="en">
-      <Head>
-        <Font
-          fallbackFontFamily={["Arial", "Helvetica"]}
-          fontFamily="Manrope"
-          fontStyle="normal"
-          fontWeight={400}
-          webFont={{ format: "woff2", url: fontUrl }}
-        />
-        <Font
-          fallbackFontFamily={["Arial", "Helvetica"]}
-          fontFamily="Manrope"
-          fontStyle="normal"
-          fontWeight={700}
-          webFont={{ format: "woff2", url: fontUrl }}
-        />
-        <Font
-          fallbackFontFamily={["Arial", "Helvetica"]}
-          fontFamily="Manrope"
-          fontStyle="normal"
-          fontWeight={800}
-          webFont={{ format: "woff2", url: fontUrl }}
-        />
-      </Head>
+      <Head />
       <Preview>Verify your {appName} account</Preview>
       <Body style={page}>
         <Container style={card}>
           <Section style={header}>
-            <Img
-              alt="RocketRota"
-              height="80"
-              src={brandWordmarkUrl}
-              style={{ display: "block" }}
-              width="240"
-            />
+            <Row>
+              <Column style={logoColumn}>
+                <Img
+                  alt="RR"
+                  height="44"
+                  src={brandLogoUrl}
+                  style={{ display: "block" }}
+                  width="44"
+                />
+              </Column>
+              <Column>
+                <Text style={wordmark}>
+                  <span style={wordmarkFirst}>Rocket</span>
+                  <span style={wordmarkSecond}>Rota</span>
+                </Text>
+              </Column>
+            </Row>
           </Section>
 
           <Hr style={divider} />
@@ -89,10 +80,10 @@ function VerifyEmail({
           <Section style={content}>
             <Img
               alt="An envelope with a verification checkmark"
-              height="250"
+              height="128"
               src={emailGraphicUrl}
               style={{ display: "block", margin: "0 auto" }}
-              width="250"
+              width="128"
             />
             <Heading as="h1" style={heading}>
               Verify your email
@@ -110,20 +101,20 @@ function VerifyEmail({
               Verify email&nbsp;&nbsp;→
             </Button>
 
-            <Hr style={{ ...divider, margin: "38px 0 24px" }} />
+            <Hr style={{ ...divider, margin: "26px 0 18px" }} />
 
             <Text style={footerText}>
               If you didn&apos;t create an account, you can ignore this email.
             </Text>
             <Text style={fallbackText}>
-              Button not working? Open this link: <br />
+              Button not working?{" "}
               <Link
                 href={verificationUrl}
                 rel="noopener noreferrer"
                 style={fallbackLink}
                 target="_blank"
               >
-                {verificationUrl}
+                Open the verification link.
               </Link>
             </Text>
             <Text style={{ ...footerText, marginBottom: "0" }}>
