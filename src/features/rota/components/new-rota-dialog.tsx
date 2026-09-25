@@ -53,7 +53,6 @@ type NewRotaDialogProps = {
   triggerIcon?: "plus" | "template"
   disabled?: boolean
   defaultSourceType?: NewRotaSource
-  workspaceType?: "organization" | "location"
 }
 
 function NewRotaDialog({
@@ -64,7 +63,6 @@ function NewRotaDialog({
   triggerIcon = "plus",
   disabled = false,
   defaultSourceType = "blank",
-  workspaceType = "organization",
 }: NewRotaDialogProps) {
   const navigate = useNavigate()
   const [open, setOpen] = React.useState(false)
@@ -95,21 +93,12 @@ function NewRotaDialog({
         })
 
         await navigate({
-          to:
-            workspaceType === "location"
-              ? "/w/$workspaceSlug/rota/$rotaId"
-              : "/w/$workspaceSlug/rota/$locationSlug/$rotaId",
-          params:
-            workspaceType === "location"
-              ? {
-                  workspaceSlug: result.target.locationSlug,
-                  rotaId: result.target.rotaId,
-                }
-              : {
-                  workspaceSlug: result.target.orgSlug,
-                  locationSlug: result.target.locationSlug,
-                  rotaId: result.target.rotaId,
-                },
+          to: "/app/$workspaceSlug/rota/$locationSlug/$rotaId",
+          params: {
+            workspaceSlug: result.target.orgSlug,
+            locationSlug: result.target.locationSlug,
+            rotaId: result.target.rotaId,
+          },
         })
       } catch (submissionError) {
         setError(

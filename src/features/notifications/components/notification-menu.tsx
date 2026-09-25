@@ -76,7 +76,7 @@ function NotificationMenu({
         <div className="max-h-[22rem] divide-y divide-[#edf0f6] overflow-y-auto">
           {hasUnreadRotaUpdates ? (
             <NotificationLink
-              href={`/w/${workspaceSlug}/rota`}
+              href={`/app/${workspaceSlug}/rota`}
               icon={CalendarDaysIcon}
               title="Your rota has been updated"
               description="Open the rota list to view the latest published shifts."
@@ -86,7 +86,7 @@ function NotificationMenu({
           {announcements.map((announcement) => (
             <NotificationLink
               key={announcement.id}
-              href={`/w/${workspaceSlug}/announcements`}
+              href={`/app/${workspaceSlug}/announcements`}
               icon={MegaphoneIcon}
               title={announcement.title}
               description={`${announcement.authorName} · ${formatTimeAgo(announcement.publishedAt)}`}
@@ -107,7 +107,7 @@ function NotificationMenu({
         </div>
 
         <Link
-          to="/w/$workspaceSlug/announcements"
+          to="/app/$workspaceSlug/announcements"
           params={{ workspaceSlug }}
           className="block border-t border-[#e9edf5] px-4 py-3 text-center text-xs font-bold text-[#0968f5] hover:bg-[#f7f9fd]"
         >

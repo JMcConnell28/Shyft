@@ -1,17 +1,11 @@
 import { queryOptions } from "@tanstack/react-query"
+import type { z } from "zod"
 
-import type { RotaListSearch } from "@/features/rota/schemas/rota-schemas"
+import type { getRotaListPageDataInputSchema } from "@/features/rota/schemas/rota-server-schemas"
 import { rotaQueryKeys } from "@/features/rota/query-keys"
 import { getRotaListPageData } from "@/features/rota/server-fns"
 
-type RotaListQueryInput = {
-  organizationId?: string
-  locationId?: string
-  orgSlug?: string
-  locationSlug?: string
-  userId: string
-  search: RotaListSearch
-}
+type RotaListQueryInput = z.infer<typeof getRotaListPageDataInputSchema>
 
 function rotaListQueryOptions(
   input: RotaListQueryInput,

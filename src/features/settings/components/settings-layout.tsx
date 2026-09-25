@@ -16,21 +16,17 @@ import { cn } from "@/lib/utils"
 
 function SettingsLayout({
   workspaceSlug,
-  workspaceType,
   activePath,
   contentOnly = false,
   children,
 }: {
   workspaceSlug: string
-  workspaceType?: "location" | "organization"
   activePath: string
   contentOnly?: boolean
   children: ReactNode
 }) {
-  const navItems = workspaceSettingsNavItems.filter(
-    (item) => !item.organizationOnly || workspaceType === "organization"
-  )
-  const settingsRootPath = `/w/${workspaceSlug}/settings`
+  const navItems = workspaceSettingsNavItems
+  const settingsRootPath = `/app/${workspaceSlug}/settings`
   const isCategoryIndex = activePath === settingsRootPath
   const activeItem = getActiveSettingsItem({
     activePath,

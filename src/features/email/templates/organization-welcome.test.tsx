@@ -8,7 +8,7 @@ describe("OrganizationWelcomeEmail", () => {
     const html = await render(
       <OrganizationWelcomeEmail
         brandLogoUrl="https://example.com/pwa/icon-192.png"
-        dashboardUrl="https://example.com/w/the-crown/dashboard"
+        dashboardUrl="https://example.com/app/the-crown/dashboard"
         helpUrl="https://example.com/help"
         organizationName="The Crown Group"
         userName="Alex"
@@ -25,7 +25,7 @@ describe("OrganizationWelcomeEmail", () => {
     expect(content).toContain("Build your first rota")
     expect(content).toContain("Set up billing")
     expect(html).toContain("https://example.com/brand/organization-welcome.png")
-    expect(html).toContain("https://example.com/w/the-crown/dashboard")
+    expect(html).toContain("https://example.com/app/the-crown/dashboard")
     expect(content).not.toContain("Set up your workspace")
     expect(content).not.toContain("Create your first location")
     expect(content).not.toContain("People. Shifts. Simplified.")

@@ -27,8 +27,8 @@ type WorkspaceSummary = {
   id: string
   name: string
   slug: string
-  type: "location" | "organization"
-  organizationId: string | null
+  type: "organization"
+  organizationId: string
 }
 
 type StaffGroupSummary = {

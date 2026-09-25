@@ -11,17 +11,13 @@ import {
 } from "@/lib/onboarding-schemas"
 import { auth } from "@/lib/auth"
 import { getDatabase } from "@/lib/db"
-import {
-  getLocationDashboardPath,
-  getOrganizationDashboardPath,
-} from "@/lib/organization-paths"
+import { getOrganizationDashboardPath } from "@/lib/organization-paths"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import {
   assertSupabaseSuccess,
   getRequiredSupabaseRow,
 } from "@/lib/supabase-errors"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
-import { requireLocationPermission } from "@/lib/auth/has-location-permission"
 
 import { syncWorkspaceBillingSubscriptionQuantities } from "@/features/billing/server/subscriptions"
 import { STAFF_INVITE_EXPIRY_DAYS } from "@/features/onboarding/constants"
@@ -49,32 +45,18 @@ const createStaffInviteLink = createServerFn({ method: "POST" })
     const { session } = await requireVerifiedSessionOrThrow()
     const organizationId = session.session.activeOrganizationId
 
-    if (organizationId) {
-      await requireOrgPermission({
-        organizationId,
-        userId: session.user.id,
-        permissions: {
-          invitation: ["create"],
-        },
-        errorMessage: "You do not have permission to create invite links.",
-      })
-
-      await ensureEmployeeStaffGroup({
-        organizationId,
-        locationId: null,
-      })
-    } else {
-      await requireLocationPermission({
-        locationId: data.locationId,
-        userId: session.user.id,
-        permissions: {
-          invitation: ["create"],
-        },
-        errorMessage: "You do not have permission to create invite links.",
-      })
+    if (!organizationId) {
+      throw new Error("Choose an organisation before creating invite links.")
     }
 
-    await requireWorkspaceWriteAccess({ locationId: data.locationId })
+    await requireOrgPermission({
+      organizationId,
+      userId: session.user.id,
+      permissions: { invitation: ["create"] },
+      errorMessage: "You do not have permission to create invite links.",
+    })
+    await ensureEmployeeStaffGroup({ organizationId, locationId: null })
+    await requireWorkspaceWriteAccess({ organizationId })
 
     const supabase = createSupabaseServerClient()
     const now = new Date()
@@ -86,11 +68,13 @@ const createStaffInviteLink = createServerFn({ method: "POST" })
         .from("locations")
         .select("id")
         .eq("id", data.locationId)
+        .eq("organization_id", organizationId)
         .maybeSingle(),
       supabase
         .from("staff_groups")
         .select("id")
         .eq("id", data.defaultStaffGroupId)
+        .eq("organization_id", organizationId)
         .maybeSingle(),
     ])
 
@@ -132,7 +116,7 @@ const createStaffInviteLink = createServerFn({ method: "POST" })
          created_by
        ) values ($1, $2, $3, $4, $5, $6)`,
       [
-        organizationId ?? null,
+        organizationId,
         data.locationId,
         data.defaultStaffGroupId,
         token,
@@ -141,12 +125,10 @@ const createStaffInviteLink = createServerFn({ method: "POST" })
       ]
     )
 
-    if (organizationId) {
-      await upsertOnboardingState(organizationId, {
-        lastStep: "complete",
-        completedAt: now,
-      })
-    }
+    await upsertOnboardingState(organizationId, {
+      lastStep: "complete",
+      completedAt: now,
+    })
 
     return {
       joinUrl: buildStaffInviteUrl(token),
@@ -158,38 +140,17 @@ const getActiveStaffInviteLink = createServerFn({ method: "GET" }).handler(
   async () => {
     const { session } = await requireVerifiedSessionOrThrow()
     const organizationId = session.session.activeOrganizationId
-    const standaloneLocationId = organizationId
-      ? null
-      : await getFirstLocationMembershipId(session.user.id)
-
-    if (!organizationId && !standaloneLocationId) {
-      throw new Error("Choose a location before opening invite links.")
+    if (!organizationId) {
+      throw new Error("Choose an organisation before opening invite links.")
     }
 
-    if (organizationId) {
-      await requireOrgPermission({
-        organizationId,
-        userId: session.user.id,
-        permissions: {
-          invitation: ["create"],
-        },
-        errorMessage: "You do not have permission to manage invite links.",
-      })
-
-      await ensureEmployeeStaffGroup({
-        organizationId,
-        locationId: null,
-      })
-    } else {
-      await requireLocationPermission({
-        locationId: standaloneLocationId!,
-        userId: session.user.id,
-        permissions: {
-          invitation: ["create"],
-        },
-        errorMessage: "You do not have permission to manage invite links.",
-      })
-    }
+    await requireOrgPermission({
+      organizationId,
+      userId: session.user.id,
+      permissions: { invitation: ["create"] },
+      errorMessage: "You do not have permission to manage invite links.",
+    })
+    await ensureEmployeeStaffGroup({ organizationId, locationId: null })
 
     const supabase = createSupabaseServerClient()
     const now = new Date().toISOString()
@@ -200,10 +161,7 @@ const getActiveStaffInviteLink = createServerFn({ method: "GET" }).handler(
           .select(
             "location_id, default_staff_group_id, token, expires_at, created_at"
           )
-          .eq(
-            organizationId ? "organization_id" : "location_id",
-            organizationId ?? standaloneLocationId!
-          )
+          .eq("organization_id", organizationId)
           .is("disabled_at", null)
           .or(`expires_at.is.null,expires_at.gt.${now}`)
           .order("created_at", { ascending: false })
@@ -212,18 +170,12 @@ const getActiveStaffInviteLink = createServerFn({ method: "GET" }).handler(
         supabase
           .from("locations")
           .select("id, name")
-          .eq(
-            organizationId ? "organization_id" : "id",
-            organizationId ?? standaloneLocationId!
-          )
+          .eq("organization_id", organizationId)
           .order("created_at", { ascending: true }),
         supabase
           .from("staff_groups")
           .select("id, name, slug, is_default")
-          .eq(
-            organizationId ? "organization_id" : "location_id",
-            organizationId ?? standaloneLocationId!
-          )
+          .eq("organization_id", organizationId)
           .order("name", { ascending: true }),
       ])
 
@@ -342,15 +294,15 @@ const getStaffInvitePreview = createServerFn({ method: "GET" })
       return null
     }
 
+    const organizationId = invite.organization_id
+
     const [organizationResult, locationResult, staffGroupResult] =
       await Promise.all([
-        invite.organization_id
-          ? supabase
-              .from("organization")
-              .select("name")
-              .eq("id", invite.organization_id)
-              .maybeSingle()
-          : Promise.resolve({ data: null, error: null }),
+        supabase
+          .from("organization")
+          .select("name")
+          .eq("id", organizationId)
+          .maybeSingle(),
         supabase
           .from("locations")
           .select("name")
@@ -386,7 +338,7 @@ const getStaffInvitePreview = createServerFn({ method: "GET" })
     const isDisabled = invite.disabled_at !== null
 
     return {
-      organizationId: invite.organization_id,
+      organizationId,
       organizationName:
         organizationResult.data?.name ?? locationResult.data.name,
       locationName: locationResult.data.name,
@@ -431,72 +383,49 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
       throw new Error("That invite link has expired.")
     }
 
-    if (invite.organization_id) {
-      await assertCanAcceptOrganizationStaffInvite({
-        organizationId: invite.organization_id,
-        locationId: invite.location_id,
-        userId: session.user.id,
-      })
+    const organizationId = invite.organization_id
 
-      const membershipResult = await supabase
-        .from("member")
-        .select("id")
-        .eq("organizationId", invite.organization_id)
-        .eq("userId", session.user.id)
-        .maybeSingle()
+    await assertCanAcceptOrganizationStaffInvite({
+      organizationId,
+      locationId: invite.location_id,
+      userId: session.user.id,
+    })
+
+    const membershipResult = await supabase
+      .from("member")
+      .select("id")
+      .eq("organizationId", organizationId)
+      .eq("userId", session.user.id)
+      .maybeSingle()
+
+    assertSupabaseSuccess(
+      membershipResult.error,
+      "We could not verify your organisation membership."
+    )
+
+    if (!membershipResult.data) {
+      const membershipInsertResult = await supabase.from("member").insert({
+        id: createEmployeeMemberId(),
+        organizationId,
+        userId: session.user.id,
+        role: "employee",
+        createdAt: new Date().toISOString(),
+      })
 
       assertSupabaseSuccess(
-        membershipResult.error,
-        "We could not verify your organization membership."
+        membershipInsertResult.error,
+        "We could not join you to that organisation."
       )
-
-      if (!membershipResult.data) {
-        const membershipInsertResult = await supabase.from("member").insert({
-          id: createEmployeeMemberId(),
-          organizationId: invite.organization_id,
-          userId: session.user.id,
-          role: "employee",
-          createdAt: new Date().toISOString(),
-        })
-
-        assertSupabaseSuccess(
-          membershipInsertResult.error,
-          "We could not join you to that organization."
-        )
-      }
-
-      await setActiveOrganizationForHeaders(headers, invite.organization_id)
-    } else {
-      await assertCanAcceptLocationStaffInvite({
-        locationId: invite.location_id,
-        userId: session.user.id,
-      })
-
-      const membershipInsertResult = await getDatabase().query(
-        `insert into public.location_memberships (
-           location_id,
-           user_id,
-           role
-         ) values ($1, $2, 'employee')
-         on conflict (location_id, user_id)
-         do nothing`,
-        [invite.location_id, session.user.id]
-      )
-
-      if (membershipInsertResult.rowCount !== 1) {
-        throw new Error("You are already part of this location.")
-      }
     }
 
-    const employeeLookupQuery = supabase
+    await setActiveOrganizationForHeaders(headers, organizationId)
+
+    const employeeLookupResult = await supabase
       .from("employees")
       .select("id")
       .eq("user_id", session.user.id)
-    const employeeLookupResult = await (
-      invite.organization_id
-        ? employeeLookupQuery.eq("organization_id", invite.organization_id)
-        : employeeLookupQuery.eq("location_id", invite.location_id)
-    ).maybeSingle()
+      .eq("organization_id", organizationId)
+      .maybeSingle()
 
     assertSupabaseSuccess(
       employeeLookupResult.error,
@@ -504,8 +433,8 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
     )
 
     const employeePayload = {
-      organization_id: invite.organization_id,
-      location_id: invite.organization_id ? null : invite.location_id,
+      organization_id: organizationId,
+      location_id: null,
       user_id: session.user.id,
       staff_group_id: invite.default_staff_group_id,
       full_name: session.user.name,
@@ -548,19 +477,14 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
          hourly_rate_pence
        ) values ($1, $2, $3, 'hourly', $4)
        on conflict (employee_id) do nothing`,
-      [
-        employeeId,
-        invite.organization_id,
-        invite.organization_id ? null : invite.location_id,
-        hourlyRatePence,
-      ]
+      [employeeId, organizationId, null, hourlyRatePence]
     )
 
     const assignmentResult = await supabase
       .from("employee_location_assignments")
       .upsert(
         {
-          organization_id: invite.organization_id,
+          organization_id: organizationId,
           employee_id: employeeId,
           location_id: invite.location_id,
           staff_group_id: invite.default_staff_group_id,
@@ -577,36 +501,26 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
       "We could not enable that workplace assignment."
     )
     await syncBillingAfterStaffInvite({
-      organizationId: invite.organization_id,
-      locationId: invite.location_id,
+      organizationId,
       userId: session.user.id,
     })
 
-    const organization = invite.organization_id
-      ? await getOrganizationSummaryById(invite.organization_id)
-      : null
-    const location = organization
-      ? null
-      : await getLocationSlugById(invite.location_id)
+    const organization = await getOrganizationSummaryById(organizationId)
 
     return {
       redirectTo: organization
         ? getOrganizationDashboardPath(organization.slug)
-        : location
-          ? getLocationDashboardPath(location.slug)
-          : "/dashboard",
+        : "/dashboard",
     }
   })
 
 async function syncBillingAfterStaffInvite(input: {
-  organizationId: string | null
-  locationId: string
+  organizationId: string
   userId: string
 }) {
   try {
     await syncWorkspaceBillingSubscriptionQuantities({
-      organizationId: input.organizationId ?? undefined,
-      locationId: input.organizationId ? undefined : input.locationId,
+      organizationId: input.organizationId,
       userId: input.userId,
     })
   } catch (error) {
@@ -652,33 +566,6 @@ async function assertCanAcceptOrganizationStaffInvite(input: {
   if (assignmentResult.rows.length > 0) {
     throw new Error("You are already part of this location.")
   }
-}
-
-async function assertCanAcceptLocationStaffInvite(input: {
-  locationId: string
-  userId: string
-}) {
-  const membershipResult = await getDatabase().query<{ role: string }>(
-    `select role
-     from public.location_memberships
-     where location_id = $1
-       and user_id = $2
-     limit 1`,
-    [input.locationId, input.userId]
-  )
-  const membershipRole = membershipResult.rows.at(0)?.role ?? null
-
-  if (!membershipRole) {
-    return
-  }
-
-  if (membershipRole === "employee") {
-    throw new Error("You are already part of this location.")
-  }
-
-  throw new Error(
-    "You already have elevated access to this location. Staff invite links are only for employees."
-  )
 }
 
 function isEmployeeOnlyRole(role: string) {
@@ -729,19 +616,6 @@ const acceptOrganizationInvitation = createServerFn({ method: "POST" })
     }
   })
 
-async function getFirstLocationMembershipId(userId: string) {
-  const result = await getDatabase().query<{ location_id: string }>(
-    `select location_id
-     from public.location_memberships
-     where user_id = $1
-     order by created_at asc
-     limit 1`,
-    [userId]
-  )
-
-  return result.rows.at(0)?.location_id ?? null
-}
-
 async function getMinimumWagePenceForUser(userId: string) {
   const result = await getDatabase().query<{ dateOfBirth: string | null }>(
     `select "dateOfBirth"
@@ -752,18 +626,6 @@ async function getMinimumWagePenceForUser(userId: string) {
   )
 
   return getMinimumWagePenceForDateOfBirth(result.rows.at(0)?.dateOfBirth)
-}
-
-async function getLocationSlugById(locationId: string) {
-  const result = await getDatabase().query<{ slug: string }>(
-    `select slug
-     from public.locations
-     where id = $1
-     limit 1`,
-    [locationId]
-  )
-
-  return result.rows.at(0) ?? null
 }
 
 export {

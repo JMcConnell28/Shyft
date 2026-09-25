@@ -1,7 +1,7 @@
 import "@tanstack/react-start/server-only"
 
-import type Stripe from "stripe"
 import { format } from "date-fns"
+import type Stripe from "stripe"
 
 import {
   sendPaymentFailedEmail,
@@ -28,7 +28,9 @@ type BillingEmailRecipient = {
   workspaceName: string
 }
 
-async function sendPaymentFailedNotification(subscription: Stripe.Subscription) {
+async function sendPaymentFailedNotification(
+  subscription: Stripe.Subscription
+) {
   const billingAccountId = subscription.metadata.billingAccountId
 
   if (!billingAccountId) {
@@ -117,7 +119,7 @@ async function getBillingEmailRecipient(billingAccountId: string) {
      ) workspace_owner on true
      where billing_account.id = $1
      limit 1`,
-    [billingAccountId],
+    [billingAccountId]
   )
   const row = result.rows.at(0)
 
@@ -146,7 +148,7 @@ function getBillingSettingsPath(row: BillingEmailRecipientRow) {
     return "/dashboard"
   }
 
-  return `/w/${workspaceSlug}/settings/billing`
+  return `/app/${workspaceSlug}/settings/billing`
 }
 
 export { sendPaymentFailedNotification, sendTrialEndingNotification }

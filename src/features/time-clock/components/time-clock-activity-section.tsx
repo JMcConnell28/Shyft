@@ -41,7 +41,7 @@ function TimeClockActivitySection({
             render={
               <Link
                 params={{ workspaceSlug }}
-                to="/w/$workspaceSlug/timesheets"
+                to="/app/$workspaceSlug/timesheets"
               />
             }
             variant="ghost"
@@ -55,7 +55,9 @@ function TimeClockActivitySection({
       />
       {recentEntries.length === 0 ? (
         <div className="p-4">
-          <TimeClockEmptyState>No activity for this date yet.</TimeClockEmptyState>
+          <TimeClockEmptyState>
+            No activity for this date yet.
+          </TimeClockEmptyState>
         </div>
       ) : (
         <div className="grid divide-y divide-[#edf0f6] md:grid-cols-2 md:divide-y-0">

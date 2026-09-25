@@ -65,44 +65,7 @@ type RotaSettingsPageData = {
   templates: Array<RotaSettingsTemplate>
 }
 
-type WorkspaceConnectionOrganization = {
-  id: string
-  name: string
-  slug: string
-  billingAccountId: string | null
-  billingStatus: string | null
-}
-
-type WorkspaceConnectionLocation = {
-  id: string
-  name: string
-  slug: string
-  organizationId: string | null
-  organizationName: string | null
-  billingAccountId: string | null
-  billingScope: "location" | "organization" | null
-  billingOrganizationId: string | null
-  billingStatus: string | null
-  canKeepBillingWhenMoved: boolean
-}
-
-type WorkspaceConnectionsPageData = {
-  currentOrganization: WorkspaceConnectionOrganization | null
-  currentLocation: WorkspaceConnectionLocation | null
-  manageableOrganizations: Array<WorkspaceConnectionOrganization>
-  manageableLocations: Array<WorkspaceConnectionLocation>
-  organizationLocations: Array<WorkspaceConnectionLocation>
-}
-
-type CreateOrganizationFromLocationResult = {
-  success: true
-  organizationId: string
-  organizationSlug: string
-  stripeSyncWarning: string | null
-}
-
 export type {
-  CreateOrganizationFromLocationResult,
   GeneralSettingsLocation,
   GeneralSettingsPageData,
   LocationSettingsItem,
@@ -112,7 +75,4 @@ export type {
   RotaSettingsTemplate,
   RotaSettingsValues,
   RotaSettingsZone,
-  WorkspaceConnectionLocation,
-  WorkspaceConnectionOrganization,
-  WorkspaceConnectionsPageData,
 }

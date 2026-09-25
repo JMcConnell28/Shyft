@@ -1,16 +1,15 @@
 import { createServerFn } from "@tanstack/react-start"
 import type { PoolClient } from "pg"
 
+import type { TimeAttendanceDeliveryAddress } from "@/features/billing/schemas/time-attendance-addon-schemas"
 import {
   activateOrganizationSchema,
   locationSetupSchema,
   onboardingOrganizationSchema,
   verifyEmailSchema,
 } from "@/lib/onboarding-schemas"
-import {
-  normalizePostcode,
-  type TimeAttendanceDeliveryAddress,
-} from "@/features/billing/schemas/time-attendance-addon-schemas"
+// eslint-disable-next-line no-duplicate-imports
+import { normalizePostcode } from "@/features/billing/schemas/time-attendance-addon-schemas"
 import { auth } from "@/lib/auth"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 import { getDatabase } from "@/lib/db"
@@ -28,7 +27,7 @@ import {
   upsertOnboardingState,
 } from "@/features/onboarding/server/state"
 import { createOrganizationWithGeneratedSlug } from "@/features/onboarding/server/organization-slug"
-import { sendWorkspaceWelcomeNotification } from "@/features/onboarding/server/workspace-welcome"
+import { sendOrganizationWelcomeNotification } from "@/features/onboarding/server/organization-welcome"
 import { getMinimumWagePenceForDateOfBirth } from "@/features/staff-groups/utils/minimum-wage"
 
 const resendVerificationEmail = createServerFn({ method: "POST" })
@@ -193,12 +192,11 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
       const organization =
         await getRequiredOrganizationWorkspace(organizationId)
 
-      await sendWorkspaceWelcomeNotification({
+      await sendOrganizationWelcomeNotification({
         to: session.user.email,
         dashboardPath: getOrganizationDashboardPath(organization.slug),
         userName: session.user.name,
-        workspaceName: organization.name,
-        workspaceType: "organization",
+        organizationName: organization.name,
       })
 
       return {
@@ -213,7 +211,7 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
     }
   })
 
-function getUniqueNames(names: string[]) {
+function getUniqueNames(names: Array<string>) {
   return Array.from(
     new Map(
       names
@@ -339,7 +337,7 @@ async function createInitialPlaces({
   organizationId: string | null
   locationId: string
   planningMode: "fixed_location" | "variable_location"
-  zoneNames: string[]
+  zoneNames: Array<string>
   worksiteName: string
 }) {
   if (planningMode === "fixed_location") {

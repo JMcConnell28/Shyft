@@ -15,26 +15,15 @@ function MobileRotaCardActions({
   data,
   row,
 }: MobileRotaCardActionsProps) {
-  const routeParams =
-    data.workspaceType === "location"
-      ? {
-          workspaceSlug: data.locationWorkspaceSlug ?? row.locationSlug,
-          rotaId: row.id,
-        }
-      : {
-          workspaceSlug: data.orgSlug,
-          locationSlug: row.locationSlug,
-          rotaId: row.id,
-        }
-  const editRoute =
-    data.workspaceType === "location"
-      ? "/w/$workspaceSlug/rota/$rotaId"
-      : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
+  const routeParams = {
+    workspaceSlug: data.orgSlug,
+    locationSlug: row.locationSlug,
+    rotaId: row.id,
+  }
+  const editRoute = "/app/$workspaceSlug/rota/$locationSlug/$rotaId"
   const openRoute =
     row.status === "published"
-      ? data.workspaceType === "location"
-        ? "/w/$workspaceSlug/rota/$rotaId/view"
-        : "/w/$workspaceSlug/rota/$locationSlug/$rotaId/view"
+      ? "/app/$workspaceSlug/rota/$locationSlug/$rotaId/view"
       : editRoute
 
   return (

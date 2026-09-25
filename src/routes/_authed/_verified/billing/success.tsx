@@ -4,10 +4,7 @@ import { z } from "zod"
 import { BrandLockup } from "@/components/app/brand"
 import { BillingSuccessPanel } from "@/features/billing/components/billing-success-panel"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  getLocationDashboardPath,
-  getOrganizationDashboardPath,
-} from "@/lib/organization-paths"
+import { getOrganizationDashboardPath } from "@/lib/organization-paths"
 
 import { loadDefaultViewer } from "@/features/navigation/load-navigation-context"
 
@@ -40,12 +37,9 @@ function BillingSuccessRoute() {
   const { viewer } = Route.useRouteContext()
   const search = Route.useSearch()
   const workspace = viewer.activeWorkspace
-  const dashboardHref =
-    workspace?.type === "location"
-      ? getLocationDashboardPath(workspace.slug)
-      : workspace
-        ? getOrganizationDashboardPath(workspace.slug)
-        : "/dashboard"
+  const dashboardHref = workspace
+    ? getOrganizationDashboardPath(workspace.slug)
+    : "/dashboard"
 
   return (
     <main className="min-h-svh bg-muted/20 px-4 py-5 sm:px-6">
@@ -62,12 +56,8 @@ function BillingSuccessRoute() {
                 checkoutSessionId={search.session_id}
                 dashboardHref={dashboardHref}
                 initialBilling={viewer.billing}
-                organizationId={
-                  workspace?.type === "organization" ? workspace.id : null
-                }
-                locationId={
-                  workspace?.type === "location" ? workspace.id : null
-                }
+                organizationId={workspace?.id ?? null}
+                locationId={null}
               />
             </CardContent>
           </Card>

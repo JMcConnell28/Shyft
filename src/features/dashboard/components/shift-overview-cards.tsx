@@ -19,7 +19,7 @@ function ShiftOverviewCards({
   mobileContext: DashboardMobileContext
   overview: DashboardShiftOverview
 }) {
-  const announcementsHref = `/w/${mobileContext.workspaceSlug}/announcements`
+  const announcementsHref = `/app/${mobileContext.workspaceSlug}/announcements`
 
   return (
     <>

@@ -24,7 +24,7 @@ function TimeClockHeader({
   workspaceSlug,
 }: TimeClockHeaderProps) {
   return (
-    <header className="animate-in flex flex-col gap-4 duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none md:flex-row md:items-end md:justify-between">
+    <header className="flex animate-in flex-col gap-4 duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none md:flex-row md:items-end md:justify-between">
       <div>
         <h1 className="text-2xl leading-none font-bold tracking-[-0.035em] sm:text-[1.75rem]">
           Time tracking
@@ -51,7 +51,9 @@ function TimeClockHeader({
           size="icon-lg"
           variant="outline"
         >
-          <RefreshCwIcon className={cn("size-4", isRefreshing && "animate-spin")} />
+          <RefreshCwIcon
+            className={cn("size-4", isRefreshing && "animate-spin")}
+          />
           <span className="hidden sm:inline">Refresh</span>
         </Button>
       </div>
@@ -107,7 +109,7 @@ function DateLink({
         <Link
           params={{ workspaceSlug }}
           search={{ date }}
-          to="/w/$workspaceSlug/time-clock"
+          to="/app/$workspaceSlug/time-clock"
         />
       }
       size="icon-lg"
@@ -124,7 +126,9 @@ function DateLink({
 function formatDateLabel(value: string) {
   const date = parseISO(value)
 
-  return isToday(date) ? `Today, ${format(date, "d MMM")}` : format(date, "EEE, d MMM")
+  return isToday(date)
+    ? `Today, ${format(date, "d MMM")}`
+    : format(date, "EEE, d MMM")
 }
 
 export { TimeClockHeader }

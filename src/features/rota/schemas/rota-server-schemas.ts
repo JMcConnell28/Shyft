@@ -11,8 +11,7 @@ import {
 import { shiftTimePattern } from "@/features/rota/utils/shift-time"
 
 const organizationScopedUserSchema = z.object({
-  organizationId: z.string().trim().min(1, "Choose an organization.").optional(),
-  locationId: z.uuid().optional(),
+  organizationId: z.string().trim().min(1, "Choose an organization."),
   userId: z.string().trim().min(1, "Choose a user."),
 })
 
@@ -29,20 +28,21 @@ const normalizedRotaListSearchSchema = z.object({
 const getHasUnreadRotaUpdatesInputSchema = organizationScopedUserSchema
 
 const getRotaListPageDataInputSchema = organizationScopedUserSchema.extend({
-  orgSlug: organizationSlugSchema.optional(),
-  locationSlug: locationSlugSchema.optional(),
+  orgSlug: organizationSlugSchema,
   search: normalizedRotaListSearchSchema,
 })
 
 const getRotaDetailPageDataInputSchema = organizationScopedUserSchema.extend({
-  orgSlug: organizationSlugSchema.optional(),
+  orgSlug: organizationSlugSchema,
   locationSlug: locationSlugSchema,
   rotaId: z.uuid(),
 })
 
-const getRotaWorkspaceDataInputSchema = getRotaDetailPageDataInputSchema.extend({
-  publishedOnly: z.boolean().default(false),
-})
+const getRotaWorkspaceDataInputSchema = getRotaDetailPageDataInputSchema.extend(
+  {
+    publishedOnly: z.boolean().default(false),
+  }
+)
 
 const shiftTimeSchema = z
   .string()
@@ -79,7 +79,10 @@ const createWorkspaceShiftInputSchema = z.discriminatedUnion("shiftType", [
     shiftType: z.literal("split"),
     segments: z.tuple([
       workspaceShiftSegmentSchema,
-      z.union([workspaceShiftSegmentSchema, workspaceClosingShiftSegmentSchema]),
+      z.union([
+        workspaceShiftSegmentSchema,
+        workspaceClosingShiftSegmentSchema,
+      ]),
     ]),
   }),
 ])
@@ -116,7 +119,10 @@ const saveWorkspaceShiftInputSchema = z.discriminatedUnion("shiftType", [
     shiftType: z.literal("split"),
     segments: z.tuple([
       workspaceShiftSegmentSchema,
-      z.union([workspaceShiftSegmentSchema, workspaceClosingShiftSegmentSchema]),
+      z.union([
+        workspaceShiftSegmentSchema,
+        workspaceClosingShiftSegmentSchema,
+      ]),
     ]),
   }),
 ])

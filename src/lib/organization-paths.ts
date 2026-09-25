@@ -6,10 +6,9 @@ type OrganizationAppRouteKey =
   | "shiftSwaps"
   | "timeClock"
   | "timesheets"
-type LocationAppRouteKey = OrganizationAppRouteKey
 
 function getWorkspaceBasePath(workspaceSlug: string) {
-  return `/w/${workspaceSlug}`
+  return `/app/${workspaceSlug}`
 }
 
 function getWorkspaceDashboardPath(workspaceSlug: string) {
@@ -46,7 +45,7 @@ function getWorkspaceAccountPath(workspaceSlug: string) {
 
 function getWorkspaceAppPath(
   workspaceSlug: string,
-  routeKey: OrganizationAppRouteKey,
+  routeKey: OrganizationAppRouteKey
 ) {
   if (routeKey === "announcements") {
     return getWorkspaceAnnouncementsPath(workspaceSlug)
@@ -107,38 +106,6 @@ function getOrganizationTimesheetsPath(orgSlug: string) {
   return `${getOrganizationBasePath(orgSlug)}/timesheets`
 }
 
-function getLocationBasePath(locationSlug: string) {
-  return getWorkspaceBasePath(locationSlug)
-}
-
-function getLocationDashboardPath(locationSlug: string) {
-  return `${getLocationBasePath(locationSlug)}/dashboard`
-}
-
-function getLocationAnnouncementsPath(locationSlug: string) {
-  return `${getLocationBasePath(locationSlug)}/announcements`
-}
-
-function getLocationRotaPath(locationSlug: string) {
-  return `${getLocationBasePath(locationSlug)}/rota`
-}
-
-function getLocationShiftSwapsPath(locationSlug: string) {
-  return `${getLocationBasePath(locationSlug)}/shift-swaps`
-}
-
-function getLocationSettingsPath(locationSlug: string) {
-  return `${getLocationBasePath(locationSlug)}/settings`
-}
-
-function getLocationTimeClockPath(locationSlug: string) {
-  return `${getLocationBasePath(locationSlug)}/time-clock`
-}
-
-function getLocationTimesheetsPath(locationSlug: string) {
-  return `${getLocationBasePath(locationSlug)}/timesheets`
-}
-
 function getOrganizationAppPath(
   orgSlug: string,
   routeKey: OrganizationAppRouteKey
@@ -172,15 +139,6 @@ function getOrganizationAppPath(
 
 export type { OrganizationAppRouteKey }
 export {
-  getLocationAppPath,
-  getLocationAnnouncementsPath,
-  getLocationBasePath,
-  getLocationDashboardPath,
-  getLocationRotaPath,
-  getLocationSettingsPath,
-  getLocationShiftSwapsPath,
-  getLocationTimesheetsPath,
-  getLocationTimeClockPath,
   getWorkspaceAccountPath,
   getWorkspaceAnnouncementsPath,
   getWorkspaceAppPath,
@@ -200,35 +158,4 @@ export {
   getOrganizationShiftSwapsPath,
   getOrganizationTimesheetsPath,
   getOrganizationTimeClockPath,
-}
-
-function getLocationAppPath(
-  locationSlug: string,
-  routeKey: LocationAppRouteKey,
-) {
-  if (routeKey === "announcements") {
-    return getLocationAnnouncementsPath(locationSlug)
-  }
-
-  if (routeKey === "rota") {
-    return getLocationRotaPath(locationSlug)
-  }
-
-  if (routeKey === "settings") {
-    return getLocationSettingsPath(locationSlug)
-  }
-
-  if (routeKey === "shiftSwaps") {
-    return getLocationShiftSwapsPath(locationSlug)
-  }
-
-  if (routeKey === "timeClock") {
-    return getLocationTimeClockPath(locationSlug)
-  }
-
-  if (routeKey === "timesheets") {
-    return getLocationTimesheetsPath(locationSlug)
-  }
-
-  return getLocationDashboardPath(locationSlug)
 }

@@ -134,144 +134,6 @@ async function ensureDefaultStaffGroup(organizationId: string) {
   })
 }
 
-async function getActiveLocationState(locationId: string) {
-  const database = getDatabase()
-  const [
-    locationResult,
-    staffGroupsResult,
-    zonesCountResult,
-    inviteLinksResult,
-    trial,
-  ] = await Promise.all([
-    database.query<{
-      id: string
-      name: string
-      slug: string
-      organization_id: string | null
-    }>(
-      `select id, name, slug, organization_id
-       from public.locations
-       where id = $1`,
-      [locationId]
-    ),
-    database.query<{
-      id: string
-      name: string
-      slug: string
-      is_default: boolean
-    }>(
-      `select id, name, slug, is_default
-       from public.staff_groups
-       where location_id = $1
-       order by name asc`,
-      [locationId]
-    ),
-    database.query(
-      `select id
-       from public.zones
-       where location_id = $1
-         and deleted_at is null
-       limit 1`,
-      [locationId]
-    ),
-    database.query<{ expires_at: Date | string | null }>(
-      `select expires_at
-       from public.staff_invite_links
-       where location_id = $1
-         and disabled_at is null
-         and (expires_at is null or expires_at > timezone('utc', now()))
-       limit 1`,
-      [locationId]
-    ),
-    getWorkspaceTrial({ locationId }),
-  ])
-  const location = locationResult.rows.at(0)
-
-  if (!location) {
-    throw new Error("We could not load your location.")
-  }
-
-  const hasInviteLink = inviteLinksResult.rows.length > 0
-  const hasZone = zonesCountResult.rows.length > 0
-
-  return {
-    onboarding: {
-      organizationId: location.organization_id,
-      locationId: location.id,
-      trialStartedAt: trial.trialStartedAt,
-      trialEndsAt: trial.trialEndsAt,
-      completedAt: toIsoString(new Date()),
-      lastStep: "complete",
-      hasLocation: true,
-      hasZone,
-      hasInviteLink,
-    } satisfies ActiveOnboardingState,
-    trial,
-    locations: [
-      {
-        id: location.id,
-        name: location.name,
-        slug: location.slug,
-        organizationId: location.organization_id,
-      },
-    ],
-    staffGroups: staffGroupsResult.rows
-      .map((staffGroup) => ({
-        id: staffGroup.id,
-        name: staffGroup.name,
-        slug: staffGroup.slug,
-        isFallback: isEmployeeStaffGroup(staffGroup),
-      }))
-      .sort((left, right) => {
-        if (left.isFallback === right.isFallback) {
-          return left.name.localeCompare(right.name)
-        }
-
-        return left.isFallback ? -1 : 1
-      }),
-  }
-}
-
-async function ensureLocationEmployeeStaffGroup(locationId: string) {
-  const database = getDatabase()
-  const existingResult = await database.query<{ id: string }>(
-    `select id
-     from public.staff_groups
-     where location_id = $1
-       and (slug = 'employee' or slug = 'employees' or is_default = true)
-     order by created_at asc
-     limit 1`,
-    [locationId]
-  )
-  const existing = existingResult.rows.at(0)
-
-  if (!existing) {
-    await database.query(
-      `insert into public.staff_groups (
-         location_id,
-         name,
-         slug,
-         is_default,
-         color
-       ) values ($1, 'Employee', 'employee', true, 'emerald')`,
-      [locationId]
-    )
-
-    return
-  }
-
-  await database.query(
-    `update public.staff_groups
-     set name = 'Employee',
-         slug = 'employee',
-         is_default = true,
-         color = 'emerald',
-         updated_at = timezone('utc', now())
-     where id = $1`,
-    [existing.id]
-  )
-}
-
 async function upsertOnboardingState(
   organizationId: string,
   values: {
@@ -365,7 +227,7 @@ async function upsertOrganizationTrialState(input: {
 }
 
 async function createUniqueLocationSlug(
-  organizationId: string | null,
+  organizationId: string,
   name: string
 ) {
   const supabase = createSupabaseServerClient()
@@ -376,11 +238,9 @@ async function createUniqueLocationSlug(
   for (;;) {
     const query = supabase.from("locations").select("id").eq("slug", nextSlug)
 
-    const { data, error } = await (
-      organizationId === null
-        ? query.is("organization_id", null)
-        : query.eq("organization_id", organizationId)
-    ).maybeSingle()
+    const { data, error } = await query
+      .eq("organization_id", organizationId)
+      .maybeSingle()
 
     assertSupabaseSuccess(error, "We could not check location availability.")
 
@@ -396,8 +256,6 @@ async function createUniqueLocationSlug(
 export {
   createUniqueLocationSlug,
   ensureDefaultStaffGroup,
-  ensureLocationEmployeeStaffGroup,
   getActiveOrganizationState,
-  getActiveLocationState,
   upsertOnboardingState,
 }

@@ -14,13 +14,13 @@ vi.mock("@/features/rota/server-fns", () => ({ getRotaWorkspaceData: vi.fn() }))
 
 const input = {
   workspace: {
-    id: "location-a",
-    slug: "cafe",
-    name: "Cafe",
-    type: "location",
-    organizationId: null,
+    id: "org-a",
+    slug: "company",
+    name: "Company",
+    type: "organization",
+    organizationId: "org-a",
   },
-  workspaceType: "location",
+  locationSlug: "cafe",
   userId: "user-a",
   rotaId: "rota-a",
   publishedOnly: false,
@@ -32,9 +32,9 @@ const board: WorkspaceBoardData = {
     status: "draft",
     canManage: true,
     canEdit: true,
-    organizationId: null,
+    organizationId: "org-a",
     userId: input.userId,
-    workspaceType: "location",
+    workspaceType: "organization",
     note: null,
     weekStart: "2026-09-21",
     weekEnd: "2026-09-27",
@@ -117,28 +117,17 @@ describe("rota route loading", () => {
     await loadRotaWorkspace(client, { ...input, rotaId: "rota-b" })
     await loadRotaWorkspace(client, {
       ...input,
-      workspace: { ...input.workspace, id: "location-b" },
+      locationSlug: "other-cafe",
     })
     expect(getRotaWorkspaceData).toHaveBeenCalledTimes(5)
   })
 
   it("passes organisation scope and the selected location to the server", async () => {
-    await loadRotaWorkspace(client, {
-      ...input,
-      workspaceType: "organization",
-      locationSlug: "cafe",
-      workspace: {
-        ...input.workspace,
-        type: "organization",
-        id: "org-a",
-        slug: "company",
-      },
-    })
+    await loadRotaWorkspace(client, input)
     expect(getRotaWorkspaceData).toHaveBeenCalledWith({
       data: {
         organizationId: "org-a",
         orgSlug: "company",
-        locationId: undefined,
         locationSlug: "cafe",
         userId: input.userId,
         rotaId: input.rotaId,
@@ -147,9 +136,9 @@ describe("rota route loading", () => {
     })
   })
 
-  it("rejects a mismatched workspace before requesting data", async () => {
+  it("rejects a missing workspace before requesting data", async () => {
     await expect(
-      loadRotaWorkspace(client, { ...input, workspaceType: "organization" })
+      loadRotaWorkspace(client, { ...input, workspace: null })
     ).rejects.toThrow("organization workspace")
     expect(getRotaWorkspaceData).not.toHaveBeenCalled()
   })

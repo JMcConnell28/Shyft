@@ -6,11 +6,10 @@ import type {
   OrganizationSummary,
   WorkspaceSummary,
 } from "@/features/onboarding/types"
+import type { OrganizationAppRouteKey } from "@/lib/organization-paths"
 import { activateOrganization } from "@/lib/onboarding"
-import {
-  getWorkspaceAppPath,
-  type OrganizationAppRouteKey,
-} from "@/lib/organization-paths"
+// eslint-disable-next-line no-duplicate-imports
+import { getWorkspaceAppPath } from "@/lib/organization-paths"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,15 +62,6 @@ function WorkspaceSwitcher({
       : "/dashboard"
   }
 
-  function handleWorkspaceSwitch(workspace: WorkspaceSummary) {
-    if (workspace.type === "location") {
-      window.location.href = getWorkspaceAppPath(workspace.slug, routeKey)
-      return
-    }
-
-    void handleOrganizationSwitch(workspace.id)
-  }
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -93,10 +83,14 @@ function WorkspaceSwitcher({
             </div>
             <div className="grid flex-1 overflow-hidden text-left text-xs leading-tight transition-[width,opacity] duration-200 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
               <span className="truncate font-medium">
-                {activeWorkspace?.name ?? activeOrganization?.name ?? "RocketRota"}
+                {activeWorkspace?.name ??
+                  activeOrganization?.name ??
+                  "RocketRota"}
               </span>
               <span className="truncate text-[11px] text-sidebar-foreground/70">
-                {activeWorkspace?.slug ?? activeOrganization?.slug ?? "Choose a workspace"}
+                {activeWorkspace?.slug ??
+                  activeOrganization?.slug ??
+                  "Choose a workspace"}
               </span>
             </div>
             <div className="ml-auto flex w-4 items-center justify-center overflow-hidden transition-[width,opacity] duration-200 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
@@ -111,25 +105,15 @@ function WorkspaceSwitcher({
           >
             <DropdownMenuGroup>
               <DropdownMenuLabel>Workspace</DropdownMenuLabel>
-              {workspaces.length > 0 ? workspaces.map((workspace) => (
+              {workspaces.map((workspace) => (
                 <DropdownMenuItem
-                  key={`${workspace.type}:${workspace.id}`}
+                  key={workspace.id}
                   disabled={isSwitchingOrganization}
                   onClick={() => {
-                    handleWorkspaceSwitch(workspace)
+                    void handleOrganizationSwitch(workspace.id)
                   }}
                 >
                   {workspace.name}
-                </DropdownMenuItem>
-              )) : organizations.map((organization) => (
-                <DropdownMenuItem
-                  key={organization.id}
-                  disabled={isSwitchingOrganization}
-                  onClick={() => {
-                    void handleOrganizationSwitch(organization.id)
-                  }}
-                >
-                  {organization.name}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>

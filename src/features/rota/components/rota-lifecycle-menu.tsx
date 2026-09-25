@@ -131,7 +131,7 @@ function RotaLifecycleMenu() {
                     }
 
                     await navigate({
-                      to: "/w/$workspaceSlug/rota",
+                      to: "/app/$workspaceSlug/rota",
                       params: {
                         workspaceSlug: String(params.workspaceSlug),
                       },

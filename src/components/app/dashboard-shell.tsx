@@ -217,17 +217,7 @@ function DashboardShell({
             >
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  {activeWorkspace?.type === "location" ? (
-                    <BreadcrumbLink
-                      render={
-                        <Link
-                          to={getWorkspaceDashboardPath(activeWorkspace.slug)}
-                        />
-                      }
-                    >
-                      {activeWorkspace.name}
-                    </BreadcrumbLink>
-                  ) : activeOrganization ? (
+                  {activeOrganization ? (
                     <BreadcrumbLink
                       render={
                         <Link
@@ -268,29 +258,7 @@ function DashboardShell({
                 workspaceSlug={activeWorkspace?.slug ?? ""}
               />
             </div>
-            {capabilities.canManageSettings &&
-            activeWorkspace?.type === "location" ? (
-              <Button
-                variant="pill"
-                size="icon"
-                className={cn(
-                  hasMobileBrandHeader &&
-                    "size-11 rounded-xl bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
-                )}
-                nativeButton={false}
-                render={
-                  <Link
-                    to={getWorkspaceSettingsPath(activeWorkspace.slug)}
-                    viewTransition={{
-                      types: ["slide-left"],
-                    }}
-                  />
-                }
-              >
-                <SettingsIcon />
-                <span className="sr-only">Settings</span>
-              </Button>
-            ) : capabilities.canManageSettings && activeOrganization ? (
+            {capabilities.canManageSettings && activeOrganization ? (
               <Button
                 variant="pill"
                 size="icon"
@@ -323,31 +291,15 @@ function DashboardShell({
                 capabilities.canManageRota || capabilities.canManageSettings
               }
               canManageBilling={capabilities.role === "owner"}
-              organizationId={
-                resolvedActiveWorkspace?.type === "organization"
-                  ? resolvedActiveWorkspace.id
-                  : null
-              }
-              locationId={
-                resolvedActiveWorkspace?.type === "location"
-                  ? resolvedActiveWorkspace.id
-                  : null
-              }
+              organizationId={resolvedActiveWorkspace?.id ?? null}
+              locationId={null}
             />
             {canInviteTeamMembers ? (
               <>
                 <PastDueBillingNotice
                   billing={billing}
-                  organizationId={
-                    activeWorkspace?.type === "organization"
-                      ? activeWorkspace.id
-                      : null
-                  }
-                  locationId={
-                    activeWorkspace?.type === "location"
-                      ? activeWorkspace.id
-                      : null
-                  }
+                  organizationId={activeWorkspace?.id ?? null}
+                  locationId={null}
                 />
               </>
             ) : null}

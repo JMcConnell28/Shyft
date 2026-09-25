@@ -55,7 +55,6 @@ function MobileRotaList({
                 triggerIcon="plus"
                 disabled={!canCreateRota}
                 defaultSourceType="blank"
-                workspaceType={data.workspaceType}
               />
             ) : null}
           </div>

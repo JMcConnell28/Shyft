@@ -44,7 +44,7 @@ function ClockStationHealthSection({
           render={
             <Link
               params={{ workspaceSlug }}
-              to="/w/$workspaceSlug/time-clock"
+              to="/app/$workspaceSlug/time-clock"
             />
           }
           variant="outline"

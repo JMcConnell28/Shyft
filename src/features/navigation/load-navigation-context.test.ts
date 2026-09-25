@@ -61,7 +61,7 @@ const viewer: WorkspaceViewer = {
   trial: null,
   billing: null,
 }
-const options = { preload: false, href: "/w/team/dashboard" }
+const options = { preload: false, href: "/app/team/dashboard" }
 let queryClient: QueryClient
 
 beforeEach(() => {
@@ -194,7 +194,7 @@ describe("workspace activation", () => {
     const loader = vi.fn()
     const route = createRoute({
       getParentRoute: () => root,
-      path: "/w/$workspaceSlug/dashboard",
+      path: "/app/$workspaceSlug/dashboard",
       beforeLoad: ({ params, preload, location }) =>
         loadWorkspaceViewer(context, params.workspaceSlug, {
           preload,
@@ -204,10 +204,10 @@ describe("workspace activation", () => {
     })
     const router = createRouter({
       routeTree: root.addChildren([route]),
-      history: createMemoryHistory({ initialEntries: ["/w/team/dashboard"] }),
+      history: createMemoryHistory({ initialEntries: ["/app/team/dashboard"] }),
     })
     await router.preloadRoute({
-      to: "/w/$workspaceSlug/dashboard",
+      to: "/app/$workspaceSlug/dashboard",
       params: { workspaceSlug: "team" },
     })
     expect(activateOrganization).not.toHaveBeenCalled()
@@ -232,11 +232,11 @@ describe("workspace activation", () => {
     })
   })
 
-  it("activates a linked location's organization before page loaders run", async () => {
+  it("activates the workspace organization before page loaders run", async () => {
     vi.mocked(getWorkspaceViewer).mockResolvedValue({
       ...viewer,
       activeOrganization: null,
-      activeWorkspace: { ...workspace, id: "location-a", type: "location" },
+      activeWorkspace: workspace,
     })
     await loadWorkspaceViewer(
       {

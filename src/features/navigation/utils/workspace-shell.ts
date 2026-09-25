@@ -21,14 +21,14 @@ type WorkspaceShellConfig = {
 
 function getWorkspaceShellConfig(
   pathname: string,
-  workspace: WorkspaceSummary,
+  workspace: WorkspaceSummary
 ): WorkspaceShellConfig {
-  const workspaceBasePath = `/w/${workspace.slug}`
+  const workspaceBasePath = `/app/${workspace.slug}`
   const workspacePath = pathname.startsWith(workspaceBasePath)
     ? pathname.slice(workspaceBasePath.length)
     : pathname
 
-  if (isRotaDetailPath(workspacePath, workspace.type)) {
+  if (isRotaDetailPath(workspacePath)) {
     return {
       routeKey: "rota",
       title: "Rota",
@@ -45,9 +45,7 @@ function getWorkspaceShellConfig(
       routeKey: "rota",
       title: "Rota",
       description:
-        workspace.type === "organization"
-          ? "Review weekly rotas across venues and jump into the builder."
-          : "Review weekly rotas and jump into the builder.",
+        "Review weekly rotas across venues and jump into the builder.",
       backLink: {
         href: getWorkspaceDashboardPath(workspace.slug),
         label: "Back to dashboard",
@@ -136,12 +134,8 @@ function getWorkspaceShellConfig(
   } satisfies WorkspaceShellConfig
 }
 
-function isRotaDetailPath(path: string, workspaceType: WorkspaceSummary["type"]) {
-  if (workspaceType === "organization") {
-    return /^\/rota\/[^/]+\/[^/]+(?:\/view)?$/.test(path)
-  }
-
-  return /^\/rota\/[^/]+(?:\/view)?$/.test(path)
+function isRotaDetailPath(path: string) {
+  return /^\/rota\/[^/]+\/[^/]+(?:\/view)?$/.test(path)
 }
 
 export { getWorkspaceShellConfig }

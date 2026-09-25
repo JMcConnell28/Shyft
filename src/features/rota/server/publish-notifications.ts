@@ -45,7 +45,6 @@ type RotaPublishedNotificationResult = {
 
 async function sendRotaPublishedNotifications(input: {
   orgSlug: string
-  isOrganizationWorkspace: boolean
   locationSlug: string
   rotaId: string
 }) {
@@ -192,15 +191,10 @@ function mapRotaPublishedRecipients(rows: Array<RotaPublishedEmailRow>) {
 
 function getPublishedRotaPath(input: {
   orgSlug: string
-  isOrganizationWorkspace: boolean
   locationSlug: string
   rotaId: string
 }) {
-  if (!input.isOrganizationWorkspace) {
-    return `/w/${input.locationSlug}/rota/${input.rotaId}/view`
-  }
-
-  return `/w/${input.orgSlug}/rota/${input.locationSlug}/${input.rotaId}/view`
+  return `/app/${input.orgSlug}/rota/${input.locationSlug}/${input.rotaId}/view`
 }
 
 function formatWeekLabel(weekStart: Date | string) {

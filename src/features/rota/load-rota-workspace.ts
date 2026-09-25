@@ -10,14 +10,13 @@ async function loadRotaWorkspace(
   queryClient: QueryClient,
   input: Omit<RotaWorkspaceRouteInput, "workspace"> & {
     workspace: RotaWorkspaceRouteInput["workspace"] | null
-    workspaceType: RotaWorkspaceRouteInput["workspace"]["type"]
   }
 ): Promise<void> {
-  const { workspace, workspaceType, ...routeInput } = input
+  const { workspace, ...routeInput } = input
 
-  if (!workspace || workspace.type !== workspaceType) {
+  if (!workspace) {
     throw new Error(
-      `A ${workspaceType} workspace is required for this rota route.`
+      "An organization workspace is required for this rota route."
     )
   }
 

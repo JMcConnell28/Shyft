@@ -16,16 +16,12 @@ import { normalizeWeekStart } from "@/lib/rota-schemas"
 
 import { listAccessibleLocations } from "@/features/rota/server/access"
 import { getMembershipRole } from "@/features/rota/server/membership"
-import { getLocationRole } from "@/lib/auth/has-location-permission"
 import {
   getSeenPublishedVersionsMap,
   getUserNameMap,
   getZoneCountByLocationIds,
 } from "@/features/rota/server/related-data"
-import {
-  getLocationOrganizationId,
-  getTemplatesForLocation,
-} from "@/features/rota/server/lookups"
+import { getTemplatesForLocation } from "@/features/rota/server/lookups"
 import {
   buildWeekLabel,
   coerceNumber,
@@ -35,17 +31,13 @@ import {
 function buildEmptyRotaListPageData({
   orgSlug,
   organizationId,
-  locationSlug,
-  locationId,
   search,
   locations,
   hasUnreadRotaUpdates,
   capabilities,
 }: {
   orgSlug: string
-  organizationId: string | null
-  locationSlug?: string
-  locationId?: string
+  organizationId: string
   search: RotaListSearch
   locations: RotaListPageData["locations"]
   hasUnreadRotaUpdates: boolean
@@ -53,9 +45,7 @@ function buildEmptyRotaListPageData({
 }): RotaListPageData {
   return {
     orgSlug,
-    organizationId: organizationId ?? locationId ?? "",
-    workspaceType: organizationId ? "organization" : "location",
-    locationWorkspaceSlug: locationSlug,
+    organizationId,
     capabilities,
     canWriteSelectedLocation: false,
     locations,
@@ -83,28 +73,15 @@ function buildEmptyRotaListPageData({
 async function getRotaListPageData({
   organizationId,
   orgSlug,
-  locationId,
-  locationSlug,
   userId,
   search,
 }: {
-  organizationId?: string
-  orgSlug?: string
-  locationId?: string
-  locationSlug?: string
+  organizationId: string
+  orgSlug: string
   userId: string
   search: RotaListSearch
 }): Promise<RotaListPageData> {
-  const isOrganizationWorkspace = Boolean(organizationId)
-  const workspaceOrganizationId =
-    organizationId ??
-    (locationId ? await getLocationOrganizationId(locationId) : null)
-  const role =
-    isOrganizationWorkspace && workspaceOrganizationId
-      ? await getMembershipRole(workspaceOrganizationId, userId)
-      : locationId
-        ? await getLocationRole(locationId, userId)
-        : null
+  const role = await getMembershipRole(organizationId, userId)
   const capabilities = getOrgCapabilitiesForRole(role)
   const canViewWorkingRotas =
     capabilities.canManageRota || capabilities.canManageTimeClock
@@ -112,22 +89,15 @@ async function getRotaListPageData({
   const effectiveSearch = publishedOnly
     ? { ...search, status: "published" as const }
     : search
-  const locations = await listAccessibleLocations(
-    workspaceOrganizationId,
-    userId,
-    role,
-    locationId
-  )
+  const locations = await listAccessibleLocations(organizationId, userId, role)
   const hasUnreadRotaUpdates = locations.some(
     (location) => location.hasUnreadPublished
   )
 
   if (!capabilities.canViewRota) {
     return buildEmptyRotaListPageData({
-      orgSlug: orgSlug ?? locationSlug ?? "",
-      organizationId: workspaceOrganizationId ?? locationId ?? "",
-      locationSlug,
-      locationId,
+      orgSlug,
+      organizationId,
       search: effectiveSearch,
       locations: [],
       hasUnreadRotaUpdates: false,
@@ -144,10 +114,8 @@ async function getRotaListPageData({
 
   if (!selectedLocation) {
     return buildEmptyRotaListPageData({
-      orgSlug: orgSlug ?? locationSlug ?? "",
-      organizationId: workspaceOrganizationId ?? locationId ?? "",
-      locationSlug,
-      locationId,
+      orgSlug,
+      organizationId,
       search: effectiveSearch,
       locations,
       hasUnreadRotaUpdates,
@@ -158,19 +126,19 @@ async function getRotaListPageData({
   const [allLocationRotas, filteredRotas, templates, zoneCounts, entitlement] =
     await Promise.all([
       listLocationRotas({
-        organizationId: workspaceOrganizationId,
+        organizationId,
         locationId: selectedLocation.id,
         publishedOnly,
       }),
       listLocationRotas({
-        organizationId: workspaceOrganizationId,
+        organizationId,
         locationId: selectedLocation.id,
         publishedOnly,
         search: effectiveSearch,
       }),
       publishedOnly
         ? Promise.resolve([])
-        : getTemplatesForLocation(workspaceOrganizationId, selectedLocation.id),
+        : getTemplatesForLocation(organizationId, selectedLocation.id),
       getZoneCountByLocationIds([selectedLocation.id]),
       getLocationEntitlement(selectedLocation.id),
     ])
@@ -208,10 +176,8 @@ async function getRotaListPageData({
   )
 
   return {
-    orgSlug: orgSlug ?? locationSlug ?? "",
-    organizationId: workspaceOrganizationId ?? selectedLocation.id,
-    workspaceType: isOrganizationWorkspace ? "organization" : "location",
-    locationWorkspaceSlug: locationSlug,
+    orgSlug,
+    organizationId,
     capabilities,
     canWriteSelectedLocation: entitlement.canWrite,
     locations,
@@ -292,7 +258,7 @@ async function listLocationRotas({
   search,
   publishedOnly = false,
 }: {
-  organizationId: string | null
+  organizationId: string
   locationId: string
   search?: RotaListSearch
   publishedOnly?: boolean
@@ -305,9 +271,7 @@ async function listLocationRotas({
     )
     .eq("location_id", locationId)
 
-  query = organizationId
-    ? query.eq("organization_id", organizationId)
-    : query.is("organization_id", null)
+  query = query.eq("organization_id", organizationId)
 
   if (publishedOnly) {
     query = query.eq("status", "published")

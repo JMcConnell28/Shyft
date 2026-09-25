@@ -8,7 +8,6 @@ import { getLocationEntitlement } from "@/features/billing/server/entitlements"
 import { DEFAULT_MINIMUM_WAGE_PENCE } from "@/features/staff-groups/utils/minimum-wage"
 import { normalizeStaffGroupColor } from "@/features/staff-groups/constants/staff-group-colors"
 import { getOrgCapabilitiesForRole } from "@/lib/auth/get-org-capabilities"
-import { getLocationRole } from "@/lib/auth/has-location-permission"
 import { getDatabase } from "@/lib/db"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
@@ -22,10 +21,7 @@ import {
   buildWorkspaceLocation,
   mapShiftRowToWorkspaceShift,
 } from "@/features/rota/server/workspace-shared"
-import {
-  getLocationOrganizationId,
-  getTemplatesForLocation,
-} from "@/features/rota/server/lookups"
+import { getTemplatesForLocation } from "@/features/rota/server/lookups"
 import {
   buildWeekLabel,
   isRotaWeekBeforeCurrentWeek,
@@ -45,16 +41,14 @@ type EmployeeRotaNoteRow = {
 
 async function getRotaWorkspaceData({
   organizationId,
-  locationId,
   userId,
   locationSlug,
   rotaId,
   publishedOnly,
 }: {
-  organizationId?: string
-  locationId?: string
+  organizationId: string
   userId: string
-  orgSlug?: string
+  orgSlug: string
   locationSlug: string
   rotaId: string
   publishedOnly: boolean
@@ -63,24 +57,14 @@ async function getRotaWorkspaceData({
 
   if (
     session.user.id !== userId ||
-    (organizationId && session.session.activeOrganizationId !== organizationId)
+    session.session.activeOrganizationId !== organizationId
   ) {
     throw new Error(
       "Your workspace session is no longer valid. Refresh and try again."
     )
   }
 
-  const workspaceOrganizationId =
-    organizationId ??
-    (locationId ? await getLocationOrganizationId(locationId) : null)
-  const role = locationId
-    ? ((await getLocationRole(locationId, userId)) ??
-      (workspaceOrganizationId
-        ? await getMembershipRole(workspaceOrganizationId, userId)
-        : null))
-    : workspaceOrganizationId
-      ? await getMembershipRole(workspaceOrganizationId, userId)
-      : null
+  const role = await getMembershipRole(organizationId, userId)
   const capabilities = getOrgCapabilitiesForRole(role)
 
   if (!capabilities.canViewRota) {
@@ -94,16 +78,9 @@ async function getRotaWorkspaceData({
     throw new Error("You do not have permission to view this rota.")
   }
 
-  const locations = await listAccessibleLocations(
-    workspaceOrganizationId,
-    userId,
-    role,
-    locationId
-  )
+  const locations = await listAccessibleLocations(organizationId, userId, role)
   const selectedLocation =
-    locations.find((location) =>
-      locationId ? location.id === locationId : location.slug === locationSlug
-    ) ?? null
+    locations.find((location) => location.slug === locationSlug) ?? null
 
   if (!selectedLocation) {
     throw new Error("You do not have access to that location.")
@@ -119,11 +96,9 @@ async function getRotaWorkspaceData({
     )
     .eq("location_id", selectedLocation.id)
     .eq("id", rotaId)
-  const rotaResult = await (
-    workspaceOrganizationId
-      ? rotaQuery.eq("organization_id", workspaceOrganizationId)
-      : rotaQuery.is("organization_id", null)
-  ).maybeSingle()
+  const rotaResult = await rotaQuery
+    .eq("organization_id", organizationId)
+    .maybeSingle()
 
   assertSupabaseSuccess(rotaResult.error, "We could not load that rota.")
   const rota = rotaResult.data
@@ -182,12 +157,8 @@ async function getRotaWorkspaceData({
       .from("employees")
       .select("id, full_name, staff_group_id")
       .eq("status", "active"),
-    workspaceOrganizationId
-      ? groupsQuery.eq("organization_id", workspaceOrganizationId)
-      : groupsQuery
-          .is("organization_id", null)
-          .eq("location_id", selectedLocation.id),
-    getTemplatesForLocation(workspaceOrganizationId, selectedLocation.id),
+    groupsQuery.eq("organization_id", organizationId),
+    getTemplatesForLocation(organizationId, selectedLocation.id),
     getLocationRotaSettings(selectedLocation.id),
   ])
 
@@ -312,9 +283,9 @@ async function getRotaWorkspaceData({
         entitlement.canWrite &&
         !isPastRota &&
         (rota.status !== "published" || rotaSettings.allowEditAfterPublish),
-      organizationId: workspaceOrganizationId,
+      organizationId,
       userId,
-      workspaceType: locationId ? "location" : "organization",
+      workspaceType: "organization",
       note: publishedOnly && !rotaSettings.showNotesToStaff ? null : rota.note,
       weekStart: rota.week_start,
       weekEnd: days[6]?.isoDate ?? rota.week_start,

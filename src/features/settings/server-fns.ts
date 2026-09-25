@@ -11,12 +11,6 @@ import {
   updateLocationSettingsInputSchema,
 } from "@/features/settings/schemas/location-settings-schemas"
 import {
-  createOrganizationFromLocationInputSchema,
-  moveLocationToOrganizationBillingInputSchema,
-  moveLocationToOrganizationInputSchema,
-  workspaceConnectionsInputSchema,
-} from "@/features/settings/schemas/connection-settings-schemas"
-import {
   createZoneInputSchema,
   deleteRotaTemplateInputSchema,
   deleteZoneInputSchema,
@@ -70,44 +64,6 @@ const updateLocationSettings = createServerFn({ method: "POST" })
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/location-actions")
     return module.updateLocationSettings(data)
-  })
-
-const getWorkspaceConnectionsPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    workspaceConnectionsInputSchema.parse(input)
-  )
-  .handler(async ({ data }) => {
-    const module = await import("@/features/settings/server/connection-queries")
-    return module.getWorkspaceConnectionsPageData(data)
-  })
-
-const moveLocationToOrganization = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    moveLocationToOrganizationInputSchema.parse(input)
-  )
-  .handler(async ({ data }) => {
-    await requireWorkspaceWriteAccess(data)
-    const module = await import("@/features/settings/server/connection-actions")
-    return module.moveLocationToOrganization(data)
-  })
-
-const createOrganizationFromLocation = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    createOrganizationFromLocationInputSchema.parse(input)
-  )
-  .handler(async ({ data }) => {
-    await requireWorkspaceWriteAccess(data)
-    const module = await import("@/features/settings/server/connection-actions")
-    return module.createOrganizationFromLocation(data)
-  })
-
-const moveLocationToOrganizationBilling = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    moveLocationToOrganizationBillingInputSchema.parse(input)
-  )
-  .handler(async ({ data }) => {
-    const module = await import("@/features/settings/server/connection-actions")
-    return module.moveLocationToOrganizationBilling(data)
   })
 
 const getRotaSettingsPageData = createServerFn({ method: "POST" })
@@ -173,16 +129,12 @@ const deleteRotaTemplate = createServerFn({ method: "POST" })
 
 export {
   createLocation,
-  createOrganizationFromLocation,
   createZone,
   deleteRotaTemplate,
   deleteZone,
   getGeneralSettingsPageData,
   getLocationSettingsPageData,
-  getWorkspaceConnectionsPageData,
   getRotaSettingsPageData,
-  moveLocationToOrganization,
-  moveLocationToOrganizationBilling,
   renameRotaTemplate,
   updateGeneralSettings,
   updateLocationSettings,

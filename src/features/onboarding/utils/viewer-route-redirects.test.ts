@@ -49,25 +49,15 @@ describe("dashboard onboarding redirect", () => {
         },
         "dashboard"
       )
-    ).toBe("/w/team/dashboard")
+    ).toBe("/app/team/dashboard")
   })
 
-  it("opens an existing location workspace after required setup", () => {
+  it("does not treat a location as an organization workspace", () => {
     expect(
       getOrganizationAppRedirect(
-        {
-          activeOrganization: null,
-          activeWorkspace: {
-            id: "location-a",
-            name: "Store",
-            slug: "store",
-            type: "location",
-            organizationId: null,
-          },
-          onboarding: null,
-        },
+        { activeOrganization: null, activeWorkspace: null, onboarding: null },
         "dashboard"
       )
-    ).toBe("/w/store/dashboard")
+    ).toBeNull()
   })
 })

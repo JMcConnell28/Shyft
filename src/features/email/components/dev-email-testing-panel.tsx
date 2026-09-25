@@ -4,23 +4,15 @@ import { useState } from "react"
 import { useServerFn } from "@tanstack/react-start"
 import { FlaskConicalIcon, MailIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select"
-import { devEmailOptions } from "@/features/email/constants/dev-email-options"
 import type { DevEmailType } from "@/features/email/constants/dev-email-options"
+import { Button } from "@/components/ui/button"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+// eslint-disable-next-line no-duplicate-imports
+import { devEmailOptions } from "@/features/email/constants/dev-email-options"
 import { sendDevTestEmail } from "@/features/email/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
-function DevEmailTestingPanel({
-  workspaceSlug,
-  workspaceType,
-}: {
-  workspaceSlug: string
-  workspaceType?: "location" | "organization"
-}) {
+function DevEmailTestingPanel({ workspaceSlug }: { workspaceSlug: string }) {
   const sendDevTestEmailFn = useServerFn(sendDevTestEmail)
   const [emailType, setEmailType] = useState<DevEmailType>("workspace-welcome")
   const [isSending, setIsSending] = useState(false)
@@ -37,7 +29,6 @@ function DevEmailTestingPanel({
         data: {
           emailType,
           workspaceSlug,
-          workspaceType,
         },
       })
       showSuccessToast("Test email sent.")

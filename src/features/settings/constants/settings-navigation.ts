@@ -15,45 +15,44 @@ const workspaceSettingsNavItems: Array<SettingsNavItem> = [
     description: "Workplace details, locations, and contact information.",
     icon: Settings2Icon,
     label: "General",
-    to: "/w/$workspaceSlug/settings/general",
+    to: "/app/$workspaceSlug/settings/general",
   },
   {
     description: "Planning zones, templates, and rota defaults.",
     icon: CalendarRangeIcon,
     label: "Rota",
-    to: "/w/$workspaceSlug/settings/rota",
+    to: "/app/$workspaceSlug/settings/rota",
   },
   {
     description: "Locations, opening hours, and closing estimates.",
     icon: MapPinnedIcon,
     label: "Locations",
-    organizationOnly: true,
-    to: "/w/$workspaceSlug/settings/locations",
+    to: "/app/$workspaceSlug/settings/locations",
   },
   {
     description: "Manage team members and assign groups for each location.",
     icon: UsersIcon,
     label: "Team",
-    to: "/w/$workspaceSlug/settings/team",
+    to: "/app/$workspaceSlug/settings/team",
   },
   {
     description:
       "Control how your team clocks in and out, how stations behave, and how records are reviewed.",
     icon: Clock3Icon,
     label: "Clocking",
-    to: "/w/$workspaceSlug/settings/clocking",
+    to: "/app/$workspaceSlug/settings/clocking",
   },
   {
     description: "Subscription, payment method, usage, and invoices.",
     icon: CreditCardIcon,
     label: "Billing",
-    to: "/w/$workspaceSlug/settings/billing",
+    to: "/app/$workspaceSlug/settings/billing",
   },
   {
     description: "Employees, roles, pay details, and location access.",
     icon: Building2Icon,
     label: "Company",
-    to: "/w/$workspaceSlug/settings/company",
+    to: "/app/$workspaceSlug/settings/company",
   },
 ]
 

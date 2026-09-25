@@ -3,10 +3,9 @@
 import * as React from "react"
 import { useLocation } from "@tanstack/react-router"
 
-import {
-  setInstallPrompt,
-  type InstallPromptEvent,
-} from "@/features/pwa/install-prompt"
+import type { InstallPromptEvent } from "@/features/pwa/install-prompt"
+// eslint-disable-next-line no-duplicate-imports
+import { setInstallPrompt } from "@/features/pwa/install-prompt"
 
 const APP_ROUTE_PREFIXES = [
   "/accept-invitation/",
@@ -20,7 +19,7 @@ const APP_ROUTE_PREFIXES = [
   "/reset-password",
   "/sign-up",
   "/verify-email",
-  "/w/",
+  "/app/",
 ]
 
 function isInstalledApp() {

@@ -182,7 +182,7 @@ function WeekLink({
         <Link
           params={{ workspaceSlug }}
           search={{ weekStart }}
-          to="/w/$workspaceSlug/timesheets"
+          to="/app/$workspaceSlug/timesheets"
         />
       }
       size="icon-lg"

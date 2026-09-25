@@ -86,10 +86,7 @@ async function loadWorkspaceViewer(
   }
 
   const organizationId = viewer.activeWorkspace.organizationId
-  if (
-    organizationId &&
-    organizationId !== navigationSession.activeOrganizationId
-  ) {
+  if (organizationId !== navigationSession.activeOrganizationId) {
     // Preloads may warm the read-only viewer, but must not switch the session
     // or start page loaders that require a different active organization.
     // reloadDocument makes Router stop this speculative load instead of

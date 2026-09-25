@@ -63,8 +63,6 @@ type PreviousPublishedSummary = {
 type RotaListPageData = {
   orgSlug: string
   organizationId: string
-  workspaceType?: "organization" | "location"
-  locationWorkspaceSlug?: string
   capabilities: OrganizationCapabilities
   canWriteSelectedLocation: boolean
   locations: Array<AccessibleRotaLocation>
@@ -112,8 +110,6 @@ type RotaDetailRecord = {
 type RotaDetailPageData = {
   orgSlug: string
   organizationId: string
-  workspaceType?: "organization" | "location"
-  locationWorkspaceSlug?: string
   capabilities: OrganizationCapabilities
   locations: Array<AccessibleRotaLocation>
   selectedLocation: AccessibleRotaLocation

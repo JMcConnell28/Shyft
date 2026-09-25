@@ -14,10 +14,7 @@ function getRotaWorkspaceQueryInput({
   userId,
   publishedOnly,
 }: RotaWorkspaceRouteInput): RotaWorkspaceQueryInput {
-  const queryLocationSlug =
-    workspace.type === "location" ? workspace.slug : locationSlug
-
-  if (!queryLocationSlug) {
+  if (!locationSlug) {
     throw new Error("A location slug is required for organization rota routes.")
   }
 
@@ -25,11 +22,9 @@ function getRotaWorkspaceQueryInput({
     rotaId,
     userId,
     publishedOnly,
-    organizationId:
-      workspace.type === "organization" ? workspace.id : undefined,
-    orgSlug: workspace.type === "organization" ? workspace.slug : undefined,
-    locationId: workspace.type === "location" ? workspace.id : undefined,
-    locationSlug: queryLocationSlug,
+    organizationId: workspace.id,
+    orgSlug: workspace.slug,
+    locationSlug,
   }
 }
 

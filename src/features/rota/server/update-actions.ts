@@ -26,6 +26,9 @@ const publishRotaVersion = createServerFn({ method: "POST" })
       permission: "publish",
       errorMessage: "You do not have permission to publish rotas.",
     })
+    if (!context.organizationId) {
+      throw new Error("An organisation is required to publish a rota.")
+    }
     const [workingShiftsResult, workingAssignmentsResult] = await Promise.all([
       context.supabase
         .from("rota_shifts")
@@ -124,7 +127,7 @@ const publishRotaVersion = createServerFn({ method: "POST" })
 
     const nextPublishedVersion = context.rota.published_version + 1
 
-    const publishQuery = context.supabase
+    const publishResult = await context.supabase
       .from("rotas")
       .update({
         status: "published",
@@ -136,12 +139,9 @@ const publishRotaVersion = createServerFn({ method: "POST" })
         updated_at: new Date().toISOString(),
       })
       .eq("id", data.rotaId)
+      .eq("organization_id", context.organizationId)
       .select("id")
-    const publishResult = await (
-      context.organizationId
-        ? publishQuery.eq("organization_id", context.organizationId)
-        : publishQuery.is("organization_id", null)
-    ).single()
+      .single()
 
     assertSupabaseSuccess(
       publishResult.error,
@@ -153,10 +153,7 @@ const publishRotaVersion = createServerFn({ method: "POST" })
     )
 
     const target = {
-      orgSlug: context.organizationId
-        ? await getRequiredOrganizationSlug(context.organizationId)
-        : context.location.slug,
-      isOrganizationWorkspace: Boolean(context.organizationId),
+      orgSlug: await getRequiredOrganizationSlug(context.organizationId),
       locationSlug: context.location.slug,
       rotaId: data.rotaId,
     }
@@ -323,7 +320,7 @@ async function insertPublishedShiftSnapshots({
       ]
     )
 
-    const insertedShift = result.rows[0]
+    const insertedShift = result.rows.at(0)
 
     if (!insertedShift) {
       throw new Error("We could not save the published rota snapshot.")
@@ -344,7 +341,7 @@ async function getActiveZoneNameById({
   database: ReturnType<typeof getDatabase>
   locationId: string
   organizationId: string | null
-  zoneIds: string[]
+  zoneIds: Array<string>
 }) {
   if (zoneIds.length === 0) {
     return new Map<string, string>()

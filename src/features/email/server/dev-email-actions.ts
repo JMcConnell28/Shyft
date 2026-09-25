@@ -13,7 +13,7 @@ import {
   sendTrialEndingEmail,
 } from "@/features/email/server/billing-emails"
 import { sendRotaPublishedEmail } from "@/features/email/server/rota-emails"
-import { sendWorkspaceWelcomeEmail } from "@/features/email/server/workspace-emails"
+import { sendOrganizationWelcomeEmail } from "@/features/email/server/organization-welcome-email"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
 import { buildAppUrl } from "@/lib/app-url.server"
 
@@ -29,9 +29,8 @@ async function sendDevTestEmail(input: SendDevTestEmailInput) {
   await requireVerifiedSessionOrThrow()
 
   const workspaceSlug = input.workspaceSlug ?? "demo-workspace"
-  const workspaceType = input.workspaceType ?? "organization"
-  const workspacePath = `/w/${workspaceSlug}/dashboard`
-  const billingPath = `/w/${workspaceSlug}/settings/billing`
+  const workspacePath = `/app/${workspaceSlug}/dashboard`
+  const billingPath = `/app/${workspaceSlug}/settings/billing`
 
   if (input.emailType === "verify-email") {
     await sendVerificationEmail({
@@ -52,21 +51,19 @@ async function sendDevTestEmail(input: SendDevTestEmailInput) {
       role: "manager",
     })
   } else if (input.emailType === "workspace-welcome") {
-    await sendWorkspaceWelcomeEmail({
+    await sendOrganizationWelcomeEmail({
       to: testRecipient,
       dashboardUrl: buildAppUrl(workspacePath),
       userName: "Alex Manager",
-      workspaceName:
-        workspaceType === "organization"
-          ? "The Crown Group"
-          : "The Crown Tavern",
-      workspaceType,
+      organizationName: "The Crown Group",
     })
   } else if (input.emailType === "rota-published") {
     await sendRotaPublishedEmail({
       to: testRecipient,
       locationName: "The Crown Tavern",
-      rotaUrl: buildAppUrl(`/w/${workspaceSlug}/rota/test-rota/view`),
+      rotaUrl: buildAppUrl(
+        `/app/${workspaceSlug}/rota/the-crown/00000000-0000-0000-0000-000000000000/view`
+      ),
       userName: "Sam Taylor",
       weekLabel: "8 Jun - 14 Jun 2026",
       shifts: [

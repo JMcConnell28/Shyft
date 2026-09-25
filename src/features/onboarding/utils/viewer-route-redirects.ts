@@ -1,10 +1,9 @@
 import type { ViewerState } from "@/features/onboarding/types"
+import type { OrganizationAppRouteKey } from "@/lib/organization-paths"
+// eslint-disable-next-line no-duplicate-imports
 import {
-  getLocationAppPath,
-  getLocationDashboardPath,
   getOrganizationAppPath,
   getOrganizationDashboardPath,
-  type OrganizationAppRouteKey,
 } from "@/lib/organization-paths"
 
 type ViewerRouteState = Pick<
@@ -15,9 +14,9 @@ type ViewerRouteState = Pick<
 type PendingOnboardingPath = "/onboarding/location" | "/onboarding/invite"
 
 function getPendingOnboardingPath(
-  viewer: ViewerRouteState,
+  viewer: ViewerRouteState
 ): PendingOnboardingPath | null {
-  if (!viewer.activeOrganization && !viewer.activeWorkspace) {
+  if (!viewer.activeOrganization) {
     return null
   }
 
@@ -37,13 +36,6 @@ function requireActiveOrganization(viewer: ViewerRouteState) {
 }
 
 function getExistingOrganizationRedirect(viewer: ViewerRouteState) {
-  if (viewer.activeWorkspace?.type === "location") {
-    return (
-      getPendingOnboardingPath(viewer) ??
-      getLocationDashboardPath(viewer.activeWorkspace.slug)
-    )
-  }
-
   if (!viewer.activeOrganization) {
     return null
   }
@@ -56,18 +48,8 @@ function getExistingOrganizationRedirect(viewer: ViewerRouteState) {
 
 function getOrganizationAppRedirect(
   viewer: ViewerRouteState,
-  routeKey: OrganizationAppRouteKey,
+  routeKey: OrganizationAppRouteKey
 ) {
-  if (viewer.activeWorkspace?.type === "location") {
-    const pendingOnboardingPath = getPendingOnboardingPath(viewer)
-
-    if (pendingOnboardingPath) {
-      return pendingOnboardingPath
-    }
-
-    return getLocationAppPath(viewer.activeWorkspace.slug, routeKey)
-  }
-
   if (!viewer.activeOrganization) {
     return null
   }

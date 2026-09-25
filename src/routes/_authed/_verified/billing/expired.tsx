@@ -15,7 +15,6 @@ import { PAST_DUE_GRACE_DAYS } from "@/features/billing/constants"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  getLocationDashboardPath,
   getOrganizationDashboardPath,
   getWorkspaceAccountPath,
 } from "@/lib/organization-paths"
@@ -69,12 +68,9 @@ function BillingExpiredRoute() {
     hasSubscription,
     workspaceName: workspace?.name ?? "This workspace",
   })
-  const dashboardHref =
-    workspace?.type === "location"
-      ? getLocationDashboardPath(workspace.slug)
-      : workspace
-        ? getOrganizationDashboardPath(workspace.slug)
-        : "/dashboard"
+  const dashboardHref = workspace
+    ? getOrganizationDashboardPath(workspace.slug)
+    : "/dashboard"
   const accountHref = workspace
     ? getWorkspaceAccountPath(workspace.slug)
     : "/account"
@@ -143,9 +139,7 @@ function BillingExpiredRoute() {
                     organizationId={
                       workspace?.type === "organization" ? workspace.id : null
                     }
-                    locationId={
-                      workspace?.type === "location" ? workspace.id : null
-                    }
+                    locationId={null}
                   >
                     Choose plan
                   </CheckoutButton>
@@ -155,9 +149,7 @@ function BillingExpiredRoute() {
                     organizationId={
                       workspace?.type === "organization" ? workspace.id : null
                     }
-                    locationId={
-                      workspace?.type === "location" ? workspace.id : null
-                    }
+                    locationId={null}
                   >
                     Update payment method
                   </BillingPortalButton>
@@ -167,9 +159,7 @@ function BillingExpiredRoute() {
                     organizationId={
                       workspace?.type === "organization" ? workspace.id : null
                     }
-                    locationId={
-                      workspace?.type === "location" ? workspace.id : null
-                    }
+                    locationId={null}
                   />
                 )}
                 {blockedState.canGoBack ? (

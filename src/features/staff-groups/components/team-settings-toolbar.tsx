@@ -42,7 +42,7 @@ function TeamSettingsToolbar({
           <MapPinIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-[#60709a]" />
           <NativeSelect
             aria-label="Team location"
-            className="w-full [&_select]:h-10 [&_select]:rounded-lg [&_select]:border-[#dfe5f0] [&_select]:bg-white [&_select]:pr-9 [&_select]:pl-9 [&_select]:text-sm [&_select]:font-semibold lg:min-w-48"
+            className="w-full lg:min-w-48 [&_select]:h-10 [&_select]:rounded-lg [&_select]:border-[#dfe5f0] [&_select]:bg-white [&_select]:pr-9 [&_select]:pl-9 [&_select]:text-sm [&_select]:font-semibold"
             value={selectedLocationId}
             onChange={(event) => onLocationChange(event.target.value)}
           >
@@ -57,7 +57,7 @@ function TeamSettingsToolbar({
         <Button
           render={
             <Link
-              to="/w/$workspaceSlug/settings/team/groups"
+              to="/app/$workspaceSlug/settings/team/groups"
               params={{ workspaceSlug }}
             />
           }
@@ -82,7 +82,7 @@ function TeamSettingsToolbar({
           <FilterIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-[#60709a]" />
           <NativeSelect
             aria-label="Filter team members"
-            className="w-full [&_select]:h-10 [&_select]:rounded-lg [&_select]:border-[#dfe5f0] [&_select]:bg-white [&_select]:pr-8 [&_select]:pl-9 [&_select]:text-sm [&_select]:font-semibold lg:w-32"
+            className="w-full lg:w-32 [&_select]:h-10 [&_select]:rounded-lg [&_select]:border-[#dfe5f0] [&_select]:bg-white [&_select]:pr-8 [&_select]:pl-9 [&_select]:text-sm [&_select]:font-semibold"
             value={status}
             onChange={(event) =>
               onStatusChange(event.target.value as TeamStatusFilter)

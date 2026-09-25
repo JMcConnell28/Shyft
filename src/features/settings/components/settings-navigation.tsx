@@ -23,7 +23,7 @@ function SettingsNavigation({
         const isActive =
           activePath === targetPath ||
           activePath.startsWith(`${targetPath}/`) ||
-          (activePath === `/w/${workspaceSlug}/settings` &&
+          (activePath === `/app/${workspaceSlug}/settings` &&
             item.label === "General")
         const Icon = item.icon
 
@@ -110,7 +110,7 @@ function MobileSettingsDetailHeader({
           aria-label="Back to settings"
           className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#dfe4ef] bg-white text-blue-600 shadow-sm active:bg-blue-50"
           params={{ workspaceSlug }}
-          to="/w/$workspaceSlug/settings"
+          to="/app/$workspaceSlug/settings"
         >
           <ArrowLeftIcon className="size-4" />
         </Link>

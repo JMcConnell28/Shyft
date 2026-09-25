@@ -20,8 +20,6 @@ import { cn } from "@/lib/utils"
 type RotaListRowProps = {
   canEdit: boolean
   orgSlug: string
-  workspaceType?: "organization" | "location"
-  locationWorkspaceSlug?: string
   row: RotaListItem
   onDeleteDraft: (rotaId: string) => void
   onUnpublish: (rotaId: string) => void
@@ -32,35 +30,22 @@ type RotaListRowProps = {
 function RotaListRow({
   canEdit,
   orgSlug,
-  workspaceType = "organization",
-  locationWorkspaceSlug,
   row,
   onDeleteDraft,
   onUnpublish,
   isDeletingDraft,
   isUnpublishing,
 }: RotaListRowProps) {
-  const editRoute =
-    workspaceType === "location"
-      ? "/w/$workspaceSlug/rota/$rotaId"
-      : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
+  const editRoute = "/app/$workspaceSlug/rota/$locationSlug/$rotaId"
   const openRoute =
     row.status === "published"
-      ? workspaceType === "location"
-        ? "/w/$workspaceSlug/rota/$rotaId/view"
-        : "/w/$workspaceSlug/rota/$locationSlug/$rotaId/view"
+      ? "/app/$workspaceSlug/rota/$locationSlug/$rotaId/view"
       : editRoute
-  const routeParams =
-    workspaceType === "location"
-      ? {
-          workspaceSlug: locationWorkspaceSlug ?? row.locationSlug,
-          rotaId: row.id,
-        }
-      : {
-          workspaceSlug: orgSlug,
-          locationSlug: row.locationSlug,
-          rotaId: row.id,
-        }
+  const routeParams = {
+    workspaceSlug: orgSlug,
+    locationSlug: row.locationSlug,
+    rotaId: row.id,
+  }
 
   return (
     <article

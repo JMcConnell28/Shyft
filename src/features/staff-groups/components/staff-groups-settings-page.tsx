@@ -78,7 +78,7 @@ function StaffGroupsSettingsPage({
   return (
     <div className="space-y-5 text-[#11245a]">
       <Link
-        to="/w/$workspaceSlug/settings/team"
+        to="/app/$workspaceSlug/settings/team"
         params={{ workspaceSlug }}
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#61709a] transition-colors hover:text-[#0968f5]"
       >

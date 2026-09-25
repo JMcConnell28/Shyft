@@ -1,8 +1,7 @@
 import type { AccessibleRotaLocation } from "@/features/rota/types"
-import {
-  getOrgCapabilitiesForRole,
-  type OrganizationCapabilities,
-} from "@/lib/auth/get-org-capabilities"
+import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
+// eslint-disable-next-line no-duplicate-imports
+import { getOrgCapabilitiesForRole } from "@/lib/auth/get-org-capabilities"
 import { getLocationRole } from "@/lib/auth/has-location-permission"
 import { getDatabase } from "@/lib/db"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
@@ -105,48 +104,14 @@ async function ensureLocationAccessOrThrow(
 
 async function getHasUnreadRotaUpdates({
   organizationId,
-  locationId,
   userId,
   capabilities,
 }: {
-  organizationId?: string | null
-  locationId?: string
+  organizationId: string
   userId: string
   capabilities?: OrganizationCapabilities
 }) {
   if (capabilities && !capabilities.canViewRota) {
-    return false
-  }
-
-  if (locationId) {
-    const role = await getLocationRole(locationId, userId)
-    const locationCapabilities = getOrgCapabilitiesForRole(role)
-
-    if (capabilities && !capabilities.canViewRota) {
-      return false
-    }
-
-    if (!locationCapabilities.canViewRota) {
-      return false
-    }
-
-    const publishedRotas = await listPublishedRotasForLocations(null, [
-      locationId,
-    ])
-    const seenVersions = await getSeenPublishedVersionsMap(
-      publishedRotas.map((rota) => rota.id),
-      userId
-    )
-
-    return publishedRotas.some((rota) => {
-      return (
-        rota.published_version > (seenVersions.get(rota.id) ?? 0) &&
-        rota.published_by_user_id !== userId
-      )
-    })
-  }
-
-  if (!organizationId) {
     return false
   }
 

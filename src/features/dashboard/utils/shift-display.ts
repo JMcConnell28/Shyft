@@ -26,10 +26,10 @@ function getRotaViewPath(input: {
   workspaceType: "location" | "organization"
 }) {
   if (input.workspaceType === "location") {
-    return `/w/${input.workspaceSlug}/rota/${input.shift.rotaId}/view`
+    return `/app/${input.workspaceSlug}/rota/${input.shift.rotaId}/view`
   }
 
-  return `/w/${input.workspaceSlug}/rota/${input.shift.locationSlug}/${input.shift.rotaId}/view`
+  return `/app/${input.workspaceSlug}/rota/${input.shift.locationSlug}/${input.shift.rotaId}/view`
 }
 
 function getShiftDateParts(dateValue: string): ShiftDateParts {

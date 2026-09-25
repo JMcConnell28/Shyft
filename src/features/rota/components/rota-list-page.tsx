@@ -141,7 +141,6 @@ function RotaListPage({
                 triggerIcon="plus"
                 triggerClassName="h-10 shrink-0 rounded-[10px] border-0 bg-[#0868f7] px-4 text-[13px] font-semibold text-white shadow-[0_7px_16px_rgba(8,104,247,0.18)] hover:bg-[#005de2]"
                 defaultSourceType="blank"
-                workspaceType={data.workspaceType}
               />
             ) : null}
           </section>
@@ -155,25 +154,12 @@ function RotaListPage({
             </div>
             {data.latestDraft && canEditRota(data.latestDraft.weekStart) ? (
               <Link
-                to={
-                  data.workspaceType === "location"
-                    ? "/w/$workspaceSlug/rota/$rotaId"
-                    : "/w/$workspaceSlug/rota/$locationSlug/$rotaId"
-                }
-                params={
-                  data.workspaceType === "location"
-                    ? {
-                        workspaceSlug:
-                          data.locationWorkspaceSlug ??
-                          data.latestDraft.locationSlug,
-                        rotaId: data.latestDraft.id,
-                      }
-                    : {
-                        workspaceSlug: data.orgSlug,
-                        locationSlug: data.latestDraft.locationSlug,
-                        rotaId: data.latestDraft.id,
-                      }
-                }
+                to="/app/$workspaceSlug/rota/$locationSlug/$rotaId"
+                params={{
+                  workspaceSlug: data.orgSlug,
+                  locationSlug: data.latestDraft.locationSlug,
+                  rotaId: data.latestDraft.id,
+                }}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0868f7] hover:underline"
               >
                 Resume latest draft
@@ -206,7 +192,6 @@ function RotaListPage({
                     triggerIcon="plus"
                     triggerClassName="h-10 rounded-[10px] border-0 bg-[#0868f7] px-4 text-sm font-semibold text-white hover:bg-[#005de2]"
                     defaultSourceType="blank"
-                    workspaceType={data.workspaceType}
                   />
                 ) : null
               }
@@ -218,8 +203,6 @@ function RotaListPage({
                   key={row.id}
                   canEdit={canEditRota(row.weekStart)}
                   orgSlug={data.orgSlug}
-                  workspaceType={data.workspaceType}
-                  locationWorkspaceSlug={data.locationWorkspaceSlug}
                   row={row}
                   isDeletingDraft={
                     deleteDraftMutation.isPending &&

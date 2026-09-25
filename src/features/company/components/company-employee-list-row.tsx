@@ -16,7 +16,7 @@ function CompanyEmployeeListRow({
 }) {
   return (
     <Link
-      to="/w/$workspaceSlug/settings/company/$employeeId"
+      to="/app/$workspaceSlug/settings/company/$employeeId"
       params={{ employeeId: employee.id, workspaceSlug }}
       className="grid min-h-18 grid-cols-[2.5rem_minmax(0,1fr)_1rem] items-center gap-3 px-4 py-3 transition-colors hover:bg-[#f8faff] focus-visible:bg-[#f8faff] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#0968f5] md:grid-cols-[2.5rem_minmax(0,1.5fr)_0.7fr_0.7fr_0.6fr_1rem] md:px-5"
     >

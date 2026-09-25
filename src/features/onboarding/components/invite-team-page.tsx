@@ -26,7 +26,6 @@ import {
   inviteOrganizationMemberByEmail,
 } from "@/lib/onboarding"
 import { getOrganizationDashboardPath } from "@/lib/organization-paths"
-import { getLocationDashboardPath } from "@/lib/organization-paths"
 import {
   emailSchema,
   organizationMemberInviteSchema,
@@ -35,18 +34,17 @@ import {
 import { showSuccessToast } from "@/lib/toast"
 import { createZodFieldValidator } from "@/lib/validation"
 
-
 function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
   const createStaffInviteLinkFn = useServerFn(createStaffInviteLink)
   const inviteOrganizationMemberByEmailFn = useServerFn(
-    inviteOrganizationMemberByEmail,
+    inviteOrganizationMemberByEmail
   )
   const [error, setError] = React.useState<string | null>(null)
   const [inviteUrl, setInviteUrl] = React.useState<string | null>(null)
   const [copyState, setCopyState] = React.useState<"idle" | "copied">("idle")
-  const [memberInviteError, setMemberInviteError] = React.useState<string | null>(
-    null,
-  )
+  const [memberInviteError, setMemberInviteError] = React.useState<
+    string | null
+  >(null)
 
   const defaultLocationId = viewer.locations.at(0)?.id ?? ""
   const defaultStaffGroupId =
@@ -69,7 +67,12 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
 
         setInviteUrl(result.joinUrl)
       } catch (submissionError) {
-        setError(getErrorMessage(submissionError, "We could not generate that invite link."))
+        setError(
+          getErrorMessage(
+            submissionError,
+            "We could not generate that invite link."
+          )
+        )
       }
     },
   })
@@ -91,7 +94,7 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
         memberInviteForm.reset()
       } catch (submissionError) {
         setMemberInviteError(
-          getErrorMessage(submissionError, "We could not send that invitation."),
+          getErrorMessage(submissionError, "We could not send that invitation.")
         )
       }
     },
@@ -112,7 +115,11 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
   return (
     <OnboardingShell
       badge="Team onboarding"
-      eyebrow={viewer.activeWorkspace?.name ?? viewer.activeOrganization?.name ?? "Invite your team"}
+      eyebrow={
+        viewer.activeWorkspace?.name ??
+        viewer.activeOrganization?.name ??
+        "Invite your team"
+      }
       title="Generate the first invite link for your team."
       description="This reusable staff link is the fastest way to get employees into the right workplace, location, and rota group."
       progress={90}
@@ -125,7 +132,9 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
               <UserPlus2Icon className="size-3" />
               Staff invite link
             </Badge>
-            <CardTitle className="mt-2 text-2xl">Create your invite link</CardTitle>
+            <CardTitle className="mt-2 text-2xl">
+              Create your invite link
+            </CardTitle>
             <CardDescription>
               Generating a new onboarding link replaces the previous active
               staff invite for this organization.
@@ -145,7 +154,7 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
                   name="locationId"
                   validators={{
                     onSubmit: createZodFieldValidator(
-                      staffInviteSelectionSchema.shape.locationId,
+                      staffInviteSelectionSchema.shape.locationId
                     ),
                   }}
                 >
@@ -165,7 +174,7 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
                   name="defaultStaffGroupId"
                   validators={{
                     onSubmit: createZodFieldValidator(
-                      staffInviteSelectionSchema.shape.defaultStaffGroupId,
+                      staffInviteSelectionSchema.shape.defaultStaffGroupId
                     ),
                   }}
                 >
@@ -218,13 +227,13 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
                   {copyState === "copied" ? "Copied" : "Copy invite link"}
                 </Button>
                 <a
-                href={
-                  viewer.activeWorkspace?.type === "location"
-                    ? getLocationDashboardPath(viewer.activeWorkspace.slug)
-                    : viewer.activeOrganization
-                      ? getOrganizationDashboardPath(viewer.activeOrganization.slug)
+                  href={
+                    viewer.activeOrganization
+                      ? getOrganizationDashboardPath(
+                          viewer.activeOrganization.slug
+                        )
                       : "/dashboard"
-                }
+                  }
                   className="inline-flex h-7 items-center justify-center rounded-md border border-border px-3 text-xs font-medium transition-colors hover:bg-input/50 sm:w-auto"
                 >
                   Finish setup
@@ -235,76 +244,78 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
         ) : null}
 
         {viewer.activeOrganization ? (
-        <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
-          <CardHeader>
-            <CardTitle className="text-xl">Invite a manager or admin by email</CardTitle>
-            <CardDescription>
-              Use Better Auth email invitations when someone should join by
-              email rather than through the reusable staff link.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="space-y-5"
-              onSubmit={(event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                void memberInviteForm.handleSubmit()
-              }}
-            >
-              <FieldGroup>
-                <memberInviteForm.Field
-                  name="email"
-                  validators={{
-                    onSubmit: createZodFieldValidator(emailSchema),
-                  }}
-                >
-                  {(field) => (
-                    <TextFormField
-                      field={field}
-                      label="Invite email"
-                      type="email"
-                      placeholder="manager@venue.com"
-                    />
-                  )}
-                </memberInviteForm.Field>
-
-                <memberInviteForm.Field
-                  name="role"
-                  validators={{
-                    onSubmit: createZodFieldValidator(
-                      organizationMemberInviteSchema.shape.role,
-                    ),
-                  }}
-                >
-                  {(field) => (
-                    <SelectFormField
-                      field={field}
-                      label="Organization role"
-                      options={[
-                        { label: "Admin", value: "admin" },
-                        { label: "Manager", value: "manager" },
-                        { label: "Supervisor", value: "supervisor" },
-                        { label: "Employee", value: "employee" },
-                      ]}
-                      description="Managers can build rotas. Supervisors can oversee rotas, timesheets, and attendance without editing schedules."
-                    />
-                  )}
-                </memberInviteForm.Field>
-              </FieldGroup>
-
-              <FormErrorMessage message={memberInviteError} />
-
-              <FormSubmitButton
-                className="w-full sm:w-auto"
-                isSubmitting={memberInviteForm.state.isSubmitting}
-                submittingText="Sending invite..."
+          <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="text-xl">
+                Invite a manager or admin by email
+              </CardTitle>
+              <CardDescription>
+                Use Better Auth email invitations when someone should join by
+                email rather than through the reusable staff link.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form
+                className="space-y-5"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  void memberInviteForm.handleSubmit()
+                }}
               >
-                Send email invite
-              </FormSubmitButton>
-            </form>
-          </CardContent>
-        </Card>
+                <FieldGroup>
+                  <memberInviteForm.Field
+                    name="email"
+                    validators={{
+                      onSubmit: createZodFieldValidator(emailSchema),
+                    }}
+                  >
+                    {(field) => (
+                      <TextFormField
+                        field={field}
+                        label="Invite email"
+                        type="email"
+                        placeholder="manager@venue.com"
+                      />
+                    )}
+                  </memberInviteForm.Field>
+
+                  <memberInviteForm.Field
+                    name="role"
+                    validators={{
+                      onSubmit: createZodFieldValidator(
+                        organizationMemberInviteSchema.shape.role
+                      ),
+                    }}
+                  >
+                    {(field) => (
+                      <SelectFormField
+                        field={field}
+                        label="Organization role"
+                        options={[
+                          { label: "Admin", value: "admin" },
+                          { label: "Manager", value: "manager" },
+                          { label: "Supervisor", value: "supervisor" },
+                          { label: "Employee", value: "employee" },
+                        ]}
+                        description="Managers can build rotas. Supervisors can oversee rotas, timesheets, and attendance without editing schedules."
+                      />
+                    )}
+                  </memberInviteForm.Field>
+                </FieldGroup>
+
+                <FormErrorMessage message={memberInviteError} />
+
+                <FormSubmitButton
+                  className="w-full sm:w-auto"
+                  isSubmitting={memberInviteForm.state.isSubmitting}
+                  submittingText="Sending invite..."
+                >
+                  Send email invite
+                </FormSubmitButton>
+              </form>
+            </CardContent>
+          </Card>
         ) : null}
       </div>
     </OnboardingShell>

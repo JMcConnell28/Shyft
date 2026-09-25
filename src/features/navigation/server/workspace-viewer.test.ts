@@ -1,17 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import {
-  getLocationBillingAccess,
-  getOrganizationBillingAccess,
-} from "@/features/billing/server/billing-accounts"
+import { getOrganizationBillingAccess } from "@/features/billing/server/billing-accounts"
 import { getWorkspaceTrial } from "@/features/billing/server/trials"
 import { readNavigationSession } from "@/features/navigation/server/navigation-session"
 import { readWorkspaceViewer } from "@/features/navigation/server/workspace-viewer"
-import {
-  listLocationWorkspacesForUser,
-  listOrganizationsForHeaders,
-} from "@/features/onboarding/server/session"
-import { getLocationRole } from "@/lib/auth/has-location-permission"
+import { listOrganizationsForHeaders } from "@/features/onboarding/server/session"
 import { getOrganizationRole } from "@/lib/auth/has-org-permission"
 
 vi.mock("@tanstack/react-start/server-only", () => ({}))
@@ -19,21 +12,16 @@ vi.mock("@/features/navigation/server/navigation-session", () => ({
   readNavigationSession: vi.fn(),
 }))
 vi.mock("@/features/onboarding/server/session", () => ({
-  listLocationWorkspacesForUser: vi.fn(),
   listOrganizationsForHeaders: vi.fn(),
 }))
 vi.mock("@/lib/auth-session.server", () => ({
   getAuthRequestHeaders: () => new Headers(),
 }))
 vi.mock("@/features/billing/server/billing-accounts", () => ({
-  getLocationBillingAccess: vi.fn(),
   getOrganizationBillingAccess: vi.fn(),
 }))
 vi.mock("@/features/billing/server/trials", () => ({
   getWorkspaceTrial: vi.fn(),
-}))
-vi.mock("@/lib/auth/has-location-permission", () => ({
-  getLocationRole: vi.fn(),
 }))
 vi.mock("@/lib/auth/has-org-permission", () => ({
   getOrganizationRole: vi.fn(),
@@ -51,13 +39,6 @@ const user = {
   emailVerified: true,
 }
 const organization = { id: "org-a", name: "Team", slug: "team" }
-const location = {
-  ...organization,
-  id: "location-a",
-  type: "location",
-  organizationId: null,
-} as const
-
 beforeEach(() => {
   vi.resetAllMocks()
   vi.mocked(readNavigationSession).mockResolvedValue({
@@ -67,10 +48,7 @@ beforeEach(() => {
     user,
   })
   vi.mocked(listOrganizationsForHeaders).mockResolvedValue([organization])
-  vi.mocked(listLocationWorkspacesForUser).mockResolvedValue([])
   vi.mocked(getOrganizationRole).mockResolvedValue("owner")
-  vi.mocked(getLocationRole).mockResolvedValue("employee")
-  vi.mocked(getLocationBillingAccess).mockResolvedValue(null)
   vi.mocked(getOrganizationBillingAccess).mockResolvedValue(null)
   vi.mocked(getWorkspaceTrial).mockResolvedValue({
     scope: "organization",
@@ -94,22 +72,18 @@ describe("workspace viewer reads", () => {
     expect(result).not.toHaveProperty("staffGroups")
     expect(result).not.toHaveProperty("locations")
     expect(listOrganizationsForHeaders).toHaveBeenCalledTimes(1)
-    expect(listLocationWorkspacesForUser).toHaveBeenCalledTimes(1)
     expect(getOrganizationBillingAccess).toHaveBeenCalledWith("org-a")
-    expect(getLocationBillingAccess).not.toHaveBeenCalled()
   })
 
-  it("preserves location precedence for colliding workspace slugs", async () => {
-    vi.mocked(listLocationWorkspacesForUser).mockResolvedValue([location])
+  it("resolves organization slugs without a location workspace lookup", async () => {
     const result = await readWorkspaceViewer(input)
     expect(result).toMatchObject({
-      activeWorkspace: location,
-      activeOrganization: null,
-      activeRole: "employee",
+      activeWorkspace: { ...organization, type: "organization" },
+      activeOrganization: organization,
+      activeRole: "owner",
     })
-    expect(getLocationRole).toHaveBeenCalledWith("location-a", "user-a")
-    expect(getWorkspaceTrial).toHaveBeenCalledWith({ locationId: "location-a" })
-    expect(getOrganizationRole).not.toHaveBeenCalled()
+    expect(getWorkspaceTrial).toHaveBeenCalledWith({ organizationId: "org-a" })
+    expect(getOrganizationRole).toHaveBeenCalledWith("org-a", "user-a")
   })
 
   it("rejects a workspace outside the authenticated user's memberships", async () => {
@@ -135,7 +109,6 @@ describe("workspace viewer reads", () => {
     async (identity) => {
       expect(await readWorkspaceViewer({ ...input, ...identity })).toBeNull()
       expect(listOrganizationsForHeaders).not.toHaveBeenCalled()
-      expect(listLocationWorkspacesForUser).not.toHaveBeenCalled()
     }
   )
 

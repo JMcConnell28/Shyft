@@ -8,20 +8,13 @@ import type {
 import type { AuthSession } from "@/lib/auth-session.server"
 import { isEmailVerificationSatisfied } from "@/lib/email-verification"
 
+import { getOrganizationBillingAccess } from "@/features/billing/server/billing-accounts"
 import {
-  getLocationBillingAccess,
-  getOrganizationBillingAccess,
-} from "@/features/billing/server/billing-accounts"
-import {
-  listLocationWorkspacesForUser,
   listOrganizationsForHeaders,
   setActiveOrganizationForHeaders,
 } from "@/features/onboarding/server/session"
 import { getOnboardingIntentForUser } from "@/features/onboarding/server/intent"
-import {
-  getActiveLocationState,
-  getActiveOrganizationState,
-} from "@/features/onboarding/server/state"
+import { getActiveOrganizationState } from "@/features/onboarding/server/state"
 // The type-only import above is intentionally separate so TanStack Start can
 // strip it before applying server-only import protection.
 // eslint-disable-next-line no-duplicate-imports
@@ -29,7 +22,6 @@ import {
   getAuthRequestHeaders,
   readSessionFromRequestHeaders,
 } from "@/lib/auth-session.server"
-import { getLocationRole } from "@/lib/auth/has-location-permission"
 import { getOrganizationRole } from "@/lib/auth/has-org-permission"
 
 function buildUser(session: AuthSession) {
@@ -62,12 +54,10 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
       return null
     }
 
-    const [organizations, locationWorkspaces, onboardingIntent] =
-      await Promise.all([
-        listOrganizationsForHeaders(headers),
-        listLocationWorkspacesForUser(session.user.id),
-        getOnboardingIntentForUser(session.user.id),
-      ])
+    const [organizations, onboardingIntent] = await Promise.all([
+      listOrganizationsForHeaders(headers),
+      getOnboardingIntentForUser(session.user.id),
+    ])
     const activeOrganizationId = session.session.activeOrganizationId ?? null
     const activeOrganization =
       organizations.find(
@@ -75,10 +65,7 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
       ) ?? null
     const selectedOrganization =
       activeOrganization ?? organizations.at(0) ?? null
-    const workspaces = [
-      ...locationWorkspaces,
-      ...organizationWorkspaces(organizations),
-    ]
+    const workspaces = organizationWorkspaces(organizations)
     const user = buildUser(session)
 
     if (selectedOrganization) {
@@ -104,37 +91,6 @@ const getViewerState = createServerFn({ method: "GET" }).handler(
           type: "organization",
           organizationId: selectedOrganization.id,
         },
-        activeRole,
-        workspaces,
-        onboarding: activeState.onboarding,
-        trial: activeState.trial,
-        billing,
-        onboardingIntent,
-        locations: activeState.locations,
-        staffGroups: activeState.staffGroups,
-      }
-    }
-
-    const activeLocationWorkspace =
-      locationWorkspaces.find(
-        (workspace) => workspace.organizationId === null
-      ) ??
-      locationWorkspaces.at(0) ??
-      null
-
-    if (activeLocationWorkspace) {
-      const [activeState, billing, activeRole] = await Promise.all([
-        getActiveLocationState(activeLocationWorkspace.id),
-        getLocationBillingAccess(activeLocationWorkspace.id),
-        getLocationRole(activeLocationWorkspace.id, session.user.id),
-      ])
-
-      return {
-        user,
-        activeOrganizationId,
-        organizations,
-        activeOrganization: null,
-        activeWorkspace: activeLocationWorkspace,
         activeRole,
         workspaces,
         onboarding: activeState.onboarding,
