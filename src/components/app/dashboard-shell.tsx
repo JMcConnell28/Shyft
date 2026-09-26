@@ -58,6 +58,7 @@ function DashboardShell({
   trial,
   billing,
   capabilities,
+  shiftSwapsEnabled,
 }: {
   routeKey: React.ComponentProps<typeof AppSidebar>["routeKey"]
   title: string
@@ -83,6 +84,7 @@ function DashboardShell({
   trial?: WorkspaceTrial | null
   billing?: WorkspaceBillingState | null
   capabilities: OrganizationCapabilities
+  shiftSwapsEnabled: boolean
 }) {
   const [isSigningOut, setIsSigningOut] = React.useState(false)
   const [isTrialBannerDismissed, setIsTrialBannerDismissed] =
@@ -104,6 +106,7 @@ function DashboardShell({
   const isTimesheetsHome = routeKey === "timesheets"
   const isTimeClockHome = routeKey === "timeClock"
   const isAnnouncementsHome = routeKey === "announcements"
+  const isShiftSwapsHome = routeKey === "shiftSwaps"
   const hasMobileBrandHeader =
     mobileBrandHeader ||
     isDashboardHome ||
@@ -111,7 +114,8 @@ function DashboardShell({
     isSettingsHome ||
     isTimesheetsHome ||
     isTimeClockHome ||
-    isAnnouncementsHome
+    isAnnouncementsHome ||
+    isShiftSwapsHome
   const canViewTrialBanner =
     (capabilities.canManageRota || Boolean(canInviteTeamMembers)) &&
     !isWorkspaceBillingBlocked({ trial, billing })
@@ -160,6 +164,7 @@ function DashboardShell({
           workspaces={workspaces}
           activeWorkspace={resolvedActiveWorkspace}
           capabilities={capabilities}
+          shiftSwapsEnabled={shiftSwapsEnabled}
         />
         <SidebarInset className="min-h-0 overflow-hidden">
           <header

@@ -1,20 +1,22 @@
 import { format, parseISO } from "date-fns"
 import type { PoolClient } from "pg"
 
+import type { ShiftSwapShift } from "@/features/shift-swaps/types"
+import type { ShiftSwapCandidateShift } from "@/features/shift-swaps/utils/shift-swap-rules"
 import { listAccessibleLocations } from "@/features/rota/server/access"
 import { getLocationOrganizationId } from "@/features/rota/server/lookups"
 import { getMembershipRole } from "@/features/rota/server/membership"
 import { requireVerifiedSessionOrThrow } from "@/features/rota/server/request-session"
 import {
-  getCurrentWeekStart,
   buildWeekLabel,
+  getCurrentWeekStart,
 } from "@/features/rota/utils/week-utils"
-import type { ShiftSwapShift } from "@/features/shift-swaps/types"
+import { isShiftSwappingEnabled } from "@/features/shift-swaps/server/availability"
+// eslint-disable-next-line no-duplicate-imports
 import {
   getShiftSwapCutoffAt,
   isPastShiftSwapCutoff,
   shiftsOverlap,
-  type ShiftSwapCandidateShift,
 } from "@/features/shift-swaps/utils/shift-swap-rules"
 import { getOrgCapabilitiesForRole } from "@/lib/auth/get-org-capabilities"
 import { getLocationRole } from "@/lib/auth/has-location-permission"
@@ -28,7 +30,7 @@ type ShiftSwapScopeInput = {
 
 type ShiftSwapContext = {
   canManage: boolean
-  locationIds: string[]
+  locationIds: Array<string>
   organizationId: string | null
   userId: string
 }
@@ -156,6 +158,10 @@ async function getShiftSwapContext(input: ShiftSwapScopeInput) {
     throw new Error("You do not have permission to view shift swaps.")
   }
 
+  if (!organizationId || !(await isShiftSwappingEnabled(organizationId))) {
+    throw new Error("Shift swapping is turned off for this workspace.")
+  }
+
   const locations = organizationId
     ? await listAccessibleLocations(
         organizationId,
@@ -191,7 +197,7 @@ async function getShiftSwapContext(input: ShiftSwapScopeInput) {
 
 async function listUserEmployees(context: ShiftSwapContext) {
   const result = await getDatabase().query<EmployeeAccessRow>(
-     `select employee.id,
+    `select employee.id,
              employee.full_name,
              assignment.staff_group_id,
              coalesce(staff_group.name, 'Team members') as staff_group_name,
@@ -319,7 +325,7 @@ function toCandidateShift(row: PublishedShiftRow): ShiftSwapCandidateShift {
 
 function hasShiftOverlap(
   candidate: PublishedShiftRow,
-  existingShifts: PublishedShiftRow[]
+  existingShifts: Array<PublishedShiftRow>
 ) {
   return existingShifts.some((shift) =>
     shiftsOverlap(toCandidateShift(candidate), toCandidateShift(shift))

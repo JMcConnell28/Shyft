@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest"
 
 import {
   findBestShiftMatch,
-  type PublishedShiftCandidate,
+  getShiftSegmentTimeLabel,
 } from "@/features/time-clock/utils/shift-matching"
+
+type PublishedShiftCandidate = Parameters<typeof findBestShiftMatch>[0][number]
 
 describe("findBestShiftMatch", () => {
   it("matches a standard shift inside the clocking window", () => {
@@ -16,7 +18,7 @@ describe("findBestShiftMatch", () => {
           endTime: "17:00:00",
         }),
       ],
-      new Date("2026-06-06T08:45:00"),
+      new Date("2026-06-06T08:45:00")
     )
 
     expect(match?.id).toBe("standard")
@@ -32,7 +34,7 @@ describe("findBestShiftMatch", () => {
           endTime: "02:00:00",
         }),
       ],
-      new Date("2026-06-07T01:30:00"),
+      new Date("2026-06-07T01:30:00")
     )
 
     expect(match?.id).toBe("overnight")
@@ -48,7 +50,7 @@ describe("findBestShiftMatch", () => {
           endTime: "12:00:00",
         }),
       ],
-      new Date("2026-06-06T22:30:00"),
+      new Date("2026-06-06T22:30:00")
     )
 
     expect(match).toBeNull()
@@ -67,7 +69,7 @@ describe("findBestShiftMatch", () => {
           startTime: "08:00:00",
         }),
       ],
-      new Date("2026-06-06T07:45:00"),
+      new Date("2026-06-06T07:45:00")
     )
 
     expect(match?.segments).toMatchObject([
@@ -82,6 +84,22 @@ describe("findBestShiftMatch", () => {
         timeLabel: "17:00 - 20:00",
       },
     ])
+  })
+
+  it("labels a split shift ending at location close", () => {
+    expect(
+      getShiftSegmentTimeLabel(
+        {
+          end_kind: "location_close",
+          end_time: "14:00:00",
+          shift_type: "split",
+          split_second_end_time: null,
+          split_second_start_time: "19:00:00",
+          start_time: "10:00:00",
+        },
+        "split_second"
+      )
+    ).toBe("19:00 - Close")
   })
 })
 

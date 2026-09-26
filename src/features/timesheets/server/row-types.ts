@@ -23,6 +23,12 @@ type TimeEntryRow = {
   notes: string | null
   payable_end_at: string | null
   payable_start_at: string | null
+  published_end_kind: string | null
+  published_end_time: string | null
+  published_shift_type: string | null
+  published_split_second_end_time: string | null
+  published_split_second_start_time: string | null
+  published_start_time: string | null
   rota_published_shift_id: string | null
   rota_id: string | null
   rota_week_start: string | null

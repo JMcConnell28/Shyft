@@ -62,6 +62,7 @@ type RotaSettingsTemplate = {
 
 type RotaSettingsPageData = {
   locations: Array<RotaSettingsLocation>
+  shiftSwapsEnabled: boolean
   templates: Array<RotaSettingsTemplate>
 }
 

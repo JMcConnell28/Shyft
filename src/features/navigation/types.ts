@@ -17,6 +17,6 @@ type WorkspaceViewer = Pick<
   | "workspaces"
   | "trial"
   | "billing"
->
+> & { shiftSwapsEnabled: boolean }
 
 export type { NavigationSession, WorkspaceViewer }

@@ -64,16 +64,18 @@ async function sendDevTestEmail(input: SendDevTestEmailInput) {
       rotaUrl: buildAppUrl(
         `/app/${workspaceSlug}/rota/the-crown/00000000-0000-0000-0000-000000000000/view`
       ),
-      userName: "Sam Taylor",
-      weekLabel: "8 Jun - 14 Jun 2026",
+      shiftSwapsEnabled: true,
+      weekStart: "2026-06-08",
       shifts: [
         {
-          dayLabel: "Mon 8 Jun",
+          dayDate: "2026-06-08",
+          durationMinutes: 480,
           timeLabel: "09:00 - 17:00",
           zoneName: "Front Bar",
         },
         {
-          dayLabel: "Thu 11 Jun",
+          dayDate: "2026-06-11",
+          durationMinutes: 360,
           timeLabel: "17:00 - Close",
           zoneName: "Garden",
         },

@@ -11,25 +11,25 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { RotaLocationSettings } from "@/features/settings/components/rota-location-settings"
+import { ShiftSwapSettingsSection } from "@/features/settings/components/shift-swap-settings-section"
 import { useRotaSettingsMutations } from "@/features/settings/hooks/use-rota-settings-mutations"
 import { useRotaSettingsQuery } from "@/features/settings/hooks/use-rota-settings-query"
 import { useRotaTemplateSettingsMutations } from "@/features/settings/hooks/use-rota-template-settings-mutations"
+import { useUpdateShiftSwapSetting } from "@/features/settings/hooks/use-update-shift-swap-setting"
 import { getErrorMessage } from "@/lib/errors"
 
 function RotaSettingsPage({
   organizationId,
-  locationId,
   userId,
 }: {
-  organizationId?: string
-  locationId?: string
+  organizationId: string
   userId: string
-  workspaceSlug: string
 }) {
-  const input = { organizationId, locationId, userId }
+  const input = { organizationId, userId }
   const query = useRotaSettingsQuery(input)
   const rotaMutations = useRotaSettingsMutations(input)
   const templateMutations = useRotaTemplateSettingsMutations(input)
+  const shiftSwapMutation = useUpdateShiftSwapSetting(input)
   const [selectedLocationId, setSelectedLocationId] = React.useState("")
 
   if (query.isPending) {
@@ -53,31 +53,25 @@ function RotaSettingsPage({
     )
   }
 
-  if (query.data.locations.length === 0) {
-    return (
-      <RotaSettingsState
-        icon={MapPinIcon}
-        message="Add a location first, then you can manage its rota setup here."
-      />
-    )
-  }
-
   const selectedLocation =
     query.data.locations.find(
       (location) => location.id === selectedLocationId
     ) ?? query.data.locations.at(0)
 
-  if (!selectedLocation) {
-    return null
-  }
-
-  const templates = query.data.templates.filter(
-    (template) => template.locationId === selectedLocation.id
-  )
+  const templates = selectedLocation
+    ? query.data.templates.filter(
+        (template) => template.locationId === selectedLocation.id
+      )
+    : []
 
   return (
-    <div className="min-w-0 text-[#10204b]">
-      {query.data.locations.length > 1 ? (
+    <div className="min-w-0 space-y-3 text-[#10204b]">
+      <ShiftSwapSettingsSection
+        enabled={query.data.shiftSwapsEnabled}
+        isSaving={shiftSwapMutation.isPending}
+        onChange={(enabled) => shiftSwapMutation.mutate(enabled)}
+      />
+      {selectedLocation && query.data.locations.length > 1 ? (
         <div className="mb-3 flex items-center justify-end gap-2">
           <MapPinIcon className="size-4 shrink-0 text-blue-600" />
           <span className="text-[11px] font-semibold text-[#7180a2]">
@@ -110,13 +104,20 @@ function RotaSettingsPage({
         </div>
       ) : null}
 
-      <RotaLocationSettings
-        key={selectedLocation.id}
-        location={selectedLocation}
-        rotaMutations={rotaMutations}
-        templateMutations={templateMutations}
-        templates={templates}
-      />
+      {selectedLocation ? (
+        <RotaLocationSettings
+          key={selectedLocation.id}
+          location={selectedLocation}
+          rotaMutations={rotaMutations}
+          templateMutations={templateMutations}
+          templates={templates}
+        />
+      ) : (
+        <RotaSettingsState
+          icon={MapPinIcon}
+          message="Add a location first, then you can manage its rota setup here."
+        />
+      )}
     </div>
   )
 }

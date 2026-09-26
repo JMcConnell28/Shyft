@@ -58,6 +58,7 @@ type TimesheetEntry = {
   scheduledEndAt: string | null
   scheduledMinutes: number
   scheduledStartAt: string | null
+  scheduledTimeLabel: string | null
   shiftSegment: ClockShiftSegment
   source: ClockSource | "scheduled"
   status: ClockEntryStatus | "scheduled"

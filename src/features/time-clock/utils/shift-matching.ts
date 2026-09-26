@@ -1,4 +1,5 @@
 import { addDays, format, parseISO } from "date-fns"
+import type { ClockShiftSegment } from "@/features/time-clock/types"
 
 type PublishedShiftCandidate = {
   id: string
@@ -12,9 +13,19 @@ type PublishedShiftCandidate = {
   zone_name_snapshot: string
 }
 
+type PublishedShiftClockTimes = Pick<
+  PublishedShiftCandidate,
+  | "end_kind"
+  | "end_time"
+  | "shift_type"
+  | "split_second_end_time"
+  | "split_second_start_time"
+  | "start_time"
+>
+
 type ShiftMatch = {
   id: string
-  segments: ShiftSegmentSummary[]
+  segments: Array<ShiftSegmentSummary>
   shiftType: string
   startsAt: Date
   endsAt: Date
@@ -31,8 +42,8 @@ type ShiftSegmentSummary = {
 }
 
 function findBestShiftMatch(
-  shifts: PublishedShiftCandidate[],
-  now: Date,
+  shifts: Array<PublishedShiftCandidate>,
+  now: Date
 ): ShiftMatch | null {
   const matches = shifts
     .map((shift) => toShiftMatch(shift))
@@ -40,7 +51,7 @@ function findBestShiftMatch(
     .sort(
       (left, right) =>
         Math.abs(left.startsAt.getTime() - now.getTime()) -
-        Math.abs(right.startsAt.getTime() - now.getTime()),
+        Math.abs(right.startsAt.getTime() - now.getTime())
     )
 
   return matches.at(0) ?? null
@@ -61,7 +72,9 @@ function toShiftMatch(shift: PublishedShiftCandidate): ShiftMatch {
   }
 }
 
-function getShiftSegments(shift: PublishedShiftCandidate): ShiftSegmentSummary[] {
+function getShiftSegments(
+  shift: PublishedShiftCandidate
+): Array<ShiftSegmentSummary> {
   const start = combineDateAndTime(shift.day_date, shift.start_time)
 
   if (shift.shift_type !== "split") {
@@ -79,7 +92,7 @@ function getShiftSegments(shift: PublishedShiftCandidate): ShiftSegmentSummary[]
   const firstEnd = getEndFromTime(start, shift.end_time)
   const secondStart = combineDateAndTime(
     format(firstEnd, "yyyy-MM-dd"),
-    shift.split_second_start_time ?? shift.start_time,
+    shift.split_second_start_time ?? shift.start_time
   )
   const normalizedSecondStart =
     secondStart.getTime() < firstEnd.getTime()
@@ -92,19 +105,17 @@ function getShiftSegments(shift: PublishedShiftCandidate): ShiftSegmentSummary[]
       key: "split_first",
       label: "First half",
       startsAt: start,
-      timeLabel: `${formatTime(shift.start_time)} - ${formatTime(shift.end_time)}`,
+      timeLabel: getShiftSegmentTimeLabel(shift, "split_first"),
     },
     {
       endsAt: getEndFromTime(
         normalizedSecondStart,
-        shift.split_second_end_time,
+        shift.split_second_end_time
       ),
       key: "split_second",
       label: "Second half",
       startsAt: normalizedSecondStart,
-      timeLabel: `${formatTime(shift.split_second_start_time)} - ${formatTime(
-        shift.split_second_end_time,
-      )}`,
+      timeLabel: getShiftSegmentTimeLabel(shift, "split_second"),
     },
   ]
 }
@@ -144,7 +155,7 @@ function combineDateAndTime(dateValue: string, timeValue: string) {
   return date
 }
 
-function getShiftTimeLabel(shift: PublishedShiftCandidate) {
+function getShiftTimeLabel(shift: PublishedShiftClockTimes): string {
   const start = formatTime(shift.start_time)
 
   if (shift.shift_type === "closing") {
@@ -152,12 +163,30 @@ function getShiftTimeLabel(shift: PublishedShiftCandidate) {
   }
 
   if (shift.shift_type === "split") {
-    return `${start} - ${formatTime(shift.end_time)}, ${formatTime(
-      shift.split_second_start_time,
-    )} - ${formatTime(shift.split_second_end_time)}`
+    return `${getShiftSegmentTimeLabel(shift, "split_first")}, ${getShiftSegmentTimeLabel(shift, "split_second")}`
   }
 
   return `${start} - ${formatTime(shift.end_time)}`
+}
+
+function getShiftSegmentTimeLabel(
+  shift: PublishedShiftClockTimes,
+  segment: ClockShiftSegment
+): string {
+  if (shift.shift_type !== "split" || segment === "full") {
+    return getShiftTimeLabel(shift)
+  }
+
+  if (segment === "split_first") {
+    return `${formatTime(shift.start_time)} - ${formatTime(shift.end_time)}`
+  }
+
+  const end =
+    shift.end_kind === "location_close"
+      ? "Close"
+      : formatTime(shift.split_second_end_time)
+
+  return `${formatTime(shift.split_second_start_time)} - ${end}`
 }
 
 function formatShiftDate(value: string) {
@@ -171,8 +200,8 @@ function formatTime(value: string | null) {
 export {
   findBestShiftMatch,
   formatShiftDate,
+  getShiftSegmentTimeLabel,
   getShiftTimeLabel,
   toShiftMatch,
 }
 export type { PublishedShiftCandidate, ShiftMatch, ShiftSegmentSummary }
-import type { ClockShiftSegment } from "@/features/time-clock/types"

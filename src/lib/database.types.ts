@@ -1742,6 +1742,7 @@ export type Database = {
           merged_into_organization_id: string | null
           metadata: string | null
           name: string
+          shift_swaps_enabled: boolean
           slug: string
           status: string
           stripeCustomerId: string | null
@@ -1757,6 +1758,7 @@ export type Database = {
           merged_into_organization_id?: string | null
           metadata?: string | null
           name: string
+          shift_swaps_enabled?: boolean
           slug: string
           status?: string
           stripeCustomerId?: string | null
@@ -1772,6 +1774,7 @@ export type Database = {
           merged_into_organization_id?: string | null
           metadata?: string | null
           name?: string
+          shift_swaps_enabled?: boolean
           slug?: string
           status?: string
           stripeCustomerId?: string | null

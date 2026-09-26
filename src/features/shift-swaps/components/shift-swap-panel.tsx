@@ -42,11 +42,11 @@ function ShiftSwapPanelHeader({
           </span>
         ) : null}
         <div className="min-w-0">
-          <h3 className="truncate text-[15px] font-semibold tracking-[-0.01em] text-[#11245a]">
+          <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-[#11245a]">
             {title}
-          </h3>
+          </h2>
           {subtitle ? (
-            <p className="mt-0.5 truncate text-xs font-medium text-[#7a86a4]">
+            <p className="mt-0.5 text-xs font-medium text-[#68769a]">
               {subtitle}
             </p>
           ) : null}

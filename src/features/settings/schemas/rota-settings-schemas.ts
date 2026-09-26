@@ -2,7 +2,11 @@ import { z } from "zod"
 import { rotaTemplateNameSchema } from "@/features/rota/schemas/rota-server-schemas"
 
 const workspaceScopedUserSchema = z.object({
-  organizationId: z.string().trim().min(1, "Choose an organization.").optional(),
+  organizationId: z
+    .string()
+    .trim()
+    .min(1, "Choose an organization.")
+    .optional(),
   locationId: z.string().uuid("Choose a valid location.").optional(),
   userId: z.string().trim().min(1, "Choose a user."),
 })
@@ -15,7 +19,7 @@ const zoneNameSchema = z
 
 const getRotaSettingsInputSchema = workspaceScopedUserSchema.refine(
   (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
-  "Choose either an organization or a location.",
+  "Choose either an organization or a location."
 )
 
 const rotaSettingsValuesSchema = z.object({
@@ -33,40 +37,53 @@ const updateRotaSettingsInputSchema = workspaceScopedUserSchema
   })
   .extend(rotaSettingsValuesSchema.shape)
 
+const updateShiftSwapSettingInputSchema = workspaceScopedUserSchema.extend({
+  organizationId: z.string().trim().min(1, "Choose an organization."),
+  enabled: z.boolean(),
+})
+
 const createZoneInputSchema = workspaceScopedUserSchema.extend({
   locationId: z.string().uuid("Choose a valid location."),
   name: zoneNameSchema,
 })
 
-const updateZoneInputSchema = workspaceScopedUserSchema.extend({
-  zoneId: z.string().uuid("Choose a valid zone."),
-  name: zoneNameSchema,
-}).refine(
-  (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
-  "Choose either an organization or a location.",
-)
+const updateZoneInputSchema = workspaceScopedUserSchema
+  .extend({
+    zoneId: z.string().uuid("Choose a valid zone."),
+    name: zoneNameSchema,
+  })
+  .refine(
+    (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
+    "Choose either an organization or a location."
+  )
 
-const deleteZoneInputSchema = workspaceScopedUserSchema.extend({
-  zoneId: z.string().uuid("Choose a valid zone."),
-}).refine(
-  (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
-  "Choose either an organization or a location.",
-)
+const deleteZoneInputSchema = workspaceScopedUserSchema
+  .extend({
+    zoneId: z.string().uuid("Choose a valid zone."),
+  })
+  .refine(
+    (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
+    "Choose either an organization or a location."
+  )
 
-const renameRotaTemplateInputSchema = workspaceScopedUserSchema.extend({
-  templateId: z.string().uuid("Choose a valid template."),
-  name: rotaTemplateNameSchema,
-}).refine(
-  (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
-  "Choose either an organization or a location.",
-)
+const renameRotaTemplateInputSchema = workspaceScopedUserSchema
+  .extend({
+    templateId: z.string().uuid("Choose a valid template."),
+    name: rotaTemplateNameSchema,
+  })
+  .refine(
+    (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
+    "Choose either an organization or a location."
+  )
 
-const deleteRotaTemplateInputSchema = workspaceScopedUserSchema.extend({
-  templateId: z.string().uuid("Choose a valid template."),
-}).refine(
-  (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
-  "Choose either an organization or a location.",
-)
+const deleteRotaTemplateInputSchema = workspaceScopedUserSchema
+  .extend({
+    templateId: z.string().uuid("Choose a valid template."),
+  })
+  .refine(
+    (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
+    "Choose either an organization or a location."
+  )
 
 export {
   createZoneInputSchema,
@@ -76,6 +93,7 @@ export {
   renameRotaTemplateInputSchema,
   rotaSettingsValuesSchema,
   updateRotaSettingsInputSchema,
+  updateShiftSwapSettingInputSchema,
   updateZoneInputSchema,
   zoneNameSchema,
 }

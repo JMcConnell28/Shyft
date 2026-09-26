@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE } from "@/features/payroll/adapters/sage-csv"
 import type { PayrollExportProfile } from "@/features/payroll/types"
 import type { TimesheetEntry } from "@/features/timesheets/types"
+import { DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE } from "@/features/payroll/adapters/sage-csv"
 import {
   buildSageTimesheetExportData,
   getMissingPayrollEmployees,
@@ -30,6 +30,7 @@ const baseEntry: TimesheetEntry = {
   scheduledEndAt: "2026-06-01T16:30:00.000Z",
   scheduledMinutes: 450,
   scheduledStartAt: "2026-06-01T09:00:00.000Z",
+  scheduledTimeLabel: null,
   shiftSegment: "full",
   source: "employee_nfc",
   status: "closed",

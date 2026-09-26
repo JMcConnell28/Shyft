@@ -91,6 +91,7 @@ function WorkspaceRoute() {
       trial={viewer.trial}
       billing={viewer.billing}
       capabilities={capabilities}
+      shiftSwapsEnabled={viewer.shiftSwapsEnabled}
     >
       <Outlet />
     </DashboardShell>

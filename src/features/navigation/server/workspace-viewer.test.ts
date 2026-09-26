@@ -5,6 +5,7 @@ import { getWorkspaceTrial } from "@/features/billing/server/trials"
 import { readNavigationSession } from "@/features/navigation/server/navigation-session"
 import { readWorkspaceViewer } from "@/features/navigation/server/workspace-viewer"
 import { listOrganizationsForHeaders } from "@/features/onboarding/server/session"
+import { isShiftSwappingEnabled } from "@/features/shift-swaps/server/availability"
 import { getOrganizationRole } from "@/lib/auth/has-org-permission"
 
 vi.mock("@tanstack/react-start/server-only", () => ({}))
@@ -25,6 +26,9 @@ vi.mock("@/features/billing/server/trials", () => ({
 }))
 vi.mock("@/lib/auth/has-org-permission", () => ({
   getOrganizationRole: vi.fn(),
+}))
+vi.mock("@/features/shift-swaps/server/availability", () => ({
+  isShiftSwappingEnabled: vi.fn(),
 }))
 
 const input = {
@@ -49,6 +53,7 @@ beforeEach(() => {
   })
   vi.mocked(listOrganizationsForHeaders).mockResolvedValue([organization])
   vi.mocked(getOrganizationRole).mockResolvedValue("owner")
+  vi.mocked(isShiftSwappingEnabled).mockResolvedValue(true)
   vi.mocked(getOrganizationBillingAccess).mockResolvedValue(null)
   vi.mocked(getWorkspaceTrial).mockResolvedValue({
     scope: "organization",

@@ -1,6 +1,8 @@
 import type { RotaSettingsPageData } from "@/features/settings/types"
 import { DEFAULT_ROTA_SETTINGS } from "@/features/rota/constants/rota-settings"
+import { isShiftSwappingEnabled } from "@/features/shift-swaps/server/availability"
 import { requireRotaSettingsPermission } from "@/features/settings/server/rota-settings-shared"
+import { getLocationOrganizationId } from "@/features/rota/server/lookups"
 import { getDatabase } from "@/lib/db"
 
 async function getRotaSettingsPageData(input: {
@@ -11,19 +13,25 @@ async function getRotaSettingsPageData(input: {
   await requireRotaSettingsPermission(input)
 
   const database = getDatabase()
-  const [locationsResult, zonesResult, templatesResult] = await Promise.all([
-    database.query<{
-      allow_edit_after_publish: boolean | null
-      confirm_shift_delete: boolean | null
-      copy_notes_by_default: boolean | null
-      default_zone_id: string | null
-      id: string
-      name: string
-      notify_staff_on_publish: boolean | null
-      show_notes_to_staff: boolean | null
-      slug: string
-    }>(
-      `select
+  const organizationId =
+    input.organizationId ??
+    (input.locationId
+      ? await getLocationOrganizationId(input.locationId)
+      : null)
+  const [locationsResult, zonesResult, templatesResult, shiftSwapsEnabled] =
+    await Promise.all([
+      database.query<{
+        allow_edit_after_publish: boolean | null
+        confirm_shift_delete: boolean | null
+        copy_notes_by_default: boolean | null
+        default_zone_id: string | null
+        id: string
+        name: string
+        notify_staff_on_publish: boolean | null
+        show_notes_to_staff: boolean | null
+        slug: string
+      }>(
+        `select
          location.id,
          location.name,
          location.slug,
@@ -46,15 +54,15 @@ async function getRotaSettingsPageData(input: {
          or ($2::uuid is not null and location.id = $2::uuid)
        )
        order by location.created_at asc, location.name asc`,
-      [input.organizationId ?? null, input.locationId ?? null]
-    ),
-    database.query<{
-      id: string
-      location_id: string
-      name: string
-      sort_order: number
-    }>(
-      `select id, location_id, name, sort_order
+        [input.organizationId ?? null, input.locationId ?? null]
+      ),
+      database.query<{
+        id: string
+        location_id: string
+        name: string
+        sort_order: number
+      }>(
+        `select id, location_id, name, sort_order
        from public.zones
        where (
          ($1::text is not null and organization_id = $1::text)
@@ -62,16 +70,16 @@ async function getRotaSettingsPageData(input: {
        )
        and deleted_at is null
        order by location_id asc, sort_order asc, created_at asc, name asc`,
-      [input.organizationId ?? null, input.locationId ?? null]
-    ),
-    database.query<{
-      id: string
-      location_id: string
-      location_name: string
-      name: string
-      shift_count: string
-    }>(
-      `select
+        [input.organizationId ?? null, input.locationId ?? null]
+      ),
+      database.query<{
+        id: string
+        location_id: string
+        location_name: string
+        name: string
+        shift_count: string
+      }>(
+        `select
          template.id,
          template.location_id,
          location.name as location_name,
@@ -87,9 +95,12 @@ async function getRotaSettingsPageData(input: {
        )
        group by template.id, template.location_id, location.name, template.name
        order by location.name asc, lower(template.name) asc`,
-      [input.organizationId ?? null, input.locationId ?? null]
-    ),
-  ])
+        [input.organizationId ?? null, input.locationId ?? null]
+      ),
+      organizationId
+        ? isShiftSwappingEnabled(organizationId)
+        : Promise.resolve(false),
+    ])
 
   const zonesByLocationId = new Map<
     string,
@@ -107,6 +118,7 @@ async function getRotaSettingsPageData(input: {
   }
 
   return {
+    shiftSwapsEnabled,
     locations: locationsResult.rows.map((location) => ({
       id: location.id,
       name: location.name,

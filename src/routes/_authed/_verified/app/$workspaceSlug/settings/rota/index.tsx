@@ -30,11 +30,7 @@ function WorkspaceRotaSettingsIndexRoute() {
     throw new Error("An active workspace is required for rota settings.")
   return (
     <SettingsLayout workspaceSlug={workspaceSlug} activePath={pathname}>
-      <RotaSettingsPage
-        organizationId={workspace.id}
-        userId={viewer.user.id}
-        workspaceSlug={workspaceSlug}
-      />
+      <RotaSettingsPage organizationId={workspace.id} userId={viewer.user.id} />
     </SettingsLayout>
   )
 }

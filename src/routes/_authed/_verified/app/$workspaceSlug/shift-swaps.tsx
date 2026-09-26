@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 import { AccessDeniedState } from "@/components/errors/access-denied-state"
+import { ShiftSwapDisabledState } from "@/features/shift-swaps/components/shift-swap-disabled-state"
 import { ShiftSwapPage } from "@/features/shift-swaps/components/shift-swap-page"
-import { getShiftSwapPageData } from "@/features/shift-swaps/server-fns"
+import {
+  getShiftSwapAvailability,
+  getShiftSwapPageData,
+} from "@/features/shift-swaps/server-fns"
 import { getWorkspaceDashboardPath } from "@/lib/organization-paths"
 
 export const Route = createFileRoute(
@@ -19,11 +23,16 @@ export const Route = createFileRoute(
       return { status: "forbidden" as const }
     }
 
+    const input = {
+      organizationId: activeWorkspace.id,
+      userId: context.viewer.user.id,
+    }
+    if (!(await getShiftSwapAvailability({ data: input }))) {
+      return { status: "disabled" as const }
+    }
+
     const data = await getShiftSwapPageData({
-      data: {
-        organizationId: activeWorkspace.id,
-        userId: context.viewer.user.id,
-      },
+      data: input,
     })
 
     return { data, status: "allowed" as const }
@@ -45,6 +54,14 @@ function WorkspaceShiftSwapsRoute() {
       <AccessDeniedState
         dashboardHref={getWorkspaceDashboardPath(activeWorkspace.slug)}
         description="Shift swaps are available to workspaces with rota access."
+      />
+    )
+  }
+
+  if (result.status === "disabled") {
+    return (
+      <ShiftSwapDisabledState
+        dashboardHref={getWorkspaceDashboardPath(activeWorkspace.slug)}
       />
     )
   }

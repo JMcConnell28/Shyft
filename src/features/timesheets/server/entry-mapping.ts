@@ -1,18 +1,21 @@
 import { format } from "date-fns"
 
 import type { ClockShiftSegment } from "@/features/time-clock/types"
-import { toShiftMatch } from "@/features/time-clock/utils/shift-matching"
 import type { TimesheetEntry } from "@/features/timesheets/types"
 import type {
   ScheduledShiftRow,
   TimeEntryRow,
 } from "@/features/timesheets/server/row-types"
+import {
+  getShiftSegmentTimeLabel,
+  toShiftMatch,
+} from "@/features/time-clock/utils/shift-matching"
 import { getMinutesBetween } from "@/features/timesheets/utils/timesheet-time"
 
 function mapEntryRows(input: {
-  entries: TimeEntryRow[]
+  entries: Array<TimeEntryRow>
   now: Date
-  scheduledShifts: ScheduledShiftRow[]
+  scheduledShifts: Array<ScheduledShiftRow>
 }) {
   const entries = input.entries.map((entry) => mapEntryRow(entry, input.now))
   const scheduledEntries = getScheduledEntriesWithoutClockEntry({
@@ -56,6 +59,7 @@ function mapEntryRow(row: TimeEntryRow, now: Date): TimesheetEntry {
       now
     ),
     scheduledStartAt: row.scheduled_start_at,
+    scheduledTimeLabel: getPersistedScheduleLabel(row),
     shiftSegment: row.shift_segment,
     source: row.source,
     status: row.status,
@@ -64,11 +68,11 @@ function mapEntryRow(row: TimeEntryRow, now: Date): TimesheetEntry {
 }
 
 function getScheduledEntriesWithoutClockEntry(input: {
-  entries: TimesheetEntry[]
-  scheduledShifts: ScheduledShiftRow[]
+  entries: Array<TimesheetEntry>
+  scheduledShifts: Array<ScheduledShiftRow>
 }) {
   const entryKeys = new Set(input.entries.map(getEntryShiftKey).filter(Boolean))
-  const scheduledEntries: TimesheetEntry[] = []
+  const scheduledEntries: Array<TimesheetEntry> = []
 
   for (const shift of input.scheduledShifts) {
     const match = toShiftMatch(shift)
@@ -117,11 +121,34 @@ function mapScheduledEntry(
       new Date()
     ),
     scheduledStartAt: segment.startsAt.toISOString(),
+    scheduledTimeLabel: segment.timeLabel,
     shiftSegment: segment.key,
     source: "scheduled",
     status: "scheduled",
     zoneName: shift.zone_name_snapshot,
   }
+}
+
+function getPersistedScheduleLabel(row: TimeEntryRow): string | null {
+  if (
+    !row.scheduled_start_at ||
+    !row.published_shift_type ||
+    !row.published_start_time
+  ) {
+    return null
+  }
+
+  return getShiftSegmentTimeLabel(
+    {
+      end_kind: row.published_end_kind,
+      end_time: row.published_end_time,
+      shift_type: row.published_shift_type,
+      split_second_end_time: row.published_split_second_end_time,
+      split_second_start_time: row.published_split_second_start_time,
+      start_time: row.published_start_time,
+    },
+    row.shift_segment
+  )
 }
 
 function compareEntries(left: TimesheetEntry, right: TimesheetEntry) {

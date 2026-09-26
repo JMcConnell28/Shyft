@@ -1,32 +1,56 @@
 import "@tanstack/react-start/server-only"
 
+import type { RotaPublishedShift } from "@/features/email/types/rota-published"
+import { getBrandedEmailLogoUrl } from "@/features/email/server/email-assets"
 import { RotaPublishedEmail } from "@/features/email/templates/rota-published"
-import type { RotaPublishedShift } from "@/features/email/templates/rota-published"
+import {
+  buildRotaPublishedDays,
+  formatRotaPublishedHours,
+  formatRotaPublishedWeek,
+} from "@/features/email/utils/rota-published-schedule"
 import { sendTransactionalEmail } from "@/lib/email"
 
 type SendRotaPublishedEmailInput = {
   locationName: string
   rotaUrl: string
-  shifts: RotaPublishedShift[]
+  shifts: Array<RotaPublishedShift>
+  shiftSwapsEnabled: boolean
   to: string
-  userName: string
-  weekLabel: string
+  weekStart: string
 }
 
 async function sendRotaPublishedEmail(input: SendRotaPublishedEmailInput) {
+  const weekLabel = formatRotaPublishedWeek(input.weekStart)
+  const totalMinutes = input.shifts.reduce(
+    (total, shift) => total + shift.durationMinutes,
+    0
+  )
+  const schedule = buildRotaPublishedDays(input.weekStart, input.shifts)
+    .flatMap((day) =>
+      day.shifts.length === 0
+        ? [`${day.label}: Off`]
+        : day.shifts.map(
+            (shift) =>
+              `${day.label}: ${shift.zoneName ?? "Shift"}, ${shift.timeLabel} (${formatRotaPublishedHours(shift.durationMinutes)}h)`
+          )
+    )
+    .join("\n")
+
   await sendTransactionalEmail({
     to: input.to,
-    subject: `${input.locationName} rota published for ${input.weekLabel}`,
+    subject: `${input.locationName} rota published for ${weekLabel}`,
     react: (
       <RotaPublishedEmail
+        brandLogoUrl={getBrandedEmailLogoUrl()}
+        helpUrl={new URL("/help", input.rotaUrl).toString()}
         locationName={input.locationName}
         rotaUrl={input.rotaUrl}
         shifts={input.shifts}
-        userName={input.userName}
-        weekLabel={input.weekLabel}
+        shiftSwapsEnabled={input.shiftSwapsEnabled}
+        weekStart={input.weekStart}
       />
     ),
-    text: `The ${input.locationName} rota for ${input.weekLabel} is now live. View it here: ${input.rotaUrl}`,
+    text: `Your rota has been published.\n\nLocation: ${input.locationName}\nWeek: ${weekLabel}\nTotal hours: ${formatRotaPublishedHours(totalMinutes)}\n\n${schedule}\n\nView rota: ${input.rotaUrl}`,
   })
 }
 

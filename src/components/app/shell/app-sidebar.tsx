@@ -39,6 +39,7 @@ function AppSidebar({
   activeOrganization,
   activeWorkspace,
   capabilities,
+  shiftSwapsEnabled,
 }: {
   routeKey: OrganizationAppRouteKey
   isSigningOut: boolean
@@ -56,11 +57,14 @@ function AppSidebar({
   workspaces: Array<WorkspaceSummary>
   activeWorkspace: WorkspaceSummary | null
   capabilities: OrganizationCapabilities
+  shiftSwapsEnabled: boolean
 }) {
   const { isMobile, setOpenMobile } = useSidebar()
   const [inviteOpen, setInviteOpen] = React.useState(false)
   const visibleNavItems = navItems.filter(
-    (item) => !item.requiredCapability || capabilities[item.requiredCapability]
+    (item) =>
+      (item.routeKey !== "shiftSwaps" || shiftSwapsEnabled) &&
+      (!item.requiredCapability || capabilities[item.requiredCapability])
   )
 
   function handleOpenInvite() {

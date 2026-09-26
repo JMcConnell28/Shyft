@@ -7,6 +7,7 @@ import { getOrganizationBillingAccess } from "@/features/billing/server/billing-
 import { getWorkspaceTrial } from "@/features/billing/server/trials"
 import { readNavigationSession } from "@/features/navigation/server/navigation-session"
 import { listOrganizationsForHeaders } from "@/features/onboarding/server/session"
+import { isShiftSwappingEnabled } from "@/features/shift-swaps/server/availability"
 import { getAuthRequestHeaders } from "@/lib/auth-session.server"
 import { getOrganizationRole } from "@/lib/auth/has-org-permission"
 
@@ -46,9 +47,10 @@ async function readWorkspaceViewer(
 
   if (!activeRole) return null
 
-  const [trial, billing] = await Promise.all([
+  const [trial, billing, shiftSwapsEnabled] = await Promise.all([
     getWorkspaceTrial({ organizationId: activeWorkspace.id }),
     getOrganizationBillingAccess(activeWorkspace.id),
+    isShiftSwappingEnabled(activeWorkspace.id),
   ])
 
   return {
@@ -63,6 +65,7 @@ async function readWorkspaceViewer(
     workspaces,
     trial,
     billing,
+    shiftSwapsEnabled,
   }
 }
 

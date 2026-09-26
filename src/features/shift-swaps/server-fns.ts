@@ -5,6 +5,7 @@ import {
   cancelShiftSwapRequestInputSchema,
   createCoverRequestInputSchema,
   createSwapRequestInputSchema,
+  getShiftSwapAvailabilityInputSchema,
   listShiftSwapPageDataInputSchema,
   managerShiftSwapActionInputSchema,
   offerCoverInputSchema,
@@ -27,6 +28,15 @@ const getShiftSwapPageData = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const module = await import("@/features/shift-swaps/server/queries")
     return module.listShiftSwapPageData(data)
+  })
+
+const getShiftSwapAvailability = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    getShiftSwapAvailabilityInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    const module = await import("@/features/shift-swaps/server/availability")
+    return module.getShiftSwapAvailability(data)
   })
 
 const createShiftSwapRequest = createServerFn({ method: "POST" })
@@ -95,6 +105,7 @@ export {
   createShiftSwapRequest,
   denyShiftSwap,
   getShiftSwapPageData,
+  getShiftSwapAvailability,
   offerShiftCover,
   respondToShiftSwapRequest,
 }

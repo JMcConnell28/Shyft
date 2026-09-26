@@ -17,6 +17,7 @@ import {
   getRotaSettingsInputSchema,
   renameRotaTemplateInputSchema,
   updateRotaSettingsInputSchema,
+  updateShiftSwapSettingInputSchema,
   updateZoneInputSchema,
 } from "@/features/settings/schemas/rota-settings-schemas"
 
@@ -83,6 +84,16 @@ const updateRotaSettings = createServerFn({ method: "POST" })
     return module.updateRotaSettings(data)
   })
 
+const updateShiftSwapSetting = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    updateShiftSwapSettingInputSchema.parse(input)
+  )
+  .handler(async ({ data }) => {
+    await requireWorkspaceWriteAccess(data)
+    const module = await import("@/features/settings/server/shift-swap-setting")
+    return module.updateShiftSwapSetting(data)
+  })
+
 const createZone = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => createZoneInputSchema.parse(input))
   .handler(async ({ data }) => {
@@ -139,5 +150,6 @@ export {
   updateGeneralSettings,
   updateLocationSettings,
   updateRotaSettings,
+  updateShiftSwapSetting,
   updateZone,
 }

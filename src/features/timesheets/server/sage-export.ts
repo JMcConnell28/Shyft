@@ -1,13 +1,13 @@
-import { mapEntryRows } from "@/features/timesheets/server/entry-mapping"
 import type {
   ScheduledShiftRow,
   TimeEntryRow,
 } from "@/features/timesheets/server/row-types"
-import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import type {
   SageTimesheetExportData,
   SageTimesheetExportInput,
 } from "@/features/timesheets/types"
+import { mapEntryRows } from "@/features/timesheets/server/entry-mapping"
+import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import { isRotaWeekBeforeCurrentWeek } from "@/features/rota/utils/week-utils"
 import {
   buildSageTimesheetExportData,
@@ -87,7 +87,7 @@ async function getSageTimesheetExportData(
 }
 
 async function getExportRota(input: {
-  locationIds: string[]
+  locationIds: Array<string>
   organizationId: string | null
   rotaId: string
 }) {
@@ -110,7 +110,7 @@ async function getExportRota(input: {
      limit 1`,
     [input.rotaId, input.locationIds, input.organizationId]
   )
-  const rota = result.rows[0]
+  const rota = result.rows.at(0)
 
   if (!rota) {
     throw new Error("Choose a published rota you can manage.")
@@ -170,6 +170,12 @@ async function listTimeEntriesForRotaWeek(input: {
        rota.id as rota_id,
        rota.week_start::text as rota_week_start,
        published_shift.zone_name_snapshot as zone_name,
+       published_shift.shift_type as published_shift_type,
+       published_shift.start_time::text as published_start_time,
+       published_shift.end_time::text as published_end_time,
+       published_shift.end_kind as published_end_kind,
+       published_shift.split_second_start_time::text as published_split_second_start_time,
+       published_shift.split_second_end_time::text as published_split_second_end_time,
        entry.shift_segment,
        entry.scheduled_start_at::text,
        entry.scheduled_end_at::text,

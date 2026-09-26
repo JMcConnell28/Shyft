@@ -8,6 +8,11 @@ const shiftSwapWorkspaceInputSchema = z.object({
 
 const listShiftSwapPageDataInputSchema = shiftSwapWorkspaceInputSchema
 
+const getShiftSwapAvailabilityInputSchema =
+  shiftSwapWorkspaceInputSchema.extend({
+    organizationId: z.string().trim().min(1),
+  })
+
 const createSwapRequestInputSchema = shiftSwapWorkspaceInputSchema.extend({
   sourceAssignmentId: z.uuid(),
   targetAssignmentId: z.uuid(),
@@ -39,6 +44,7 @@ export {
   cancelShiftSwapRequestInputSchema,
   createCoverRequestInputSchema,
   createSwapRequestInputSchema,
+  getShiftSwapAvailabilityInputSchema,
   listShiftSwapPageDataInputSchema,
   managerShiftSwapActionInputSchema,
   offerCoverInputSchema,

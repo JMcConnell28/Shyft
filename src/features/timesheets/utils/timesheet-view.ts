@@ -38,6 +38,7 @@ function getTimesheetHealth(timesheet: TimesheetTotals): TimesheetHealth {
 
 function getEntryScheduleLabel(entry: TimesheetEntry | null) {
   if (!entry?.scheduledStartAt) return "No scheduled shift"
+  if (entry.scheduledTimeLabel) return entry.scheduledTimeLabel
   return `${formatTime(entry.scheduledStartAt)} \u2013 ${formatTime(
     entry.scheduledEndAt
   )}`

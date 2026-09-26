@@ -60,6 +60,7 @@ const viewer: WorkspaceViewer = {
   workspaces: [workspace],
   trial: null,
   billing: null,
+  shiftSwapsEnabled: true,
 }
 const options = { preload: false, href: "/app/team/dashboard" }
 let queryClient: QueryClient
