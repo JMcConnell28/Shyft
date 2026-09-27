@@ -1,4 +1,11 @@
-import { addDays, differenceInMinutes, format, parseISO, startOfWeek } from "date-fns"
+import {
+  addDays,
+  differenceInMinutes,
+  format,
+  parseISO,
+  startOfWeek,
+} from "date-fns"
+import { getDateKeyInTimeZone } from "@/lib/time-zone"
 
 type TimesheetWeek = {
   days: TimesheetWeekDay[]
@@ -34,15 +41,19 @@ function getTimesheetWeek(value?: string | null): TimesheetWeek {
     weekEnd,
     weekLabel: `${format(weekStartDate, "d MMM")} - ${format(
       weekEndDate,
-      "d MMM yyyy",
+      "d MMM yyyy"
     )}`,
     weekStart,
   }
 }
 
-function getDateKey(value: string | null | undefined) {
+function getDateKey(value: string | null | undefined, timeZone?: string) {
   if (!value) {
     return null
+  }
+
+  if (timeZone) {
+    return getDateKeyInTimeZone(value, timeZone)
   }
 
   return format(new Date(value), "yyyy-MM-dd")
@@ -51,7 +62,7 @@ function getDateKey(value: string | null | undefined) {
 function getMinutesBetween(
   startValue: string | null | undefined,
   endValue: string | null | undefined,
-  fallbackEnd: Date,
+  fallbackEnd: Date
 ) {
   if (!startValue) {
     return 0
@@ -70,7 +81,7 @@ function formatHours(minutes: number) {
   return `${hours.toFixed(hours % 1 === 0 ? 0 : 1)}h`
 }
 
-function formatTime(value: string | null | undefined) {
+function formatTime(value: string | null | undefined, timeZone?: string) {
   if (!value) {
     return "--:--"
   }
@@ -78,6 +89,7 @@ function formatTime(value: string | null | undefined) {
   return new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
+    ...(timeZone ? { timeZone } : {}),
   }).format(new Date(value))
 }
 

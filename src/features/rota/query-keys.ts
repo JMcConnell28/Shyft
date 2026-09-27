@@ -3,6 +3,8 @@ import type { RotaWorkspaceQueryInput } from "@/features/rota/types/workspace-qu
 
 const rotaQueryKeys = {
   all: ["rota"] as const,
+  unreadUpdates: (input: { organizationId: string; userId: string }) =>
+    [...rotaQueryKeys.all, "unread-updates", input] as const,
   listPage: (input: RotaListQueryInput) =>
     [...rotaQueryKeys.all, "list-page", input] as const,
   creationPreview: (input: { locationId: string; weekStart: string }) =>

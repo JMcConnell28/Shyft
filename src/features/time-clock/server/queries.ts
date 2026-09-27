@@ -1,4 +1,4 @@
-import { addDays, format } from "date-fns"
+import { addDays, format, parseISO } from "date-fns"
 
 import type {
   ClockAction,
@@ -17,6 +17,7 @@ import {
   formatShiftDate,
 } from "@/features/time-clock/utils/shift-matching"
 import { isPastForgottenClockOutAlert } from "@/features/time-clock/utils/pay-rules"
+import { DEFAULT_CLOCK_TIME_ZONE, getDateKeyInTimeZone } from "@/lib/time-zone"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
 import { getDatabase } from "@/lib/db"
 import {
@@ -134,6 +135,7 @@ async function buildEmployeeClockPageData(
     employeeId: employee.id,
     locationId: location.id,
     now,
+    timeZone: settings.timezone,
   })
   const completedShiftSegments = matchedShift
     ? await listCompletedShiftSegments({
@@ -393,7 +395,7 @@ async function getClockSettingsPageData(input: {
         longitude: setting?.longitude ?? null,
         radiusMeters: setting?.radiusMeters ?? 75,
         maxAccuracyMeters: setting?.maxAccuracyMeters ?? 150,
-        timezone: setting?.timezone ?? "Europe/London",
+        timezone: setting?.timezone ?? DEFAULT_CLOCK_TIME_ZONE,
         earlyClockInGraceMinutes: rules.earlyClockInGraceMinutes,
         earlyStartReviewMinutes: rules.earlyStartReviewMinutes,
         forgottenClockOutAlertMinutes: rules.forgottenClockOutAlertMinutes,
@@ -502,7 +504,7 @@ async function getLocationClockSettings(
       maxAccuracyMeters: 150,
       radiusMeters: 75,
       rules: defaultClockRules(),
-      timezone: "Europe/London",
+      timezone: DEFAULT_CLOCK_TIME_ZONE,
     }
   )
 }
@@ -796,6 +798,7 @@ async function getMatchedPublishedShift(input: {
   employeeId: string
   locationId: string
   now: Date
+  timeZone: string
 }): Promise<EmployeeClockPageData["matchedShift"]> {
   const supabase = createSupabaseServerClient()
   const assignmentResult = await supabase
@@ -815,12 +818,9 @@ async function getMatchedPublishedShift(input: {
     return null
   }
 
-  const today = format(input.now, "yyyy-MM-dd")
-  const fromDate = format(
-    addDays(new Date(`${today}T00:00:00`), -1),
-    "yyyy-MM-dd"
-  )
-  const toDate = format(addDays(new Date(`${today}T00:00:00`), 1), "yyyy-MM-dd")
+  const today = getDateKeyInTimeZone(input.now, input.timeZone)
+  const fromDate = format(addDays(parseISO(today), -1), "yyyy-MM-dd")
+  const toDate = format(addDays(parseISO(today), 1), "yyyy-MM-dd")
   const shiftResult = await supabase
     .from("rota_published_shifts")
     .select(
@@ -862,6 +862,7 @@ async function getMatchedPublishedShift(input: {
       split_second_end_time: shift.split_second_end_time,
       split_second_start_time: shift.split_second_start_time,
       start_time: shift.start_time,
+      time_zone: input.timeZone,
       zone_name_snapshot: shift.zone_name_snapshot,
     }))
   const match = findBestShiftMatch(candidates, input.now)
@@ -872,7 +873,7 @@ async function getMatchedPublishedShift(input: {
 
   return {
     id: match.id,
-    dateLabel: formatShiftDate(format(match.startsAt, "yyyy-MM-dd")),
+    dateLabel: formatShiftDate(match.dayDate),
     segments: match.segments.map((segment) => ({
       endsAt: segment.endsAt.toISOString(),
       key: segment.key,

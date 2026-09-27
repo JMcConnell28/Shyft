@@ -17,7 +17,6 @@ import { TrialBanner } from "@/features/billing/components/trial-banner"
 import { WorkspaceRecoveryNotice } from "@/features/billing/components/workspace-recovery-notice"
 import { isWorkspaceBillingBlocked } from "@/features/billing/utils/billing-access"
 import { NotificationMenu } from "@/features/notifications/components/notification-menu"
-import { authClient } from "@/lib/auth-client"
 import {
   getWorkspaceAppPath,
   getWorkspaceDashboardPath,
@@ -48,6 +47,8 @@ function DashboardShell({
   children,
   hasUnreadRotaUpdates,
   hasUnreadAnnouncements,
+  notificationsError = false,
+  notificationsLoading = false,
   recentAnnouncements = [],
   canInviteTeamMembers,
   user,
@@ -71,6 +72,8 @@ function DashboardShell({
   children?: React.ReactNode
   hasUnreadRotaUpdates?: boolean
   hasUnreadAnnouncements?: boolean
+  notificationsError?: boolean
+  notificationsLoading?: boolean
   recentAnnouncements?: Array<DashboardAnnouncement>
   canInviteTeamMembers?: boolean
   user: {
@@ -86,7 +89,6 @@ function DashboardShell({
   capabilities: OrganizationCapabilities
   shiftSwapsEnabled: boolean
 }) {
-  const [isSigningOut, setIsSigningOut] = React.useState(false)
   const [isTrialBannerDismissed, setIsTrialBannerDismissed] =
     React.useState(false)
   const resolvedActiveWorkspace =
@@ -120,30 +122,11 @@ function DashboardShell({
     (capabilities.canManageRota || Boolean(canInviteTeamMembers)) &&
     !isWorkspaceBillingBlocked({ trial, billing })
 
-  const handleSignOut = React.useCallback(async () => {
-    setIsSigningOut(true)
-
-    const result = await authClient.signOut()
-
-    if (result.error) {
-      setIsSigningOut(false)
-      return
-    }
-
-    if (typeof window !== "undefined") {
-      window.location.href = "/login"
-    }
-  }, [])
-
   return (
     <TooltipProvider>
       <SidebarProvider>
         <AppSidebar
           routeKey={routeKey}
-          isSigningOut={isSigningOut}
-          onSignOut={() => {
-            void handleSignOut()
-          }}
           hasUnreadRotaUpdates={hasUnreadRotaUpdates}
           hasUnreadAnnouncements={hasUnreadAnnouncements}
           canInviteTeamMembers={canInviteTeamMembers}
@@ -259,6 +242,8 @@ function DashboardShell({
               <NotificationMenu
                 announcements={recentAnnouncements}
                 hasUnreadRotaUpdates={Boolean(hasUnreadRotaUpdates)}
+                hasError={notificationsError}
+                isLoading={notificationsLoading}
                 prominent={hasMobileBrandHeader}
                 workspaceSlug={activeWorkspace?.slug ?? ""}
               />

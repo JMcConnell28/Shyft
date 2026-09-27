@@ -24,6 +24,7 @@ const scheduledShift: ScheduledShiftRow = {
   split_second_end_time: null,
   split_second_start_time: null,
   start_time: "21:00:00",
+  time_zone: "Europe/London",
   zone_name_snapshot: "Bar",
 }
 
@@ -39,6 +40,7 @@ const timeEntry: TimeEntryRow = {
   notes: null,
   payable_end_at: null,
   payable_start_at: null,
+  published_day_date: "2026-06-01",
   published_end_kind: null,
   published_end_time: "23:00:00",
   published_shift_type: "standard",
@@ -53,6 +55,7 @@ const timeEntry: TimeEntryRow = {
   shift_segment: "full",
   source: "employee_nfc",
   status: "closed",
+  time_zone: "Europe/London",
   zone_name: "Bar",
 }
 

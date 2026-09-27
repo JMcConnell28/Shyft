@@ -5,6 +5,7 @@ import type {
   TimesheetEntry,
 } from "@/features/timesheets/types"
 import { TimesheetEntryBadge } from "@/features/timesheets/components/timesheet-status"
+import { useViewerTimeZone } from "@/features/timesheets/hooks/use-viewer-time-zone"
 import {
   formatTimesheetDuration,
   getEntryClockLabel,
@@ -21,6 +22,7 @@ function EmployeeWeekDetails({
   employee: ManagerTimesheetEmployee
   onEdit: (entry: TimesheetEntry) => void
 }) {
+  const viewerTimeZone = useViewerTimeZone()
   const rows = employee.days.flatMap((day) =>
     day.entries.map((entry, index) => ({
       day,
@@ -63,12 +65,13 @@ function EmployeeWeekDetails({
           <div className="min-w-0">
             <div className="flex min-w-0 items-center gap-2">
               <p className="truncate text-xs font-semibold">
-                {getEntryScheduleLabel(entry)}
+                {getEntryScheduleLabel(entry, viewerTimeZone ?? undefined)}
               </p>
               <TimesheetEntryBadge entry={entry} />
             </div>
             <p className="mt-1 truncate text-[10px] font-medium text-[#7481a0]">
-              {getEntryClockLabel(entry)} · {entry.locationName}
+              {getEntryClockLabel(entry, viewerTimeZone ?? undefined)} ·{" "}
+              {entry.locationName}
             </p>
           </div>
           <div className="ml-auto shrink-0 text-right">

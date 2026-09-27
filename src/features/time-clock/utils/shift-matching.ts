@@ -1,5 +1,11 @@
 import { addDays, format, parseISO } from "date-fns"
 import type { ClockShiftSegment } from "@/features/time-clock/types"
+import {
+  combineDateAndTimeInTimeZone,
+  DEFAULT_CLOCK_TIME_ZONE,
+  getDateKeyInTimeZone,
+  getTimeInTimeZone,
+} from "@/lib/time-zone"
 
 type PublishedShiftCandidate = {
   id: string
@@ -10,6 +16,7 @@ type PublishedShiftCandidate = {
   split_second_end_time: string | null
   split_second_start_time: string | null
   start_time: string
+  time_zone: string
   zone_name_snapshot: string
 }
 
@@ -24,6 +31,7 @@ type PublishedShiftClockTimes = Pick<
 >
 
 type ShiftMatch = {
+  dayDate: string
   id: string
   segments: Array<ShiftSegmentSummary>
   shiftType: string
@@ -58,12 +66,19 @@ function findBestShiftMatch(
 }
 
 function toShiftMatch(shift: PublishedShiftCandidate): ShiftMatch {
-  const start = combineDateAndTime(shift.day_date, shift.start_time)
-  const end = getShiftEnd(shift, start)
+  const timeZone = shift.time_zone || DEFAULT_CLOCK_TIME_ZONE
+  const segments = getShiftSegments(shift)
+  const firstSegment = segments[0]
+  const lastSegment = segments.at(-1)
+  const start =
+    firstSegment?.startsAt ??
+    combineDateAndTimeInTimeZone(shift.day_date, shift.start_time, timeZone)
+  const end = lastSegment?.endsAt ?? getShiftEnd(shift, start, timeZone)
 
   return {
+    dayDate: shift.day_date,
     id: shift.id,
-    segments: getShiftSegments(shift),
+    segments,
     shiftType: shift.shift_type,
     startsAt: start,
     endsAt: end,
@@ -75,12 +90,17 @@ function toShiftMatch(shift: PublishedShiftCandidate): ShiftMatch {
 function getShiftSegments(
   shift: PublishedShiftCandidate
 ): Array<ShiftSegmentSummary> {
-  const start = combineDateAndTime(shift.day_date, shift.start_time)
+  const timeZone = shift.time_zone || DEFAULT_CLOCK_TIME_ZONE
+  const start = combineDateAndTimeInTimeZone(
+    shift.day_date,
+    shift.start_time,
+    timeZone
+  )
 
   if (shift.shift_type !== "split") {
     return [
       {
-        endsAt: getShiftEnd(shift, start),
+        endsAt: getShiftEnd(shift, start, timeZone),
         key: "full",
         label: "Shift",
         startsAt: start,
@@ -89,15 +109,18 @@ function getShiftSegments(
     ]
   }
 
-  const firstEnd = getEndFromTime(start, shift.end_time)
-  const secondStart = combineDateAndTime(
-    format(firstEnd, "yyyy-MM-dd"),
-    shift.split_second_start_time ?? shift.start_time
+  const firstEnd = getEndFromTime(start, shift.end_time, timeZone)
+  const secondStartTime = shift.split_second_start_time ?? shift.start_time
+  const firstEndDate = getDateKeyInTimeZone(firstEnd, timeZone)
+  const secondStartDate =
+    secondStartTime.slice(0, 5) <= getTimeInTimeZone(firstEnd, timeZone)
+      ? addCalendarDays(firstEndDate, 1)
+      : firstEndDate
+  const normalizedSecondStart = combineDateAndTimeInTimeZone(
+    secondStartDate,
+    secondStartTime,
+    timeZone
   )
-  const normalizedSecondStart =
-    secondStart.getTime() < firstEnd.getTime()
-      ? addDays(secondStart, 1)
-      : secondStart
 
   return [
     {
@@ -110,7 +133,8 @@ function getShiftSegments(
     {
       endsAt: getEndFromTime(
         normalizedSecondStart,
-        shift.split_second_end_time
+        shift.split_second_end_time,
+        timeZone
       ),
       key: "split_second",
       label: "Second half",
@@ -127,32 +151,52 @@ function isWithinClockWindow(shift: ShiftMatch, now: Date) {
   return now.getTime() >= earlyWindow && now.getTime() <= lateWindow
 }
 
-function getShiftEnd(shift: PublishedShiftCandidate, start: Date) {
+function getShiftEnd(
+  shift: PublishedShiftCandidate,
+  start: Date,
+  timeZone: string
+) {
   if (shift.shift_type === "split") {
-    return getEndFromTime(start, shift.split_second_end_time ?? shift.end_time)
+    return getEndFromTime(
+      start,
+      shift.split_second_end_time ?? shift.end_time,
+      timeZone
+    )
   }
 
   if (shift.end_kind === "location_close" || !shift.end_time) {
-    return addDays(start, 1)
+    const nextDay = addCalendarDays(getDateKeyInTimeZone(start, timeZone), 1)
+    return combineDateAndTimeInTimeZone(
+      nextDay,
+      getTimeInTimeZone(start, timeZone),
+      timeZone
+    )
   }
 
-  return getEndFromTime(start, shift.end_time)
+  return getEndFromTime(start, shift.end_time, timeZone)
 }
 
-function getEndFromTime(start: Date, value: string | null) {
+function getEndFromTime(start: Date, value: string | null, timeZone: string) {
+  const startDate = getDateKeyInTimeZone(start, timeZone)
+
   if (!value) {
-    return addDays(start, 1)
+    return combineDateAndTimeInTimeZone(
+      addCalendarDays(startDate, 1),
+      getTimeInTimeZone(start, timeZone),
+      timeZone
+    )
   }
 
-  const end = combineDateAndTime(format(start, "yyyy-MM-dd"), value)
-  return end.getTime() <= start.getTime() ? addDays(end, 1) : end
+  const endDate =
+    value.slice(0, 5) <= getTimeInTimeZone(start, timeZone)
+      ? addCalendarDays(startDate, 1)
+      : startDate
+
+  return combineDateAndTimeInTimeZone(endDate, value, timeZone)
 }
 
-function combineDateAndTime(dateValue: string, timeValue: string) {
-  const [hours = "0", minutes = "0"] = timeValue.split(":")
-  const date = parseISO(dateValue)
-  date.setHours(Number(hours), Number(minutes), 0, 0)
-  return date
+function addCalendarDays(dateValue: string, amount: number) {
+  return format(addDays(parseISO(dateValue), amount), "yyyy-MM-dd")
 }
 
 function getShiftTimeLabel(shift: PublishedShiftClockTimes): string {

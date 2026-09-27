@@ -54,7 +54,7 @@ function buildEmployeeTimesheet(input: {
   week: TimesheetWeek
 }): EmployeeTimesheet {
   const entries = input.entries.filter((entry) =>
-    input.employeeIds.includes(entry.employeeId),
+    input.employeeIds.includes(entry.employeeId)
   )
   const days = buildDays(input.week, entries)
 
@@ -75,10 +75,10 @@ function buildManagerTimesheet(input: {
     buildManagerEmployeeTimesheet({
       employee,
       entries: input.entries.filter(
-        (entry) => entry.employeeId === employee.employee_id,
+        (entry) => entry.employeeId === employee.employee_id
       ),
       week: input.week,
-    }),
+    })
   )
 
   return {
@@ -99,14 +99,18 @@ function buildManagerEmployeeTimesheet(input: {
     ...getTotals(days),
     employeeId: input.employee.employee_id,
     employeeName: input.employee.employee_name,
-    locations: Array.from(new Set([input.employee.location_name, ...locations])),
+    locations: Array.from(
+      new Set([input.employee.location_name, ...locations])
+    ),
     days,
   }
 }
 
 function buildDays(week: TimesheetWeek, entries: TimesheetEntry[]) {
   return week.days.map<TimesheetDay>((day) => {
-    const dayEntries = entries.filter((entry) => getEntryDate(entry) === day.date)
+    const dayEntries = entries.filter(
+      (entry) => getEntryDate(entry) === day.date
+    )
 
     return {
       ...day,
@@ -117,12 +121,16 @@ function buildDays(week: TimesheetWeek, entries: TimesheetEntry[]) {
 }
 
 function getTotals(
-  items: Array<TimesheetEntry | TimesheetDay | ManagerTimesheetEmployee>,
+  items: Array<TimesheetEntry | TimesheetDay | ManagerTimesheetEmployee>
 ): TimesheetTotals {
   return items.reduce<TimesheetTotals>(
     (totals, item) => {
       const openCount =
-        "status" in item ? (item.status === "open" ? 1 : 0) : item.openEntryCount
+        "status" in item
+          ? item.status === "open"
+            ? 1
+            : 0
+          : item.openEntryCount
       const reviewCount =
         "status" in item
           ? item.status === "requires_review"
@@ -144,15 +152,15 @@ function getTotals(
       payableMinutes: 0,
       reviewCount: 0,
       scheduledMinutes: 0,
-    },
+    }
   )
 }
 
 function getEntryDate(entry: TimesheetEntry) {
   return (
-    getDateKey(entry.scheduledStartAt) ??
-    getDateKey(entry.clockedInAt) ??
-    getDateKey(entry.payableStartAt) ??
+    getDateKey(entry.scheduledStartAt, entry.timeZone) ??
+    getDateKey(entry.clockedInAt, entry.timeZone) ??
+    getDateKey(entry.payableStartAt, entry.timeZone) ??
     ""
   )
 }

@@ -9,6 +9,7 @@ type ScheduledShiftRow = PublishedShiftCandidate & {
   location_name: string
   rota_id: string
   rota_week_start: string
+  time_zone: string
 }
 
 type TimeEntryRow = {
@@ -23,6 +24,7 @@ type TimeEntryRow = {
   notes: string | null
   payable_end_at: string | null
   payable_start_at: string | null
+  published_day_date: string | null
   published_end_kind: string | null
   published_end_time: string | null
   published_shift_type: string | null
@@ -37,6 +39,7 @@ type TimeEntryRow = {
   shift_segment: ClockShiftSegment
   source: "employee_nfc" | "manager_override" | "adjustment"
   status: "open" | "closed" | "requires_review"
+  time_zone: string
   zone_name: string | null
 }
 

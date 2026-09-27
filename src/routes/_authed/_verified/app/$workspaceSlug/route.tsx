@@ -1,11 +1,11 @@
 import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router"
 
+import type { WorkspaceSummary } from "@/features/onboarding/types"
 import { DashboardShell } from "@/components/app/dashboard-shell"
-import { getDashboardAnnouncements } from "@/features/announcements/server-fns"
 import { getWorkspaceShellConfig } from "@/features/navigation/utils/workspace-shell"
 import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
 import { loadWorkspaceViewer } from "@/features/navigation/load-navigation-context"
-import { getHasUnreadRotaUpdates } from "@/lib/rota"
+import { useWorkspaceNotifications } from "@/features/notifications/hooks/use-workspace-notifications"
 
 export const Route = createFileRoute("/_authed/_verified/app/$workspaceSlug")({
   beforeLoad: async ({ context, params, preload, location }) => {
@@ -18,38 +18,6 @@ export const Route = createFileRoute("/_authed/_verified/app/$workspaceSlug")({
 
     return { capabilities, viewer }
   },
-  loader: async ({ context }) => {
-    const activeWorkspace = context.viewer.activeWorkspace
-
-    if (!activeWorkspace) {
-      return {
-        hasUnreadAnnouncements: false,
-        hasUnreadRotaUpdates: false,
-        recentAnnouncements: [],
-        canInviteTeamMembers: false,
-      }
-    }
-
-    const unreadInput = {
-      organizationId: activeWorkspace.id,
-      userId: context.viewer.user.id,
-    }
-    const [dashboardAnnouncements, hasUnreadRotaUpdates] = await Promise.all([
-      getDashboardAnnouncements({
-        data: unreadInput,
-      }),
-      getHasUnreadRotaUpdates({
-        data: unreadInput,
-      }),
-    ])
-
-    return {
-      hasUnreadAnnouncements: dashboardAnnouncements.unreadCount > 0,
-      hasUnreadRotaUpdates,
-      recentAnnouncements: dashboardAnnouncements.announcements,
-      canInviteTeamMembers: context.capabilities.canInviteTeamMembers,
-    }
-  },
   component: WorkspaceRoute,
 })
 
@@ -58,17 +26,43 @@ function WorkspaceRoute() {
   const pathname = useLocation({
     select: (location) => location.pathname,
   })
-  const {
-    canInviteTeamMembers,
-    hasUnreadAnnouncements,
-    hasUnreadRotaUpdates,
-    recentAnnouncements,
-  } = Route.useLoaderData()
   const activeWorkspace = viewer.activeWorkspace
 
   if (!activeWorkspace) {
     throw new Error("An active workspace is required for this route.")
   }
+
+  return (
+    <WorkspaceShellRoute
+      activeWorkspace={activeWorkspace}
+      capabilities={capabilities}
+      pathname={pathname}
+      viewer={viewer}
+    />
+  )
+}
+
+function WorkspaceShellRoute({
+  activeWorkspace,
+  capabilities,
+  pathname,
+  viewer,
+}: {
+  activeWorkspace: WorkspaceSummary
+  capabilities: ReturnType<typeof getOrgCapabilitiesForRole>
+  pathname: string
+  viewer: ReturnType<typeof Route.useRouteContext>["viewer"]
+}) {
+  const {
+    hasError,
+    hasUnreadAnnouncements,
+    hasUnreadRotaUpdates,
+    isLoading,
+    recentAnnouncements,
+  } = useWorkspaceNotifications({
+    organizationId: activeWorkspace.id,
+    userId: viewer.user.id,
+  })
 
   const shellConfig = getWorkspaceShellConfig(pathname, activeWorkspace)
 
@@ -81,8 +75,10 @@ function WorkspaceRoute() {
       mobileBrandHeader={shellConfig.mobileBrandHeader}
       hasUnreadRotaUpdates={hasUnreadRotaUpdates}
       hasUnreadAnnouncements={hasUnreadAnnouncements}
+      notificationsError={hasError}
+      notificationsLoading={isLoading}
       recentAnnouncements={recentAnnouncements}
-      canInviteTeamMembers={canInviteTeamMembers}
+      canInviteTeamMembers={capabilities.canInviteTeamMembers}
       user={viewer.user}
       organizations={viewer.organizations}
       activeOrganization={viewer.activeOrganization}

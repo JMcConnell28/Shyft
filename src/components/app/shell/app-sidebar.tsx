@@ -29,8 +29,6 @@ import {
 
 function AppSidebar({
   routeKey,
-  isSigningOut,
-  onSignOut,
   hasUnreadRotaUpdates,
   hasUnreadAnnouncements,
   canInviteTeamMembers,
@@ -42,8 +40,6 @@ function AppSidebar({
   shiftSwapsEnabled,
 }: {
   routeKey: OrganizationAppRouteKey
-  isSigningOut: boolean
-  onSignOut: () => void
   hasUnreadRotaUpdates?: boolean
   hasUnreadAnnouncements?: boolean
   canInviteTeamMembers?: boolean
@@ -143,8 +139,6 @@ function AppSidebar({
                 ? getWorkspaceAccountPath(activeWorkspace.slug)
                 : "/account"
             }
-            isSigningOut={isSigningOut}
-            onSignOut={onSignOut}
             user={user}
           />
         </SidebarFooter>

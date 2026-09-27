@@ -8,6 +8,7 @@ import type {
 } from "@/features/timesheets/server/row-types"
 import {
   getShiftSegmentTimeLabel,
+  type PublishedShiftCandidate,
   toShiftMatch,
 } from "@/features/time-clock/utils/shift-matching"
 import { getMinutesBetween } from "@/features/timesheets/utils/timesheet-time"
@@ -27,6 +28,12 @@ function mapEntryRows(input: {
 }
 
 function mapEntryRow(row: TimeEntryRow, now: Date): TimesheetEntry {
+  const scheduledWindow = getPersistedScheduledWindow(row)
+  const scheduledStartAt =
+    scheduledWindow?.startsAt.toISOString() ?? row.scheduled_start_at
+  const scheduledEndAt =
+    scheduledWindow?.endsAt.toISOString() ?? row.scheduled_end_at
+
   return {
     id: row.id,
     actualMinutes: getMinutesBetween(
@@ -52,15 +59,12 @@ function mapEntryRow(row: TimeEntryRow, now: Date): TimesheetEntry {
     publishedShiftId: row.rota_published_shift_id,
     rotaId: row.rota_id,
     rotaLabel: getRotaLabel(row.rota_week_start, row.location_name),
-    scheduledEndAt: row.scheduled_end_at,
-    scheduledMinutes: getMinutesBetween(
-      row.scheduled_start_at,
-      row.scheduled_end_at,
-      now
-    ),
-    scheduledStartAt: row.scheduled_start_at,
+    scheduledEndAt,
+    scheduledMinutes: getMinutesBetween(scheduledStartAt, scheduledEndAt, now),
+    scheduledStartAt,
     scheduledTimeLabel: getPersistedScheduleLabel(row),
     shiftSegment: row.shift_segment,
+    timeZone: row.time_zone,
     source: row.source,
     status: row.status,
     zoneName: row.zone_name,
@@ -123,10 +127,40 @@ function mapScheduledEntry(
     scheduledStartAt: segment.startsAt.toISOString(),
     scheduledTimeLabel: segment.timeLabel,
     shiftSegment: segment.key,
+    timeZone: shift.time_zone,
     source: "scheduled",
     status: "scheduled",
     zoneName: shift.zone_name_snapshot,
   }
+}
+
+function getPersistedScheduledWindow(row: TimeEntryRow) {
+  if (
+    !row.published_day_date ||
+    !row.published_shift_type ||
+    !row.published_start_time
+  ) {
+    return null
+  }
+
+  const shift: PublishedShiftCandidate = {
+    day_date: row.published_day_date,
+    end_kind: row.published_end_kind,
+    end_time: row.published_end_time,
+    id: row.rota_published_shift_id ?? row.id,
+    shift_type: row.published_shift_type,
+    split_second_end_time: row.published_split_second_end_time,
+    split_second_start_time: row.published_split_second_start_time,
+    start_time: row.published_start_time,
+    time_zone: row.time_zone,
+    zone_name_snapshot: row.zone_name ?? "",
+  }
+
+  const match = toShiftMatch(shift)
+
+  return (
+    match.segments.find((segment) => segment.key === row.shift_segment) ?? null
+  )
 }
 
 function getPersistedScheduleLabel(row: TimeEntryRow): string | null {

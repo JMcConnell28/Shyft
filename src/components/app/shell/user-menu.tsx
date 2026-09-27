@@ -1,5 +1,5 @@
 import * as React from "react"
-import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react"
+import { ChevronsUpDownIcon } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -20,13 +20,9 @@ import {
 } from "@/components/ui/sidebar"
 
 function UserMenu({
-  isSigningOut,
-  onSignOut,
   accountHref,
   user,
 }: {
-  isSigningOut: boolean
-  onSignOut: () => void
   accountHref: string
   user: {
     name: string
@@ -76,22 +72,24 @@ function UserMenu({
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="min-w-56 rounded-lg"
+            className="min-w-64 rounded-xl border border-[#dfe4ef] bg-white p-1.5 text-[#10204b] shadow-[0_12px_32px_rgba(30,50,96,0.12)] ring-0"
             side="top"
             align="end"
             sideOffset={4}
           >
             <DropdownMenuGroup>
               <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-xs">
-                  <Avatar className="size-8 rounded-lg">
-                    <AvatarFallback className="rounded-lg">
+                <div className="flex min-w-0 items-center gap-3 px-2 py-2 text-left">
+                  <Avatar className="size-9 rounded-full bg-[#eef3ff]">
+                    <AvatarFallback className="rounded-full bg-[#eef3ff] text-xs font-bold text-[#236cff]">
                       {fallbackInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-xs leading-tight">
-                    <span className="truncate font-medium">{user.name}</span>
-                    <span className="truncate text-muted-foreground">
+                  <div className="grid min-w-0 flex-1 text-left leading-tight">
+                    <span className="truncate text-[13px] font-bold text-[#10204b]">
+                      {user.name}
+                    </span>
+                    <span className="mt-1 truncate text-[11px] font-medium text-[#7180a2]">
                       {user.email}
                     </span>
                   </div>
@@ -101,20 +99,12 @@ function UserMenu({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
+                className="min-h-9 rounded-lg px-3 text-[13px] font-semibold text-[#53617f] transition-colors focus:bg-[#f5f7fb] focus:text-[#10204b]"
                 render={
                   <Link to={accountHref} onClick={() => setOpenMobile(false)} />
                 }
               >
                 Account
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={isSigningOut}
-                onClick={() => {
-                  onSignOut()
-                }}
-              >
-                <LogOutIcon />
-                {isSigningOut ? "Signing out..." : "Log out"}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

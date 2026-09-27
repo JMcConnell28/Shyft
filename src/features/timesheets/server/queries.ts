@@ -14,6 +14,7 @@ import { resolveTimesheetAccess } from "@/features/timesheets/server/access"
 import { getTimesheetWeek } from "@/features/timesheets/utils/timesheet-time"
 import { getCurrentWeekStart } from "@/features/rota/utils/week-utils"
 import { getDatabase } from "@/lib/db"
+import { DEFAULT_CLOCK_TIME_ZONE } from "@/lib/time-zone"
 
 async function getTimesheetPageData(
   input: TimesheetScopeInput
@@ -221,13 +222,16 @@ async function listScheduledShifts(input: {
        shift.split_second_end_time::text,
        shift.split_second_start_time::text,
        shift.start_time::text,
-       shift.zone_name_snapshot
+       shift.zone_name_snapshot,
+       coalesce(clock_settings.timezone, $5::text) as time_zone
      from public.rota_published_shift_assignments assignment
      join public.employees employee on employee.id = assignment.employee_id
      join public.rota_published_shifts shift
        on shift.id = assignment.rota_published_shift_id
      join public.rotas rota on rota.id = shift.rota_id
      join public.locations location on location.id = rota.location_id
+     left join public.location_clock_settings clock_settings
+       on clock_settings.location_id = location.id
      where rota.status = 'published'
        and rota.location_id = any($1::uuid[])
        and shift.day_date >= $2::date
@@ -243,6 +247,7 @@ async function listScheduledShifts(input: {
       input.weekStart,
       input.organizationId,
       input.employeeUserId,
+      DEFAULT_CLOCK_TIME_ZONE,
     ]
   )
 
@@ -263,10 +268,12 @@ async function listTimeEntries(input: {
        employee.payroll_id as employee_payroll_id,
        entry.location_id,
        location.name as location_name,
+       coalesce(clock_settings.timezone, $5::text) as time_zone,
        entry.rota_published_shift_id,
        rota.id as rota_id,
        rota.week_start::text as rota_week_start,
        published_shift.zone_name_snapshot as zone_name,
+       published_shift.day_date::text as published_day_date,
        published_shift.shift_type as published_shift_type,
        published_shift.start_time::text as published_start_time,
        published_shift.end_time::text as published_end_time,
@@ -286,13 +293,26 @@ async function listTimeEntries(input: {
      from public.time_entries entry
      join public.employees employee on employee.id = entry.employee_id
      join public.locations location on location.id = entry.location_id
+     left join public.location_clock_settings clock_settings
+       on clock_settings.location_id = location.id
      left join public.rota_published_shifts published_shift
        on published_shift.id = entry.rota_published_shift_id
      left join public.rotas rota on rota.id = published_shift.rota_id
      where entry.location_id = any($1::uuid[])
-       and coalesce(entry.scheduled_start_at, entry.clocked_in_at) >= $2::date
-       and coalesce(entry.scheduled_start_at, entry.clocked_in_at) <
-         ($2::date + interval '7 day')
+       and coalesce(
+         published_shift.day_date,
+         (
+           coalesce(entry.scheduled_start_at, entry.clocked_in_at)
+           at time zone coalesce(clock_settings.timezone, $5::text)
+         )::date
+       ) >= $2::date
+       and coalesce(
+         published_shift.day_date,
+         (
+           coalesce(entry.scheduled_start_at, entry.clocked_in_at)
+           at time zone coalesce(clock_settings.timezone, $5::text)
+         )::date
+       ) < ($2::date + interval '7 day')::date
        and (
          ($3::text is not null and entry.organization_id = $3::text)
          or ($3::text is null)
@@ -304,6 +324,7 @@ async function listTimeEntries(input: {
       input.weekStart,
       input.organizationId,
       input.employeeUserId,
+      DEFAULT_CLOCK_TIME_ZONE,
     ]
   )
 

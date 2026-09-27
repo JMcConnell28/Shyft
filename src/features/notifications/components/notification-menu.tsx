@@ -15,11 +15,15 @@ import { cn } from "@/lib/utils"
 function NotificationMenu({
   announcements,
   hasUnreadRotaUpdates,
+  hasError,
+  isLoading,
   prominent,
   workspaceSlug,
 }: {
   announcements: Array<DashboardAnnouncement>
   hasUnreadRotaUpdates: boolean
+  hasError: boolean
+  isLoading: boolean
   prominent: boolean
   workspaceSlug: string
 }) {
@@ -93,7 +97,17 @@ function NotificationMenu({
               unread={announcement.isUnread}
             />
           ))}
-          {!hasUnreadRotaUpdates && announcements.length === 0 ? (
+          {isLoading && unreadCount === 0 && announcements.length === 0 ? (
+            <div className="px-4 py-8 text-center text-sm text-[#61709a]">
+              Loading updates…
+            </div>
+          ) : null}
+          {hasError && !isLoading && unreadCount === 0 && announcements.length === 0 ? (
+            <div className="px-4 py-8 text-center text-sm text-[#61709a]">
+              We could not load your updates.
+            </div>
+          ) : null}
+          {!hasError && !isLoading && !hasUnreadRotaUpdates && announcements.length === 0 ? (
             <div className="px-4 py-8 text-center">
               <BellIcon className="mx-auto size-5 text-[#96a1ba]" />
               <p className="mt-2 text-sm font-semibold text-[#405078]">

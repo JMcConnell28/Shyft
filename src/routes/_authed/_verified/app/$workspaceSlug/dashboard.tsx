@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { ShiftOverviewCards } from "@/features/dashboard/components/shift-overview-cards"
 import { DashboardWelcomeModal } from "@/features/dashboard/components/dashboard-welcome-modal"
-import { getDashboardAnnouncements } from "@/features/announcements/server-fns"
+import { dashboardAnnouncementsQueryOptions } from "@/features/announcements/query-options"
 import {
   getDashboardShiftOverview,
   getDashboardWelcome,
@@ -24,9 +24,9 @@ export const Route = createFileRoute(
     }
 
     const [announcements, overview, welcome] = await Promise.all([
-      getDashboardAnnouncements({
-        data: announcementInput,
-      }),
+      context.queryClient.ensureQueryData(
+        dashboardAnnouncementsQueryOptions(announcementInput)
+      ),
       getDashboardShiftOverview({
         data: announcementInput,
       }),

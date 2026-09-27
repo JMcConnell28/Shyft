@@ -15,6 +15,7 @@ import {
   TimesheetPanelHeader,
 } from "@/features/timesheets/components/timesheet-panel"
 import { TimesheetEntryBadge } from "@/features/timesheets/components/timesheet-status"
+import { useViewerTimeZone } from "@/features/timesheets/hooks/use-viewer-time-zone"
 import {
   formatTimesheetDuration,
   getEntryClockLabel,
@@ -29,6 +30,7 @@ type TimesheetEntryRow = {
 
 function EmployeeTimesheetEntries({ days }: { days: Array<TimesheetDay> }) {
   const rows = getEntryRows(days)
+  const viewerTimeZone = useViewerTimeZone()
 
   return (
     <TimesheetPanel>
@@ -38,18 +40,28 @@ function EmployeeTimesheetEntries({ days }: { days: Array<TimesheetDay> }) {
         title="Your timesheet entries"
       />
       <div className="hidden md:block">
-        <DesktopEntryTable rows={rows} />
+        <DesktopEntryTable rows={rows} viewerTimeZone={viewerTimeZone} />
       </div>
       <div className="divide-y divide-[#edf0f6] md:hidden">
         {rows.map((row) => (
-          <MobileEntryRow key={row.key} row={row} />
+          <MobileEntryRow
+            key={row.key}
+            row={row}
+            viewerTimeZone={viewerTimeZone}
+          />
         ))}
       </div>
     </TimesheetPanel>
   )
 }
 
-function DesktopEntryTable({ rows }: { rows: Array<TimesheetEntryRow> }) {
+function DesktopEntryTable({
+  rows,
+  viewerTimeZone,
+}: {
+  rows: Array<TimesheetEntryRow>
+  viewerTimeZone: string | null
+}) {
   return (
     <Table>
       <TableHeader>
@@ -80,10 +92,10 @@ function DesktopEntryTable({ rows }: { rows: Array<TimesheetEntryRow> }) {
               <span className="text-[#7481a0]">{day.dateLabel}</span>
             </TableCell>
             <TableCell className="px-4 font-medium text-[#46577d]">
-              {getEntryScheduleLabel(entry)}
+              {getEntryScheduleLabel(entry, viewerTimeZone ?? undefined)}
             </TableCell>
             <TableCell className="px-4 font-medium text-[#46577d]">
-              {getEntryClockLabel(entry)}
+              {getEntryClockLabel(entry, viewerTimeZone ?? undefined)}
             </TableCell>
             <TableCell className="max-w-44 truncate px-4 font-medium text-[#68769a]">
               {entry?.locationName ?? "—"}
@@ -104,7 +116,13 @@ function DesktopEntryTable({ rows }: { rows: Array<TimesheetEntryRow> }) {
   )
 }
 
-function MobileEntryRow({ row }: { row: TimesheetEntryRow }) {
+function MobileEntryRow({
+  row,
+  viewerTimeZone,
+}: {
+  row: TimesheetEntryRow
+  viewerTimeZone: string | null
+}) {
   const { day, entry } = row
   const date = parseISO(day.date)
 
@@ -121,12 +139,13 @@ function MobileEntryRow({ row }: { row: TimesheetEntryRow }) {
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-2">
           <p className="truncate text-sm font-semibold">
-            {getEntryScheduleLabel(entry)}
+            {getEntryScheduleLabel(entry, viewerTimeZone ?? undefined)}
           </p>
           <TimesheetEntryBadge entry={entry} />
         </div>
         <p className="mt-1 truncate text-[11px] font-medium text-[#7481a0]">
-          {getEntryClockLabel(entry)} · {entry?.locationName ?? "No shift"}
+          {getEntryClockLabel(entry, viewerTimeZone ?? undefined)} ·{" "}
+          {entry?.locationName ?? "No shift"}
         </p>
       </div>
       <div className="text-right">

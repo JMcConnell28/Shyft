@@ -121,6 +121,7 @@ function createShift(input: {
     split_second_end_time: input.splitSecondEndTime ?? null,
     split_second_start_time: input.splitSecondStartTime ?? null,
     start_time: input.startTime,
+    time_zone: "Europe/London",
     zone_name_snapshot: "Bar",
   }
 }

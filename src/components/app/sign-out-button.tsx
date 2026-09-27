@@ -1,10 +1,17 @@
 import * as React from "react"
+import { LogOutIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { authClient } from "@/lib/auth-client"
 import { showErrorToast } from "@/lib/toast"
 
-function SignOutButton({ className }: { className?: string }) {
+function SignOutButton({
+  className,
+  showIcon = false,
+}: {
+  className?: string
+  showIcon?: boolean
+}) {
   const [isSigningOut, setIsSigningOut] = React.useState(false)
 
   async function handleSignOut() {
@@ -35,6 +42,7 @@ function SignOutButton({ className }: { className?: string }) {
       onClick={() => void handleSignOut()}
       disabled={isSigningOut}
     >
+      {showIcon ? <LogOutIcon aria-hidden="true" /> : null}
       {isSigningOut ? "Signing out..." : "Log out"}
     </Button>
   )

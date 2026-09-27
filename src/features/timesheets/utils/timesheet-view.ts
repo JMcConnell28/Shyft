@@ -36,17 +36,30 @@ function getTimesheetHealth(timesheet: TimesheetTotals): TimesheetHealth {
   return "ready"
 }
 
-function getEntryScheduleLabel(entry: TimesheetEntry | null) {
+function getEntryScheduleLabel(
+  entry: TimesheetEntry | null,
+  timeZone = entry?.timeZone
+) {
   if (!entry?.scheduledStartAt) return "No scheduled shift"
-  if (entry.scheduledTimeLabel) return entry.scheduledTimeLabel
-  return `${formatTime(entry.scheduledStartAt)} \u2013 ${formatTime(
-    entry.scheduledEndAt
-  )}`
+
+  const endLabel = entry.scheduledTimeLabel?.endsWith(" - Close")
+    ? "Close"
+    : entry.scheduledEndAt
+      ? formatTime(entry.scheduledEndAt, timeZone)
+      : "--:--"
+
+  return `${formatTime(entry.scheduledStartAt, timeZone)} \u2013 ${endLabel}`
 }
 
-function getEntryClockLabel(entry: TimesheetEntry | null) {
+function getEntryClockLabel(
+  entry: TimesheetEntry | null,
+  timeZone = entry?.timeZone
+) {
   if (!entry?.clockedInAt) return "Not clocked"
-  return `${formatTime(entry.clockedInAt)} \u2013 ${formatTime(entry.clockedOutAt)}`
+  return `${formatTime(entry.clockedInAt, timeZone)} \u2013 ${formatTime(
+    entry.clockedOutAt,
+    timeZone
+  )}`
 }
 
 function filterTeamTimesheetEmployees(
