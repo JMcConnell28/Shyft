@@ -13,13 +13,10 @@ import { auth } from "@/lib/auth"
 import { getDatabase } from "@/lib/db"
 import { getOrganizationDashboardPath } from "@/lib/organization-paths"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
-import {
-  assertSupabaseSuccess,
-  getRequiredSupabaseRow,
-} from "@/lib/supabase-errors"
+import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 
-import { syncWorkspaceBillingSubscriptionQuantities } from "@/features/billing/server/subscriptions"
+import { createStaffJoinRequest } from "@/features/join-approvals/server/actions"
 import { STAFF_INVITE_EXPIRY_DAYS } from "@/features/onboarding/constants"
 import {
   getOrganizationSummaryById,
@@ -27,9 +24,9 @@ import {
   setActiveOrganizationForHeaders,
 } from "@/features/onboarding/server/session"
 import { upsertOnboardingState } from "@/features/onboarding/server/state"
+import { isEmployeeOnlyRole } from "@/features/onboarding/utils/employee-role"
 import {
   buildStaffInviteUrl,
-  createEmployeeMemberId,
   toIsoString,
 } from "@/features/onboarding/utils/invite-utils"
 import {
@@ -37,7 +34,6 @@ import {
   getEmployeeFallbackStaffGroup,
   isEmployeeStaffGroup,
 } from "@/features/staff-groups/server/shared"
-import { getMinimumWagePenceForDateOfBirth } from "@/features/staff-groups/utils/minimum-wage"
 
 const createStaffInviteLink = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => staffInviteSelectionSchema.parse(input))
@@ -352,12 +348,12 @@ const getStaffInvitePreview = createServerFn({ method: "GET" })
 const acceptStaffInvite = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => acceptInviteSchema.parse(input))
   .handler(async ({ data }) => {
-    const { headers, session } = await requireVerifiedSessionOrThrow()
+    const { session } = await requireVerifiedSessionOrThrow()
     const supabase = createSupabaseServerClient()
     const inviteResult = await supabase
       .from("staff_invite_links")
       .select(
-        "organization_id, location_id, default_staff_group_id, expires_at, disabled_at"
+        "id, organization_id, location_id, default_staff_group_id, expires_at, disabled_at"
       )
       .eq("token", data.token)
       .maybeSingle()
@@ -391,142 +387,15 @@ const acceptStaffInvite = createServerFn({ method: "POST" })
       userId: session.user.id,
     })
 
-    const membershipResult = await supabase
-      .from("member")
-      .select("id")
-      .eq("organizationId", organizationId)
-      .eq("userId", session.user.id)
-      .maybeSingle()
-
-    assertSupabaseSuccess(
-      membershipResult.error,
-      "We could not verify your organisation membership."
-    )
-
-    if (!membershipResult.data) {
-      const membershipInsertResult = await supabase.from("member").insert({
-        id: createEmployeeMemberId(),
-        organizationId,
-        userId: session.user.id,
-        role: "employee",
-        createdAt: new Date().toISOString(),
-      })
-
-      assertSupabaseSuccess(
-        membershipInsertResult.error,
-        "We could not join you to that organisation."
-      )
-    }
-
-    await setActiveOrganizationForHeaders(headers, organizationId)
-
-    const employeeLookupResult = await supabase
-      .from("employees")
-      .select("id")
-      .eq("user_id", session.user.id)
-      .eq("organization_id", organizationId)
-      .maybeSingle()
-
-    assertSupabaseSuccess(
-      employeeLookupResult.error,
-      "We could not load your employee record."
-    )
-
-    const employeePayload = {
-      organization_id: organizationId,
-      location_id: null,
-      user_id: session.user.id,
-      staff_group_id: invite.default_staff_group_id,
-      full_name: session.user.name,
-      email: session.user.email,
-      status: "active",
-      updated_at: new Date().toISOString(),
-    }
-
-    const employeeResult = employeeLookupResult.data
-      ? await supabase
-          .from("employees")
-          .update(employeePayload)
-          .eq("id", employeeLookupResult.data.id)
-          .select("id")
-          .single()
-      : await supabase
-          .from("employees")
-          .insert(employeePayload)
-          .select("id")
-          .single()
-
-    assertSupabaseSuccess(
-      employeeResult.error,
-      "We could not attach you to this workplace."
-    )
-
-    const employeeId = getRequiredSupabaseRow(
-      employeeResult.data,
-      "We could not attach you to this workplace."
-    ).id
-
-    const hourlyRatePence = await getMinimumWagePenceForUser(session.user.id)
-
-    await getDatabase().query(
-      `insert into public.employee_compensation (
-         employee_id,
-         organization_id,
-         location_id,
-         pay_type,
-         hourly_rate_pence
-       ) values ($1, $2, $3, 'hourly', $4)
-       on conflict (employee_id) do nothing`,
-      [employeeId, organizationId, null, hourlyRatePence]
-    )
-
-    const assignmentResult = await supabase
-      .from("employee_location_assignments")
-      .upsert(
-        {
-          organization_id: organizationId,
-          employee_id: employeeId,
-          location_id: invite.location_id,
-          staff_group_id: invite.default_staff_group_id,
-          is_enabled: true,
-          disabled_at: null,
-        },
-        {
-          onConflict: "employee_id,location_id",
-        }
-      )
-
-    assertSupabaseSuccess(
-      assignmentResult.error,
-      "We could not enable that workplace assignment."
-    )
-    await syncBillingAfterStaffInvite({
+    const requestId = await createStaffJoinRequest({
+      inviteLinkId: invite.id,
       organizationId,
+      locationId: invite.location_id,
+      staffGroupId: invite.default_staff_group_id,
       userId: session.user.id,
     })
-
-    const organization = await getOrganizationSummaryById(organizationId)
-
-    return {
-      redirectTo: organization
-        ? getOrganizationDashboardPath(organization.slug)
-        : "/dashboard",
-    }
+    return { redirectTo: `/join-status/${requestId}` }
   })
-
-async function syncBillingAfterStaffInvite(input: {
-  organizationId: string
-  userId: string
-}) {
-  try {
-    await syncWorkspaceBillingSubscriptionQuantities({
-      organizationId: input.organizationId,
-      userId: input.userId,
-    })
-  } catch (error) {
-    console.warn("Could not sync billing quantities after staff invite.", error)
-  }
-}
 
 async function assertCanAcceptOrganizationStaffInvite(input: {
   organizationId: string
@@ -566,13 +435,6 @@ async function assertCanAcceptOrganizationStaffInvite(input: {
   if (assignmentResult.rows.length > 0) {
     throw new Error("You are already part of this location.")
   }
-}
-
-function isEmployeeOnlyRole(role: string) {
-  return role
-    .split(",")
-    .map((entry) => entry.trim())
-    .every((entry) => entry === "employee")
 }
 
 const acceptOrganizationInvitation = createServerFn({ method: "POST" })
@@ -615,18 +477,6 @@ const acceptOrganizationInvitation = createServerFn({ method: "POST" })
         : "/dashboard",
     }
   })
-
-async function getMinimumWagePenceForUser(userId: string) {
-  const result = await getDatabase().query<{ dateOfBirth: string | null }>(
-    `select "dateOfBirth"
-     from public."user"
-     where id = $1
-     limit 1`,
-    [userId]
-  )
-
-  return getMinimumWagePenceForDateOfBirth(result.rows.at(0)?.dateOfBirth)
-}
 
 export {
   acceptOrganizationInvitation,

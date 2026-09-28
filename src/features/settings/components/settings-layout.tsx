@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouteContext } from "@tanstack/react-router"
 import type { ReactNode } from "react"
 
 import {
@@ -25,7 +26,20 @@ function SettingsLayout({
   contentOnly?: boolean
   children: ReactNode
 }) {
-  const navItems = workspaceSettingsNavItems
+  const { viewer } = useRouteContext({
+    from: "/_authed/_verified/app/$workspaceSlug",
+  })
+  const canReviewJoinRequests =
+    viewer.activeRole === "owner" ||
+    viewer.activeRole === "admin" ||
+    viewer.activeRole === "manager"
+  const canManageCompany =
+    viewer.activeRole === "owner" || viewer.activeRole === "admin"
+  const navItems = workspaceSettingsNavItems.filter(
+    (item) =>
+      (!item.requiresJoinApproval || canReviewJoinRequests) &&
+      (!item.requiresCompanyAdmin || canManageCompany)
+  )
   const settingsRootPath = `/app/${workspaceSlug}/settings`
   const isCategoryIndex = activePath === settingsRootPath
   const activeItem = getActiveSettingsItem({

@@ -44,6 +44,7 @@ import { Route as AuthedVerifiedOnboardingOrgRouteImport } from './routes/_authe
 import { Route as AuthedVerifiedOnboardingLocationRouteImport } from './routes/_authed/_verified/onboarding/location'
 import { Route as AuthedVerifiedOnboardingJoinRouteImport } from './routes/_authed/_verified/onboarding/join'
 import { Route as AuthedVerifiedOnboardingInviteRouteImport } from './routes/_authed/_verified/onboarding/invite'
+import { Route as AuthedVerifiedJoinStatusRequestIdRouteImport } from './routes/_authed/_verified/join-status/$requestId'
 import { Route as AuthedVerifiedBillingSuccessRouteImport } from './routes/_authed/_verified/billing/success'
 import { Route as AuthedVerifiedBillingExpiredRouteImport } from './routes/_authed/_verified/billing/expired'
 import { Route as AuthedVerifiedAppWorkspaceSlugRouteRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/route'
@@ -71,6 +72,7 @@ import { Route as AuthedVerifiedAppWorkspaceSlugSettingsCompanyIndexRouteImport 
 import { Route as AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRouteImport } from './routes/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsTeamGroupsRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/team/groups'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsRotaZonesRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/rota/zones'
+import { Route as AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/company/join-requests'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/company/$employeeId'
 import { Route as AuthedVerifiedAppWorkspaceSlugRotaLocationSlugRotaIdRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/rota/$locationSlug/$rotaId'
 import { Route as AuthedVerifiedAppWorkspaceSlugRotaLocationSlugRotaIdIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/rota/$locationSlug/$rotaId/index'
@@ -255,6 +257,12 @@ const AuthedVerifiedOnboardingInviteRoute =
     path: '/onboarding/invite',
     getParentRoute: () => AuthedVerifiedRouteRoute,
   } as any)
+const AuthedVerifiedJoinStatusRequestIdRoute =
+  AuthedVerifiedJoinStatusRequestIdRouteImport.update({
+    id: '/join-status/$requestId',
+    path: '/join-status/$requestId',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
 const AuthedVerifiedBillingSuccessRoute =
   AuthedVerifiedBillingSuccessRouteImport.update({
     id: '/billing/success',
@@ -417,6 +425,12 @@ const AuthedVerifiedAppWorkspaceSlugSettingsRotaZonesRoute =
     path: '/zones',
     getParentRoute: () => AuthedVerifiedAppWorkspaceSlugSettingsRotaRoute,
   } as any)
+const AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRoute =
+  AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRouteImport.update({
+    id: '/join-requests',
+    path: '/join-requests',
+    getParentRoute: () => AuthedVerifiedAppWorkspaceSlugSettingsCompanyRoute,
+  } as any)
 const AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute =
   AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRouteImport.update({
     id: '/$employeeId',
@@ -473,6 +487,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug': typeof AuthedVerifiedAppWorkspaceSlugRouteRouteWithChildren
   '/billing/expired': typeof AuthedVerifiedBillingExpiredRoute
   '/billing/success': typeof AuthedVerifiedBillingSuccessRoute
+  '/join-status/$requestId': typeof AuthedVerifiedJoinStatusRequestIdRoute
   '/onboarding/invite': typeof AuthedVerifiedOnboardingInviteRoute
   '/onboarding/join': typeof AuthedVerifiedOnboardingJoinRoute
   '/onboarding/location': typeof AuthedVerifiedOnboardingLocationRoute
@@ -501,6 +516,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/settings/': typeof AuthedVerifiedAppWorkspaceSlugSettingsIndexRoute
   '/app/$workspaceSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedAppWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren
   '/app/$workspaceSlug/settings/company/$employeeId': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  '/app/$workspaceSlug/settings/company/join-requests': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRoute
   '/app/$workspaceSlug/settings/rota/zones': typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaZonesRoute
   '/app/$workspaceSlug/settings/team/groups': typeof AuthedVerifiedAppWorkspaceSlugSettingsTeamGroupsRoute
   '/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
@@ -538,6 +554,7 @@ export interface FileRoutesByTo {
   '/api/support/thread': typeof ApiSupportThreadRoute
   '/billing/expired': typeof AuthedVerifiedBillingExpiredRoute
   '/billing/success': typeof AuthedVerifiedBillingSuccessRoute
+  '/join-status/$requestId': typeof AuthedVerifiedJoinStatusRequestIdRoute
   '/onboarding/invite': typeof AuthedVerifiedOnboardingInviteRoute
   '/onboarding/join': typeof AuthedVerifiedOnboardingJoinRoute
   '/onboarding/location': typeof AuthedVerifiedOnboardingLocationRoute
@@ -561,6 +578,7 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/rota': typeof AuthedVerifiedAppWorkspaceSlugRotaIndexRoute
   '/app/$workspaceSlug/settings': typeof AuthedVerifiedAppWorkspaceSlugSettingsIndexRoute
   '/app/$workspaceSlug/settings/company/$employeeId': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  '/app/$workspaceSlug/settings/company/join-requests': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRoute
   '/app/$workspaceSlug/settings/rota/zones': typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaZonesRoute
   '/app/$workspaceSlug/settings/team/groups': typeof AuthedVerifiedAppWorkspaceSlugSettingsTeamGroupsRoute
   '/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
@@ -602,6 +620,7 @@ export interface FileRoutesById {
   '/_authed/_verified/app/$workspaceSlug': typeof AuthedVerifiedAppWorkspaceSlugRouteRouteWithChildren
   '/_authed/_verified/billing/expired': typeof AuthedVerifiedBillingExpiredRoute
   '/_authed/_verified/billing/success': typeof AuthedVerifiedBillingSuccessRoute
+  '/_authed/_verified/join-status/$requestId': typeof AuthedVerifiedJoinStatusRequestIdRoute
   '/_authed/_verified/onboarding/invite': typeof AuthedVerifiedOnboardingInviteRoute
   '/_authed/_verified/onboarding/join': typeof AuthedVerifiedOnboardingJoinRoute
   '/_authed/_verified/onboarding/location': typeof AuthedVerifiedOnboardingLocationRoute
@@ -630,6 +649,7 @@ export interface FileRoutesById {
   '/_authed/_verified/app/$workspaceSlug/settings/': typeof AuthedVerifiedAppWorkspaceSlugSettingsIndexRoute
   '/_authed/_verified/app/$workspaceSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedAppWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren
   '/_authed/_verified/app/$workspaceSlug/settings/company/$employeeId': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  '/_authed/_verified/app/$workspaceSlug/settings/company/join-requests': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRoute
   '/_authed/_verified/app/$workspaceSlug/settings/rota/zones': typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaZonesRoute
   '/_authed/_verified/app/$workspaceSlug/settings/team/groups': typeof AuthedVerifiedAppWorkspaceSlugSettingsTeamGroupsRoute
   '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId': typeof AuthedVerifiedOOrgSlugRotaLocationSlugRotaIdRoute
@@ -670,6 +690,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug'
     | '/billing/expired'
     | '/billing/success'
+    | '/join-status/$requestId'
     | '/onboarding/invite'
     | '/onboarding/join'
     | '/onboarding/location'
@@ -698,6 +719,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings/'
     | '/app/$workspaceSlug/rota/$locationSlug/$rotaId'
     | '/app/$workspaceSlug/settings/company/$employeeId'
+    | '/app/$workspaceSlug/settings/company/join-requests'
     | '/app/$workspaceSlug/settings/rota/zones'
     | '/app/$workspaceSlug/settings/team/groups'
     | '/o/$orgSlug/rota/$locationSlug/$rotaId'
@@ -735,6 +757,7 @@ export interface FileRouteTypes {
     | '/api/support/thread'
     | '/billing/expired'
     | '/billing/success'
+    | '/join-status/$requestId'
     | '/onboarding/invite'
     | '/onboarding/join'
     | '/onboarding/location'
@@ -758,6 +781,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/rota'
     | '/app/$workspaceSlug/settings'
     | '/app/$workspaceSlug/settings/company/$employeeId'
+    | '/app/$workspaceSlug/settings/company/join-requests'
     | '/app/$workspaceSlug/settings/rota/zones'
     | '/app/$workspaceSlug/settings/team/groups'
     | '/o/$orgSlug/rota/$locationSlug/$rotaId'
@@ -798,6 +822,7 @@ export interface FileRouteTypes {
     | '/_authed/_verified/app/$workspaceSlug'
     | '/_authed/_verified/billing/expired'
     | '/_authed/_verified/billing/success'
+    | '/_authed/_verified/join-status/$requestId'
     | '/_authed/_verified/onboarding/invite'
     | '/_authed/_verified/onboarding/join'
     | '/_authed/_verified/onboarding/location'
@@ -826,6 +851,7 @@ export interface FileRouteTypes {
     | '/_authed/_verified/app/$workspaceSlug/settings/'
     | '/_authed/_verified/app/$workspaceSlug/rota/$locationSlug/$rotaId'
     | '/_authed/_verified/app/$workspaceSlug/settings/company/$employeeId'
+    | '/_authed/_verified/app/$workspaceSlug/settings/company/join-requests'
     | '/_authed/_verified/app/$workspaceSlug/settings/rota/zones'
     | '/_authed/_verified/app/$workspaceSlug/settings/team/groups'
     | '/_authed/_verified/o/$orgSlug/rota/$locationSlug/$rotaId'
@@ -1110,6 +1136,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedVerifiedOnboardingInviteRouteImport
       parentRoute: typeof AuthedVerifiedRouteRoute
     }
+    '/_authed/_verified/join-status/$requestId': {
+      id: '/_authed/_verified/join-status/$requestId'
+      path: '/join-status/$requestId'
+      fullPath: '/join-status/$requestId'
+      preLoaderRoute: typeof AuthedVerifiedJoinStatusRequestIdRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
+    }
     '/_authed/_verified/billing/success': {
       id: '/_authed/_verified/billing/success'
       path: '/billing/success'
@@ -1299,6 +1332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaZonesRouteImport
       parentRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaRoute
     }
+    '/_authed/_verified/app/$workspaceSlug/settings/company/join-requests': {
+      id: '/_authed/_verified/app/$workspaceSlug/settings/company/join-requests'
+      path: '/join-requests'
+      fullPath: '/app/$workspaceSlug/settings/company/join-requests'
+      preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRouteImport
+      parentRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyRoute
+    }
     '/_authed/_verified/app/$workspaceSlug/settings/company/$employeeId': {
       id: '/_authed/_verified/app/$workspaceSlug/settings/company/$employeeId'
       path: '/$employeeId'
@@ -1332,6 +1372,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthedVerifiedAppWorkspaceSlugSettingsCompanyRouteChildren {
   AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute
+  AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRoute
   AuthedVerifiedAppWorkspaceSlugSettingsCompanyIndexRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyIndexRoute
 }
 
@@ -1339,6 +1380,8 @@ const AuthedVerifiedAppWorkspaceSlugSettingsCompanyRouteChildren: AuthedVerified
   {
     AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute:
       AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute,
+    AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRoute:
+      AuthedVerifiedAppWorkspaceSlugSettingsCompanyJoinRequestsRoute,
     AuthedVerifiedAppWorkspaceSlugSettingsCompanyIndexRoute:
       AuthedVerifiedAppWorkspaceSlugSettingsCompanyIndexRoute,
   }
@@ -1489,6 +1532,7 @@ interface AuthedVerifiedRouteRouteChildren {
   AuthedVerifiedAppWorkspaceSlugRouteRoute: typeof AuthedVerifiedAppWorkspaceSlugRouteRouteWithChildren
   AuthedVerifiedBillingExpiredRoute: typeof AuthedVerifiedBillingExpiredRoute
   AuthedVerifiedBillingSuccessRoute: typeof AuthedVerifiedBillingSuccessRoute
+  AuthedVerifiedJoinStatusRequestIdRoute: typeof AuthedVerifiedJoinStatusRequestIdRoute
   AuthedVerifiedOnboardingInviteRoute: typeof AuthedVerifiedOnboardingInviteRoute
   AuthedVerifiedOnboardingJoinRoute: typeof AuthedVerifiedOnboardingJoinRoute
   AuthedVerifiedOnboardingLocationRoute: typeof AuthedVerifiedOnboardingLocationRoute
@@ -1506,6 +1550,8 @@ const AuthedVerifiedRouteRouteChildren: AuthedVerifiedRouteRouteChildren = {
     AuthedVerifiedAppWorkspaceSlugRouteRouteWithChildren,
   AuthedVerifiedBillingExpiredRoute: AuthedVerifiedBillingExpiredRoute,
   AuthedVerifiedBillingSuccessRoute: AuthedVerifiedBillingSuccessRoute,
+  AuthedVerifiedJoinStatusRequestIdRoute:
+    AuthedVerifiedJoinStatusRequestIdRoute,
   AuthedVerifiedOnboardingInviteRoute: AuthedVerifiedOnboardingInviteRoute,
   AuthedVerifiedOnboardingJoinRoute: AuthedVerifiedOnboardingJoinRoute,
   AuthedVerifiedOnboardingLocationRoute: AuthedVerifiedOnboardingLocationRoute,

@@ -82,7 +82,7 @@ function JoinInviteRoute() {
       setError(
         joinError instanceof Error
           ? joinError.message
-          : "We could not join that workplace.",
+          : "We could not join that workplace."
       )
       setIsJoining(false)
     }
@@ -117,7 +117,7 @@ function JoinInviteRoute() {
       badge="Workplace invite"
       eyebrow="Join workplace"
       title={`Join ${loaderData.preview.organizationName} on RocketRota.`}
-      description="This invite will place you into the correct workplace, location, and default staff group."
+      description="Request access to this workplace and location. A manager will review your request."
       progress={80}
       showSignOut={Boolean(loaderData.viewer)}
     >
@@ -129,13 +129,15 @@ function JoinInviteRoute() {
           </Badge>
           <CardTitle className="mt-2 text-2xl">Review your invite</CardTitle>
           <CardDescription>
-            Confirm the workplace details below before joining.
+            Confirm the workplace details before requesting approval.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4">
             <div>
-              <p className="text-sm font-medium text-foreground">Organization</p>
+              <p className="text-sm font-medium text-foreground">
+                Organization
+              </p>
               <p className="text-sm text-muted-foreground">
                 {loaderData.preview.organizationName}
               </p>
@@ -147,7 +149,9 @@ function JoinInviteRoute() {
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium text-foreground">Default group</p>
+              <p className="text-sm font-medium text-foreground">
+                Default group
+              </p>
               <p className="text-sm text-muted-foreground">
                 {loaderData.preview.staffGroupName}
               </p>
@@ -156,7 +160,8 @@ function JoinInviteRoute() {
 
           {loaderData.preview.isDisabled || loaderData.preview.isExpired ? (
             <p className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-700">
-              This invite is no longer active. Ask your manager for a fresh link.
+              This invite is no longer active. Ask your manager for a fresh
+              link.
             </p>
           ) : null}
 
@@ -178,7 +183,10 @@ function JoinInviteRoute() {
               <Link
                 to="/sign-up"
                 search={{ redirect: `/join/${loaderData.token}` }}
-                className={cn(buttonVariants({ variant: "outline" }), "w-full sm:w-auto")}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "w-full sm:w-auto"
+                )}
               >
                 Create account first
               </Link>
@@ -194,7 +202,7 @@ function JoinInviteRoute() {
               }
             >
               <BadgeCheckIcon />
-              {isJoining ? "Joining workplace..." : "Join workplace"}
+              {isJoining ? "Sending request..." : "Request to join"}
             </Button>
           )}
         </CardContent>

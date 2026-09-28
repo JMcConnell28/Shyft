@@ -4,7 +4,10 @@ import { Link } from "@tanstack/react-router"
 import { ArrowLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import type { SettingsNavItem } from "@/features/settings/constants/settings-navigation.types"
-import { getSettingsTitle } from "@/features/settings/constants/settings-navigation"
+import {
+  getActiveSettingsItem,
+  getSettingsTitle,
+} from "@/features/settings/constants/settings-navigation"
 import { cn } from "@/lib/utils"
 
 function SettingsNavigation({
@@ -16,13 +19,12 @@ function SettingsNavigation({
   items: Array<SettingsNavItem>
   workspaceSlug: string
 }) {
+  const activeItem = getActiveSettingsItem({ activePath, items, workspaceSlug })
   return (
     <nav className="space-y-1.5">
       {items.map((item) => {
-        const targetPath = item.to.replace("$workspaceSlug", workspaceSlug)
         const isActive =
-          activePath === targetPath ||
-          activePath.startsWith(`${targetPath}/`) ||
+          activeItem.to === item.to ||
           (activePath === `/app/${workspaceSlug}/settings` &&
             item.label === "General")
         const Icon = item.icon

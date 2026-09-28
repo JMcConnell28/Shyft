@@ -19,7 +19,13 @@ const shiftActions = ["view", "create", "update", "delete", "assign"] as const
 
 const locationActions = ["view", "create", "update", "delete"] as const
 
-const teamMemberActions = ["view", "invite", "update", "remove"] as const
+const teamMemberActions = [
+  "view",
+  "invite",
+  "approve",
+  "update",
+  "remove",
+] as const
 const announcementActions = ["view", "create", "update", "archive"] as const
 
 const statements = {
@@ -72,7 +78,7 @@ const manager = ac.newRole({
   rota: ["view", "create", "update", "publish", "viewCosts"],
   shift: [...shiftActions],
   location: ["view"],
-  teamMember: ["view"],
+  teamMember: ["view", "approve"],
   announcement: [...announcementActions],
 })
 

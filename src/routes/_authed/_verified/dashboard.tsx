@@ -4,11 +4,19 @@ import { OrglessWorkspacePage } from "@/components/app/orgless-workspace-page"
 import { getOrganizationAppRedirect } from "@/features/onboarding/utils/viewer-route-redirects"
 
 import { loadDefaultViewer } from "@/features/navigation/load-navigation-context"
+import { listOwnJoinRequests } from "@/features/join-approvals/server-fns"
 
 export const Route = createFileRoute("/_authed/_verified/dashboard")({
   beforeLoad: async ({ context }) => {
     const viewer = await loadDefaultViewer(context)
     if (!viewer.activeWorkspace && viewer.organizations.length === 0) {
+      const pendingRequests = await listOwnJoinRequests()
+      if (pendingRequests[0]) {
+        throw redirect({
+          to: "/join-status/$requestId",
+          params: { requestId: pendingRequests[0].id },
+        })
+      }
       throw redirect({
         to:
           viewer.onboardingIntent === "join"

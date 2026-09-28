@@ -5,6 +5,7 @@ import {
   CreditCardIcon,
   MapPinnedIcon,
   Settings2Icon,
+  UserRoundCheckIcon,
   UsersIcon,
 } from "lucide-react"
 
@@ -52,7 +53,15 @@ const workspaceSettingsNavItems: Array<SettingsNavItem> = [
     description: "Employees, roles, pay details, and location access.",
     icon: Building2Icon,
     label: "Company",
+    requiresCompanyAdmin: true,
     to: "/app/$workspaceSlug/settings/company",
+  },
+  {
+    description: "Approve or deny employee requests from staff invite links.",
+    icon: UserRoundCheckIcon,
+    label: "Join requests",
+    requiresJoinApproval: true,
+    to: "/app/$workspaceSlug/settings/company/join-requests",
   },
 ]
 
@@ -66,12 +75,15 @@ function getActiveSettingsItem({
   workspaceSlug: string
 }) {
   return (
-    items.find((item) => {
-      const targetPath = item.to.replace("$workspaceSlug", workspaceSlug)
-      return (
-        activePath === targetPath || activePath.startsWith(`${targetPath}/`)
-      )
-    }) ?? items[0]
+    items
+      .filter((item) => {
+        const targetPath = item.to.replace("$workspaceSlug", workspaceSlug)
+        return (
+          activePath === targetPath || activePath.startsWith(`${targetPath}/`)
+        )
+      })
+      .sort((a, b) => b.to.length - a.to.length)
+      .at(0) ?? items[0]
   )
 }
 
