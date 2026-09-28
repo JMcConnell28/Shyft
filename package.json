@@ -6,9 +6,6 @@
     "apps/*",
     "packages/*"
   ],
-  "overrides": {
-    "@noble/ciphers": "1.3.0"
-  },
   "scripts": {
     "dev": "vite dev --port 3000",
     "dev:app": "vite dev --port 3000",
