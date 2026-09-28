@@ -14,6 +14,7 @@ const APP_ROUTE_PREFIXES = [
   "/dashboard",
   "/forgot-password",
   "/join/",
+  "/join-status/",
   "/login",
   "/onboarding/",
   "/reset-password",
@@ -73,4 +74,4 @@ function PwaAppController() {
   return null
 }
 
-export { PwaAppController }
+export { PwaAppController, isAppRoute }

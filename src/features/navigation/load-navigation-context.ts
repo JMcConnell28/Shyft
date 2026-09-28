@@ -87,16 +87,12 @@ async function loadWorkspaceViewer(
 
   const organizationId = viewer.activeWorkspace.organizationId
   if (organizationId !== navigationSession.activeOrganizationId) {
-    // Preloads may warm the read-only viewer, but must not switch the session
-    // or start page loaders that require a different active organization.
-    // reloadDocument makes Router stop this speculative load instead of
-    // recursively preloading the redirect target. Actual navigation activates
-    // the organization below and proceeds through the client router.
-    if (options.preload) {
-      throw redirect({ href: options.href, reloadDocument: true })
+    // Preloads may warm the viewer but never change the active organization.
+    // Real navigation activates it, then starts a fresh document and cache.
+    if (!options.preload) {
+      await activateOrganization({ data: { organizationId } })
     }
-    await activateOrganization({ data: { organizationId } })
-    updateActiveOrganization(queryClient, navigationSession, organizationId)
+    throw redirect({ href: options.href, reloadDocument: true })
   }
 
   return { ...viewer, user: navigationSession.user }

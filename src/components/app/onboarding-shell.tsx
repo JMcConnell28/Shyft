@@ -17,6 +17,7 @@ type OnboardingShellProps = {
   children: ReactNode
   contentWidth?: "default" | "wide"
   showBackToDashboard?: boolean
+  hideBackLink?: boolean
   showSignOut?: boolean
 }
 
@@ -29,20 +30,25 @@ function OnboardingShell({
   children,
   contentWidth = "default",
   showBackToDashboard = true,
+  hideBackLink = false,
   showSignOut = false,
 }: OnboardingShellProps) {
   return (
     <div className="min-h-svh bg-muted/20">
       <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-3 sm:px-5 lg:px-8">
         <div className="flex items-center justify-between gap-4">
-          <Link
-            to={showBackToDashboard ? "/dashboard" : "/"}
-            data-pwa-hide={!showBackToDashboard ? "true" : undefined}
-            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-          >
-            <ArrowLeftIcon />
-            {showBackToDashboard ? "Back to workspace" : "Back to site"}
-          </Link>
+          {hideBackLink ? (
+            <span />
+          ) : (
+            <Link
+              to={showBackToDashboard ? "/dashboard" : "/"}
+              data-pwa-hide={!showBackToDashboard ? "true" : undefined}
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+            >
+              <ArrowLeftIcon />
+              {showBackToDashboard ? "Back to workspace" : "Back to site"}
+            </Link>
+          )}
           <div className="flex items-center gap-2">
             <BrandLockup compact />
             {showSignOut ? <SignOutButton /> : null}

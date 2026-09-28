@@ -20,5 +20,11 @@ export const Route = createFileRoute(
 function AccountRoute() {
   const { viewer } = Route.useRouteContext()
 
-  return <AccountPage user={viewer.user} />
+  return (
+    <AccountPage
+      user={viewer.user}
+      organizations={viewer.organizations}
+      activeOrganizationId={viewer.activeWorkspace?.id ?? null}
+    />
+  )
 }

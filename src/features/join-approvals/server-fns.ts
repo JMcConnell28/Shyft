@@ -19,6 +19,15 @@ const listOwnJoinRequests = createServerFn({ method: "GET" }).handler(
   }
 )
 
+const listMyOrganizations = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { requireVerifiedSessionOrThrow, listOrganizationsForHeaders } =
+      await import("@/features/onboarding/server/session")
+    const { headers } = await requireVerifiedSessionOrThrow()
+    return listOrganizationsForHeaders(headers)
+  }
+)
+
 const listPendingJoinRequests = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
     organizationJoinRequestsSchema.parse(input)
@@ -40,5 +49,6 @@ export {
   decideJoinRequest,
   getOwnJoinRequest,
   listOwnJoinRequests,
+  listMyOrganizations,
   listPendingJoinRequests,
 }

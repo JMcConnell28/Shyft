@@ -34,6 +34,7 @@ function AppSidebar({
   canInviteTeamMembers,
   mobileTrialBanner,
   user,
+  organizations,
   activeOrganization,
   activeWorkspace,
   capabilities,
@@ -140,6 +141,8 @@ function AppSidebar({
                 : "/account"
             }
             user={user}
+            organizations={organizations}
+            activeOrganization={activeOrganization}
           />
         </SidebarFooter>
       </Sidebar>

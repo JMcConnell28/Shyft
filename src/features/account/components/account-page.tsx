@@ -1,6 +1,8 @@
 "use client"
 
+import type { OrganizationSummary } from "@/features/onboarding/types"
 import { AccountProfileSection } from "@/features/account/components/account-profile-section"
+import { AccountOrganizationsSection } from "@/features/account/components/account-organizations-section"
 import { AccountPasswordSection } from "@/features/account/components/account-password-section"
 import { PasskeyCard } from "@/features/account/components/passkey-card"
 import { SignOutButton } from "@/components/app/sign-out-button"
@@ -9,9 +11,15 @@ import { NotificationSettingsCard } from "@/features/push-notifications/componen
 
 type AccountPageProps = {
   user: { email: string; emailVerified: boolean; name: string }
+  organizations: Array<OrganizationSummary>
+  activeOrganizationId: string | null
 }
 
-function AccountPage({ user }: AccountPageProps) {
+function AccountPage({
+  user,
+  organizations,
+  activeOrganizationId,
+}: AccountPageProps) {
   return (
     <div className="flex min-w-0 flex-1 flex-col bg-[#f6f8fc] px-4 py-5 text-[#10204b] sm:px-5 sm:py-6 lg:px-7">
       <header className="mb-4">
@@ -21,6 +29,10 @@ function AccountPage({ user }: AccountPageProps) {
         </p>
       </header>
       <div className="settings-content min-w-0 space-y-3">
+        <AccountOrganizationsSection
+          organizations={organizations}
+          activeOrganizationId={activeOrganizationId}
+        />
         <AccountProfileSection user={user} />
         <PasskeyCard />
         <AccountPasswordSection email={user.email} />

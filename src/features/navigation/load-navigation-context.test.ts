@@ -1,10 +1,4 @@
 import { QueryClient } from "@tanstack/react-query"
-import {
-  createMemoryHistory,
-  createRootRoute,
-  createRoute,
-  createRouter,
-} from "@tanstack/react-router"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import type {
@@ -186,36 +180,24 @@ describe("navigation caching", () => {
 })
 
 describe("workspace activation", () => {
-  it("stops speculative routing without a redirect loop, then loads on navigation", async () => {
+  it("does not activate on preload and reloads the document after activation", async () => {
     const context = {
       queryClient,
       navigationSession: { ...session, activeOrganizationId: null },
     }
-    const root = createRootRoute()
-    const loader = vi.fn()
-    const route = createRoute({
-      getParentRoute: () => root,
-      path: "/app/$workspaceSlug/dashboard",
-      beforeLoad: ({ params, preload, location }) =>
-        loadWorkspaceViewer(context, params.workspaceSlug, {
-          preload,
-          href: location.href,
-        }),
-      loader,
-    })
-    const router = createRouter({
-      routeTree: root.addChildren([route]),
-      history: createMemoryHistory({ initialEntries: ["/app/team/dashboard"] }),
-    })
-    await router.preloadRoute({
-      to: "/app/$workspaceSlug/dashboard",
-      params: { workspaceSlug: "team" },
+    await expect(
+      loadWorkspaceViewer(context, "team", { ...options, preload: true })
+    ).rejects.toMatchObject({
+      options: { href: options.href, reloadDocument: true },
     })
     expect(activateOrganization).not.toHaveBeenCalled()
-    expect(loader).not.toHaveBeenCalled()
-    await router.load()
+
+    await expect(
+      loadWorkspaceViewer(context, "team", options)
+    ).rejects.toMatchObject({
+      options: { href: options.href, reloadDocument: true },
+    })
     expect(activateOrganization).toHaveBeenCalledTimes(1)
-    expect(loader).toHaveBeenCalledTimes(1)
   })
 
   it("warms another organization's viewer without changing the session on hover", async () => {
@@ -226,27 +208,33 @@ describe("workspace activation", () => {
     ).rejects.toMatchObject({ options: { href: options.href } })
     expect(activateOrganization).not.toHaveBeenCalled()
 
-    await loadWorkspaceViewer(context, "team", options)
+    await expect(
+      loadWorkspaceViewer(context, "team", options)
+    ).rejects.toMatchObject({
+      options: { href: options.href, reloadDocument: true },
+    })
     expect(getWorkspaceViewer).toHaveBeenCalledTimes(1)
     expect(activateOrganization).toHaveBeenCalledWith({
       data: { organizationId: "org-a" },
     })
   })
 
-  it("activates the workspace organization before page loaders run", async () => {
+  it("activates the workspace organization before reloading", async () => {
     vi.mocked(getWorkspaceViewer).mockResolvedValue({
       ...viewer,
       activeOrganization: null,
       activeWorkspace: workspace,
     })
-    await loadWorkspaceViewer(
-      {
-        queryClient,
-        navigationSession: { ...session, activeOrganizationId: null },
-      },
-      "team",
-      options
-    )
+    await expect(
+      loadWorkspaceViewer(
+        {
+          queryClient,
+          navigationSession: { ...session, activeOrganizationId: null },
+        },
+        "team",
+        options
+      )
+    ).rejects.toMatchObject({ options: { reloadDocument: true } })
     expect(activateOrganization).toHaveBeenCalledWith({
       data: { organizationId: "org-a" },
     })
@@ -265,11 +253,9 @@ describe("workspace activation", () => {
       navigationQueryKeys.session
     )?.dataUpdatedAt
     vi.setSystemTime(new Date("2030-01-01T00:00:20Z"))
-    await loadWorkspaceViewer(
-      { queryClient, navigationSession },
-      "team",
-      options
-    )
+    await expect(
+      loadWorkspaceViewer({ queryClient, navigationSession }, "team", options)
+    ).rejects.toMatchObject({ options: { reloadDocument: true } })
     expect(
       queryClient.getQueryState(navigationQueryKeys.session)?.dataUpdatedAt
     ).toBe(updatedAt)

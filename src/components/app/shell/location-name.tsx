@@ -1,8 +1,8 @@
-import Title from "@/components/title"
 import type {
   OrganizationSummary,
   WorkspaceSummary,
 } from "@/features/onboarding/types"
+import Title from "@/components/title"
 
 function LocationName({
   activeOrganization,
@@ -13,15 +13,23 @@ function LocationName({
 }) {
   return (
     <>
-      <div className="flex items-center gap-4 px-6 pt-8 pb-8 text-[#071a54] md:hidden">
-        <div className="flex aspect-[1.55] h-8 items-center justify-center">
-          <img
-            src="/brand/rocketrota-logo.png"
-            alt=""
-            className="h-full w-full object-contain"
-          />
+      <div className="w-full px-6 pt-8 pb-8 text-[#071a54] md:hidden">
+        <div className="flex items-center gap-4">
+          <div className="flex aspect-[1.55] h-8 items-center justify-center">
+            <img
+              src="/brand/rocketrota-logo.png"
+              alt=""
+              className="h-full w-full object-contain"
+            />
+          </div>
+          <Title />
         </div>
-        <Title />
+        <p className="mt-3 truncate text-xs font-medium text-[#5d6b94]">
+          Viewing{" "}
+          {activeWorkspace?.name ??
+            activeOrganization?.name ??
+            "no organization"}
+        </p>
       </div>
 
       <div className="hidden w-full items-center gap-2.5 px-3 py-2 text-sm font-semibold text-[#4c5675] group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:self-center group-data-[collapsible=icon]:px-0 first:pt-0 md:flex">

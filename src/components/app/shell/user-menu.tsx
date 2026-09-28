@@ -1,7 +1,9 @@
 import * as React from "react"
-import { ChevronsUpDownIcon } from "lucide-react"
+import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 
+import type { OrganizationSummary } from "@/features/onboarding/types"
+import { useOrganizationSwitch } from "@/features/navigation/hooks/use-organization-switch"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -21,15 +23,21 @@ import {
 
 function UserMenu({
   accountHref,
+  organizations,
+  activeOrganization,
   user,
 }: {
   accountHref: string
+  organizations: Array<OrganizationSummary>
+  activeOrganization: OrganizationSummary | null
   user: {
     name: string
     email: string
   }
 }) {
   const { setOpenMobile } = useSidebar()
+  const { switchingId, switchOrganization } =
+    useOrganizationSwitch(organizations)
   const fallbackInitials = React.useMemo(() => {
     return user.name
       .split(" ")
@@ -92,9 +100,33 @@ function UserMenu({
                     <span className="mt-1 truncate text-[11px] font-medium text-[#7180a2]">
                       {user.email}
                     </span>
+                    <span className="mt-1 truncate text-[11px] font-medium text-[#53617f]">
+                      Viewing {activeOrganization?.name ?? "no organization"}
+                    </span>
                   </div>
                 </div>
               </DropdownMenuLabel>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Switch organization</DropdownMenuLabel>
+              {organizations.map((organization) => (
+                <DropdownMenuItem
+                  key={organization.id}
+                  disabled={
+                    Boolean(switchingId) ||
+                    organization.id === activeOrganization?.id
+                  }
+                  onClick={() => void switchOrganization(organization.id)}
+                >
+                  <span className="min-w-0 flex-1 truncate">
+                    {organization.name}
+                  </span>
+                  {organization.id === activeOrganization?.id ? (
+                    <CheckIcon aria-label="Current organization" />
+                  ) : null}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -104,7 +136,7 @@ function UserMenu({
                   <Link to={accountHref} onClick={() => setOpenMobile(false)} />
                 }
               >
-                Account
+                Account settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
