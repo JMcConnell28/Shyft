@@ -15,6 +15,7 @@ type ClockStationTag = {
 }
 
 type ClockStationsPageData = {
+  appBaseUrl: string | null
   locations: ClockStationLocation[]
   tags: ClockStationTag[]
 }

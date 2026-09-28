@@ -41,7 +41,6 @@ async function generateClockStationTag(input: {
 
   const result = await getDatabase().query<ClockTagRow>(
     `insert into public.clock_tags (
-       created_by,
        is_active,
        label,
        location_id,
@@ -50,14 +49,13 @@ async function generateClockStationTag(input: {
        ntag_public_id,
        organization_id,
        token_hash
-     ) values ($1, true, 'NTAG 424 clock tag', $2, $3, 0, $4, $5, $6)
+     ) values (true, 'NTAG 424 clock tag', $1, $2, 0, $3, $4, $5)
      returning id,
                location_id,
                ntag_aes_key_hex,
                ntag_last_seen_counter,
                ntag_public_id`,
     [
-      input.adminUserId,
       location.id,
       aesKeyHex,
       publicId,

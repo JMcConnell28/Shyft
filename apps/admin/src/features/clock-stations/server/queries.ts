@@ -2,6 +2,8 @@ import "@tanstack/react-start/server-only"
 
 import { queryMany } from "@rocketrota/db"
 
+import { appBaseUrlSchema } from "@/features/clock-stations/schemas"
+import { getOptionalEnv } from "@/lib/env.server"
 import type {
   ClockStationLocation,
   ClockStationTag,
@@ -44,14 +46,28 @@ async function getClockStationsPageData(): Promise<ClockStationsPageData> {
               ntag_aes_key_hex,
               ntag_last_seen_counter
        from public.clock_tags
+       where ntag_public_id is not null
+         and ntag_aes_key_hex is not null
        order by created_at desc`,
     ),
   ])
 
   return {
+    appBaseUrl: getAppBaseUrl(),
     locations: locations.map(mapLocation),
     tags: tags.map(mapTag),
   }
+}
+
+function getAppBaseUrl(): string | null {
+  const configuredUrl =
+    getOptionalEnv("APP_BASE_URL") ??
+    (process.env.NODE_ENV === "production"
+      ? "https://rocketrota.com"
+      : "http://localhost:3000")
+
+  const parsedUrl = appBaseUrlSchema.safeParse(configuredUrl)
+  return parsedUrl.success ? new URL(parsedUrl.data).origin : null
 }
 
 function mapLocation(row: LocationRow): ClockStationLocation {
