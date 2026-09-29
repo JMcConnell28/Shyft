@@ -59,9 +59,12 @@ function WorkspaceShellRoute({
     hasUnreadRotaUpdates,
     isLoading,
     recentAnnouncements,
+    supportNotifications,
+    supportUnreadCount,
   } = useWorkspaceNotifications({
     organizationId: activeWorkspace.id,
     userId: viewer.user.id,
+    canUseSupport: capabilities.canUseSupport,
   })
 
   const shellConfig = getWorkspaceShellConfig(pathname, activeWorkspace)
@@ -78,6 +81,8 @@ function WorkspaceShellRoute({
       notificationsError={hasError}
       notificationsLoading={isLoading}
       recentAnnouncements={recentAnnouncements}
+      supportNotifications={supportNotifications}
+      supportUnreadCount={supportUnreadCount}
       canInviteTeamMembers={capabilities.canInviteTeamMembers}
       user={viewer.user}
       organizations={viewer.organizations}

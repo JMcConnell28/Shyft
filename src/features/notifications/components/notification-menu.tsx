@@ -1,9 +1,15 @@
 "use client"
 
 import { Link } from "@tanstack/react-router"
-import { BellIcon, CalendarDaysIcon, MegaphoneIcon } from "lucide-react"
+import {
+  BellIcon,
+  CalendarDaysIcon,
+  LifeBuoyIcon,
+  MegaphoneIcon,
+} from "lucide-react"
 
 import type { DashboardAnnouncement } from "@/features/announcements/types"
+import type { SupportThreadSummary } from "@/features/support/types"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
@@ -14,6 +20,8 @@ import { cn } from "@/lib/utils"
 
 function NotificationMenu({
   announcements,
+  supportThreads,
+  supportUnreadCount,
   hasUnreadRotaUpdates,
   hasError,
   isLoading,
@@ -21,6 +29,8 @@ function NotificationMenu({
   workspaceSlug,
 }: {
   announcements: Array<DashboardAnnouncement>
+  supportThreads: Array<SupportThreadSummary>
+  supportUnreadCount: number
   hasUnreadRotaUpdates: boolean
   hasError: boolean
   isLoading: boolean
@@ -29,7 +39,8 @@ function NotificationMenu({
 }) {
   const unreadCount =
     announcements.filter((announcement) => announcement.isUnread).length +
-    Number(hasUnreadRotaUpdates)
+    Number(hasUnreadRotaUpdates) +
+    supportUnreadCount
 
   return (
     <Popover>
@@ -97,24 +108,42 @@ function NotificationMenu({
               unread={announcement.isUnread}
             />
           ))}
+          {supportThreads.slice(0, 5).map((thread) => (
+            <NotificationLink
+              key={thread.id}
+              href={`/app/${workspaceSlug}/support/${thread.id}`}
+              icon={LifeBuoyIcon}
+              title="Support update"
+              description={thread.subject}
+              unread
+            />
+          ))}
           {isLoading && unreadCount === 0 && announcements.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-[#61709a]">
               Loading updates…
             </div>
           ) : null}
-          {hasError && !isLoading && unreadCount === 0 && announcements.length === 0 ? (
+          {hasError &&
+          !isLoading &&
+          unreadCount === 0 &&
+          announcements.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-[#61709a]">
               We could not load your updates.
             </div>
           ) : null}
-          {!hasError && !isLoading && !hasUnreadRotaUpdates && announcements.length === 0 ? (
+          {!hasError &&
+          !isLoading &&
+          !hasUnreadRotaUpdates &&
+          announcements.length === 0 &&
+          supportThreads.length === 0 ? (
             <div className="px-4 py-8 text-center">
               <BellIcon className="mx-auto size-5 text-[#96a1ba]" />
               <p className="mt-2 text-sm font-semibold text-[#405078]">
                 You’re all caught up
               </p>
               <p className="mt-1 text-xs text-[#7a86a4]">
-                New rota updates and announcements will appear here.
+                New rota updates, announcements, and support replies will appear
+                here.
               </p>
             </div>
           ) : null}

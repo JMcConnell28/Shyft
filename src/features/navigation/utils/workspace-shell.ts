@@ -65,6 +65,18 @@ function getWorkspaceShellConfig(
     } satisfies WorkspaceShellConfig
   }
 
+  if (workspacePath.startsWith("/support")) {
+    return {
+      routeKey: "support",
+      title: "Support",
+      description: "Your conversations with RocketRota support.",
+      backLink: {
+        href: getWorkspaceDashboardPath(workspace.slug),
+        label: "Back to dashboard",
+      },
+    } satisfies WorkspaceShellConfig
+  }
+
   if (workspacePath.startsWith("/announcements")) {
     return {
       routeKey: "announcements",

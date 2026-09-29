@@ -3,6 +3,7 @@ import {
   CalendarClockIcon,
   ClockIcon,
   HomeIcon,
+  LifeBuoyIcon,
   MegaphoneIcon,
   ShuffleIcon,
 } from "lucide-react"
@@ -11,7 +12,7 @@ import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
 
 type NavigationCapability = keyof Pick<
   OrganizationCapabilities,
-  "canManageTimeClock" | "canViewRota"
+  "canManageTimeClock" | "canViewRota" | "canUseSupport"
 >
 
 type NavItem = {
@@ -21,6 +22,7 @@ type NavItem = {
     | "dashboard"
     | "rota"
     | "shiftSwaps"
+    | "support"
     | "timeClock"
     | "timesheets"
   icon: typeof HomeIcon
@@ -60,6 +62,12 @@ const navItems = [
     routeKey: "timeClock" as const,
     icon: ClockIcon,
     requiredCapability: "canManageTimeClock",
+  },
+  {
+    title: "Support",
+    routeKey: "support" as const,
+    icon: LifeBuoyIcon,
+    requiredCapability: "canUseSupport",
   },
 ] satisfies Array<NavItem>
 

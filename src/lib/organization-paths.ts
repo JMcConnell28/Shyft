@@ -4,6 +4,7 @@ type OrganizationAppRouteKey =
   | "rota"
   | "settings"
   | "shiftSwaps"
+  | "support"
   | "timeClock"
   | "timesheets"
 
@@ -33,6 +34,10 @@ function getWorkspaceTimeClockPath(workspaceSlug: string) {
 
 function getWorkspaceTimesheetsPath(workspaceSlug: string) {
   return `${getWorkspaceBasePath(workspaceSlug)}/timesheets`
+}
+
+function getWorkspaceSupportPath(workspaceSlug: string) {
+  return `${getWorkspaceBasePath(workspaceSlug)}/support`
 }
 
 function getWorkspaceSettingsPath(workspaceSlug: string) {
@@ -69,6 +74,10 @@ function getWorkspaceAppPath(
 
   if (routeKey === "timesheets") {
     return getWorkspaceTimesheetsPath(workspaceSlug)
+  }
+
+  if (routeKey === "support") {
+    return getWorkspaceSupportPath(workspaceSlug)
   }
 
   return getWorkspaceDashboardPath(workspaceSlug)
@@ -134,6 +143,10 @@ function getOrganizationAppPath(
     return getOrganizationTimesheetsPath(orgSlug)
   }
 
+  if (routeKey === "support") {
+    return getWorkspaceSupportPath(orgSlug)
+  }
+
   return getOrganizationDashboardPath(orgSlug)
 }
 
@@ -148,6 +161,7 @@ export {
   getWorkspaceSettingsPath,
   getWorkspaceShiftSwapsPath,
   getWorkspaceTimesheetsPath,
+  getWorkspaceSupportPath,
   getWorkspaceTimeClockPath,
   getOrganizationAppPath,
   getOrganizationAnnouncementsPath,

@@ -7,6 +7,7 @@ import type {
   WorkspaceTrial,
 } from "@/features/billing/types"
 import type { DashboardAnnouncement } from "@/features/announcements/types"
+import type { SupportThreadSummary } from "@/features/support/types"
 import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
 import type { OrganizationSummary, WorkspaceSummary } from "@/lib/onboarding"
 import { BrandMark } from "@/components/app/brand"
@@ -50,6 +51,8 @@ function DashboardShell({
   notificationsError = false,
   notificationsLoading = false,
   recentAnnouncements = [],
+  supportNotifications = [],
+  supportUnreadCount = 0,
   canInviteTeamMembers,
   user,
   organizations,
@@ -75,6 +78,8 @@ function DashboardShell({
   notificationsError?: boolean
   notificationsLoading?: boolean
   recentAnnouncements?: Array<DashboardAnnouncement>
+  supportNotifications?: Array<SupportThreadSummary>
+  supportUnreadCount?: number
   canInviteTeamMembers?: boolean
   user: {
     name: string
@@ -109,6 +114,7 @@ function DashboardShell({
   const isTimeClockHome = routeKey === "timeClock"
   const isAnnouncementsHome = routeKey === "announcements"
   const isShiftSwapsHome = routeKey === "shiftSwaps"
+  const isSupportHome = routeKey === "support"
   const hasMobileBrandHeader =
     mobileBrandHeader ||
     isDashboardHome ||
@@ -117,7 +123,8 @@ function DashboardShell({
     isTimesheetsHome ||
     isTimeClockHome ||
     isAnnouncementsHome ||
-    isShiftSwapsHome
+    isShiftSwapsHome ||
+    isSupportHome
   const canViewTrialBanner =
     (capabilities.canManageRota || Boolean(canInviteTeamMembers)) &&
     !isWorkspaceBillingBlocked({ trial, billing })
@@ -241,6 +248,8 @@ function DashboardShell({
               ) : null}
               <NotificationMenu
                 announcements={recentAnnouncements}
+                supportThreads={supportNotifications}
+                supportUnreadCount={supportUnreadCount}
                 hasUnreadRotaUpdates={Boolean(hasUnreadRotaUpdates)}
                 hasError={notificationsError}
                 isLoading={notificationsLoading}

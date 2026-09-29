@@ -18,6 +18,7 @@ type OrganizationCapabilities = {
   canInviteTeamMembers: boolean
   canManageTeamMembers: boolean
   canManageAnnouncements: boolean
+  canUseSupport: boolean
 }
 
 function can(
@@ -53,6 +54,7 @@ function getOrgCapabilitiesForRole(
     canInviteTeamMembers: can(role, { invitation: ["create"] }),
     canManageTeamMembers: can(role, { member: ["create"] }),
     canManageAnnouncements: can(role, { announcement: ["create"] }),
+    canUseSupport: role === "owner" || role === "admin" || role === "manager",
   }
 }
 

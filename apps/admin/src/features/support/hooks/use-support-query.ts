@@ -6,12 +6,13 @@ import { useServerFn } from "@tanstack/react-start"
 import { supportQueryKeys } from "@/features/support/query-keys"
 import { getSupportThreads } from "@/features/support/server-fns"
 
-function useSupportQuery() {
+function useSupportQuery(page: number) {
   const getSupportThreadsFn = useServerFn(getSupportThreads)
 
   return useQuery({
-    queryKey: supportQueryKeys.all,
-    queryFn: () => getSupportThreadsFn(),
+    queryKey: supportQueryKeys.list(page),
+    queryFn: () => getSupportThreadsFn({ data: { page } }),
+    refetchOnWindowFocus: "always",
   })
 }
 
