@@ -28,7 +28,7 @@ function SupportPage() {
           Customer questions, issues, and suggestions.
         </p>
       </header>
-      <DataTable className="overflow-x-auto">
+      <DataTable>
         <TableHead>
           <TableRow>
             <TableHeaderCell>Thread</TableHeaderCell>
@@ -42,7 +42,7 @@ function SupportPage() {
         <tbody>
           {(query.data?.threads ?? []).map((thread) => (
             <TableRow key={thread.id}>
-              <TableCell>
+              <TableCell label="Thread">
                 <p className="flex items-center gap-2 font-medium">
                   {thread.unread ? (
                     <span
@@ -56,8 +56,10 @@ function SupportPage() {
                   {getSupportCategoryLabel(thread.category)}
                 </p>
               </TableCell>
-              <TableCell>{thread.customerName ?? "Unknown customer"}</TableCell>
-              <TableCell>
+              <TableCell label="Customer">
+                {thread.customerName ?? "Unknown customer"}
+              </TableCell>
+              <TableCell label="Workplace">
                 <p className="font-medium">
                   {thread.organizationName ?? "Unknown organisation"}
                 </p>
@@ -65,15 +67,17 @@ function SupportPage() {
                   {thread.locationName ?? "All locations"}
                 </p>
               </TableCell>
-              <TableCell>
+              <TableCell label="Status">
                 <StatusBadge
                   tone={thread.status === "open" ? "warning" : "neutral"}
                 >
                   {thread.status}
                 </StatusBadge>
               </TableCell>
-              <TableCell>{formatDateTime(thread.updatedAt)}</TableCell>
-              <TableCell>
+              <TableCell label="Updated">
+                {formatDateTime(thread.updatedAt)}
+              </TableCell>
+              <TableCell label="Conversation">
                 <Link
                   to="/support/$threadId"
                   params={{ threadId: thread.id }}

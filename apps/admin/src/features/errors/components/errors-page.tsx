@@ -38,18 +38,22 @@ function ErrorsPage() {
         <tbody>
           {(query.data?.errors ?? []).map((error) => (
             <TableRow key={error.id}>
-              <TableCell>
+              <TableCell label="Error">
                 <p className="font-medium">{error.message}</p>
                 <p className="text-xs text-slate-500">{error.routePath}</p>
               </TableCell>
-              <TableCell>
-                <StatusBadge tone={error.status === "open" ? "danger" : "neutral"}>
+              <TableCell label="Status">
+                <StatusBadge
+                  tone={error.status === "open" ? "danger" : "neutral"}
+                >
                   {error.status}
                 </StatusBadge>
               </TableCell>
-              <TableCell>{error.occurrenceCount}</TableCell>
-              <TableCell>{formatDateTime(error.lastSeenAt)}</TableCell>
-              <TableCell>
+              <TableCell label="Seen">{error.occurrenceCount}</TableCell>
+              <TableCell label="Last seen">
+                {formatDateTime(error.lastSeenAt)}
+              </TableCell>
+              <TableCell label="Action">
                 <Button
                   onClick={() =>
                     updateStatusMutation.mutate({

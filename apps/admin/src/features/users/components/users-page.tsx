@@ -38,7 +38,10 @@ function UsersPage() {
       {impersonationMutation.data ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
           <p className="font-semibold">Read-only impersonation link created</p>
-          <a className="break-all underline" href={impersonationMutation.data.url}>
+          <a
+            className="break-all underline"
+            href={impersonationMutation.data.url}
+          >
             {impersonationMutation.data.url}
           </a>
         </div>
@@ -56,19 +59,21 @@ function UsersPage() {
         <tbody>
           {(query.data?.users ?? []).map((user) => (
             <TableRow key={user.id}>
-              <TableCell>
+              <TableCell label="User">
                 <p className="font-medium">{user.name}</p>
                 <p className="text-xs text-slate-500">{user.email}</p>
               </TableCell>
-              <TableCell>{user.roleSummary}</TableCell>
-              <TableCell>
+              <TableCell label="Roles">{user.roleSummary}</TableCell>
+              <TableCell label="Status">
                 <StatusBadge tone={user.deactivatedAt ? "danger" : "good"}>
                   {user.deactivatedAt ? "deactivated" : "active"}
                 </StatusBadge>
               </TableCell>
-              <TableCell>{formatDateTime(user.lastLoginAt)}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
+              <TableCell label="Last login">
+                {formatDateTime(user.lastLoginAt)}
+              </TableCell>
+              <TableCell label="Actions">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     onClick={() =>
                       impersonationMutation.mutate({

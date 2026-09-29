@@ -51,7 +51,7 @@ function LoginPage() {
         result.error.message ??
           (mode === "bootstrap-sign-up"
             ? "We could not create that admin account."
-            : "We could not sign you in."),
+            : "We could not sign you in.")
       )
       return
     }
@@ -66,7 +66,12 @@ function LoginPage() {
         onSubmit={(event) => void handleSubmit(event)}
       >
         <div>
-          <h1 className="text-xl font-semibold">RocketRota Admin</h1>
+          <img
+            src="/pwa/icon-192.png"
+            alt=""
+            className="mb-3 size-12 rounded-xl"
+          />
+          <h1 className="text-xl font-semibold">Admin</h1>
           <p className="text-sm text-slate-500">
             {mode === "bootstrap-sign-up"
               ? "Create the temporary bootstrap admin account."
@@ -112,7 +117,7 @@ function LoginPage() {
             onClick={() => {
               setError(null)
               setMode((currentMode) =>
-                currentMode === "sign-in" ? "bootstrap-sign-up" : "sign-in",
+                currentMode === "sign-in" ? "bootstrap-sign-up" : "sign-in"
               )
             }}
             type="button"

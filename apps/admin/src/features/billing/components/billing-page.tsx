@@ -39,17 +39,19 @@ function BillingPage() {
         <tbody>
           {(query.data?.locations ?? []).map((location) => (
             <TableRow key={location.locationId}>
-              <TableCell>
+              <TableCell label="Location">
                 <p className="font-medium">{location.locationName}</p>
                 <p className="text-xs text-slate-500">
                   {location.organizationName ?? "Standalone"}
                 </p>
               </TableCell>
-              <TableCell>
+              <TableCell label="Billing">
                 <StatusBadge>{location.billingStatus ?? "unknown"}</StatusBadge>
               </TableCell>
-              <TableCell>{formatDateTime(location.trialEndsAt)}</TableCell>
-              <TableCell>
+              <TableCell label="Trial ends">
+                {formatDateTime(location.trialEndsAt)}
+              </TableCell>
+              <TableCell label="Action">
                 <Button
                   onClick={() =>
                     extendTrialMutation.mutate({

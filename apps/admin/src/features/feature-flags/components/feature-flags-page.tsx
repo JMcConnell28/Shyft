@@ -24,9 +24,7 @@ function FeatureFlagsPage() {
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Feature flags
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Feature flags</h1>
         <p className="text-sm text-slate-500">
           Roll out product capabilities globally or to selected workspaces.
         </p>
@@ -78,18 +76,20 @@ function FeatureFlagsPage() {
         <tbody>
           {(query.data?.flags ?? []).map((flag) => (
             <TableRow key={flag.id}>
-              <TableCell>
+              <TableCell label="Flag">
                 <p className="font-medium">{flag.name}</p>
                 <p className="font-mono text-xs text-slate-500">{flag.key}</p>
               </TableCell>
-              <TableCell>
+              <TableCell label="Status">
                 <StatusBadge tone={flag.isEnabled ? "good" : "neutral"}>
                   {flag.isEnabled ? "enabled" : "disabled"}
                 </StatusBadge>
               </TableCell>
-              <TableCell>{flag.targets.length}</TableCell>
-              <TableCell>{formatDateTime(flag.updatedAt)}</TableCell>
-              <TableCell>
+              <TableCell label="Targets">{flag.targets.length}</TableCell>
+              <TableCell label="Updated">
+                {formatDateTime(flag.updatedAt)}
+              </TableCell>
+              <TableCell label="Action">
                 <Button
                   onClick={() =>
                     updateMutation.mutate({

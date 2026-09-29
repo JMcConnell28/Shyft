@@ -33,12 +33,16 @@ function EventsPage() {
         <tbody>
           {(query.data?.events ?? []).map((event) => (
             <TableRow key={event.id}>
-              <TableCell>{event.eventType}</TableCell>
-              <TableCell>
+              <TableCell label="Event">{event.eventType}</TableCell>
+              <TableCell label="Target">
                 {event.targetType ?? "workspace"} {event.targetId ?? ""}
               </TableCell>
-              <TableCell>{event.actorUserId ?? "system"}</TableCell>
-              <TableCell>{formatDateTime(event.createdAt)}</TableCell>
+              <TableCell label="Actor">
+                {event.actorUserId ?? "system"}
+              </TableCell>
+              <TableCell label="Created">
+                {formatDateTime(event.createdAt)}
+              </TableCell>
             </TableRow>
           ))}
         </tbody>

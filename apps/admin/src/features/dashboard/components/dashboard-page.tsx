@@ -16,7 +16,7 @@ function DashboardPage() {
           clocking.
         </p>
       </header>
-      <section className="grid gap-3 md:grid-cols-5">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <Metric label="Open errors" value={data?.summary.openErrors} />
         <Metric
           label="Support threads"
@@ -27,10 +27,7 @@ function DashboardPage() {
           label="Clock failures today"
           value={data?.summary.failedClockAttemptsToday}
         />
-        <Metric
-          label="Trials ending"
-          value={data?.summary.trialExpiringSoon}
-        />
+        <Metric label="Trials ending" value={data?.summary.trialExpiringSoon} />
       </section>
       <section className="rounded-lg border border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-4 py-3">
@@ -38,12 +35,15 @@ function DashboardPage() {
         </div>
         <div className="divide-y divide-slate-100">
           {(data?.activity ?? []).map((item) => (
-            <div className="flex items-center justify-between px-4 py-3" key={item.id}>
-              <div>
+            <div
+              className="flex flex-wrap items-start justify-between gap-2 px-4 py-3"
+              key={item.id}
+            >
+              <div className="min-w-0">
                 <p className="text-sm font-medium">{item.label}</p>
                 <p className="text-xs text-slate-500">{item.type}</p>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="shrink-0 text-xs text-slate-500">
                 {formatDateTime(item.occurredAt)}
               </p>
             </div>

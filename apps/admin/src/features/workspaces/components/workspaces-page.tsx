@@ -36,16 +36,24 @@ function WorkspacesPage() {
         <tbody>
           {workspaces.map((workspace) => (
             <TableRow key={workspace.locationId}>
-              <TableCell>
+              <TableCell label="Location">
                 <p className="font-medium">{workspace.locationName}</p>
                 <p className="text-xs text-slate-500">{workspace.locationId}</p>
               </TableCell>
-              <TableCell>{workspace.organizationName ?? "Standalone"}</TableCell>
-              <TableCell>
-                <StatusBadge>{workspace.billingStatus ?? "unknown"}</StatusBadge>
+              <TableCell label="Organization">
+                {workspace.organizationName ?? "Standalone"}
               </TableCell>
-              <TableCell>{workspace.activeEmployees}</TableCell>
-              <TableCell>{formatDateTime(workspace.trialEndsAt)}</TableCell>
+              <TableCell label="Billing">
+                <StatusBadge>
+                  {workspace.billingStatus ?? "unknown"}
+                </StatusBadge>
+              </TableCell>
+              <TableCell label="Employees">
+                {workspace.activeEmployees}
+              </TableCell>
+              <TableCell label="Trial ends">
+                {formatDateTime(workspace.trialEndsAt)}
+              </TableCell>
             </TableRow>
           ))}
         </tbody>

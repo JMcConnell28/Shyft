@@ -106,7 +106,10 @@ function SupportThreadPage({ id }: { id: string }) {
                       ? (query.data.customerName ?? "Customer")
                       : "RocketRota support"}
                   </span>
-                  <time dateTime={message.createdAt}>
+                  <time
+                    className="shrink-0 text-right"
+                    dateTime={message.createdAt}
+                  >
                     {new Date(message.createdAt).toLocaleString()}
                   </time>
                 </div>
