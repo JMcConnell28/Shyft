@@ -41,6 +41,17 @@ const getSupportNotifications = createServerFn({ method: "POST" })
     return listCustomerSupportNotifications(scope)
   })
 
+const getSupportLocations = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => supportScopeSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { requireCustomerSupportAccess } =
+      await import("@/features/support/server/access")
+    const { listSupportLocations } =
+      await import("@/features/support/server/queries")
+    const scope = await requireCustomerSupportAccess(data.organizationId)
+    return listSupportLocations(scope.organizationId)
+  })
+
 const createSupportThread = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => createSupportThreadSchema.parse(input))
   .handler(async ({ data }) => {
@@ -67,6 +78,7 @@ const replyToSupportThread = createServerFn({ method: "POST" })
 export {
   createSupportThread,
   getSupportNotifications,
+  getSupportLocations,
   getSupportThread,
   listSupportThreads,
   replyToSupportThread,

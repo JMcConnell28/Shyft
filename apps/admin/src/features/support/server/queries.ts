@@ -12,8 +12,10 @@ import type {
 type ThreadRow = {
   category: string
   created_at: Date | string
-  created_by_email: string | null
+  customer_name: string | null
   id: string
+  location_name: string | null
+  organization_name: string | null
   priority: string
   status: string
   subject: string
@@ -41,7 +43,9 @@ async function listSupportThreads(
             thread.status,
             thread.created_at,
             thread.updated_at,
-            app_user.email as created_by_email,
+            app_user.name as customer_name,
+            organization_row.name as organization_name,
+            location.name as location_name,
             coalesce((select max(message_number)
                       from admin_private.support_messages message
                       where message.thread_id = thread.id
@@ -50,6 +54,10 @@ async function listSupportThreads(
      from admin_private.support_threads thread
      left join public."user" app_user
        on app_user.id = thread.created_by_user_id
+     left join public."organization" organization_row
+       on organization_row.id = thread.organization_id
+     left join public.locations location
+       on location.id = thread.location_id
      left join admin_private.support_thread_reads read_state
        on read_state.thread_id = thread.id
       and read_state.reader_kind = 'admin'
@@ -72,10 +80,17 @@ async function getSupportThreadDetail(
   const threads = await queryMany<ThreadRow>(
     `select thread.id, thread.subject, thread.category, thread.priority,
             thread.status, thread.created_at, thread.updated_at,
-            app_user.email as created_by_email, false as unread
+            app_user.name as customer_name,
+            organization_row.name as organization_name,
+            location.name as location_name,
+            false as unread
      from admin_private.support_threads thread
      left join public."user" app_user
        on app_user.id = thread.created_by_user_id
+     left join public."organization" organization_row
+       on organization_row.id = thread.organization_id
+     left join public.locations location
+       on location.id = thread.location_id
      where thread.id = $1`,
     [id]
   )
@@ -136,8 +151,10 @@ function mapThread(row: ThreadRow): SupportThread {
   return {
     category: row.category,
     createdAt: new Date(row.created_at).toISOString(),
-    createdByEmail: row.created_by_email,
+    customerName: row.customer_name,
     id: row.id,
+    locationName: row.location_name,
+    organizationName: row.organization_name,
     priority: row.priority,
     status: row.status,
     subject: row.subject,

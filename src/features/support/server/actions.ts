@@ -8,16 +8,33 @@ async function createCustomerSupportThread(input: {
   userId: string
   subject: string
   category: SupportCategory
+  locationId: string | null
   body: string
 }): Promise<{ id: string }> {
   const client = await getDatabase().connect()
   try {
     await client.query("begin")
+    if (input.locationId) {
+      const location = await client.query<{ id: string }>(
+        `select id from public.locations
+         where id = $1 and organization_id = $2`,
+        [input.locationId, input.organizationId]
+      )
+      if (!location.rows[0]) {
+        throw new Error("Choose a valid workplace location.")
+      }
+    }
     const result = await client.query<{ id: string }>(
       `insert into admin_private.support_threads
-         (created_by_user_id, organization_id, subject, category)
-       values ($1, $2, $3, $4) returning id`,
-      [input.userId, input.organizationId, input.subject, input.category]
+         (created_by_user_id, organization_id, location_id, subject, category)
+       values ($1, $2, $3, $4, $5) returning id`,
+      [
+        input.userId,
+        input.organizationId,
+        input.locationId,
+        input.subject,
+        input.category,
+      ]
     )
     const thread = result.rows.at(0)
     if (!thread) throw new Error("We could not create that support request.")

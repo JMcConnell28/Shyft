@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query"
 
 import {
+  getSupportLocations,
   getSupportNotifications,
   getSupportThread,
   listSupportThreads,
@@ -16,6 +17,8 @@ const supportQueryKeys = {
     ["customer-support", organizationId, "detail", threadId] as const,
   notifications: (organizationId: string) =>
     ["customer-support", organizationId, "notifications"] as const,
+  locations: (organizationId: string) =>
+    ["customer-support", organizationId, "locations"] as const,
 }
 
 function supportThreadsQueryOptions(organizationId: string, page: number) {
@@ -43,8 +46,16 @@ function supportNotificationsQueryOptions(organizationId: string) {
   })
 }
 
+function supportLocationsQueryOptions(organizationId: string) {
+  return queryOptions({
+    queryKey: supportQueryKeys.locations(organizationId),
+    queryFn: () => getSupportLocations({ data: { organizationId } }),
+  })
+}
+
 export {
   supportNotificationsQueryOptions,
+  supportLocationsQueryOptions,
   supportQueryKeys,
   supportThreadQueryOptions,
   supportThreadsQueryOptions,

@@ -31,8 +31,11 @@ type SupportNotifications = {
   unreadCount: number
 }
 
+type SupportLocationOption = { id: string; name: string }
+
 export type {
   SupportCategory,
+  SupportLocationOption,
   SupportMessage,
   SupportNotifications,
   SupportStatus,

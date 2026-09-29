@@ -10,6 +10,7 @@ const supportMessageSchema = z.string().trim().min(1).max(5000)
 const createSupportThreadSchema = supportScopeSchema.extend({
   subject: z.string().trim().min(2).max(160),
   category: z.enum(["support", "bug", "feature_request"]),
+  locationId: z.uuid().nullable().default(null),
   body: supportMessageSchema,
 })
 

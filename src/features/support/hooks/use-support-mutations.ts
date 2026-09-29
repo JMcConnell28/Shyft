@@ -20,6 +20,7 @@ function useSupportMutations(organizationId: string) {
       mutationFn: (input: {
         subject: string
         category: SupportCategory
+        locationId: string | null
         body: string
       }) => createSupportThread({ data: { ...input, organizationId } }),
       onSuccess: async () => {

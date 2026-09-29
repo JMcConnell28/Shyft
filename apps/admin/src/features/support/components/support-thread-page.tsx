@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { getSupportCategoryLabel } from "@/features/support/constants"
 import { useSupportDetail } from "@/features/support/hooks/use-support-detail"
 import { useSupportMutations } from "@/features/support/hooks/use-support-mutations"
 import { supportQueryKeys } from "@/features/support/query-keys"
@@ -72,8 +73,13 @@ function SupportThreadPage({ id }: { id: string }) {
             <div>
               <h1 className="text-2xl font-semibold">{query.data.subject}</h1>
               <p className="mt-1 text-sm text-slate-500">
-                {query.data.createdByEmail ?? "Unknown customer"} ·{" "}
-                {query.data.category} · {query.data.status}
+                {query.data.customerName ?? "Unknown customer"} ·{" "}
+                {getSupportCategoryLabel(query.data.category)} ·{" "}
+                {query.data.status}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                {query.data.organizationName ?? "Unknown organisation"} ·{" "}
+                {query.data.locationName ?? "All locations"}
               </p>
             </div>
             {query.data.status !== "resolved" ? (
@@ -97,7 +103,7 @@ function SupportThreadPage({ id }: { id: string }) {
                 <div className="flex justify-between gap-3 text-xs text-slate-500">
                   <span className="font-semibold">
                     {message.authorType === "user"
-                      ? "Customer"
+                      ? (query.data.customerName ?? "Customer")
                       : "RocketRota support"}
                   </span>
                   <time dateTime={message.createdAt}>

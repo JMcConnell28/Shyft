@@ -14,13 +14,14 @@ import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminWorkspacesRouteImport } from './routes/_admin/workspaces'
 import { Route as AdminUsersRouteImport } from './routes/_admin/users'
-import { Route as AdminSupportRouteImport } from './routes/_admin/support'
 import { Route as AdminFeatureFlagsRouteImport } from './routes/_admin/feature-flags'
 import { Route as AdminEventsRouteImport } from './routes/_admin/events'
 import { Route as AdminErrorsRouteImport } from './routes/_admin/errors'
 import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
 import { Route as AdminClockStationsRouteImport } from './routes/_admin/clock-stations'
 import { Route as AdminBillingRouteImport } from './routes/_admin/billing'
+import { Route as AdminSupportRouteRouteImport } from './routes/_admin/support/route'
+import { Route as AdminSupportIndexRouteImport } from './routes/_admin/support/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminSupportThreadIdRouteImport } from './routes/_admin/support/$threadId'
 
@@ -46,11 +47,6 @@ const AdminWorkspacesRoute = AdminWorkspacesRouteImport.update({
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSupportRoute = AdminSupportRouteImport.update({
-  id: '/support',
-  path: '/support',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminFeatureFlagsRoute = AdminFeatureFlagsRouteImport.update({
@@ -83,6 +79,16 @@ const AdminBillingRoute = AdminBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSupportRouteRoute = AdminSupportRouteRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSupportIndexRoute = AdminSupportIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminSupportRouteRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -91,23 +97,24 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 const AdminSupportThreadIdRoute = AdminSupportThreadIdRouteImport.update({
   id: '/$threadId',
   path: '/$threadId',
-  getParentRoute: () => AdminSupportRoute,
+  getParentRoute: () => AdminSupportRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/support': typeof AdminSupportRouteRouteWithChildren
   '/billing': typeof AdminBillingRoute
   '/clock-stations': typeof AdminClockStationsRoute
   '/dashboard': typeof AdminDashboardRoute
   '/errors': typeof AdminErrorsRoute
   '/events': typeof AdminEventsRoute
   '/feature-flags': typeof AdminFeatureFlagsRoute
-  '/support': typeof AdminSupportRouteWithChildren
   '/users': typeof AdminUsersRoute
   '/workspaces': typeof AdminWorkspacesRoute
   '/support/$threadId': typeof AdminSupportThreadIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/support/': typeof AdminSupportIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,45 +125,47 @@ export interface FileRoutesByTo {
   '/errors': typeof AdminErrorsRoute
   '/events': typeof AdminEventsRoute
   '/feature-flags': typeof AdminFeatureFlagsRoute
-  '/support': typeof AdminSupportRouteWithChildren
   '/users': typeof AdminUsersRoute
   '/workspaces': typeof AdminWorkspacesRoute
   '/support/$threadId': typeof AdminSupportThreadIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/support': typeof AdminSupportIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/_admin/support': typeof AdminSupportRouteRouteWithChildren
   '/_admin/billing': typeof AdminBillingRoute
   '/_admin/clock-stations': typeof AdminClockStationsRoute
   '/_admin/dashboard': typeof AdminDashboardRoute
   '/_admin/errors': typeof AdminErrorsRoute
   '/_admin/events': typeof AdminEventsRoute
   '/_admin/feature-flags': typeof AdminFeatureFlagsRoute
-  '/_admin/support': typeof AdminSupportRouteWithChildren
   '/_admin/users': typeof AdminUsersRoute
   '/_admin/workspaces': typeof AdminWorkspacesRoute
   '/_admin/support/$threadId': typeof AdminSupportThreadIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_admin/support/': typeof AdminSupportIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/login'
+    | '/support'
     | '/billing'
     | '/clock-stations'
     | '/dashboard'
     | '/errors'
     | '/events'
     | '/feature-flags'
-    | '/support'
     | '/users'
     | '/workspaces'
     | '/support/$threadId'
     | '/api/auth/$'
+    | '/support/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -167,27 +176,28 @@ export interface FileRouteTypes {
     | '/errors'
     | '/events'
     | '/feature-flags'
-    | '/support'
     | '/users'
     | '/workspaces'
     | '/support/$threadId'
     | '/api/auth/$'
+    | '/support'
   id:
     | '__root__'
     | '/'
     | '/_admin'
     | '/login'
+    | '/_admin/support'
     | '/_admin/billing'
     | '/_admin/clock-stations'
     | '/_admin/dashboard'
     | '/_admin/errors'
     | '/_admin/events'
     | '/_admin/feature-flags'
-    | '/_admin/support'
     | '/_admin/users'
     | '/_admin/workspaces'
     | '/_admin/support/$threadId'
     | '/api/auth/$'
+    | '/_admin/support/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -234,13 +244,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/support': {
-      id: '/_admin/support'
-      path: '/support'
-      fullPath: '/support'
-      preLoaderRoute: typeof AdminSupportRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_admin/feature-flags': {
       id: '/_admin/feature-flags'
       path: '/feature-flags'
@@ -283,6 +286,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBillingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/support': {
+      id: '/_admin/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof AdminSupportRouteRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/support/': {
+      id: '/_admin/support/'
+      path: '/'
+      fullPath: '/support/'
+      preLoaderRoute: typeof AdminSupportIndexRouteImport
+      parentRoute: typeof AdminSupportRouteRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -295,43 +312,44 @@ declare module '@tanstack/react-router' {
       path: '/$threadId'
       fullPath: '/support/$threadId'
       preLoaderRoute: typeof AdminSupportThreadIdRouteImport
-      parentRoute: typeof AdminSupportRoute
+      parentRoute: typeof AdminSupportRouteRoute
     }
   }
 }
 
-interface AdminSupportRouteChildren {
+interface AdminSupportRouteRouteChildren {
   AdminSupportThreadIdRoute: typeof AdminSupportThreadIdRoute
+  AdminSupportIndexRoute: typeof AdminSupportIndexRoute
 }
 
-const AdminSupportRouteChildren: AdminSupportRouteChildren = {
+const AdminSupportRouteRouteChildren: AdminSupportRouteRouteChildren = {
   AdminSupportThreadIdRoute: AdminSupportThreadIdRoute,
+  AdminSupportIndexRoute: AdminSupportIndexRoute,
 }
 
-const AdminSupportRouteWithChildren = AdminSupportRoute._addFileChildren(
-  AdminSupportRouteChildren,
-)
+const AdminSupportRouteRouteWithChildren =
+  AdminSupportRouteRoute._addFileChildren(AdminSupportRouteRouteChildren)
 
 interface AdminRouteChildren {
+  AdminSupportRouteRoute: typeof AdminSupportRouteRouteWithChildren
   AdminBillingRoute: typeof AdminBillingRoute
   AdminClockStationsRoute: typeof AdminClockStationsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminErrorsRoute: typeof AdminErrorsRoute
   AdminEventsRoute: typeof AdminEventsRoute
   AdminFeatureFlagsRoute: typeof AdminFeatureFlagsRoute
-  AdminSupportRoute: typeof AdminSupportRouteWithChildren
   AdminUsersRoute: typeof AdminUsersRoute
   AdminWorkspacesRoute: typeof AdminWorkspacesRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminSupportRouteRoute: AdminSupportRouteRouteWithChildren,
   AdminBillingRoute: AdminBillingRoute,
   AdminClockStationsRoute: AdminClockStationsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminErrorsRoute: AdminErrorsRoute,
   AdminEventsRoute: AdminEventsRoute,
   AdminFeatureFlagsRoute: AdminFeatureFlagsRoute,
-  AdminSupportRoute: AdminSupportRouteWithChildren,
   AdminUsersRoute: AdminUsersRoute,
   AdminWorkspacesRoute: AdminWorkspacesRoute,
 }

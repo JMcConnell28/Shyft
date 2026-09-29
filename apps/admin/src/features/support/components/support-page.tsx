@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/data-table"
 import { StatusBadge } from "@/components/ui/status-badge"
+import { getSupportCategoryLabel } from "@/features/support/constants"
 import { useSupportQuery } from "@/features/support/hooks/use-support-query"
 import { formatDateTime } from "@/lib/utils"
 
@@ -32,6 +33,7 @@ function SupportPage() {
           <TableRow>
             <TableHeaderCell>Thread</TableHeaderCell>
             <TableHeaderCell>Customer</TableHeaderCell>
+            <TableHeaderCell>Workplace</TableHeaderCell>
             <TableHeaderCell>Status</TableHeaderCell>
             <TableHeaderCell>Updated</TableHeaderCell>
             <TableHeaderCell>Conversation</TableHeaderCell>
@@ -50,9 +52,19 @@ function SupportPage() {
                   ) : null}
                   {thread.subject}
                 </p>
-                <p className="text-xs text-slate-500">{thread.category}</p>
+                <p className="text-xs text-slate-500">
+                  {getSupportCategoryLabel(thread.category)}
+                </p>
               </TableCell>
-              <TableCell>{thread.createdByEmail ?? "Unknown user"}</TableCell>
+              <TableCell>{thread.customerName ?? "Unknown customer"}</TableCell>
+              <TableCell>
+                <p className="font-medium">
+                  {thread.organizationName ?? "Unknown organisation"}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {thread.locationName ?? "All locations"}
+                </p>
+              </TableCell>
               <TableCell>
                 <StatusBadge
                   tone={thread.status === "open" ? "warning" : "neutral"}

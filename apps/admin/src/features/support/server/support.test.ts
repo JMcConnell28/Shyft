@@ -48,13 +48,24 @@ describe("admin support", () => {
         status: "open",
         created_at: new Date("2026-01-01"),
         updated_at: new Date("2026-01-01"),
-        created_by_email: null,
+        customer_name: "Alex Manager",
+        organization_name: "Harbour Group",
+        location_name: "North Branch",
         unread: false,
       }))
     )
     const result = await listSupportThreads("agent-1", 1)
     expect(result.threads).toHaveLength(25)
     expect(result.hasMore).toBe(true)
+    expect(result.threads[0]).toMatchObject({
+      customerName: "Alex Manager",
+      organizationName: "Harbour Group",
+      locationName: "North Branch",
+    })
+    expect(queryMany).toHaveBeenCalledWith(
+      expect.stringContaining('left join public."organization"'),
+      ["agent-1", 25]
+    )
     expect(queryMany).toHaveBeenCalledWith(
       expect.stringContaining("limit 26 offset $2"),
       ["agent-1", 25]
@@ -79,7 +90,9 @@ describe("admin support", () => {
       status: "open",
       created_at: new Date("2026-01-01"),
       updated_at: new Date("2026-01-01"),
-      created_by_email: "customer@example.com",
+      customer_name: "Alex Manager",
+      organization_name: "Harbour Group",
+      location_name: null,
       unread: false,
     }
     const message = {

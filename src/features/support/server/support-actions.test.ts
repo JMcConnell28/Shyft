@@ -35,6 +35,7 @@ describe("support mutations", () => {
         userId: "user-1",
         subject: "Question",
         category: "support",
+        locationId: null,
         body: "How does this work?",
       })
     ).resolves.toEqual({ id: "thread-1" })
@@ -44,6 +45,48 @@ describe("support mutations", () => {
     )
     expect(query).toHaveBeenCalledWith("commit")
     expect(release).toHaveBeenCalledOnce()
+  })
+
+  it("checks that a selected location belongs to the workplace", async () => {
+    query.mockImplementation((sql: string) =>
+      Promise.resolve(
+        sql.includes("from public.locations")
+          ? { rows: [{ id: "location-1" }] }
+          : sql.includes("insert into admin_private.support_threads")
+            ? { rows: [{ id: "thread-1" }] }
+            : { rows: [] }
+      )
+    )
+    await createCustomerSupportThread({
+      organizationId: "org-1",
+      userId: "user-1",
+      subject: "Question",
+      category: "support",
+      locationId: "location-1",
+      body: "Help",
+    })
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining("organization_id = $2"),
+      ["location-1", "org-1"]
+    )
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining("admin_private.support_threads"),
+      ["user-1", "org-1", "location-1", "Question", "support"]
+    )
+  })
+
+  it("rejects a location outside the workplace", async () => {
+    await expect(
+      createCustomerSupportThread({
+        organizationId: "org-1",
+        userId: "user-1",
+        subject: "Question",
+        category: "support",
+        locationId: "location-2",
+        body: "Help",
+      })
+    ).rejects.toThrow("valid workplace location")
+    expect(query).toHaveBeenCalledWith("rollback")
   })
 
   it("reopens a resolved thread when its requester replies", async () => {

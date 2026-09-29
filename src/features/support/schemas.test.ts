@@ -8,6 +8,7 @@ import {
 const input = {
   organizationId: "org-1",
   category: "support",
+  locationId: null,
   subject: "Question",
   body: "How do I publish a rota?",
 }
@@ -19,6 +20,11 @@ describe("support input validation", () => {
         createSupportThreadSchema.safeParse({ ...input, category }).success
       ).toBe(true)
     }
+  })
+
+  it("treats older requests without a location as organisation-wide", () => {
+    const { locationId: _locationId, ...previousInput } = input
+    expect(createSupportThreadSchema.parse(previousInput).locationId).toBe(null)
   })
 
   it("rejects empty and oversized messages", () => {
@@ -39,6 +45,15 @@ describe("support input validation", () => {
     })
     expect(parsed).not.toHaveProperty("userId")
     expect(parsed).not.toHaveProperty("priority")
+  })
+
+  it("rejects an invalid location identifier", () => {
+    expect(
+      createSupportThreadSchema.safeParse({
+        ...input,
+        locationId: "other-workplace",
+      }).success
+    ).toBe(false)
   })
 
   it("requires a thread id for replies", () => {

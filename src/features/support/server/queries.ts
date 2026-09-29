@@ -2,6 +2,7 @@ import "@tanstack/react-start/server-only"
 
 import type {
   SupportCategory,
+  SupportLocationOption,
   SupportMessage,
   SupportNotifications,
   SupportStatus,
@@ -148,8 +149,20 @@ async function listCustomerSupportNotifications(input: {
   }
 }
 
+async function listSupportLocations(
+  organizationId: string
+): Promise<Array<SupportLocationOption>> {
+  const result = await getDatabase().query<SupportLocationOption>(
+    `select id, name from public.locations
+     where organization_id = $1 order by name`,
+    [organizationId]
+  )
+  return result.rows
+}
+
 export {
   getCustomerSupportThread,
   listCustomerSupportNotifications,
   listCustomerSupportThreads,
+  listSupportLocations,
 }

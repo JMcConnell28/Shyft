@@ -1,8 +1,10 @@
 type SupportThread = {
   category: string
   createdAt: string
-  createdByEmail: string | null
+  customerName: string | null
   id: string
+  locationName: string | null
+  organizationName: string | null
   priority: string
   status: string
   subject: string
