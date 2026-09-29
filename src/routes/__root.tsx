@@ -55,11 +55,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       {
         rel: "icon",
         type: "image/png",
-        href: "/favicon-v4.png",
+        href: "/favicon-v5.png",
       },
       {
         rel: "shortcut icon",
-        href: "/favicon-v4.png",
+        href: "/favicon-v5.png",
       },
       {
         rel: "manifest",
@@ -67,7 +67,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       },
       {
         rel: "apple-touch-icon",
-        href: "/pwa/icon-180-v4.png",
+        href: "/pwa/icon-180-v5.png",
       },
       {
         rel: "apple-touch-startup-image",

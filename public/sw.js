@@ -1,4 +1,4 @@
-const CACHE_NAME = "rocketrota-pwa-v8"
+const CACHE_NAME = "rocketrota-pwa-v9"
 const APP_ASSETS = [
   "/manifest.json",
   "/offline.html",
@@ -8,10 +8,10 @@ const APP_ASSETS = [
   "/pwa/icon-180.png",
   "/pwa/icon-512.png",
   "/pwa/icon-maskable-512.png",
-  "/pwa/icon-192-v4.png",
-  "/pwa/icon-180-v4.png",
-  "/pwa/icon-512-v4.png",
-  "/favicon-v4.png",
+  "/pwa/icon-192-v5.png",
+  "/pwa/icon-180-v5.png",
+  "/pwa/icon-512-v5.png",
+  "/favicon-v5.png",
   "/pwa/splash-2048.png",
 ]
 
