@@ -2,15 +2,17 @@ import type { DashboardShiftOverview } from "@/features/dashboard/types"
 
 function DashboardSummaryStrip({
   overview,
+  organizationName,
 }: {
   overview: DashboardShiftOverview
+  organizationName: string
 }) {
   return (
     <section className="rounded-[14px] border border-[#dfe5f0] bg-card px-5 py-4 shadow-[0_8px_24px_rgba(30,50,96,0.045)]">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
         <div className="min-w-0">
           <p className="text-xs font-semibold tracking-[0.08em] text-[#7a86a4] uppercase">
-            Dashboard
+            Dashboard - {organizationName}
           </p>
           <h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-[#11245a]">
             Your shift overview

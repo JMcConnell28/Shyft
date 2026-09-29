@@ -61,11 +61,11 @@ const timeEntry: TimeEntryRow = {
 
 describe("timesheet schedule labels", () => {
   it("shows a published 21:00 shift at 21:00 in personal and team views", () => {
-    expectSchedules([], [scheduledShift], "21:00 - 23:00")
+    expectSchedules([], [scheduledShift], "21:00 – 23:00")
   })
 
   it("uses the published wall time for an existing clocked entry", () => {
-    expectSchedules([timeEntry], [scheduledShift], "21:00 - 23:00")
+    expectSchedules([timeEntry], [scheduledShift], "21:00 – 23:00")
   })
 
   it("shows the correct half of a split shift", () => {
@@ -81,7 +81,7 @@ describe("timesheet schedule labels", () => {
         },
       ],
       [],
-      "21:00 - 23:00"
+      "21:00 – 23:00"
     )
   })
 })

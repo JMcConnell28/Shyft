@@ -63,9 +63,6 @@ function DashboardWorkspaceRoute() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
-      <p className="hidden text-sm font-medium text-muted-foreground md:block">
-        Viewing {activeWorkspace.name}
-      </p>
       <DashboardWelcomeModal
         capabilities={context.capabilities}
         initiallyOpen={welcome.shouldShow}
@@ -74,6 +71,7 @@ function DashboardWorkspaceRoute() {
       />
 
       <ShiftOverviewCards
+        organizationName={activeWorkspace.name}
         announcements={announcements}
         mobileContext={{
           userName: context.viewer.user.name,

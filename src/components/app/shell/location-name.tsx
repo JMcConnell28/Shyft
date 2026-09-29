@@ -25,7 +25,6 @@ function LocationName({
           <Title />
         </div>
         <p className="mt-3 truncate text-xs font-medium text-[#5d6b94]">
-          Viewing{" "}
           {activeWorkspace?.name ??
             activeOrganization?.name ??
             "no organization"}

@@ -12,10 +12,12 @@ import { MobileDashboardShell } from "@/features/dashboard/components/mobile-das
 
 function ShiftOverviewCards({
   announcements,
+  organizationName,
   mobileContext,
   overview,
 }: {
   announcements: DashboardAnnouncements
+  organizationName: string
   mobileContext: DashboardMobileContext
   overview: DashboardShiftOverview
 }) {
@@ -33,7 +35,10 @@ function ShiftOverviewCards({
         weekHoursLabel={overview.weekHoursLabel}
       />
       <div className="hidden flex-col gap-4 md:flex">
-        <DashboardSummaryStrip overview={overview} />
+        <DashboardSummaryStrip
+          overview={overview}
+          organizationName={organizationName}
+        />
         <div className="grid items-start gap-4 xl:grid-cols-[minmax(22rem,0.78fr)_minmax(0,1.22fr)]">
           <div className="space-y-4">
             <DashboardClockStatusPanel clockStatus={overview.clockStatus} />

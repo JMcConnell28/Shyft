@@ -101,7 +101,8 @@ function UserMenu({
                       {user.email}
                     </span>
                     <span className="mt-1 truncate text-[11px] font-medium text-[#53617f]">
-                      Viewing {activeOrganization?.name ?? "no organization"}
+                      <span className="hidden md:inline">Viewing </span>
+                      {activeOrganization?.name ?? "no organization"}
                     </span>
                   </div>
                 </div>

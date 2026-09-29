@@ -32,6 +32,7 @@ const baseEntry: TimesheetEntry = {
   scheduledStartAt: "2026-06-01T09:00:00.000Z",
   scheduledTimeLabel: null,
   shiftSegment: "full",
+  timeZone: "Europe/London",
   source: "employee_nfc",
   status: "closed",
   zoneName: "Bar",

@@ -10,6 +10,7 @@ import type {
   ClockPayRuleSettings,
   ScheduledClockWindow,
 } from "@/features/time-clock/utils/pay-rules"
+// eslint-disable-next-line no-duplicate-imports
 import {
   getPayableClockIn,
   getPayableClockOut,
@@ -22,6 +23,7 @@ import {
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
 import { requireTimeAttendanceAccess } from "@/features/billing/server/entitlements"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
+import { DEFAULT_CLOCK_TIME_ZONE } from "@/lib/time-zone"
 import {
   assertSupabaseSuccess,
   getRequiredSupabaseRow,
@@ -76,7 +78,7 @@ async function submitEmployeeClock(input: {
     throw new Error("Clocking is not enabled for this location.")
   }
 
-  const rules = await getLocationClockRules(page.location.id)
+  const { rules } = await getLocationClockSettings(page.location.id)
   const now = new Date()
 
   if (input.action === "clock_in") {
@@ -179,14 +181,15 @@ async function managerClockOverride(input: {
       throw new Error("That team member is already clocked in.")
     }
 
+    const { rules, timeZone } = await getLocationClockSettings(input.locationId)
+    const now = new Date()
     const matchedShift = await getMatchedPublishedShift({
       employeeId: employee.id,
       locationId: input.locationId,
-      now: new Date(),
+      now,
+      timeZone,
     })
     const scheduledWindow = getScheduledWindow(matchedShift, "full")
-    const now = new Date()
-    const rules = await getLocationClockRules(input.locationId)
     const payable = getPayableClockIn({
       actualClockInAt: now,
       rules,
@@ -232,7 +235,7 @@ async function managerClockOverride(input: {
     )
   }
 
-  const rules = await getLocationClockRules(input.locationId)
+  const { rules } = await getLocationClockSettings(input.locationId)
   const scheduledWindow =
     openEntries[0].scheduled_start_at && openEntries[0].scheduled_end_at
       ? {
@@ -602,14 +605,14 @@ async function ensureShiftSegmentCanStart(input: {
   }
 }
 
-async function getLocationClockRules(
+async function getLocationClockSettings(
   locationId: string
-): Promise<ClockPayRuleSettings> {
+): Promise<{ rules: ClockPayRuleSettings; timeZone: string }> {
   const supabase = createSupabaseServerClient()
   const result = await supabase
     .from("location_clock_settings")
     .select(
-      "early_clock_in_grace_minutes, early_start_review_minutes, forgotten_clock_out_alert_minutes, hard_review_after_minutes, late_clock_in_grace_minutes, late_clock_out_grace_minutes, late_finish_review_minutes, late_start_review_minutes"
+      "early_clock_in_grace_minutes, early_start_review_minutes, forgotten_clock_out_alert_minutes, hard_review_after_minutes, late_clock_in_grace_minutes, late_clock_out_grace_minutes, late_finish_review_minutes, late_start_review_minutes, timezone"
     )
     .eq("location_id", locationId)
     .maybeSingle()
@@ -617,15 +620,18 @@ async function getLocationClockRules(
   assertSupabaseSuccess(result.error, "We could not load clock settings.")
 
   return {
-    earlyClockInGraceMinutes: result.data?.early_clock_in_grace_minutes ?? 10,
-    earlyStartReviewMinutes: result.data?.early_start_review_minutes ?? 15,
-    forgottenClockOutAlertMinutes:
-      result.data?.forgotten_clock_out_alert_minutes ?? 120,
-    hardReviewAfterMinutes: result.data?.hard_review_after_minutes ?? 720,
-    lateClockInGraceMinutes: result.data?.late_clock_in_grace_minutes ?? 5,
-    lateClockOutGraceMinutes: result.data?.late_clock_out_grace_minutes ?? 10,
-    lateFinishReviewMinutes: result.data?.late_finish_review_minutes ?? 15,
-    lateStartReviewMinutes: result.data?.late_start_review_minutes ?? 15,
+    rules: {
+      earlyClockInGraceMinutes: result.data?.early_clock_in_grace_minutes ?? 10,
+      earlyStartReviewMinutes: result.data?.early_start_review_minutes ?? 15,
+      forgottenClockOutAlertMinutes:
+        result.data?.forgotten_clock_out_alert_minutes ?? 120,
+      hardReviewAfterMinutes: result.data?.hard_review_after_minutes ?? 720,
+      lateClockInGraceMinutes: result.data?.late_clock_in_grace_minutes ?? 5,
+      lateClockOutGraceMinutes: result.data?.late_clock_out_grace_minutes ?? 10,
+      lateFinishReviewMinutes: result.data?.late_finish_review_minutes ?? 15,
+      lateStartReviewMinutes: result.data?.late_start_review_minutes ?? 15,
+    },
+    timeZone: result.data?.timezone ?? DEFAULT_CLOCK_TIME_ZONE,
   }
 }
 
