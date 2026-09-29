@@ -5,19 +5,19 @@
   "description": "Rotas, shifts and time tracking for your team.",
   "icons": [
     {
-      "src": "/pwa/icon-192-v2.png",
+      "src": "/pwa/icon-192-v3.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/pwa/icon-512-v2.png",
+      "src": "/pwa/icon-512-v3.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "/pwa/icon-maskable-512-v2.png",
+      "src": "/pwa/icon-maskable-512-v3.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"
