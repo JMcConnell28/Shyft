@@ -20,7 +20,10 @@ function useUpdateRotaBudget() {
       }),
     onSuccess: async (_, budgetPence) => {
       setBudgetPence(budgetPence)
-      await queryClient.invalidateQueries({ queryKey: rotaQueryKeys.all })
+      await queryClient.invalidateQueries({
+        queryKey: rotaQueryKeys.workspaces,
+        refetchType: "none",
+      })
       showSuccessToast(
         budgetPence === null ? "Budget removed." : "Budget saved."
       )

@@ -24,7 +24,8 @@ function useUpdateRotaNote() {
     onSuccess: async (_, note) => {
       setMetaNote(note.trim() || null)
       await queryClient.invalidateQueries({
-        queryKey: rotaQueryKeys.all,
+        queryKey: rotaQueryKeys.workspaces,
+        refetchType: "none",
       })
       showSuccessToast("Staff notes saved.")
     },

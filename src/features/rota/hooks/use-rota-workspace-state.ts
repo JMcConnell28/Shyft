@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-
 import type {
   CreateWorkspaceShiftInput,
   WorkspaceAssignment,
@@ -11,6 +10,8 @@ import type {
   WorkspaceShift,
   WorkspaceZone,
 } from "@/features/rota/types/workspace"
+import { useTouchInput } from "@/features/rota/hooks/use-touch-input"
+
 import { formatMinutesAsHours } from "@/features/rota/utils/workspace-time"
 import {
   formatCurrency,
@@ -20,10 +21,10 @@ import {
 } from "@/features/rota/utils/workspace-budget"
 import { buildBudgetInsights } from "@/features/rota/utils/budget-insights"
 import {
-  compareShiftsByTime,
   getShiftAbsoluteSegments,
   shiftsHaveMatchingTimes,
 } from "@/features/rota/utils/workspace-shifts"
+import { indexWorkspaceShifts } from "@/features/rota/utils/workspace-shift-index"
 import {
   buildWorkspaceInsights,
   getZoneAppearance,
@@ -48,6 +49,7 @@ function useRotaWorkspaceState({
     mapById(boardData.assignments)
   )
   const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false)
+  const isTouchInput = useTouchInput()
 
   React.useEffect(() => {
     setMeta(boardData.meta)
@@ -63,33 +65,19 @@ function useRotaWorkspaceState({
   )
   const lowerSearchQuery = searchQuery.trim().toLowerCase()
 
-  const visibleShiftIdsByDayId = React.useMemo(() => {
-    return boardData.days.reduce<Record<string, string[]>>((map, day) => {
-      map[day.id] = Object.values(shiftsById)
-        .filter((shift) => shift.dayId === day.id)
-        .filter(
-          (shift) => selectedZoneId === "all" || shift.zoneId === selectedZoneId
-        )
-        .sort((left, right) =>
-          compareShiftsByTime(left, right, boardData.location)
-        )
-        .map((shift) => shift.id)
-
-      return map
-    }, {})
-  }, [boardData.days, boardData.location, selectedZoneId, shiftsById])
-
-  const allShiftIdsByDayId = React.useMemo(() => {
-    return boardData.days.reduce<Record<string, string[]>>((map, day) => {
-      map[day.id] = Object.values(shiftsById)
-        .filter((shift) => shift.dayId === day.id)
-        .map((shift) => shift.id)
-      return map
-    }, {})
-  }, [boardData.days, shiftsById])
+  const { allShiftIdsByDayId, visibleShiftIdsByDayId } = React.useMemo(
+    () =>
+      indexWorkspaceShifts({
+        days: boardData.days,
+        location: boardData.location,
+        selectedZoneId,
+        shiftsById,
+      }),
+    [boardData.days, boardData.location, selectedZoneId, shiftsById]
+  )
 
   const assignmentIdsByShiftId = React.useMemo(() => {
-    return Object.values(assignmentsById).reduce<Record<string, string[]>>(
+    return Object.values(assignmentsById).reduce<Record<string, Array<string>>>(
       (map, assignment) => {
         const list = map[assignment.shiftId] ?? []
         list.push(assignment.id)
@@ -330,6 +318,8 @@ function useRotaWorkspaceState({
       setAssignmentsById((currentAssignments) => {
         const assignment = currentAssignments[assignmentId]
 
+        // IDs can be stale after a concurrent edit, despite the indexed type.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!assignment || assignment.shiftId === shiftId) {
           mutationResult = { status: "noop" }
           return currentAssignments
@@ -432,6 +422,7 @@ function useRotaWorkspaceState({
     async (shiftId: string) => {
       const shift = shiftsById[shiftId]
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!shift) {
         return {
           status: "noop" as const,
@@ -527,6 +518,7 @@ function useRotaWorkspaceState({
     getZoneAppearance,
     hasUnsavedChanges,
     isDemo: mode === "demo",
+    isTouchInput,
     locations: [boardData.location],
     markChangesSaved,
     meta,
@@ -556,7 +548,7 @@ function useRotaWorkspaceState({
   }
 }
 
-function mapById<TItem extends { id: string }>(items: TItem[]) {
+function mapById<TItem extends { id: string }>(items: Array<TItem>) {
   return items.reduce<Record<string, TItem>>((map, item) => {
     map[item.id] = item
     return map
@@ -591,10 +583,11 @@ function getAssignmentOverlapResult({
   location: WorkspaceBoardData["location"]
   shiftId: string
   shiftsById: Record<string, WorkspaceShift>
-  zones: WorkspaceZone[]
+  zones: Array<WorkspaceZone>
 }): WorkspaceAssignmentMutationResult | null {
   const nextShift = shiftsById[shiftId]
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!nextShift) {
     return null
   }
@@ -610,6 +603,7 @@ function getAssignmentOverlapResult({
 
     const existingShift = shiftsById[assignment.shiftId]
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!existingShift) {
       return false
     }
@@ -636,6 +630,7 @@ function getAssignmentOverlapResult({
     return null
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const employeeName = employeesById[employeeId]?.name ?? "This team member"
   const day = days.find((entry) => entry.id === nextShift.dayId)
   const zoneName =

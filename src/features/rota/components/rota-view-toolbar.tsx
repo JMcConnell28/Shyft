@@ -1,10 +1,21 @@
-import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
+import type {
+  WorkspaceBoardData,
+  WorkspaceDay,
+} from "@/features/rota/types/workspace"
 import { canExportSageTimesheetForRota } from "@/features/rota/utils/week-utils"
 import { SageTimesheetExportButton } from "@/features/timesheets/components/sage-timesheet-export-button"
-import ZonePicker from "@/features/rota/components/zone-picker"
+import { ZoneSelect } from "@/features/rota/components/zone-select"
 
-function RotaViewToolbar() {
-  const { days, meta, selectedLocation } = useRotaWorkspace()
+function RotaViewToolbar({
+  boardData,
+  selectedZoneId,
+  onSelectZone,
+}: {
+  boardData: WorkspaceBoardData
+  selectedZoneId: string
+  onSelectZone: (zoneId: string) => void
+}) {
+  const { days, meta, location: selectedLocation, zones } = boardData
   const weekRangeLabel = getWeekRangeLabel(days)
 
   return (
@@ -13,7 +24,7 @@ function RotaViewToolbar() {
         <div className="flex min-w-0 flex-col justify-center rounded-xl bg-card px-3 py-2">
           <div className="flex items-center gap-2">
             <span className="truncate text-sm font-semibold text-foreground">
-              {selectedLocation?.name ?? "Location"}
+              {selectedLocation.name}
             </span>
           </div>
           <span className="text-xs text-muted-foreground">
@@ -37,16 +48,20 @@ function RotaViewToolbar() {
               variant="pill"
             />
           ) : null}
-          <ZonePicker />
+          <ZoneSelect
+            selectedZoneId={selectedZoneId}
+            onSelectZone={onSelectZone}
+            zones={zones}
+          />
         </div>
       </div>
     </div>
   )
 }
 
-function getWeekRangeLabel(days: ReturnType<typeof useRotaWorkspace>["days"]) {
-  const firstDay = days[0]
-  const lastDay = days[days.length - 1]
+function getWeekRangeLabel(days: Array<WorkspaceDay>) {
+  const firstDay = days.at(0)
+  const lastDay = days.at(-1)
 
   if (!firstDay || !lastDay) {
     return "Week"

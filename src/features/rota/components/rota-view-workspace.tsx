@@ -1,20 +1,46 @@
 "use client"
 
-import RotaViewToolbar from "@/features/rota/components/rota-view-toolbar"
-import { RotaWorkspaceProvider } from "@/features/rota/components/rota-workspace-provider"
-import WeekContainer from "@/features/rota/components/week-container"
+import * as React from "react"
+
 import type { WorkspaceBoardData } from "@/features/rota/types/workspace"
+import RotaViewToolbar from "@/features/rota/components/rota-view-toolbar"
+import { PublishedRotaDay } from "@/features/rota/components/published-rota-day"
+import { buildPublishedRotaBoardIndex } from "@/features/rota/utils/published-rota-board"
 
 function RotaViewWorkspace({ boardData }: { boardData: WorkspaceBoardData }) {
+  const [selectedZoneId, setSelectedZoneId] = React.useState(
+    boardData.meta.settings.defaultZoneId ?? "all"
+  )
+  React.useEffect(() => {
+    setSelectedZoneId(boardData.meta.settings.defaultZoneId ?? "all")
+  }, [boardData])
+  const boardIndex = React.useMemo(
+    () => buildPublishedRotaBoardIndex(boardData, selectedZoneId),
+    [boardData, selectedZoneId]
+  )
+
   return (
-    <RotaWorkspaceProvider boardData={boardData}>
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2">
-        <RotaViewToolbar />
-        <div className="flex min-h-0 flex-1 gap-2 overflow-hidden">
-          <WeekContainer readOnly mobileDayColumns={2} />
+    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2">
+      <RotaViewToolbar
+        boardData={boardData}
+        selectedZoneId={selectedZoneId}
+        onSelectZone={setSelectedZoneId}
+      />
+      <div className="flex min-h-0 flex-1 gap-2 overflow-hidden">
+        <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+          <div className="no-scrollbar grid h-full min-h-0 w-full touch-pan-x snap-x snap-mandatory auto-cols-[calc(50%_-_0.3125rem)] grid-flow-col gap-2.5 overflow-x-auto overscroll-x-contain scroll-smooth [-webkit-overflow-scrolling:touch] md:auto-cols-auto md:grid-flow-row md:grid-cols-7 md:gap-2 md:overflow-hidden">
+            {boardData.days.map((day) => (
+              <div
+                key={day.id}
+                className="h-full min-h-0 min-w-0 snap-start overflow-hidden"
+              >
+                <PublishedRotaDay day={day} boardIndex={boardIndex} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </RotaWorkspaceProvider>
+    </div>
   )
 }
 

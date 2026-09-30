@@ -1,11 +1,11 @@
 "use client"
 
+import type { ReactNode } from "react"
 import type { RotaWorkspaceRouteInput } from "@/features/rota/types/workspace-query"
+import type { WorkspaceBoardData } from "@/features/rota/types/workspace"
 import { getRotaWorkspaceQueryInput } from "@/features/rota/workspace-query-options"
 import { RotaWorkspaceSkeleton } from "@/features/rota/components/rota-workspace-skeleton"
 import { RotaWorkspaceErrorState } from "@/features/rota/components/rota-workspace-error-state"
-import RotaViewWorkspace from "@/features/rota/components/rota-view-workspace"
-import RotaWorkspace from "@/features/rota/components/rota-workspace"
 import { useRotaWorkspaceQuery } from "@/features/rota/hooks/use-rota-workspace-query"
 
 function WorkspaceRotaDetailPage({
@@ -14,7 +14,10 @@ function WorkspaceRotaDetailPage({
   rotaId,
   userId,
   workspace,
-}: RotaWorkspaceRouteInput) {
+  children,
+}: RotaWorkspaceRouteInput & {
+  children: (boardData: WorkspaceBoardData) => ReactNode
+}) {
   const workspaceQuery = useRotaWorkspaceQuery(
     getRotaWorkspaceQueryInput({
       workspace,
@@ -51,11 +54,7 @@ function WorkspaceRotaDetailPage({
     )
   }
 
-  if (publishedOnly) {
-    return <RotaViewWorkspace boardData={workspaceQuery.data} />
-  }
-
-  return <RotaWorkspace boardData={workspaceQuery.data} />
+  return children(workspaceQuery.data)
 }
 
 export { WorkspaceRotaDetailPage }

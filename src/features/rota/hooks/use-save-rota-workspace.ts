@@ -4,10 +4,10 @@ import * as React from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
+import type { RotaListPageData } from "@/features/rota/types"
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
 import { rotaQueryKeys } from "@/features/rota/query-keys"
 import { saveRotaWorkspace } from "@/features/rota/server-fns"
-import type { RotaListPageData } from "@/features/rota/types"
 import { buildSaveRotaWorkspacePayload } from "@/features/rota/utils/rota-workspace-payload"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -52,16 +52,17 @@ function useSaveRotaWorkspace() {
           assignmentsById,
         }),
       }),
-    onSuccess: async () => {
+    onSuccess: () => {
       const nextCooldownUntil = Date.now() + SAVE_RATE_LIMIT_MS
       setCooldownUntil(nextCooldownUntil)
       setNow(Date.now())
       markChangesSaved()
       updateRotaListSaveState(queryClient, meta.rotaId, meta.status)
 
-      void queryClient.invalidateQueries({
-        queryKey: rotaQueryKeys.all,
-      })
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: rotaQueryKeys.workspaces }),
+        queryClient.invalidateQueries({ queryKey: rotaQueryKeys.listPages }),
+      ])
 
       showSuccessToast(
         meta.status === "published"
@@ -79,7 +80,6 @@ function useSaveRotaWorkspace() {
   const isRateLimited = cooldownUntil > now
   const canSave =
     meta.canEdit &&
-    (meta.status === "draft" || meta.status === "published") &&
     hasUnsavedChanges &&
     !saveMutation.isPending &&
     !isRateLimited
@@ -87,7 +87,6 @@ function useSaveRotaWorkspace() {
   async function save(options?: { bypassRateLimit?: boolean }) {
     const canSaveNow =
       meta.canEdit &&
-      (meta.status === "draft" || meta.status === "published") &&
       hasUnsavedChanges &&
       !saveMutation.isPending &&
       (!isRateLimited || options?.bypassRateLimit === true)
@@ -103,10 +102,9 @@ function useSaveRotaWorkspace() {
     canSave,
     isSaving: saveMutation.isPending,
     save,
-    saveBlockedReason:
-      !meta.canEdit
-        ? "Past rotas are locked and can no longer be edited."
-        : hasUnsavedChanges
+    saveBlockedReason: !meta.canEdit
+      ? "Past rotas are locked and can no longer be edited."
+      : hasUnsavedChanges
         ? isRateLimited
           ? "Saving is cooling down for a moment."
           : null
@@ -121,25 +119,21 @@ function updateRotaListSaveState(
 ) {
   queryClient.setQueriesData<RotaListPageData>(
     {
-      queryKey: rotaQueryKeys.all,
+      queryKey: rotaQueryKeys.listPages,
     },
     (currentData) => {
-      if (
-        !currentData ||
-        typeof currentData !== "object" ||
-        !("rows" in currentData) ||
-        !Array.isArray(currentData.rows)
-      ) {
+      if (!currentData) {
         return currentData
       }
 
-      let didChange = false
+      if (!currentData.rows.some((row) => row.id === rotaId)) {
+        return currentData
+      }
+
       const nextRows = currentData.rows.map((row) => {
         if (row.id !== rotaId) {
           return row
         }
-
-        didChange = true
 
         return {
           ...row,
@@ -147,10 +141,6 @@ function updateRotaListSaveState(
             status === "published" ? true : row.hasUnpublishedChanges,
         }
       })
-
-      if (!didChange) {
-        return currentData
-      }
 
       return {
         ...currentData,

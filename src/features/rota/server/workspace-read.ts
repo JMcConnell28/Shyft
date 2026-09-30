@@ -12,14 +12,18 @@ import { getDatabase } from "@/lib/db"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 
-import { listAccessibleLocations } from "@/features/rota/server/access"
+import { listWorkspaceEmployees } from "@/features/rota/server/workspace-employee-read"
+import { getAccessibleWorkspaceLocation } from "@/features/rota/server/workspace-location-read"
+import {
+  loadWorkspaceAssignments,
+  loadWorkspaceShifts,
+} from "@/features/rota/server/workspace-shift-read"
 import { getMembershipRole } from "@/features/rota/server/membership"
 import { requireVerifiedSessionOrThrow } from "@/features/rota/server/request-session"
 import { getLocationRotaSettings } from "@/features/rota/server/rota-settings"
 import {
   buildWorkspaceDays,
   buildWorkspaceLocation,
-  mapShiftRowToWorkspaceShift,
 } from "@/features/rota/server/workspace-shared"
 import { getTemplatesForLocation } from "@/features/rota/server/lookups"
 import {
@@ -78,15 +82,17 @@ async function getRotaWorkspaceData({
     throw new Error("You do not have permission to view this rota.")
   }
 
-  const locations = await listAccessibleLocations(organizationId, userId, role)
-  const selectedLocation =
-    locations.find((location) => location.slug === locationSlug) ?? null
+  const selectedLocation = await getAccessibleWorkspaceLocation({
+    organizationId,
+    locationSlug,
+    userId,
+    canViewManagedLocations:
+      capabilities.canManageRota || capabilities.canManageTimeClock,
+  })
 
   if (!selectedLocation) {
     throw new Error("You do not have access to that location.")
   }
-
-  const entitlement = await getLocationEntitlement(selectedLocation.id)
 
   const supabase = createSupabaseServerClient()
   const rotaQuery = supabase
@@ -96,9 +102,10 @@ async function getRotaWorkspaceData({
     )
     .eq("location_id", selectedLocation.id)
     .eq("id", rotaId)
-  const rotaResult = await rotaQuery
-    .eq("organization_id", organizationId)
-    .maybeSingle()
+  const [entitlement, rotaResult] = await Promise.all([
+    getLocationEntitlement(selectedLocation.id),
+    rotaQuery.eq("organization_id", organizationId).maybeSingle(),
+  ])
 
   assertSupabaseSuccess(rotaResult.error, "We could not load that rota.")
   const rota = rotaResult.data
@@ -124,11 +131,12 @@ async function getRotaWorkspaceData({
   const [
     hoursResult,
     zonesResult,
-    assignmentResult,
-    employeesResult,
+    employees,
     groupsResult,
     templates,
     rotaSettings,
+    shifts,
+    budgetPence,
   ] = await Promise.all([
     database.query<{
       close_time: string
@@ -147,80 +155,48 @@ async function getRotaWorkspaceData({
       .is("deleted_at", null)
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true }),
-    supabase
-      .from("employee_location_assignments")
-      .select("employee_id, staff_group_id, show_on_rota")
-      .eq("location_id", selectedLocation.id)
-      .eq("is_enabled", true)
-      .is("disabled_at", null),
-    supabase
-      .from("employees")
-      .select("id, full_name, staff_group_id")
-      .eq("status", "active"),
+    listWorkspaceEmployees({
+      organizationId,
+      locationId: selectedLocation.id,
+      includeHiddenEmployees: isPastRota,
+    }),
     groupsQuery.eq("organization_id", organizationId),
-    getTemplatesForLocation(organizationId, selectedLocation.id),
+    publishedOnly
+      ? Promise.resolve([])
+      : getTemplatesForLocation(organizationId, selectedLocation.id),
     getLocationRotaSettings(selectedLocation.id),
+    loadWorkspaceShifts(supabase, rota.id, days, publishedOnly),
+    !publishedOnly && capabilities.canViewRotaCosts
+      ? getRotaBudgetPence(rota.id)
+      : Promise.resolve(null),
   ])
 
   assertSupabaseSuccess(zonesResult.error, "We could not load the rota zones.")
-  assertSupabaseSuccess(
-    assignmentResult.error,
-    "We could not load the location staff assignments."
-  )
-  assertSupabaseSuccess(employeesResult.error, "We could not load employees.")
   assertSupabaseSuccess(groupsResult.error, "We could not load staff groups.")
-  const estimatedClosingSettings = await getLocationEstimatedClosingTime(
-    selectedLocation.id
-  )
 
   const location = buildWorkspaceLocation(
-    {
-      ...selectedLocation,
-      estimatedClosingTime: estimatedClosingSettings.estimatedClosingTime,
-      estimatedClosingTimeNextDay:
-        estimatedClosingSettings.estimatedClosingTimeNextDay,
-    },
+    selectedLocation,
     days,
     hoursResult.rows
   )
-  const enabledEmployeeIds = new Set(
-    (assignmentResult.data ?? [])
-      .filter((entry) => isPastRota || entry.show_on_rota)
-      .map((entry) => entry.employee_id)
-  )
-  const locationGroupByEmployeeId = new Map(
-    (assignmentResult.data ?? []).map((entry) => [
-      entry.employee_id,
-      entry.staff_group_id,
+  const employeeIds = employees.map((employee) => employee.id)
+  const [compensationByEmployeeId, rotaNotesByEmployeeId, assignments] =
+    await Promise.all([
+      !publishedOnly && capabilities.canViewRotaCosts
+        ? getEmployeeCompensationById(employeeIds)
+        : Promise.resolve(new Map<string, EmployeeCompensationRow>()),
+      publishedOnly
+        ? Promise.resolve(new Map<string, Array<WorkspaceEmployeeRotaNote>>())
+        : getEmployeeRotaNotesByEmployeeId(employeeIds, selectedLocation.id),
+      loadWorkspaceAssignments(supabase, shifts, publishedOnly),
     ])
-  )
-  const employees = (employeesResult.data ?? [])
-    .filter((employee) => enabledEmployeeIds.has(employee.id))
-    .sort((left, right) => left.full_name.localeCompare(right.full_name))
-  const compensationByEmployeeId = capabilities.canViewRotaCosts
-    ? await getEmployeeCompensationById(
-        employees.map((employee) => employee.id)
-      )
-    : new Map<string, EmployeeCompensationRow>()
-  const rotaNotesByEmployeeId = await getEmployeeRotaNotesByEmployeeId(
-    employees.map((employee) => employee.id),
-    selectedLocation.id
-  )
-  const budgetPence = capabilities.canViewRotaCosts
-    ? await getRotaBudgetPence(rota.id)
-    : null
   const employeeGroups = (groupsResult.data ?? []).map((group) => ({
     id: group.id,
     name: group.name,
     color: normalizeStaffGroupColor(group.color),
   }))
 
-  if (
-    employees.some(
-      (employee) =>
-        !(locationGroupByEmployeeId.get(employee.id) ?? employee.staff_group_id)
-    )
-  ) {
+  if (employees.some((employee) => !employee.staff_group_id)) {
     employeeGroups.push({
       id: "ungrouped",
       name: "Team members",
@@ -232,31 +208,6 @@ async function getRotaWorkspaceData({
     employeeGroups.map((group) => [group.id, group.color])
   )
 
-  const shiftsResult = publishedOnly
-    ? await supabase
-        .from("rota_published_shifts")
-        .select(
-          "id, day_date, zone_id, zone_name_snapshot, shift_type, start_time, end_time, end_kind, split_second_start_time, split_second_end_time"
-        )
-        .eq("rota_id", rota.id)
-        .order("day_date", { ascending: true })
-        .order("start_time", { ascending: true })
-    : await supabase
-        .from("rota_shifts")
-        .select(
-          "id, day_date, zone_id, zone_name_snapshot, shift_type, start_time, end_time, end_kind, split_second_start_time, split_second_end_time"
-        )
-        .eq("rota_id", rota.id)
-        .order("day_date", { ascending: true })
-        .order("start_time", { ascending: true })
-
-  assertSupabaseSuccess(
-    shiftsResult.error,
-    "We could not load the saved shifts."
-  )
-  const shifts = (shiftsResult.data ?? []).map((row) =>
-    mapShiftRowToWorkspaceShift(row, days)
-  )
   const zones = buildWorkspaceZones({
     activeZones: (zonesResult.data ?? []).map((zone) => ({
       id: zone.id,
@@ -265,14 +216,6 @@ async function getRotaWorkspaceData({
     preferShiftSnapshots: isPastRota,
     shifts,
   })
-  const shiftIds = shifts.map((shift) => shift.id)
-  const assignments =
-    shiftIds.length === 0
-      ? []
-      : publishedOnly
-        ? await loadPublishedAssignments(supabase, shiftIds)
-        : await loadWorkingAssignments(supabase, shiftIds)
-
   return {
     meta: {
       rotaId: rota.id,
@@ -301,10 +244,7 @@ async function getRotaWorkspaceData({
     zones,
     employeeGroups,
     employees: employees.map((employee) => {
-      const groupId =
-        locationGroupByEmployeeId.get(employee.id) ??
-        employee.staff_group_id ??
-        "ungrouped"
+      const groupId = employee.staff_group_id ?? "ungrouped"
 
       return {
         id: employee.id,
@@ -411,68 +351,6 @@ async function getRotaBudgetPence(rotaId: string) {
   )
 
   return result.rows.at(0)?.budget_pence ?? null
-}
-
-async function getLocationEstimatedClosingTime(locationId: string) {
-  const database = getDatabase()
-  const result = await database.query<{
-    estimated_closing_time: string
-    estimated_closing_time_next_day: boolean
-  }>(
-    `select estimated_closing_time, estimated_closing_time_next_day
-     from public.locations
-     where id = $1
-     limit 1`,
-    [locationId]
-  )
-
-  return {
-    estimatedClosingTime: result.rows[0]?.estimated_closing_time ?? "23:00",
-    estimatedClosingTimeNextDay:
-      result.rows[0]?.estimated_closing_time_next_day ?? false,
-  }
-}
-
-async function loadWorkingAssignments(
-  supabase: ReturnType<typeof createSupabaseServerClient>,
-  shiftIds: Array<string>
-) {
-  const result = await supabase
-    .from("rota_shift_assignments")
-    .select("id, employee_id, rota_shift_id")
-    .in("rota_shift_id", shiftIds)
-
-  assertSupabaseSuccess(
-    result.error,
-    "We could not load the shift assignments."
-  )
-
-  return (result.data ?? []).map((assignment) => ({
-    id: assignment.id,
-    employeeId: assignment.employee_id,
-    shiftId: assignment.rota_shift_id,
-  }))
-}
-
-async function loadPublishedAssignments(
-  supabase: ReturnType<typeof createSupabaseServerClient>,
-  shiftIds: Array<string>
-) {
-  const result = await supabase
-    .from("rota_published_shift_assignments")
-    .select("id, employee_id, rota_published_shift_id")
-    .in("rota_published_shift_id", shiftIds)
-
-  assertSupabaseSuccess(
-    result.error,
-    "We could not load the shift assignments."
-  )
-
-  return (result.data ?? []).map((assignment) => ({
-    id: assignment.id,
-    employeeId: assignment.employee_id,
-    shiftId: assignment.rota_published_shift_id,
-  }))
 }
 
 async function getEmployeeRotaNotesByEmployeeId(

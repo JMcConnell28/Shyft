@@ -11,22 +11,16 @@ import { useDeleteShift } from "@/features/rota/hooks/use-delete-shift"
 import { getShiftDisplayLines } from "@/features/rota/utils/workspace-shifts"
 import { Button } from "@/components/ui/button"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+
+const ConfirmDeleteShiftDialog = React.lazy(
+  () => import("@/features/rota/components/confirm-delete-shift-dialog")
+)
 
 function Shift({
   shiftId,
@@ -39,6 +33,7 @@ function Shift({
     assignmentIdsByShiftId,
     assignmentsById,
     getEmployee,
+    isTouchInput,
     meta,
     shiftsById,
     zones,
@@ -46,7 +41,6 @@ function Shift({
   const { removeShift } = useDeleteShift()
   const [menuOpen, setMenuOpen] = React.useState(false)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false)
-  const isTouchInput = useIsTouchInput()
   const shift = shiftsById[shiftId]
   const assignmentIds = assignmentIdsByShiftId[shiftId] ?? []
   const droppable = useDroppable({
@@ -206,53 +200,20 @@ function Shift({
         )}
       </div>
 
-      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
-        <AlertDialogContent size="sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete shift?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {assignmentIds.length > 0
-                ? `This will remove the shift and unassign ${assignmentIds.length} team member${assignmentIds.length === 1 ? "" : "s"} from it.`
-                : "This shift will be removed from the rota."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={() => {
-                setConfirmDeleteOpen(false)
-                void removeShift(shiftId)
-              }}
-            >
-              Delete shift
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <React.Suspense fallback={null}>
+        {confirmDeleteOpen ? (
+          <ConfirmDeleteShiftDialog
+            assignmentCount={assignmentIds.length}
+            onClose={() => setConfirmDeleteOpen(false)}
+            onConfirm={() => {
+              setConfirmDeleteOpen(false)
+              void removeShift(shiftId)
+            }}
+          />
+        ) : null}
+      </React.Suspense>
     </>
   )
-}
-
-function useIsTouchInput() {
-  const [isTouchInput, setIsTouchInput] = React.useState(false)
-
-  React.useEffect(() => {
-    const mediaQuery = window.matchMedia("(hover: none), (pointer: coarse)")
-    const updateMatch = () => {
-      setIsTouchInput(mediaQuery.matches)
-    }
-
-    updateMatch()
-
-    mediaQuery.addEventListener("change", updateMatch)
-
-    return () => {
-      mediaQuery.removeEventListener("change", updateMatch)
-    }
-  }, [])
-
-  return isTouchInput
 }
 
 export default Shift

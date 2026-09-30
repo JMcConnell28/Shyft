@@ -5,6 +5,7 @@ import { RotaWorkspaceRouteError } from "@/features/rota/components/rota-workspa
 import { loadRotaWorkspace } from "@/features/rota/load-rota-workspace"
 
 import { WorkspaceRotaDetailPage } from "@/features/rota/components/workspace-rota-detail-page"
+import RotaViewWorkspace from "@/features/rota/components/rota-view-workspace"
 
 export const Route = createFileRoute(
   "/_authed/_verified/app/$workspaceSlug/rota/$locationSlug/$rotaId/view"
@@ -54,6 +55,8 @@ function RotaViewRoute() {
       rotaId={params.rotaId}
       userId={viewer.user.id}
       workspace={activeWorkspace}
-    />
+    >
+      {(boardData) => <RotaViewWorkspace boardData={boardData} />}
+    </WorkspaceRotaDetailPage>
   )
 }
