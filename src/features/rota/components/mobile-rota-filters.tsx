@@ -45,7 +45,7 @@ function MobileRotaFilters({
   onRangeChange,
 }: MobileRotaFiltersProps) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex w-full items-center gap-2.5">
       {canEditRotas ? (
         <MobileFilterSelect
           icon={ListFilterIcon}
@@ -138,7 +138,7 @@ function MobileFilterSelect({
   onChange: (value: string) => void
 }) {
   return (
-    <label className="relative flex h-10 min-w-[6.5rem] items-center justify-center gap-2 rounded-[10px] border border-[#d7e0ed] bg-white px-3 text-[13px] font-semibold text-[#405782] shadow-[0_2px_8px_rgba(30,50,96,0.025)]">
+    <label className="relative flex h-10 min-w-0 flex-1 items-center justify-center gap-2 rounded-[10px] border border-[#d7e0ed] bg-white px-3 text-[13px] font-semibold text-[#405782] shadow-[0_2px_8px_rgba(30,50,96,0.025)]">
       <Icon className="size-[18px]" aria-hidden="true" />
       <span>{label}</span>
       <NativeSelect

@@ -13,13 +13,13 @@ type MobileRotaCardProps = {
 
 function MobileRotaCard({ canEdit, data, row }: MobileRotaCardProps) {
   return (
-    <article className="relative rounded-[11px] border border-[#e0e7f1] bg-white p-3 text-[#10285c] shadow-[0_3px_10px_rgba(30,50,96,0.065)]">
+    <article className="rounded-[11px] border border-[#e0e7f1] bg-white p-3 text-[#10285c] shadow-[0_3px_10px_rgba(30,50,96,0.065)]">
       <div className="min-w-0">
-        <p className="mb-1 flex min-w-0 items-center gap-1.5 pr-6 text-xs font-semibold text-[#0868f7]">
+        <p className="mb-1 flex min-w-0 items-center gap-1.5 text-xs font-semibold text-[#0868f7]">
           <MapPinIcon className="size-3.5 shrink-0" aria-hidden="true" />
           <span className="truncate">{row.locationName}</span>
         </p>
-        <div className="flex items-start justify-between gap-2 pr-6">
+        <div className="flex items-start justify-between gap-2">
           <h2 className="min-w-0 text-[16px] leading-6 font-semibold tracking-[-0.02em]">
             {row.weekLabel}
           </h2>
@@ -41,13 +41,9 @@ function MobileRotaCard({ canEdit, data, row }: MobileRotaCardProps) {
           )}
         </p>
 
-        <div className="mt-2 flex items-end justify-between gap-2">
-          <p className="min-w-0 truncate pb-0.5 text-[11px] font-medium text-[#607399]">
+        <div className="mt-2 flex flex-col gap-2">
+          <p className="text-[11px] font-medium text-[#607399]">
             {formatRotaUpdatedLabel(row)}
-            <span className="px-1.5" aria-hidden="true">
-              •
-            </span>
-            {Math.round(row.scheduledHours)} hours
           </p>
           <MobileRotaCardActions canEdit={canEdit} data={data} row={row} />
         </div>

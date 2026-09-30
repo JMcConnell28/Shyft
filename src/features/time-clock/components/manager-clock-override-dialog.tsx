@@ -71,8 +71,8 @@ function ManagerClockOverrideDialog({
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="bottom-0 top-auto left-0 w-full max-w-none translate-x-0 translate-y-0 gap-0 overflow-hidden rounded-t-[22px] rounded-b-none p-0 text-[#10204b] sm:top-1/2 sm:left-1/2 sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl">
-        <DialogHeader className="border-b border-[#edf0f6] px-5 py-5 pr-12">
+      <DialogContent className="top-auto bottom-0 left-0 flex max-h-[calc(100dvh-1rem)] w-full max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-t-[22px] rounded-b-none p-0 text-[#10204b] sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:max-h-[calc(100dvh-2rem)] sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl">
+        <DialogHeader className="shrink-0 border-b border-[#edf0f6] px-5 py-5 pr-12">
           <DialogTitle className="text-lg font-bold tracking-[-0.02em]">
             Manual {action === "clock_in" ? "clock in" : "clock out"}
           </DialogTitle>
@@ -81,7 +81,7 @@ function ManagerClockOverrideDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 px-5 py-5">
+        <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           <fieldset>
             <legend className="text-xs font-semibold text-[#617096]">
               Action
@@ -113,7 +113,7 @@ function ManagerClockOverrideDialog({
           <label className="block text-xs font-semibold text-[#617096]">
             Team member
             <select
-              className="mt-2 h-11 w-full rounded-xl border border-[#dfe4ef] bg-white px-3 text-sm font-semibold text-[#10204b] outline-none transition focus:border-[#236cff] focus:ring-2 focus:ring-blue-100"
+              className="mt-2 h-11 w-full rounded-xl border border-[#dfe4ef] bg-white px-3 text-sm font-semibold text-[#10204b] transition outline-none focus:border-[#236cff] focus:ring-2 focus:ring-blue-100"
               onChange={(event) => setEmployeeKey(event.target.value)}
               value={employeeKey}
             >

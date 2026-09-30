@@ -98,10 +98,6 @@ function RotaListRow({
           <span className="px-1.5" aria-hidden="true">
             •
           </span>
-          {Math.round(row.scheduledHours)} hours
-          <span className="px-1.5" aria-hidden="true">
-            •
-          </span>
           {row.shiftCount} shifts
           <span className="px-1.5" aria-hidden="true">
             •
