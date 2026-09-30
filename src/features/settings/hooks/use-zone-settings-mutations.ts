@@ -81,11 +81,11 @@ function useZoneSettingsMutations(input: {
       }),
     onSuccess: async () => {
       await invalidate()
-      showSuccessToast("Zone deleted.")
+      showSuccessToast("Zone archived.")
     },
     onError: (error) => {
       showErrorToast(error, {
-        fallbackMessage: "We could not delete that zone.",
+        fallbackMessage: "We could not archive that zone.",
       })
     },
   })

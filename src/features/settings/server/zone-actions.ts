@@ -110,9 +110,15 @@ async function deleteZone(input: {
 
   const database = getDatabase()
   const zone = await getZoneForWorkspace(database, input)
-
-  const zoneCountResult = await database.query<{ count: string }>(
-    `select count(*)::text as count
+  const client = await database.connect()
+  try {
+    await client.query("BEGIN")
+    await client.query(
+      `select id from public.locations where id = $1::uuid for update`,
+      [zone.locationId]
+    )
+    const zoneCountResult = await client.query<{ count: string }>(
+      `select count(*)::text as count
      from public.zones
      where (
          ($1::text is not null and organization_id = $1::text)
@@ -120,27 +126,36 @@ async function deleteZone(input: {
        )
        and location_id = $2::uuid
        and deleted_at is null`,
-    [input.organizationId ?? null, zone.locationId, input.locationId ?? null]
-  )
-
-  if (Number(zoneCountResult.rows[0]?.count ?? "0") <= 1) {
-    throw new Error(
-      "Each location needs at least one zone. Create another zone first."
+      [input.organizationId ?? null, zone.locationId, input.locationId ?? null]
     )
-  }
 
-  await database.query(
-    `update public.zones
-     set deleted_at = timezone('utc', now()),
-         updated_at = timezone('utc', now())
-     where id = $2::uuid
-       and (
-         ($1::text is not null and organization_id = $1::text)
-         or ($3::uuid is not null and location_id = $3::uuid)
-       )
-       and deleted_at is null`,
-    [input.organizationId ?? null, input.zoneId, input.locationId ?? null]
-  )
+    if (Number(zoneCountResult.rows[0]?.count ?? "0") <= 1) {
+      throw new Error(
+        "Each location needs at least one zone. Create another zone first."
+      )
+    }
+
+    const result = await client.query<{ id: string }>(
+      `update public.zones
+       set deleted_at = timezone('utc', now()),
+           updated_at = timezone('utc', now())
+       where id = $2::uuid
+         and (
+           ($1::text is not null and organization_id = $1::text)
+           or ($3::uuid is not null and location_id = $3::uuid)
+         )
+         and deleted_at is null
+       returning id`,
+      [input.organizationId ?? null, input.zoneId, input.locationId ?? null]
+    )
+    if (!result.rows.at(0)) throw new Error("This zone has already been archived.")
+    await client.query("COMMIT")
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
+  }
 
   return {
     id: input.zoneId,
@@ -199,7 +214,7 @@ async function getLocationForWorkspace(
      limit 1`,
     [input.organizationId ?? null, input.locationId]
   )
-  const location = result.rows[0]
+  const location = result.rows.at(0)
 
   if (!location) {
     throw new Error("Choose a valid location.")
@@ -236,7 +251,7 @@ async function getZoneForWorkspace(
     [input.organizationId ?? null, input.locationId ?? null, input.zoneId]
   )
 
-  const zone = result.rows[0]
+  const zone = result.rows.at(0)
 
   if (!zone) {
     throw new Error("Choose a valid zone.")

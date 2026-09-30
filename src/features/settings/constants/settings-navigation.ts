@@ -25,7 +25,7 @@ const workspaceSettingsNavItems: Array<SettingsNavItem> = [
     to: "/app/$workspaceSlug/settings/rota",
   },
   {
-    description: "Locations, opening hours, and closing estimates.",
+    description: "Locations, zones, addresses, and closing times.",
     icon: MapPinnedIcon,
     label: "Locations",
     to: "/app/$workspaceSlug/settings/locations",

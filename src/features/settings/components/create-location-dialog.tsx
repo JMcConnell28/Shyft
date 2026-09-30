@@ -1,8 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { MapPinPlusIcon } from "lucide-react"
+import { MapPinPlusIcon, PlusIcon, XIcon } from "lucide-react"
 
+import type {
+  OnboardingBusinessType,
+  OnboardingPlanningMode,
+} from "@/features/onboarding/schemas/onboarding-schemas"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,18 +24,14 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import type {
-  OnboardingBusinessType,
-  OnboardingPlanningMode,
-} from "@/features/onboarding/schemas/onboarding-schemas"
 import { getErrorMessage } from "@/lib/errors"
+import { createLocationDetailsSchema } from "@/features/settings/schemas/location-settings-schemas"
 
 type CreateLocationValues = {
   name: string
   businessType: OnboardingBusinessType
   planningMode: OnboardingPlanningMode
-  zoneNames: string[]
+  zoneNames: Array<string>
   worksiteName: string
 }
 
@@ -44,13 +44,13 @@ function CreateLocationDialog({
 }) {
   const [open, setOpen] = React.useState(false)
   const [name, setName] = React.useState("")
-  const [zoneText, setZoneText] = React.useState("Main area")
+  const [zones, setZones] = React.useState(["Main area"])
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (!open) {
       setName("")
-      setZoneText("Main area")
+      setZones(["Main area"])
       setError(null)
     }
   }, [open])
@@ -59,18 +59,18 @@ function CreateLocationDialog({
     event.preventDefault()
 
     const locationName = name.trim()
-    const zoneNames = parseZoneNames(zoneText)
-
-    if (locationName.length < 2) {
-      setError("Enter a location name.")
+    const zoneNames = zones.map((zone) => zone.trim())
+    const parsed = createLocationDetailsSchema.safeParse({
+      name: locationName,
+      businessType: "hospitality",
+      planningMode: "fixed_location",
+      zoneNames,
+      worksiteName: "",
+    })
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Check the location details.")
       return
     }
-
-    if (zoneNames.length === 0) {
-      setError("Add at least one zone for this location.")
-      return
-    }
-
     try {
       await onSubmit({
         name: locationName,
@@ -101,7 +101,7 @@ function CreateLocationDialog({
         <MapPinPlusIcon className="size-4" />
         New location
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-h-[90dvh] max-w-md overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create location</DialogTitle>
           <DialogDescription>
@@ -128,15 +128,50 @@ function CreateLocationDialog({
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="location-zones">Initial zones</FieldLabel>
+            <FieldLabel>Initial zones</FieldLabel>
             <FieldContent>
-              <Textarea
-                id="location-zones"
-                value={zoneText}
-                rows={3}
-                placeholder={"Main area\nBar\nKitchen"}
-                onChange={(event) => setZoneText(event.target.value)}
-              />
+              <div className="space-y-2">
+                {zones.map((zone, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input
+                      aria-label={`Zone ${index + 1} name`}
+                      value={zone}
+                      maxLength={80}
+                      placeholder={index === 0 ? "Main area" : "Another zone"}
+                      onChange={(event) =>
+                        setZones((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index ? event.target.value : item
+                          )
+                        )
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      aria-label={`Remove zone ${index + 1}`}
+                      disabled={zones.length === 1}
+                      onClick={() =>
+                        setZones((current) =>
+                          current.filter((_, itemIndex) => itemIndex !== index)
+                        )
+                      }
+                    >
+                      <XIcon className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={zones.length >= 12}
+                  onClick={() => setZones((current) => [...current, ""])}
+                >
+                  <PlusIcon className="size-3.5" /> Add zone
+                </Button>
+              </div>
             </FieldContent>
           </Field>
 
@@ -150,18 +185,6 @@ function CreateLocationDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function parseZoneNames(value: string) {
-  return Array.from(
-    new Map(
-      value
-        .split(/[\n,]/)
-        .map((entry) => entry.trim())
-        .filter(Boolean)
-        .map((entry) => [entry.toLowerCase(), entry])
-    ).values()
   )
 }
 

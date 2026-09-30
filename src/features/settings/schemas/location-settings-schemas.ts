@@ -40,14 +40,26 @@ const createLocationInputSchema = organizationScopedUserSchema.extend({
         .min(1, "Enter a zone name.")
         .max(80, "Zone name is too long.")
     )
+    .min(1, "Add at least one zone for this location.")
     .max(12, "Use 12 zones or fewer.")
-    .default([]),
+    .refine(
+      (names) =>
+        new Set(names.map((name) => name.toLowerCase())).size === names.length,
+      "Zone names must be unique within a location."
+    )
+    .default(["Main area"]),
   worksiteName: z
     .string()
     .trim()
     .max(80, "Worksite name is too long.")
     .optional()
     .default(""),
+})
+
+const createLocationDetailsSchema = createLocationInputSchema.omit({
+  organizationId: true,
+  locationId: true,
+  userId: true,
 })
 
 const updateLocationSettingsInputSchema = organizationScopedUserSchema.extend({
@@ -65,6 +77,7 @@ const updateLocationSettingsInputSchema = organizationScopedUserSchema.extend({
 })
 
 export {
+  createLocationDetailsSchema,
   createLocationInputSchema,
   getLocationSettingsInputSchema,
   updateLocationSettingsInputSchema,

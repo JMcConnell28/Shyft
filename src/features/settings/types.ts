@@ -29,6 +29,7 @@ type LocationSettingsItem = {
   slug: string
   employeeCount: number
   zoneCount: number
+  zones: Array<RotaSettingsZone>
   estimatedClosingTime: string
   estimatedClosingTimeNextDay: boolean
 }

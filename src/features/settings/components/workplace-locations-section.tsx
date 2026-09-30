@@ -1,10 +1,7 @@
 import { MapPinnedIcon } from "lucide-react"
 
 import type { GeneralSettingsLocation } from "@/features/settings/types"
-import {
-  WorkplaceReadOnlyValue,
-  WorkplaceSettingRow,
-} from "@/features/settings/components/workplace-setting-row"
+import { WorkplaceSettingRow } from "@/features/settings/components/workplace-setting-row"
 import { WorkplaceSettingsSection } from "@/features/settings/components/workplace-settings-section"
 
 function WorkplaceLocationsSection({
@@ -24,9 +21,7 @@ function WorkplaceLocationsSection({
             description={`Location ${index + 1} of ${locations.length}`}
             key={location.id}
             title={location.name}
-          >
-            <WorkplaceReadOnlyValue value={location.slug} />
-          </WorkplaceSettingRow>
+          />
         ))
       ) : (
         <div className="py-5 text-xs font-semibold text-[#7180a2]">

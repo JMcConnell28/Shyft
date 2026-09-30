@@ -1,6 +1,5 @@
-import { createFileRoute, useLocation } from "@tanstack/react-router"
+import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router"
 
-import { LocationsSettingsPage } from "@/features/settings/components/locations-settings-page"
 import { locationSettingsQueryOptions } from "@/features/settings/query-options"
 import { SettingsLayout } from "@/features/settings/components/settings-layout"
 
@@ -39,15 +38,8 @@ function WorkspaceLocationsSettingsRoute() {
   }
 
   return (
-    <SettingsLayout
-      contentOnly
-      workspaceSlug={workspaceSlug}
-      activePath={pathname}
-    >
-      <LocationsSettingsPage
-        organizationId={activeWorkspace.id}
-        userId={viewer.user.id}
-      />
+    <SettingsLayout workspaceSlug={workspaceSlug} activePath={pathname}>
+      <Outlet />
     </SettingsLayout>
   )
 }

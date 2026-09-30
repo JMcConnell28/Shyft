@@ -6,7 +6,7 @@ function WorkplaceSettingRow({
   description,
   title,
 }: {
-  children: ReactNode
+  children?: ReactNode
   description: string
   title: string
 }) {
@@ -18,7 +18,9 @@ function WorkplaceSettingRow({
           {description}
         </p>
       </div>
-      <div className="flex min-w-0 items-center justify-end">{children}</div>
+      {children ? (
+        <div className="flex min-w-0 items-center justify-end">{children}</div>
+      ) : null}
     </div>
   )
 }

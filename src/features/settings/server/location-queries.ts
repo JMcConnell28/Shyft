@@ -32,24 +32,28 @@ async function getLocationSettingsPageData(input: {
   }
 
   const database = getDatabase()
-  const [locationsResult, operatingHoursResult, employeeCountResult] =
-    await Promise.all([
-      database.query<{
-        employee_count: string
-        estimated_closing_time: string
-        estimated_closing_time_next_day: boolean
-        address_line1: string | null
-        address_line2: string | null
-        address_city: string | null
-        address_county: string | null
-        address_postcode: string | null
-        address_country: string | null
-        id: string
-        name: string
-        slug: string
-        zone_count: string
-      }>(
-        `select location.id,
+  const [
+    locationsResult,
+    operatingHoursResult,
+    employeeCountResult,
+    zonesResult,
+  ] = await Promise.all([
+    database.query<{
+      employee_count: string
+      estimated_closing_time: string
+      estimated_closing_time_next_day: boolean
+      address_line1: string | null
+      address_line2: string | null
+      address_city: string | null
+      address_county: string | null
+      address_postcode: string | null
+      address_country: string | null
+      id: string
+      name: string
+      slug: string
+      zone_count: string
+    }>(
+      `select location.id,
               location.name,
               location.slug,
               location.estimated_closing_time,
@@ -71,27 +75,40 @@ async function getLocationSettingsPageData(input: {
        where ${input.organizationId ? "location.organization_id = $1" : "location.id = $1"}
        group by location.id
        order by location.created_at asc, location.name asc`,
-        [input.organizationId ?? input.locationId]
-      ),
-      database.query<{
-        close_time: string
-        close_time_next_day: boolean
-        location_id: string
-        weekday: number
-      }>(
-        `select location_id, weekday, close_time, close_time_next_day
+      [input.organizationId ?? input.locationId]
+    ),
+    database.query<{
+      close_time: string
+      close_time_next_day: boolean
+      location_id: string
+      weekday: number
+    }>(
+      `select location_id, weekday, close_time, close_time_next_day
        from public.location_operating_hours
        where ${input.organizationId ? "organization_id = $1" : "location_id = $1"}`,
-        [input.organizationId ?? input.locationId]
-      ),
-      database.query<{ total: string }>(
-        `select count(distinct employee.id) as total
+      [input.organizationId ?? input.locationId]
+    ),
+    database.query<{ total: string }>(
+      `select count(distinct employee.id) as total
        from public.employees employee
        where ${input.organizationId ? "employee.organization_id = $1" : "employee.location_id = $1"}
          and employee.status = 'active'`,
-        [input.organizationId ?? input.locationId]
-      ),
-    ])
+      [input.organizationId ?? input.locationId]
+    ),
+    database.query<{
+      id: string
+      location_id: string
+      name: string
+      sort_order: number
+    }>(
+      `select id, location_id, name, sort_order
+         from public.zones
+         where ${input.organizationId ? "organization_id = $1" : "location_id = $1"}
+           and deleted_at is null
+         order by sort_order, name`,
+      [input.organizationId ?? input.locationId]
+    ),
+  ])
 
   const operatingHourByLocationAndWeekday = new Map(
     operatingHoursResult.rows.map((row) => [
@@ -99,6 +116,15 @@ async function getLocationSettingsPageData(input: {
       row,
     ])
   )
+  const zonesByLocation = new Map<
+    string,
+    Array<{ id: string; name: string; sortOrder: number }>
+  >()
+  for (const zone of zonesResult.rows) {
+    const zones = zonesByLocation.get(zone.location_id) ?? []
+    zones.push({ id: zone.id, name: zone.name, sortOrder: zone.sort_order })
+    zonesByLocation.set(zone.location_id, zones)
+  }
 
   return {
     locations: locationsResult.rows.map((location) => ({
@@ -126,6 +152,7 @@ async function getLocationSettingsPageData(input: {
       slug: location.slug,
       employeeCount: Number(location.employee_count),
       zoneCount: Number(location.zone_count),
+      zones: zonesByLocation.get(location.id) ?? [],
       estimatedClosingTime: location.estimated_closing_time.slice(0, 5),
       estimatedClosingTimeNextDay: location.estimated_closing_time_next_day,
     })),

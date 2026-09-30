@@ -1,6 +1,7 @@
 "use client"
 
-import { Trash2Icon } from "lucide-react"
+import * as React from "react"
+import { ArchiveIcon } from "lucide-react"
 
 import {
   AlertDialog,
@@ -26,35 +27,57 @@ function DeleteZoneDialog({
   zoneName: string
   onConfirm: () => Promise<void>
 }) {
+  const [open, setOpen] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
+
+  async function handleConfirm() {
+    try {
+      setError(null)
+      await onConfirm()
+      setOpen(false)
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "We could not archive this zone."
+      )
+    }
+  }
+
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger
         disabled={disabled}
         render={
           <Button type="button" variant="pill" size="sm" className="gap-2" />
         }
       >
-        <Trash2Icon className="size-3.5" />
-        Delete
+        <ArchiveIcon className="size-3.5" />
+        Archive
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete {zoneName}?</AlertDialogTitle>
+          <AlertDialogTitle>Archive {zoneName}?</AlertDialogTitle>
           <AlertDialogDescription>
             This removes the zone from future planning. Existing shifts and past
             rotas will keep showing the zone name they were saved with.
           </AlertDialogDescription>
         </AlertDialogHeader>
+        {error ? (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            variant="destructive"
             disabled={pending}
-            onClick={() => {
-              void onConfirm()
+            onClick={(event) => {
+              event.preventDefault()
+              void handleConfirm()
             }}
           >
-            {pending ? "Deleting..." : "Delete zone"}
+            {pending ? "Archiving..." : "Archive zone"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
