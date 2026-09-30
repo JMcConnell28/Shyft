@@ -94,13 +94,13 @@ function TeamSettingsToolbar({
           </NativeSelect>
         </div>
 
-        <Button
+        {/* <Button
           render={<Link to="/onboarding/invite" />}
           className="order-3 h-10 justify-center rounded-lg bg-[#0968f5] px-4 text-white shadow-[0_5px_12px_rgba(9,104,245,0.22)] hover:bg-[#075edc] lg:order-none"
         >
           <PlusIcon className="size-4" />
           Add team member
-        </Button>
+        </Button> */}
       </div>
     </section>
   )

@@ -1,5 +1,8 @@
 "use client"
 
+import { useUpdateShiftSwapSetting } from "../hooks/use-update-shift-swap-setting"
+import { useRotaSettingsQuery } from "../hooks/use-rota-settings-query"
+import { ShiftSwapSettingsSection } from "./shift-swap-settings-section"
 import type {
   RotaSettingsLocation,
   RotaSettingsTemplate,
@@ -22,11 +25,16 @@ function RotaLocationSettings({
   rotaMutations,
   templateMutations,
   templates,
+  input,
 }: {
   location: RotaSettingsLocation
   rotaMutations: RotaSettingsMutations
   templateMutations: TemplateMutations
   templates: Array<RotaSettingsTemplate>
+  input: {
+    organizationId: string
+    userId: string
+  }
 }) {
   const { isSaving, update, values } = useRotaLocationSettings(
     location,
@@ -35,6 +43,8 @@ function RotaLocationSettings({
   const isManagingTemplates =
     templateMutations.renameMutation.isPending ||
     templateMutations.deleteMutation.isPending
+  const query = useRotaSettingsQuery(input)
+  const shiftSwapMutation = useUpdateShiftSwapSetting(input)
 
   return (
     <div className="animate-in space-y-2.5 duration-300 fade-in slide-in-from-bottom-1 motion-reduce:animate-none sm:space-y-3">
@@ -52,6 +62,11 @@ function RotaLocationSettings({
       />
       <RotaEditingSettingsSection onUpdate={update} values={values} />
       <RotaShiftRulesSettingsSection />
+      <ShiftSwapSettingsSection
+        enabled={query.data?.shiftSwapsEnabled ?? false}
+        isSaving={shiftSwapMutation.isPending}
+        onChange={(enabled) => shiftSwapMutation.mutate(enabled)}
+      />
       <RotaTemplateCopyingSettingsSection
         onUpdate={update}
         templateCount={templates.length}

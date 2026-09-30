@@ -11,11 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { RotaLocationSettings } from "@/features/settings/components/rota-location-settings"
-import { ShiftSwapSettingsSection } from "@/features/settings/components/shift-swap-settings-section"
 import { useRotaSettingsMutations } from "@/features/settings/hooks/use-rota-settings-mutations"
 import { useRotaSettingsQuery } from "@/features/settings/hooks/use-rota-settings-query"
 import { useRotaTemplateSettingsMutations } from "@/features/settings/hooks/use-rota-template-settings-mutations"
-import { useUpdateShiftSwapSetting } from "@/features/settings/hooks/use-update-shift-swap-setting"
 import { getErrorMessage } from "@/lib/errors"
 
 function RotaSettingsPage({
@@ -29,7 +27,6 @@ function RotaSettingsPage({
   const query = useRotaSettingsQuery(input)
   const rotaMutations = useRotaSettingsMutations(input)
   const templateMutations = useRotaTemplateSettingsMutations(input)
-  const shiftSwapMutation = useUpdateShiftSwapSetting(input)
   const [selectedLocationId, setSelectedLocationId] = React.useState("")
 
   if (query.isPending) {
@@ -66,11 +63,6 @@ function RotaSettingsPage({
 
   return (
     <div className="min-w-0 space-y-3 text-[#10204b]">
-      <ShiftSwapSettingsSection
-        enabled={query.data.shiftSwapsEnabled}
-        isSaving={shiftSwapMutation.isPending}
-        onChange={(enabled) => shiftSwapMutation.mutate(enabled)}
-      />
       {selectedLocation && query.data.locations.length > 1 ? (
         <div className="mb-3 flex items-center justify-end gap-2">
           <MapPinIcon className="size-4 shrink-0 text-blue-600" />
@@ -111,6 +103,7 @@ function RotaSettingsPage({
           rotaMutations={rotaMutations}
           templateMutations={templateMutations}
           templates={templates}
+          input={input}
         />
       ) : (
         <RotaSettingsState
