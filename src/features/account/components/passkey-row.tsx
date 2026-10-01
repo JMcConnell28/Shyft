@@ -23,7 +23,13 @@ import { passkeyQueryKey } from "@/features/account/queries/passkey-queries"
 import { authClient } from "@/lib/auth-client"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
-function PasskeyRow({ passkey }: { passkey: Passkey }) {
+function PasskeyRow({
+  passkey,
+  allowNaming = false,
+}: {
+  passkey: Passkey
+  allowNaming?: boolean
+}) {
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = React.useState(false)
   const [name, setName] = React.useState(passkey.name || "Saved sign-in")
@@ -65,7 +71,7 @@ function PasskeyRow({ passkey }: { passkey: Passkey }) {
   return (
     <div className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1">
-        {isEditing ? (
+        {allowNaming && isEditing ? (
           <Input
             value={name}
             maxLength={80}
@@ -75,9 +81,13 @@ function PasskeyRow({ passkey }: { passkey: Passkey }) {
         ) : (
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate text-sm font-medium">
-              {passkey.name || "Saved sign-in"}
+              {allowNaming
+                ? passkey.name || "Saved sign-in"
+                : "Face, fingerprint or PIN sign-in"}
             </p>
-            {passkey.backedUp ? <Badge variant="outline">Backed up</Badge> : null}
+            {passkey.backedUp ? (
+              <Badge variant="outline">Backed up</Badge>
+            ) : null}
           </div>
         )}
         <p className="mt-1 text-xs text-muted-foreground">
@@ -85,9 +95,10 @@ function PasskeyRow({ passkey }: { passkey: Passkey }) {
         </p>
       </div>
       <div className="flex items-center gap-2">
-        {isEditing ? (
+        {allowNaming && isEditing ? (
           <>
             <Button
+              variant="brand"
               type="button"
               disabled={!name.trim() || updateMutation.isPending}
               onClick={() => updateMutation.mutate()}
@@ -102,7 +113,7 @@ function PasskeyRow({ passkey }: { passkey: Passkey }) {
               Cancel
             </Button>
           </>
-        ) : (
+        ) : allowNaming ? (
           <Button
             type="button"
             variant="ghost"
@@ -111,7 +122,7 @@ function PasskeyRow({ passkey }: { passkey: Passkey }) {
             <PencilIcon />
             Rename
           </Button>
-        )}
+        ) : null}
         <PasskeyDeleteDialog
           isDeleting={deleteMutation.isPending}
           onDelete={() => deleteMutation.mutate()}

@@ -66,7 +66,10 @@ async function createAnnouncement(input: AnnouncementMutationInput) {
     }
   )
 
-  await sendAnnouncementPushNotifications(createdAnnouncement.announcementId)
+  await sendAnnouncementPushNotifications(createdAnnouncement.announcementId, {
+    title: input.title,
+    body: input.body,
+  })
   return createdAnnouncement
 }
 

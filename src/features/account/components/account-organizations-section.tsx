@@ -1,12 +1,7 @@
+import { Building2Icon } from "lucide-react"
 import type { OrganizationSummary } from "@/features/onboarding/types"
 import { OrganizationSwitcherList } from "@/features/navigation/components/organization-switcher-list"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { SettingsSection } from "@/features/settings/components/settings-section"
 
 function AccountOrganizationsSection({
   organizations,
@@ -16,21 +11,18 @@ function AccountOrganizationsSection({
   activeOrganizationId: string | null
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Organizations</CardTitle>
-        <CardDescription>
-          Choose which organization you are viewing. Switching reloads the app
-          with that organization’s data.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <SettingsSection
+      title="Organisations"
+      icon={Building2Icon}
+      description="Choose which organisation you are viewing."
+    >
+      <div className="py-3">
         <OrganizationSwitcherList
           organizations={organizations}
           activeOrganizationId={activeOrganizationId}
         />
-      </CardContent>
-    </Card>
+      </div>
+    </SettingsSection>
   )
 }
 

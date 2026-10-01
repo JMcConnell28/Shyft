@@ -16,13 +16,18 @@ vi.mock("@/features/push-notifications/server/push-service", () => ({
 
 beforeEach(() => vi.resetAllMocks())
 
+const content = {
+  title: "Team meeting",
+  body: "Meet in the staff room at 10am.",
+}
+
 describe("announcement push notifications", () => {
-  it("sends a privacy-conscious message with a link to the correct workspace", async () => {
+  it("sends the announcement title and contents with a link to the correct workspace", async () => {
     recipients.mockResolvedValue([{ userId: "staff", workspaceSlug: "team" }])
-    await sendAnnouncementPushNotifications("announcement-1")
+    await sendAnnouncementPushNotifications("announcement-1", content)
     expect(sendPush).toHaveBeenCalledWith(["staff"], {
-      title: "New announcement",
-      body: "A new announcement has been posted for your team.",
+      title: content.title,
+      body: content.body,
       tag: "announcement-announcement-1",
       data: {
         notificationId: "announcement-1",
@@ -33,7 +38,7 @@ describe("announcement push notifications", () => {
 
   it("does not invoke push delivery when there are no eligible recipients", async () => {
     recipients.mockResolvedValue([])
-    await sendAnnouncementPushNotifications("announcement-1")
+    await sendAnnouncementPushNotifications("announcement-1", content)
     expect(sendPush).not.toHaveBeenCalled()
   })
 
@@ -45,7 +50,7 @@ describe("announcement push notifications", () => {
       const failingStep = step === "lookup" ? recipients : sendPush
       failingStep.mockRejectedValue(new Error("Unavailable"))
       await expect(
-        sendAnnouncementPushNotifications("announcement-1")
+        sendAnnouncementPushNotifications("announcement-1", content)
       ).resolves.toBeUndefined()
       expect(log).toHaveBeenCalledWith(
         "Announcement Web Push notifications failed",

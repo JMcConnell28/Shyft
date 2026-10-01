@@ -11,6 +11,7 @@ function AccountPreferencesPage({ userId }: { userId: string }) {
 
   return (
     <div className="settings-content min-w-0 space-y-3">
+      <NotificationSettingsCard />
       <SettingsSection
         title="Notification preferences"
         icon={BellIcon}
@@ -51,6 +52,7 @@ function AccountPreferencesPage({ userId }: { userId: string }) {
                 </span>
               ) : null}
               <Switch
+                className="data-checked:bg-[#0868f7]"
                 id="announcement-push"
                 aria-describedby="announcement-push-description"
                 checked={
@@ -67,7 +69,6 @@ function AccountPreferencesPage({ userId }: { userId: string }) {
           </div>
         )}
       </SettingsSection>
-      <NotificationSettingsCard />
     </div>
   )
 }

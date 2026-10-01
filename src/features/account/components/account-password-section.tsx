@@ -53,7 +53,12 @@ function AccountPasswordSection({ email }: { email: string }) {
         </div>
         <FieldError>{form.error}</FieldError>
         <div className="flex justify-end">
-          <Button type="submit" size="sm" disabled={form.mutation.isPending}>
+          <Button
+            variant="brand"
+            type="submit"
+            size="lg"
+            disabled={form.mutation.isPending}
+          >
             {form.mutation.isPending ? "Updating..." : "Change password"}
           </Button>
         </div>

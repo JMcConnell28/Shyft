@@ -1,15 +1,16 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
-import { cva } from "class-variance-authority"
-import type { VariantProps } from "class-variance-authority"
+import * as variants from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-const buttonVariants = cva(
+const buttonVariants = variants.cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-xs/relaxed font-medium whitespace-nowrap transition-all outline-none select-none hover:cursor-pointer focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        brand:
+          "rounded-lg bg-[#0868f7] font-semibold text-white shadow-none hover:bg-[#005de2] focus-visible:ring-[#0868f7]/30",
         outline:
           "border-border bg-white hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30",
         pill: "rounded-lg border-border bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.12)] hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30",
@@ -49,7 +50,7 @@ function Button({
   variant = "default",
   size = "default",
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props & variants.VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
       data-slot="button"

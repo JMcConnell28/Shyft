@@ -3,10 +3,12 @@ import type { z } from "zod"
 import type {
   pushPayloadSchema,
   pushSubscriptionSchema,
+  savePushSubscriptionSchema,
 } from "@/features/push-notifications/schemas/push-schemas"
 
 type PushPayload = z.infer<typeof pushPayloadSchema>
 type PushSubscriptionInput = z.infer<typeof pushSubscriptionSchema>
+type SavePushSubscriptionInput = z.infer<typeof savePushSubscriptionSchema>
 
 type PushSendSummary = {
   failed: number
@@ -25,4 +27,5 @@ export type {
   PushSendSummary,
   PushSubscriptionInput,
   PushSubscriptionState,
+  SavePushSubscriptionInput,
 }

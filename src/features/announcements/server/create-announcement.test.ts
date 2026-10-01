@@ -56,7 +56,10 @@ describe("announcement creation", () => {
     await expect(createAnnouncement(input)).resolves.toEqual({
       announcementId: "announcement",
     })
-    expect(sendPush).toHaveBeenCalledWith("announcement")
+    expect(sendPush).toHaveBeenCalledWith("announcement", {
+      title: input.title,
+      body: input.body,
+    })
   })
 
   it("never sends notifications for a failed transaction", async () => {

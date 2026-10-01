@@ -10,7 +10,7 @@ import { usePasskeySettings } from "@/features/account/hooks/use-passkey-setting
 import { Input } from "@/components/ui/input"
 import { PasskeyRow } from "@/features/account/components/passkey-row"
 
-function PasskeyCard() {
+function PasskeyCard({ allowNaming = false }: { allowNaming?: boolean }) {
   const {
     name,
     setName,
@@ -41,19 +41,28 @@ function PasskeyCard() {
           </p>
         </div>
         <div>
-          <label htmlFor="device-sign-in-name" className="mb-2 block text-xs font-semibold text-[#14214a]">
-            Name for this sign-in (optional)
-          </label>
+          {allowNaming ? (
+            <label
+              htmlFor="device-sign-in-name"
+              className="mb-2 block text-xs font-semibold text-[#14214a]"
+            >
+              Name for this sign-in (optional)
+            </label>
+          ) : null}
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Input
-              id="device-sign-in-name"
-              value={name}
-              maxLength={80}
-              placeholder="e.g. My iPhone"
-              aria-label="Name for this sign-in (optional)"
-              onChange={(event) => setName(event.target.value)}
-            />
+            {allowNaming ? (
+              <Input
+                id="device-sign-in-name"
+                value={name}
+                maxLength={80}
+                placeholder="e.g. My iPhone"
+                aria-label="Name for this sign-in (optional)"
+                onChange={(event) => setName(event.target.value)}
+              />
+            ) : null}
             <Button
+              variant="brand"
+              size="lg"
               type="button"
               className="sm:shrink-0"
               disabled={!isSupported || addMutation.isPending}
@@ -85,6 +94,7 @@ function PasskeyCard() {
           </div>
         ) : (
           <PasskeyList
+            allowNaming={allowNaming}
             passkeys={passkeysQuery.data ?? []}
             isLoading={passkeysQuery.isPending}
           />
@@ -94,11 +104,7 @@ function PasskeyCard() {
   )
 }
 
-function PasskeySupportMessage({
-  support,
-}: {
-  support: PasskeySupport
-}) {
+function PasskeySupportMessage({ support }: { support: PasskeySupport }) {
   if (support === "checking" || support === "supported") return null
 
   return (
@@ -111,9 +117,11 @@ function PasskeySupportMessage({
 }
 
 function PasskeyList({
+  allowNaming,
   passkeys,
   isLoading,
 }: {
+  allowNaming: boolean
   passkeys: Array<Passkey>
   isLoading: boolean
 }) {
@@ -134,7 +142,11 @@ function PasskeyList({
   return (
     <div className="divide-y divide-border/70 border-y border-border/70">
       {passkeys.map((passkey) => (
-        <PasskeyRow key={passkey.id} passkey={passkey} />
+        <PasskeyRow
+          key={passkey.id}
+          passkey={passkey}
+          allowNaming={allowNaming}
+        />
       ))}
     </div>
   )

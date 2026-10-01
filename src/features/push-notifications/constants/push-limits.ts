@@ -1,0 +1,3 @@
+const PUSH_BODY_MAX_LENGTH = 240
+
+export { PUSH_BODY_MAX_LENGTH }

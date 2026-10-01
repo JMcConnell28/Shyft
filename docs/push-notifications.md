@@ -27,9 +27,9 @@ Apply `supabase/migrations/20260711202136_push_subscriptions.sql` to the hosted 
 
 1. Open the deployed HTTPS app in Chrome and sign in.
 2. Open Account → Preferences and find Push notifications.
-3. Select Enable notifications and accept the browser prompt.
-4. Select Send test notification.
-5. Background or close the PWA and send another test.
+3. Turn on Notifications on this device and accept the browser prompt.
+4. Send a test using the operator CLI below.
+5. Background or close the PWA and send another CLI test.
 6. Tap it and verify RocketRota opens `/dashboard`.
 
 ## iPhone and iPad test
@@ -38,13 +38,13 @@ Apply `supabase/migrations/20260711202136_push_subscriptions.sql` to the hosted 
 2. Use Share → Add to Home Screen.
 3. Open RocketRota from its Home Screen icon and sign in.
 4. Open Account → Preferences, enable notifications, and accept the prompt.
-5. Send a test, then background the app and send another test.
+5. Send a CLI test, then background the app and send another test.
 6. Tap it and verify RocketRota opens the expected internal route.
 
 ## Edge cases
 
 - Permission denied: re-enable notifications in OS/browser settings; the app cannot bypass this.
-- Unsubscribe: select Disable; this revokes the server row and removes the browser subscription.
+- Unsubscribe: turn off Notifications on this device; this revokes the server row and removes the browser subscription.
 - Multiple devices: enable each device separately. Each endpoint is stored once and all active devices receive user-targeted pushes.
 - Expired endpoint: HTTP 404 and 410 responses automatically revoke the stored subscription.
 - Existing window: tapping a notification focuses an existing RocketRota window and navigates it to the safe internal path.
@@ -54,16 +54,14 @@ Rota publication sends only a privacy-conscious “New rota published” message
 
 ## Forced tests
 
-- **Current device:** Account → Preferences → Push notifications → Send test notification.
-- **All current-user devices:** Account → Preferences → Push notifications → Send to all my devices.
 - **CLI user test:** `npm run push:test -- --user <better-auth-user-id>` from a server environment containing the database and VAPID variables.
 
-All UI tests require `PUSH_TESTING_ENABLED=true` and are rate-limited per user. The CLI is an operator-only server command and never exposes subscription details.
+The account preferences page exposes only the device toggle. Server-side test actions remain available for future diagnostic interfaces; they require `PUSH_TESTING_ENABLED=true` and are rate-limited per user. The CLI is an operator-only server command and never exposes subscription details.
 
 ## Announcement notifications
 
 Apply `supabase/migrations/20261001203130_account_notification_preferences.sql` before deploying this feature. Preferences are stored in the server-only `account_private.user_preferences` table.
 
-New announcements send a generic push notification after their transaction commits. Recipients match announcement visibility: organisation administrators, relevant location managers, and active staff with enabled location assignments. The author is excluded. Edits, polls, pins and archives do not send additional pushes. Delivery failures are logged and do not undo creation.
+New announcements send their title and a preview of their contents after their transaction commits. The preview collapses whitespace and truncates text over 240 characters with an ellipsis; tapping opens the announcements page to read the full message. Recipients match announcement visibility: organisation administrators, relevant location managers, and active staff with enabled location assignments. The author is excluded. Edits, polls, pins and archives do not send additional pushes. Delivery failures are logged and do not undo creation.
 
 Account → Preferences → Announcement notifications defaults to on, including accounts without a saved preference. Turning it off stops announcement pushes across every subscribed device without changing other notification types. Users still need to enable push notifications and grant permission on each device.

@@ -6,6 +6,7 @@ import {
   passkeyQueryKey,
 } from "@/features/account/queries/passkey-queries"
 import { usePasskeySupport } from "@/features/account/hooks/use-passkey-support"
+import { getPasskeyDeviceName } from "@/features/account/utils/passkey-device-name"
 import { authClient } from "@/lib/auth-client"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -21,7 +22,7 @@ function usePasskeySettings() {
   const addMutation = useMutation({
     mutationFn: async () => {
       const result = await authClient.passkey.addPasskey({
-        name: name.trim() || "My device",
+        name: name.trim() || getPasskeyDeviceName(navigator.userAgent),
         authenticatorAttachment: "platform",
       })
 

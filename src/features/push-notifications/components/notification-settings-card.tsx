@@ -1,359 +1,76 @@
 "use client"
 
-import * as React from "react"
-import { useServerFn } from "@tanstack/react-start"
-import { BellIcon, SmartphoneIcon } from "lucide-react"
+import { BellIcon } from "lucide-react"
 
-import {
-  getPushPublicConfig,
-  getPushSubscriptionStatus,
-  removePushSubscription,
-  savePushSubscription,
-  sendTestPushToCurrentDevice,
-  sendTestPushToCurrentUser,
-} from "@/features/push-notifications/server-fns"
-import {
-  getPushSupport,
-  isIosDevice,
-  isStandaloneDisplayMode,
-  urlBase64ToUint8Array,
-} from "@/features/push-notifications/utils/push-browser"
-import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { useDeviceNotifications } from "@/features/push-notifications/hooks/use-device-notifications"
 import { SettingsSection } from "@/features/settings/components/settings-section"
-import { Badge } from "@/components/ui/badge"
-import { showErrorToast, showSuccessToast } from "@/lib/toast"
-
-type DeviceState = {
-  endpoint: string | null
-  installed: boolean
-  isIos: boolean
-  permission: NotificationPermission | "unavailable"
-  serverActive: boolean
-  supported: boolean
-  syncError: string | null
-}
-
-const initialState: DeviceState = {
-  endpoint: null,
-  installed: false,
-  isIos: false,
-  permission: "unavailable",
-  serverActive: false,
-  supported: false,
-  syncError: null,
-}
 
 function NotificationSettingsCard() {
-  const saveSubscription = useServerFn(savePushSubscription)
-  const removeSubscription = useServerFn(removePushSubscription)
-  const readStatus = useServerFn(getPushSubscriptionStatus)
-  const readPublicConfig = useServerFn(getPushPublicConfig)
-  const sendTest = useServerFn(sendTestPushToCurrentDevice)
-  const sendUserTest = useServerFn(sendTestPushToCurrentUser)
-  const [state, setState] = React.useState<DeviceState>(initialState)
-  const [pendingAction, setPendingAction] = React.useState<
-    "enable" | "disable" | "test" | null
-  >(null)
-
-  const refresh = React.useCallback(async () => {
-    const support = getPushSupport()
-    const installed = isStandaloneDisplayMode()
-    const isIos = isIosDevice()
-    const permission = support.notifications
-      ? Notification.permission
-      : "unavailable"
-
-    setState({
-      endpoint: null,
-      installed,
-      isIos,
-      permission,
-      serverActive: false,
-      supported: support.supported,
-      syncError: null,
-    })
-
-    if (!support.supported) {
-      return
-    }
-
-    const registration = await navigator.serviceWorker.getRegistration()
-    const subscription = await registration?.pushManager.getSubscription()
-    const endpoint = subscription?.endpoint ?? null
-    setState({
-      endpoint,
-      installed,
-      isIos,
-      permission,
-      serverActive: Boolean(subscription),
-      supported: true,
-      syncError: null,
-    })
-
-    try {
-      const serverState = await readStatus({
-        data: { endpoint: endpoint ?? undefined },
-      })
-
-      if (subscription && !serverState.active) {
-        await syncSubscription(subscription, saveSubscription)
-      }
-    } catch (error) {
-      setState((current) => ({
-        ...current,
-        syncError:
-          error instanceof Error
-            ? error.message
-            : "Notification server sync is unavailable.",
-      }))
-    }
-  }, [readStatus, saveSubscription])
-
-  React.useEffect(() => {
-    void refresh().catch(() =>
-      setState((current) => ({
-        ...current,
-        syncError: "We could not read this device's notification state.",
-      }))
-    )
-  }, [refresh])
-
-  const enable = async () => {
-    setPendingAction("enable")
-    try {
-      const { publicKey } = await readPublicConfig()
-
-      const permission = await Notification.requestPermission()
-      if (permission !== "granted") {
-        throw new Error(
-          permission === "denied"
-            ? "Notifications are blocked in browser settings."
-            : "Notification permission was not granted."
-        )
-      }
-
-      const registration = await navigator.serviceWorker.register("/sw.js")
-      await navigator.serviceWorker.ready
-      const applicationServerKey = urlBase64ToUint8Array(publicKey)
-      let subscription = await registration.pushManager.getSubscription()
-
-      if (
-        subscription &&
-        !keysMatch(
-          subscription.options.applicationServerKey,
-          applicationServerKey
-        )
-      ) {
-        await subscription.unsubscribe()
-        subscription = null
-      }
-
-      subscription ??= await registration.pushManager.subscribe({
-        applicationServerKey,
-        userVisibleOnly: true,
-      })
-      await syncSubscription(subscription, saveSubscription)
-      await refresh()
-      showSuccessToast("Notifications enabled on this device.")
-    } catch (error) {
-      showErrorToast(error, {
-        fallbackMessage: "We could not enable notifications.",
-      })
-    } finally {
-      setPendingAction(null)
-    }
-  }
-
-  const disable = async () => {
-    setPendingAction("disable")
-    try {
-      const registration = await navigator.serviceWorker.getRegistration()
-      const subscription = await registration?.pushManager.getSubscription()
-      if (subscription) {
-        await removeSubscription({ data: { endpoint: subscription.endpoint } })
-        await subscription.unsubscribe()
-      }
-      await refresh()
-      showSuccessToast("Notifications disabled on this device.")
-    } catch (error) {
-      showErrorToast(error, {
-        fallbackMessage: "We could not disable notifications.",
-      })
-    } finally {
-      setPendingAction(null)
-    }
-  }
-
-  const test = async () => {
-    if (!state.endpoint) return
-    setPendingAction("test")
-    try {
-      await sendTest({ data: { endpoint: state.endpoint } })
-      showSuccessToast("Test notification sent.")
-    } catch (error) {
-      showErrorToast(error, {
-        fallbackMessage: "We could not send the test notification.",
-      })
-    } finally {
-      setPendingAction(null)
-    }
-  }
-
-  const testAllDevices = async () => {
-    setPendingAction("test")
-    try {
-      await sendUserTest()
-      showSuccessToast("Test sent to all your subscribed devices.")
-    } catch (error) {
-      showErrorToast(error, {
-        fallbackMessage: "We could not send the multi-device test.",
-      })
-    } finally {
-      setPendingAction(null)
-    }
-  }
-
+  const { state, isLoading, isPending, checked, setEnabled } =
+    useDeviceNotifications()
   const needsIosInstall = state.isIos && !state.installed
+  const cannotEnable =
+    !state.supported || needsIosInstall || state.permission === "denied"
+  let guidance: string | null = null
+  if (needsIosInstall) {
+    guidance =
+      "In Safari, choose Share → Add to Home Screen, then open the installed RocketRota app to enable notifications."
+  } else if (!state.supported && !isLoading) {
+    guidance = "Notifications aren't available in this browser."
+  } else if (state.permission === "denied") {
+    guidance =
+      "Allow notifications in your browser settings to turn them on here."
+  }
 
   return (
     <SettingsSection
       title="Notifications"
       icon={BellIcon}
-      description="Get updates about your rota on this device."
+      description="Receive rota updates and announcements on this device."
     >
-      <div className="space-y-4 py-3">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs font-bold text-[#14214a]">
-            Notifications on this device
-          </p>
-          <Badge variant={state.serverActive ? "outline" : "secondary"}>
-            {state.serverActive ? "Active" : "Inactive"}
-          </Badge>
+      <div className="space-y-3 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <label
+              htmlFor="device-notifications"
+              className="text-xs font-bold text-[#14214a]"
+            >
+              Notifications on this device
+            </label>
+            <p
+              id="device-notifications-description"
+              className="mt-1 text-[11px] text-[#7180a2]"
+            >
+              Get updates even when RocketRota is closed.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {isLoading || isPending ? (
+              <span role="status" className="text-xs text-[#7180a2]">
+                {isPending ? "Saving..." : "Checking..."}
+              </span>
+            ) : null}
+            <Switch
+              id="device-notifications"
+              aria-describedby="device-notifications-description"
+              className="data-checked:bg-[#0868f7]"
+              checked={checked}
+              disabled={isLoading || isPending || (cannotEnable && !checked)}
+              onCheckedChange={(enabled) => void setEnabled(enabled)}
+            />
+          </div>
         </div>
-        <div className="grid gap-2 sm:grid-cols-3">
-          <Status label="Supported" value={state.supported ? "Yes" : "No"} />
-          <Status label="Permission" value={state.permission} />
-          <Status
-            label="Installed app"
-            value={state.installed ? "Yes" : "No"}
-          />
-        </div>
-
-        {needsIosInstall ? <IosInstallInstructions /> : null}
-        {!state.supported && !needsIosInstall ? (
-          <p className="text-sm text-muted-foreground">
-            This browser does not support Web Push notifications.
+        {guidance ? (
+          <p className="text-xs leading-5 text-[#657398]">{guidance}</p>
+        ) : null}
+        {state.error ? (
+          <p role="alert" className="text-xs text-destructive">
+            {state.error}
           </p>
         ) : null}
-        {state.syncError ? (
-          <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-            Browser support was detected, but RocketRota could not sync this
-            device with the notification server. {state.syncError}
-          </p>
-        ) : null}
-
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            onClick={() => void enable()}
-            disabled={
-              !state.supported ||
-              needsIosInstall ||
-              state.permission === "denied" ||
-              pendingAction !== null
-            }
-          >
-            <BellIcon className="size-3.5" />
-            {pendingAction === "enable"
-              ? "Enabling..."
-              : "Enable notifications"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void testAllDevices()}
-            disabled={!state.serverActive || pendingAction !== null}
-          >
-            Send to all my devices
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void disable()}
-            disabled={!state.endpoint || pendingAction !== null}
-          >
-            Disable
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void test()}
-            disabled={!state.serverActive || pendingAction !== null}
-          >
-            {pendingAction === "test" ? "Sending..." : "Send test notification"}
-          </Button>
-        </div>
       </div>
     </SettingsSection>
-  )
-}
-
-function Status({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-border/70 bg-muted/10 px-3 py-2">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold capitalize">{value}</p>
-    </div>
-  )
-}
-
-function IosInstallInstructions() {
-  return (
-    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-      <p className="flex items-center gap-2 text-sm font-semibold">
-        <SmartphoneIcon className="size-4" />
-        Install RocketRota first
-      </p>
-      <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-        <li>Open RocketRota in Safari.</li>
-        <li>Choose Share, then Add to Home Screen.</li>
-        <li>Open the installed RocketRota app.</li>
-        <li>Return here and enable notifications.</li>
-      </ol>
-    </div>
-  )
-}
-
-async function syncSubscription(
-  subscription: PushSubscription,
-  save: ReturnType<typeof useServerFn<typeof savePushSubscription>>
-) {
-  const json = subscription.toJSON()
-  if (!json.endpoint || !json.keys?.auth || !json.keys.p256dh)
-    throw new Error("The browser returned an incomplete push subscription.")
-  await save({
-    data: {
-      deviceDescription: getDeviceDescription(),
-      platform: navigator.platform,
-      subscription: {
-        endpoint: json.endpoint,
-        expirationTime: json.expirationTime,
-        keys: { auth: json.keys.auth, p256dh: json.keys.p256dh },
-      },
-    },
-  })
-}
-
-function getDeviceDescription() {
-  return `${navigator.platform || "Device"} · ${isStandaloneDisplayMode() ? "Installed app" : "Browser"}`
-}
-
-function keysMatch(current: ArrayBuffer | null, expected: Uint8Array) {
-  if (!current) return false
-  const currentBytes = new Uint8Array(current)
-  return (
-    currentBytes.length === expected.length &&
-    currentBytes.every((value, index) => value === expected[index])
   )
 }
 

@@ -57,8 +57,9 @@ function AccountProfileSection({
         </Field>
         <div className="flex justify-end">
           <Button
+            variant="brand"
             type="submit"
-            size="sm"
+            size="lg"
             disabled={mutation.isPending || !name.trim()}
           >
             {mutation.isPending ? "Saving..." : "Save details"}

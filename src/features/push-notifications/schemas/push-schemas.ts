@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { PUSH_BODY_MAX_LENGTH } from "@/features/push-notifications/constants/push-limits"
+
 const pushEndpointSchema = z.string().url().max(4096)
 
 const pushSubscriptionSchema = z.object({
@@ -24,7 +26,7 @@ const pushStatusInputSchema = z.object({
 
 const pushPayloadSchema = z.object({
   title: z.string().trim().min(1).max(120),
-  body: z.string().trim().min(1).max(240),
+  body: z.string().trim().min(1).max(PUSH_BODY_MAX_LENGTH),
   icon: z.string().startsWith("/").max(200).optional(),
   badge: z.string().startsWith("/").max(200).optional(),
   tag: z.string().trim().min(1).max(120).optional(),

@@ -5,7 +5,7 @@ import { AccountProfileSection } from "@/features/account/components/account-pro
 import { AccountOrganizationsSection } from "@/features/account/components/account-organizations-section"
 import { AccountPasswordSection } from "@/features/account/components/account-password-section"
 import { PasskeyCard } from "@/features/account/components/passkey-card"
-import { SignOutButton } from "@/components/app/sign-out-button"
+import { AccountDangerZone } from "@/features/account/components/account-danger-zone"
 import { PwaInstallCard } from "@/features/pwa/components/pwa-install-card"
 
 type AccountPageProps = {
@@ -30,13 +30,8 @@ function AccountPage({
         <PasskeyCard />
         <AccountPasswordSection email={user.email} />
         <PwaInstallCard />
+        <AccountDangerZone />
       </div>
-      <footer className="mt-auto flex justify-end border-t border-[#dfe4ef] pt-5">
-        <SignOutButton
-          showIcon
-          className="h-9 gap-2 rounded-lg border border-[#f2d5d2] px-3 text-[#b42318] hover:bg-[#fff4f2] hover:text-[#b42318]"
-        />
-      </footer>
     </div>
   )
 }
