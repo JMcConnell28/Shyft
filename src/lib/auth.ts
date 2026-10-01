@@ -10,6 +10,7 @@ import { tanstackStartCookies } from "better-auth/tanstack-start"
 import Stripe from "stripe"
 
 import { passwordResetExpiryHours } from "@/features/email/constants/password-reset"
+import { requireTermsAcceptance } from "@/features/legal/server/require-terms-acceptance"
 import { ac, roles } from "@/lib/auth/permissions"
 import { requireSignUpAccessCode } from "@/lib/auth/sign-up-access.server"
 import { authUserAdditionalFields } from "@/lib/auth-fields"
@@ -92,6 +93,7 @@ const auth = betterAuth({
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path === "/sign-up/email") {
         requireSignUpAccessCode(ctx.headers?.get("x-signup-access-code"))
+        requireTermsAcceptance(ctx.headers?.get("x-terms-version"))
       }
     }),
   },

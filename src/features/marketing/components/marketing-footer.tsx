@@ -1,9 +1,11 @@
-import { Button } from "@/components/ui/button"
+import { Link } from "@tanstack/react-router"
 import { ArrowRightIcon } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
 
 function MarketingFooter() {
   return (
-    <footer className="mx-auto w-full max-w-[1280px] px-4 pb-8 pt-4 sm:px-6 lg:px-8">
+    <footer className="mx-auto w-full max-w-[1280px] px-4 pt-4 pb-8 sm:px-6 lg:px-8">
       <div className="grid gap-10 border-t border-[#e2eaf9] px-2 py-10 lg:grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
@@ -57,7 +59,9 @@ function MarketingFooter() {
         <p>&copy; 2024 RocketRota. All rights reserved.</p>
         <div className="flex gap-6">
           <button type="button">Privacy Policy</button>
-          <button type="button">Terms of Service</button>
+          <Link to="/terms" className="hover:text-[#16346e]">
+            Terms and Conditions
+          </Link>
         </div>
       </div>
     </footer>
@@ -78,14 +82,21 @@ function FooterColumn({
       </h3>
       <div className="mt-5 space-y-3 text-sm text-[#65799f]">
         {items.map((item) => (
-          <FooterItem key={typeof item === "string" ? item : item.label} item={item} />
+          <FooterItem
+            key={typeof item === "string" ? item : item.label}
+            item={item}
+          />
         ))}
       </div>
     </div>
   )
 }
 
-function FooterItem({ item }: { item: string | { label: string; href: string } }) {
+function FooterItem({
+  item,
+}: {
+  item: string | { label: string; href: string }
+}) {
   if (typeof item === "string") {
     return (
       <button

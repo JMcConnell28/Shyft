@@ -12,6 +12,9 @@ import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { TextFormField } from "@/components/forms/text-form-field"
 import { FieldGroup } from "@/components/ui/field"
+import { TermsAcceptanceField } from "@/features/legal/components/terms-acceptance-field"
+import { termsAcceptanceSchema } from "@/features/legal/schemas/terms-acceptance-schema"
+import { termsVersion } from "@/features/legal/terms"
 import { authClient } from "@/lib/auth-client"
 import { getSession } from "@/lib/auth-server"
 import { isPublicDevelopmentEmailVerificationBypassed } from "@/lib/email-verification"
@@ -76,6 +79,7 @@ function SignUpRoute() {
       email: "",
       password: "",
       accessCode: "",
+      acceptsTerms: false,
     },
     onSubmit: async ({ value }) => {
       setError(null)
@@ -97,7 +101,10 @@ function SignUpRoute() {
           callbackURL: redirectTarget,
         },
         {
-          headers: { "x-signup-access-code": parsed.data.accessCode },
+          headers: {
+            "x-signup-access-code": parsed.data.accessCode,
+            "x-terms-version": termsVersion,
+          },
         }
       )
 
@@ -259,6 +266,21 @@ function SignUpRoute() {
             </form.Field>
           </div>
         </FieldGroup>
+
+        <form.Field
+          name="acceptsTerms"
+          validators={{
+            onSubmit: createZodFieldValidator(termsAcceptanceSchema),
+          }}
+        >
+          {(field) => (
+            <TermsAcceptanceField
+              checked={field.state.value}
+              error={field.state.meta.errors[0]}
+              onChange={field.handleChange}
+            />
+          )}
+        </form.Field>
 
         <FormErrorMessage message={error} />
 

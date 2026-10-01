@@ -52,6 +52,7 @@ describe("onboarding schemas", () => {
         email: "jane@example.com",
         password: "password123",
         accessCode: "522562",
+        acceptsTerms: true,
       }).success
     ).toBe(true)
   })
@@ -68,8 +69,28 @@ describe("onboarding schemas", () => {
         email: "jane@example.com",
         password: "password123",
         accessCode: "522562",
+        acceptsTerms: true,
       }).success
     ).toBe(false)
+  })
+
+  it("requires explicit acceptance of the terms during signup", () => {
+    const details = {
+      firstName: "Jane",
+      lastName: "Smith",
+      dateOfBirth: "1998-04-12",
+      email: "jane@example.com",
+      password: "password123",
+      accessCode: "522562",
+    }
+
+    expect(signUpSchema.safeParse(details).success).toBe(false)
+    expect(
+      signUpSchema.safeParse({ ...details, acceptsTerms: false }).success
+    ).toBe(false)
+    expect(
+      signUpSchema.safeParse({ ...details, acceptsTerms: true }).success
+    ).toBe(true)
   })
 
   it("accepts fixed-location setup with at least one area", () => {

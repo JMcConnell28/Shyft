@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { timeAttendanceDeliveryAddressSchema } from "@/features/billing/schemas/time-attendance-addon-schemas"
+import { termsAcceptanceSchema } from "@/features/legal/schemas/terms-acceptance-schema"
 import { locationAddressSchema } from "@/features/locations/schemas/location-address-schema"
 import { assignableOrganizationRoles } from "@/lib/auth/permissions"
 import { signUpAccessCodeSchema } from "@/lib/auth/sign-up-access-schema"
@@ -140,6 +141,7 @@ const signUpSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   accessCode: signUpAccessCodeSchema,
+  acceptsTerms: termsAcceptanceSchema,
 })
 
 const onboardingIntentSchema = z.enum(["manage", "join"])
