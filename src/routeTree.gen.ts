@@ -59,6 +59,7 @@ import { Route as AuthedVerifiedAppWorkspaceSlugAccountRouteImport } from './rou
 import { Route as AuthedVerifiedAppWorkspaceSlugSupportIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/support/index'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/index'
 import { Route as AuthedVerifiedAppWorkspaceSlugRotaIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/rota/index'
+import { Route as AuthedVerifiedAppWorkspaceSlugAccountIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/account.index'
 import { Route as AuthedVerifiedAppWorkspaceSlugSupportThreadIdRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/support/$threadId'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsTeamRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/team'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsRotaRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/rota'
@@ -68,6 +69,7 @@ import { Route as AuthedVerifiedAppWorkspaceSlugSettingsConnectionsRouteImport }
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsCompanyRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/company'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsClockingRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/clocking'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsBillingRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/billing'
+import { Route as AuthedVerifiedAppWorkspaceSlugAccountPreferencesRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/account.preferences'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsTeamIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/team/index'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsRotaIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/rota/index'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsLocationsIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/locations/index'
@@ -351,6 +353,12 @@ const AuthedVerifiedAppWorkspaceSlugRotaIndexRoute =
     path: '/rota/',
     getParentRoute: () => AuthedVerifiedAppWorkspaceSlugRouteRoute,
   } as any)
+const AuthedVerifiedAppWorkspaceSlugAccountIndexRoute =
+  AuthedVerifiedAppWorkspaceSlugAccountIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedVerifiedAppWorkspaceSlugAccountRoute,
+  } as any)
 const AuthedVerifiedAppWorkspaceSlugSupportThreadIdRoute =
   AuthedVerifiedAppWorkspaceSlugSupportThreadIdRouteImport.update({
     id: '/support/$threadId',
@@ -404,6 +412,12 @@ const AuthedVerifiedAppWorkspaceSlugSettingsBillingRoute =
     id: '/billing',
     path: '/billing',
     getParentRoute: () => AuthedVerifiedAppWorkspaceSlugSettingsRoute,
+  } as any)
+const AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute =
+  AuthedVerifiedAppWorkspaceSlugAccountPreferencesRouteImport.update({
+    id: '/preferences',
+    path: '/preferences',
+    getParentRoute: () => AuthedVerifiedAppWorkspaceSlugAccountRoute,
   } as any)
 const AuthedVerifiedAppWorkspaceSlugSettingsTeamIndexRoute =
   AuthedVerifiedAppWorkspaceSlugSettingsTeamIndexRouteImport.update({
@@ -527,7 +541,7 @@ export interface FileRoutesByFullPath {
   '/w/$': typeof AuthedVerifiedWSplatRoute
   '/api/auth/stripe/webhook': typeof ApiAuthStripeWebhookRoute
   '/w/': typeof AuthedVerifiedWIndexRoute
-  '/app/$workspaceSlug/account': typeof AuthedVerifiedAppWorkspaceSlugAccountRoute
+  '/app/$workspaceSlug/account': typeof AuthedVerifiedAppWorkspaceSlugAccountRouteWithChildren
   '/app/$workspaceSlug/announcements': typeof AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute
   '/app/$workspaceSlug/dashboard': typeof AuthedVerifiedAppWorkspaceSlugDashboardRoute
   '/app/$workspaceSlug/settings': typeof AuthedVerifiedAppWorkspaceSlugSettingsRouteWithChildren
@@ -535,6 +549,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/time-clock': typeof AuthedVerifiedAppWorkspaceSlugTimeClockRoute
   '/app/$workspaceSlug/timesheets': typeof AuthedVerifiedAppWorkspaceSlugTimesheetsRoute
   '/app/$workspaceSlug/': typeof AuthedVerifiedAppWorkspaceSlugIndexRoute
+  '/app/$workspaceSlug/account/preferences': typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute
   '/app/$workspaceSlug/settings/billing': typeof AuthedVerifiedAppWorkspaceSlugSettingsBillingRoute
   '/app/$workspaceSlug/settings/clocking': typeof AuthedVerifiedAppWorkspaceSlugSettingsClockingRoute
   '/app/$workspaceSlug/settings/company': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyRouteWithChildren
@@ -544,6 +559,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/settings/rota': typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaRouteWithChildren
   '/app/$workspaceSlug/settings/team': typeof AuthedVerifiedAppWorkspaceSlugSettingsTeamRouteWithChildren
   '/app/$workspaceSlug/support/$threadId': typeof AuthedVerifiedAppWorkspaceSlugSupportThreadIdRoute
+  '/app/$workspaceSlug/account/': typeof AuthedVerifiedAppWorkspaceSlugAccountIndexRoute
   '/app/$workspaceSlug/rota/': typeof AuthedVerifiedAppWorkspaceSlugRotaIndexRoute
   '/app/$workspaceSlug/settings/': typeof AuthedVerifiedAppWorkspaceSlugSettingsIndexRoute
   '/app/$workspaceSlug/support/': typeof AuthedVerifiedAppWorkspaceSlugSupportIndexRoute
@@ -598,18 +614,19 @@ export interface FileRoutesByTo {
   '/w/$': typeof AuthedVerifiedWSplatRoute
   '/api/auth/stripe/webhook': typeof ApiAuthStripeWebhookRoute
   '/w': typeof AuthedVerifiedWIndexRoute
-  '/app/$workspaceSlug/account': typeof AuthedVerifiedAppWorkspaceSlugAccountRoute
   '/app/$workspaceSlug/announcements': typeof AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute
   '/app/$workspaceSlug/dashboard': typeof AuthedVerifiedAppWorkspaceSlugDashboardRoute
   '/app/$workspaceSlug/shift-swaps': typeof AuthedVerifiedAppWorkspaceSlugShiftSwapsRoute
   '/app/$workspaceSlug/time-clock': typeof AuthedVerifiedAppWorkspaceSlugTimeClockRoute
   '/app/$workspaceSlug/timesheets': typeof AuthedVerifiedAppWorkspaceSlugTimesheetsRoute
   '/app/$workspaceSlug': typeof AuthedVerifiedAppWorkspaceSlugIndexRoute
+  '/app/$workspaceSlug/account/preferences': typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute
   '/app/$workspaceSlug/settings/billing': typeof AuthedVerifiedAppWorkspaceSlugSettingsBillingRoute
   '/app/$workspaceSlug/settings/clocking': typeof AuthedVerifiedAppWorkspaceSlugSettingsClockingRoute
   '/app/$workspaceSlug/settings/connections': typeof AuthedVerifiedAppWorkspaceSlugSettingsConnectionsRoute
   '/app/$workspaceSlug/settings/general': typeof AuthedVerifiedAppWorkspaceSlugSettingsGeneralRoute
   '/app/$workspaceSlug/support/$threadId': typeof AuthedVerifiedAppWorkspaceSlugSupportThreadIdRoute
+  '/app/$workspaceSlug/account': typeof AuthedVerifiedAppWorkspaceSlugAccountIndexRoute
   '/app/$workspaceSlug/rota': typeof AuthedVerifiedAppWorkspaceSlugRotaIndexRoute
   '/app/$workspaceSlug/settings': typeof AuthedVerifiedAppWorkspaceSlugSettingsIndexRoute
   '/app/$workspaceSlug/support': typeof AuthedVerifiedAppWorkspaceSlugSupportIndexRoute
@@ -667,7 +684,7 @@ export interface FileRoutesById {
   '/_authed/_verified/w/$': typeof AuthedVerifiedWSplatRoute
   '/api/auth/stripe/webhook': typeof ApiAuthStripeWebhookRoute
   '/_authed/_verified/w/': typeof AuthedVerifiedWIndexRoute
-  '/_authed/_verified/app/$workspaceSlug/account': typeof AuthedVerifiedAppWorkspaceSlugAccountRoute
+  '/_authed/_verified/app/$workspaceSlug/account': typeof AuthedVerifiedAppWorkspaceSlugAccountRouteWithChildren
   '/_authed/_verified/app/$workspaceSlug/announcements': typeof AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute
   '/_authed/_verified/app/$workspaceSlug/dashboard': typeof AuthedVerifiedAppWorkspaceSlugDashboardRoute
   '/_authed/_verified/app/$workspaceSlug/settings': typeof AuthedVerifiedAppWorkspaceSlugSettingsRouteWithChildren
@@ -675,6 +692,7 @@ export interface FileRoutesById {
   '/_authed/_verified/app/$workspaceSlug/time-clock': typeof AuthedVerifiedAppWorkspaceSlugTimeClockRoute
   '/_authed/_verified/app/$workspaceSlug/timesheets': typeof AuthedVerifiedAppWorkspaceSlugTimesheetsRoute
   '/_authed/_verified/app/$workspaceSlug/': typeof AuthedVerifiedAppWorkspaceSlugIndexRoute
+  '/_authed/_verified/app/$workspaceSlug/account/preferences': typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute
   '/_authed/_verified/app/$workspaceSlug/settings/billing': typeof AuthedVerifiedAppWorkspaceSlugSettingsBillingRoute
   '/_authed/_verified/app/$workspaceSlug/settings/clocking': typeof AuthedVerifiedAppWorkspaceSlugSettingsClockingRoute
   '/_authed/_verified/app/$workspaceSlug/settings/company': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyRouteWithChildren
@@ -684,6 +702,7 @@ export interface FileRoutesById {
   '/_authed/_verified/app/$workspaceSlug/settings/rota': typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaRouteWithChildren
   '/_authed/_verified/app/$workspaceSlug/settings/team': typeof AuthedVerifiedAppWorkspaceSlugSettingsTeamRouteWithChildren
   '/_authed/_verified/app/$workspaceSlug/support/$threadId': typeof AuthedVerifiedAppWorkspaceSlugSupportThreadIdRoute
+  '/_authed/_verified/app/$workspaceSlug/account/': typeof AuthedVerifiedAppWorkspaceSlugAccountIndexRoute
   '/_authed/_verified/app/$workspaceSlug/rota/': typeof AuthedVerifiedAppWorkspaceSlugRotaIndexRoute
   '/_authed/_verified/app/$workspaceSlug/settings/': typeof AuthedVerifiedAppWorkspaceSlugSettingsIndexRoute
   '/_authed/_verified/app/$workspaceSlug/support/': typeof AuthedVerifiedAppWorkspaceSlugSupportIndexRoute
@@ -749,6 +768,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/time-clock'
     | '/app/$workspaceSlug/timesheets'
     | '/app/$workspaceSlug/'
+    | '/app/$workspaceSlug/account/preferences'
     | '/app/$workspaceSlug/settings/billing'
     | '/app/$workspaceSlug/settings/clocking'
     | '/app/$workspaceSlug/settings/company'
@@ -758,6 +778,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings/rota'
     | '/app/$workspaceSlug/settings/team'
     | '/app/$workspaceSlug/support/$threadId'
+    | '/app/$workspaceSlug/account/'
     | '/app/$workspaceSlug/rota/'
     | '/app/$workspaceSlug/settings/'
     | '/app/$workspaceSlug/support/'
@@ -812,18 +833,19 @@ export interface FileRouteTypes {
     | '/w/$'
     | '/api/auth/stripe/webhook'
     | '/w'
-    | '/app/$workspaceSlug/account'
     | '/app/$workspaceSlug/announcements'
     | '/app/$workspaceSlug/dashboard'
     | '/app/$workspaceSlug/shift-swaps'
     | '/app/$workspaceSlug/time-clock'
     | '/app/$workspaceSlug/timesheets'
     | '/app/$workspaceSlug'
+    | '/app/$workspaceSlug/account/preferences'
     | '/app/$workspaceSlug/settings/billing'
     | '/app/$workspaceSlug/settings/clocking'
     | '/app/$workspaceSlug/settings/connections'
     | '/app/$workspaceSlug/settings/general'
     | '/app/$workspaceSlug/support/$threadId'
+    | '/app/$workspaceSlug/account'
     | '/app/$workspaceSlug/rota'
     | '/app/$workspaceSlug/settings'
     | '/app/$workspaceSlug/support'
@@ -888,6 +910,7 @@ export interface FileRouteTypes {
     | '/_authed/_verified/app/$workspaceSlug/time-clock'
     | '/_authed/_verified/app/$workspaceSlug/timesheets'
     | '/_authed/_verified/app/$workspaceSlug/'
+    | '/_authed/_verified/app/$workspaceSlug/account/preferences'
     | '/_authed/_verified/app/$workspaceSlug/settings/billing'
     | '/_authed/_verified/app/$workspaceSlug/settings/clocking'
     | '/_authed/_verified/app/$workspaceSlug/settings/company'
@@ -897,6 +920,7 @@ export interface FileRouteTypes {
     | '/_authed/_verified/app/$workspaceSlug/settings/rota'
     | '/_authed/_verified/app/$workspaceSlug/settings/team'
     | '/_authed/_verified/app/$workspaceSlug/support/$threadId'
+    | '/_authed/_verified/app/$workspaceSlug/account/'
     | '/_authed/_verified/app/$workspaceSlug/rota/'
     | '/_authed/_verified/app/$workspaceSlug/settings/'
     | '/_authed/_verified/app/$workspaceSlug/support/'
@@ -1294,6 +1318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugRotaIndexRouteImport
       parentRoute: typeof AuthedVerifiedAppWorkspaceSlugRouteRoute
     }
+    '/_authed/_verified/app/$workspaceSlug/account/': {
+      id: '/_authed/_verified/app/$workspaceSlug/account/'
+      path: '/'
+      fullPath: '/app/$workspaceSlug/account/'
+      preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountIndexRouteImport
+      parentRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountRoute
+    }
     '/_authed/_verified/app/$workspaceSlug/support/$threadId': {
       id: '/_authed/_verified/app/$workspaceSlug/support/$threadId'
       path: '/support/$threadId'
@@ -1356,6 +1387,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/$workspaceSlug/settings/billing'
       preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsBillingRouteImport
       parentRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsRoute
+    }
+    '/_authed/_verified/app/$workspaceSlug/account/preferences': {
+      id: '/_authed/_verified/app/$workspaceSlug/account/preferences'
+      path: '/preferences'
+      fullPath: '/app/$workspaceSlug/account/preferences'
+      preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRouteImport
+      parentRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountRoute
     }
     '/_authed/_verified/app/$workspaceSlug/settings/team/': {
       id: '/_authed/_verified/app/$workspaceSlug/settings/team/'
@@ -1450,6 +1488,24 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthedVerifiedAppWorkspaceSlugAccountRouteChildren {
+  AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute
+  AuthedVerifiedAppWorkspaceSlugAccountIndexRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountIndexRoute
+}
+
+const AuthedVerifiedAppWorkspaceSlugAccountRouteChildren: AuthedVerifiedAppWorkspaceSlugAccountRouteChildren =
+  {
+    AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute:
+      AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute,
+    AuthedVerifiedAppWorkspaceSlugAccountIndexRoute:
+      AuthedVerifiedAppWorkspaceSlugAccountIndexRoute,
+  }
+
+const AuthedVerifiedAppWorkspaceSlugAccountRouteWithChildren =
+  AuthedVerifiedAppWorkspaceSlugAccountRoute._addFileChildren(
+    AuthedVerifiedAppWorkspaceSlugAccountRouteChildren,
+  )
 
 interface AuthedVerifiedAppWorkspaceSlugSettingsCompanyRouteChildren {
   AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyEmployeeIdRoute
@@ -1584,7 +1640,7 @@ const AuthedVerifiedAppWorkspaceSlugRotaLocationSlugRotaIdRouteWithChildren =
   )
 
 interface AuthedVerifiedAppWorkspaceSlugRouteRouteChildren {
-  AuthedVerifiedAppWorkspaceSlugAccountRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountRoute
+  AuthedVerifiedAppWorkspaceSlugAccountRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountRouteWithChildren
   AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute: typeof AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute
   AuthedVerifiedAppWorkspaceSlugDashboardRoute: typeof AuthedVerifiedAppWorkspaceSlugDashboardRoute
   AuthedVerifiedAppWorkspaceSlugSettingsRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsRouteWithChildren
@@ -1601,7 +1657,7 @@ interface AuthedVerifiedAppWorkspaceSlugRouteRouteChildren {
 const AuthedVerifiedAppWorkspaceSlugRouteRouteChildren: AuthedVerifiedAppWorkspaceSlugRouteRouteChildren =
   {
     AuthedVerifiedAppWorkspaceSlugAccountRoute:
-      AuthedVerifiedAppWorkspaceSlugAccountRoute,
+      AuthedVerifiedAppWorkspaceSlugAccountRouteWithChildren,
     AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute:
       AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute,
     AuthedVerifiedAppWorkspaceSlugDashboardRoute:

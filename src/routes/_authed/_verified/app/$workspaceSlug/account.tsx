@@ -1,30 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { AccountPage } from "@/features/account/components/account-page"
+import { AccountLayout } from "@/features/account/components/account-layout"
 
 export const Route = createFileRoute(
   "/_authed/_verified/app/$workspaceSlug/account"
 )({
-  head: () => ({
-    meta: [
-      { title: "Account | RocketRota" },
-      {
-        name: "description",
-        content: "Manage your RocketRota account details and password.",
-      },
-    ],
-  }),
   component: AccountRoute,
 })
 
 function AccountRoute() {
-  const { viewer } = Route.useRouteContext()
-
-  return (
-    <AccountPage
-      user={viewer.user}
-      organizations={viewer.organizations}
-      activeOrganizationId={viewer.activeWorkspace?.id ?? null}
-    />
-  )
+  const { workspaceSlug } = Route.useParams()
+  return <AccountLayout workspaceSlug={workspaceSlug} />
 }

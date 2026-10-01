@@ -26,7 +26,7 @@ Apply `supabase/migrations/20260711202136_push_subscriptions.sql` to the hosted 
 ## Android test
 
 1. Open the deployed HTTPS app in Chrome and sign in.
-2. Open Account and find Push notifications.
+2. Open Account → Preferences and find Push notifications.
 3. Select Enable notifications and accept the browser prompt.
 4. Select Send test notification.
 5. Background or close the PWA and send another test.
@@ -37,7 +37,7 @@ Apply `supabase/migrations/20260711202136_push_subscriptions.sql` to the hosted 
 1. Open RocketRota in Safari over HTTPS.
 2. Use Share → Add to Home Screen.
 3. Open RocketRota from its Home Screen icon and sign in.
-4. Open Account, enable notifications, and accept the prompt.
+4. Open Account → Preferences, enable notifications, and accept the prompt.
 5. Send a test, then background the app and send another test.
 6. Tap it and verify RocketRota opens the expected internal route.
 
@@ -54,8 +54,16 @@ Rota publication sends only a privacy-conscious “New rota published” message
 
 ## Forced tests
 
-- **Current device:** Account → Push notifications → Send test notification.
-- **All current-user devices:** Account → Push notifications → Send to all my devices.
+- **Current device:** Account → Preferences → Push notifications → Send test notification.
+- **All current-user devices:** Account → Preferences → Push notifications → Send to all my devices.
 - **CLI user test:** `npm run push:test -- --user <better-auth-user-id>` from a server environment containing the database and VAPID variables.
 
 All UI tests require `PUSH_TESTING_ENABLED=true` and are rate-limited per user. The CLI is an operator-only server command and never exposes subscription details.
+
+## Announcement notifications
+
+Apply `supabase/migrations/20261001203130_account_notification_preferences.sql` before deploying this feature. Preferences are stored in the server-only `account_private.user_preferences` table.
+
+New announcements send a generic push notification after their transaction commits. Recipients match announcement visibility: organisation administrators, relevant location managers, and active staff with enabled location assignments. The author is excluded. Edits, polls, pins and archives do not send additional pushes. Delivery failures are logged and do not undo creation.
+
+Account → Preferences → Announcement notifications defaults to on, including accounts without a saved preference. Turning it off stops announcement pushes across every subscribed device without changing other notification types. Users still need to enable push notifications and grant permission on each device.

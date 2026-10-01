@@ -6,6 +6,7 @@ import type {
   AnnouncementTargetScope,
 } from "@/features/announcements/types"
 import { getAnnouncementsPageData } from "@/features/announcements/server/queries"
+import { sendAnnouncementPushNotifications } from "@/features/announcements/server/push-notifications"
 import {
   getAnnouncementContext,
   listAnnouncementManageableLocations,
@@ -26,9 +27,10 @@ async function createAnnouncement(input: AnnouncementMutationInput) {
   const context = await getAnnouncementContext(input)
   const targetLocationIds = await assertCanManageTargets(context, input)
 
-  return withAnnouncementTransaction(async (client) => {
-    const result = await client.query<{ id: string }>(
-      `insert into public.announcements (
+  const createdAnnouncement = await withAnnouncementTransaction(
+    async (client) => {
+      const result = await client.query<{ id: string }>(
+        `insert into public.announcements (
          organization_id,
          author_user_id,
          title,
@@ -37,31 +39,35 @@ async function createAnnouncement(input: AnnouncementMutationInput) {
          is_pinned
        ) values ($1, $2, $3, $4, $5, $6)
        returning id`,
-      [
-        context.organizationId,
-        context.userId,
-        input.title,
-        input.body,
-        input.targetScope,
-        input.isPinned,
-      ]
-    )
-    const announcementId = result.rows[0]?.id
+        [
+          context.organizationId,
+          context.userId,
+          input.title,
+          input.body,
+          input.targetScope,
+          input.isPinned,
+        ]
+      )
+      const announcementId = result.rows[0]?.id
 
-    if (!announcementId) {
-      throw new Error("We could not create that announcement.")
+      if (!announcementId) {
+        throw new Error("We could not create that announcement.")
+      }
+
+      await replaceAnnouncementLocations(
+        client,
+        announcementId,
+        targetLocationIds
+      )
+      await replaceAnnouncementPoll(client, announcementId, input.pollOptions)
+      await markRead(client, announcementId, context.userId)
+
+      return { announcementId }
     }
+  )
 
-    await replaceAnnouncementLocations(
-      client,
-      announcementId,
-      targetLocationIds
-    )
-    await replaceAnnouncementPoll(client, announcementId, input.pollOptions)
-    await markRead(client, announcementId, context.userId)
-
-    return { announcementId }
-  })
+  await sendAnnouncementPushNotifications(createdAnnouncement.announcementId)
+  return createdAnnouncement
 }
 
 async function updateAnnouncement(
