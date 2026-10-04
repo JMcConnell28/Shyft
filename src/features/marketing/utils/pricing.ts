@@ -1,27 +1,13 @@
-type LocationPricingInput = {
-  employeeCount: number
-  timeAttendanceEnabled: boolean
-}
-
-type LocationPricingBreakdown = LocationPricingInput & {
-  extraEmployees: number
-  timeAttendanceEmployees: number
-}
-
-type PricingBreakdown = {
-  locationCount: number
-  employeeCount: number
-  includedEmployees: number
-  extraEmployees: number
-  basePrice: number
-  extraPrice: number
-  timeAttendancePrice: number
-  totalPrice: number
-  locations: Array<LocationPricingBreakdown>
-}
+import type {
+  LocationPricingInput,
+  PricingBreakdown,
+} from "@/features/marketing/pricing-types"
+import {
+  INCLUDED_CORE_EMPLOYEES,
+  calculateTimeAttendanceOverageQuantity,
+} from "@/features/billing/utils/pricing-quantities"
 
 const CORE_BASE_PRICE_GBP = 25
-const INCLUDED_CORE_EMPLOYEES = 10
 const EXTRA_EMPLOYEE_PRICE_GBP = 2.5
 const TIME_ATTENDANCE_EMPLOYEE_PRICE_GBP = 1
 
@@ -39,7 +25,7 @@ function calculatePricing(input: {
       employeeCount,
       extraEmployees: 0,
       timeAttendanceEmployees: location.timeAttendanceEnabled
-        ? employeeCount
+        ? calculateTimeAttendanceOverageQuantity(employeeCount)
         : 0,
       timeAttendanceEnabled: location.timeAttendanceEnabled,
     }
@@ -86,4 +72,7 @@ export {
   calculatePricing,
   formatGbp,
 }
-export type { LocationPricingInput, PricingBreakdown }
+export type {
+  LocationPricingInput,
+  PricingBreakdown,
+} from "@/features/marketing/pricing-types"

@@ -15,6 +15,7 @@ import type {
 } from "@/features/timesheets/types"
 import { Button } from "@/components/ui/button"
 import { SageTimesheetExportButton } from "@/features/timesheets/components/sage-timesheet-export-button"
+import { isTimesheetWeekComplete } from "@/features/timesheets/utils/timesheet-time"
 import { cn } from "@/lib/utils"
 
 type TimesheetHeaderProps = {
@@ -60,13 +61,13 @@ function TimesheetHeader({
             <SageTimesheetExportButton
               className="h-10 rounded-xl border-[#dfe4ef] bg-white px-3 font-semibold shadow-none"
               disabledReason={
-                data.exportableRotas.length === 0
-                  ? "No published rota is available for this week."
+                !isTimesheetWeekComplete(data.weekStart)
+                  ? "Sage exports are only available for completed timesheet weeks."
                   : null
               }
-              input={input}
+              input={{ ...input, weekStart: data.weekStart }}
               label="Export"
-              rotas={data.exportableRotas}
+              locations={data.locations}
               size="lg"
             />
           ) : null}

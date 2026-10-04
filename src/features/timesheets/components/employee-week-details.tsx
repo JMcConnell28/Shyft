@@ -6,6 +6,7 @@ import type {
 } from "@/features/timesheets/types"
 import { TimesheetEntryBadge } from "@/features/timesheets/components/timesheet-status"
 import { useViewerTimeZone } from "@/features/timesheets/hooks/use-viewer-time-zone"
+import { getTimesheetEntryRows } from "@/features/timesheets/utils/timesheet-entry-rows"
 import {
   formatTimesheetDuration,
   getEntryClockLabel,
@@ -23,21 +24,7 @@ function EmployeeWeekDetails({
   onEdit: (entry: TimesheetEntry) => void
 }) {
   const viewerTimeZone = useViewerTimeZone()
-  const rows = employee.days.flatMap((day) =>
-    day.entries.map((entry, index) => ({
-      day,
-      entry,
-      key: entry.id ?? `${day.date}:${index}`,
-    }))
-  )
-
-  if (rows.length === 0) {
-    return (
-      <p className="rounded-xl border border-dashed border-[#dfe4ef] bg-white px-4 py-6 text-center text-sm font-medium text-[#7481a0]">
-        No scheduled or clocked entries for this week.
-      </p>
-    )
-  }
+  const rows = getTimesheetEntryRows(employee.days)
 
   return (
     <div className="grid gap-2 lg:grid-cols-2 2xl:grid-cols-3">
@@ -45,13 +32,15 @@ function EmployeeWeekDetails({
         <button
           className={cn(
             "flex min-w-0 items-center gap-3 rounded-xl border border-[#dfe4ef] bg-white p-3 text-left transition-colors",
-            entry.id && canEditEntry(entry)
+            entry?.id && canEditEntry(entry)
               ? "hover:border-[#b8c9ee] hover:bg-blue-50/30"
               : "cursor-default"
           )}
-          disabled={!entry.id || !canEditEntry(entry)}
+          disabled={!entry?.id || !canEditEntry(entry)}
           key={key}
-          onClick={() => onEdit(entry)}
+          onClick={() => {
+            if (entry?.id && canEditEntry(entry)) onEdit(entry)
+          }}
           type="button"
         >
           <div className="flex size-10 shrink-0 flex-col items-center justify-center rounded-lg bg-[#eef3ff] text-[#236cff]">
@@ -71,14 +60,14 @@ function EmployeeWeekDetails({
             </div>
             <p className="mt-1 truncate text-[10px] font-medium text-[#7481a0]">
               {getEntryClockLabel(entry, viewerTimeZone ?? undefined)} ·{" "}
-              {entry.locationName}
+              {entry?.locationName ?? "No hours recorded"}
             </p>
           </div>
           <div className="ml-auto shrink-0 text-right">
             <p className="text-xs font-semibold">
-              {formatTimesheetDuration(entry.payableMinutes)}
+              {formatTimesheetDuration(entry?.payableMinutes ?? 0)}
             </p>
-            {entry.id ? (
+            {entry?.id && canEditEntry(entry) ? (
               <PencilIcon className="mt-1 ml-auto size-3 text-[#236cff]" />
             ) : null}
           </div>

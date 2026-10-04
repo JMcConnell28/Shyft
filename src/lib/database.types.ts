@@ -2328,6 +2328,9 @@ export type Database = {
       }
       rotas: {
         Row: {
+          content_version: number
+          content_fingerprint: string
+          published_content_version: number
           created_at: string
           created_by: string
           has_unpublished_changes: boolean
@@ -2350,6 +2353,9 @@ export type Database = {
           week_start: string
         }
         Insert: {
+          content_version?: number
+          content_fingerprint?: string
+          published_content_version?: number
           created_at?: string
           created_by: string
           has_unpublished_changes?: boolean
@@ -2372,6 +2378,9 @@ export type Database = {
           week_start: string
         }
         Update: {
+          content_version?: number
+          content_fingerprint?: string
+          published_content_version?: number
           created_at?: string
           created_by?: string
           has_unpublished_changes?: boolean

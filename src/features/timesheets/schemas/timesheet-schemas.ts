@@ -1,11 +1,6 @@
 import { z } from "zod"
 
-const weekStartSchema = z
-  .string()
-  .trim()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a valid week.")
-  .optional()
-  .nullable()
+const weekStartSchema = z.iso.date("Choose a valid week.").optional().nullable()
 
 const timesheetScopeBaseSchema = z.object({
   organizationId: z.string().trim().min(1).nullable().optional(),
@@ -65,7 +60,8 @@ const updateTimesheetEntryInputSchema = timesheetScopeBaseSchema
 
 const sageTimesheetExportInputSchema = timesheetScopeBaseSchema
   .extend({
-    rotaId: z.uuid("Choose a valid rota."),
+    exportLocationId: z.uuid("Choose a valid location."),
+    weekStart: z.iso.date("Choose a valid week."),
   })
   .refine(
     (value) => Boolean(value.organizationId) || Boolean(value.locationId),

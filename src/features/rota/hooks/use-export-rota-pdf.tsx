@@ -14,6 +14,7 @@ function useExportRotaPdf() {
     days,
     employeeGroups,
     employeesById,
+    hasUnsavedChanges,
     meta,
     selectedLocation,
     shiftsById,
@@ -23,7 +24,7 @@ function useExportRotaPdf() {
 
   const exportPdf = React.useCallback(
     async (options: RotaPdfExportOptions) => {
-      if (isExporting || zones.length === 0) {
+      if (isExporting || hasUnsavedChanges || zones.length === 0) {
         return
       }
 
@@ -72,6 +73,7 @@ function useExportRotaPdf() {
       employeeGroups,
       employeesById,
       isExporting,
+      hasUnsavedChanges,
       meta,
       selectedLocation,
       shiftsById,
@@ -80,7 +82,10 @@ function useExportRotaPdf() {
   )
 
   return {
-    canExport: !isExporting && zones.length > 0,
+    canExport: !isExporting && !hasUnsavedChanges && zones.length > 0,
+    exportBlockedReason: hasUnsavedChanges
+      ? "Save your changes before exporting a versioned rota."
+      : undefined,
     exportPdf,
     isExporting,
   }

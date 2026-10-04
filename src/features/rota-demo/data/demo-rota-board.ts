@@ -42,6 +42,8 @@ const demoRotaBoardData = {
     weekStart: "2026-06-08",
     weekEnd: "2026-06-14",
     weekLabel: "8 - 14 Jun 2026",
+    contentVersion: 1,
+    publishedContentVersion: 0,
     publishedVersion: 0,
     hasUnpublishedChanges: false,
     publishedSnapshotAvailable: false,

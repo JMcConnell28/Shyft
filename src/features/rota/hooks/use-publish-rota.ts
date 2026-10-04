@@ -8,7 +8,10 @@ import type { WorkspaceBoardData } from "@/features/rota/types/workspace"
 
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
 import { rotaQueryKeys } from "@/features/rota/query-keys"
-import { publishRotaVersion, saveRotaWorkspace } from "@/features/rota/server-fns"
+import {
+  publishRotaVersion,
+  saveRotaWorkspace,
+} from "@/features/rota/server-fns"
 import { buildSaveRotaWorkspacePayload } from "@/features/rota/utils/rota-workspace-payload"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -51,11 +54,11 @@ function usePublishRota() {
     },
     onSuccess: async (result) => {
       if (hasUnsavedChanges) {
-        markChangesSaved()
+        markChangesSaved(result.contentVersion)
       }
 
-      markPublished()
-      updateWorkspaceCaches(queryClient, meta.rotaId)
+      markPublished(result.contentVersion)
+      updateWorkspaceCaches(queryClient, meta.rotaId, result.contentVersion)
       updateListCaches(queryClient, meta.rotaId)
 
       await queryClient.invalidateQueries({
@@ -68,14 +71,16 @@ function usePublishRota() {
         showSuccessToast(
           `Rota published. ${result.notificationEmailCount} email${
             result.notificationEmailCount === 1 ? "" : "s"
-          } queued.`,
+          } queued.`
         )
       } else {
         showSuccessToast("Rota published. No staff emails were queued.")
       }
 
       if (result.notificationEmailError) {
-        showErrorToast(new Error("Rota published, but email notifications failed."))
+        showErrorToast(
+          new Error("Rota published, but email notifications failed.")
+        )
       }
     },
     onError: (error) => {
@@ -120,13 +125,19 @@ function usePublishRota() {
         ? meta.status === "published" && !meta.settings.allowEditAfterPublish
           ? "Published rotas are locked in the rota settings."
           : "Past rotas are locked and can no longer be edited."
-      : meta.status === "published" && !meta.hasUnpublishedChanges && !hasUnsavedChanges
-        ? "No unpublished changes to publish yet."
-        : null,
+        : meta.status === "published" &&
+            !meta.hasUnpublishedChanges &&
+            !hasUnsavedChanges
+          ? "No unpublished changes to publish yet."
+          : null,
   }
 }
 
-function updateWorkspaceCaches(queryClient: ReturnType<typeof useQueryClient>, rotaId: string) {
+function updateWorkspaceCaches(
+  queryClient: ReturnType<typeof useQueryClient>,
+  rotaId: string,
+  contentVersion: number
+) {
   queryClient.setQueriesData<WorkspaceBoardData>(
     {
       queryKey: rotaQueryKeys.all,
@@ -145,6 +156,8 @@ function updateWorkspaceCaches(queryClient: ReturnType<typeof useQueryClient>, r
         meta: {
           ...currentData.meta,
           status: "published",
+          contentVersion,
+          publishedContentVersion: contentVersion,
           publishedVersion: currentData.meta.publishedVersion + 1,
           hasUnpublishedChanges: false,
           publishedSnapshotAvailable: true,
@@ -154,7 +167,10 @@ function updateWorkspaceCaches(queryClient: ReturnType<typeof useQueryClient>, r
   )
 }
 
-function updateListCaches(queryClient: ReturnType<typeof useQueryClient>, rotaId: string) {
+function updateListCaches(
+  queryClient: ReturnType<typeof useQueryClient>,
+  rotaId: string
+) {
   queryClient.setQueriesData<RotaListPageData>(
     {
       queryKey: rotaQueryKeys.all,

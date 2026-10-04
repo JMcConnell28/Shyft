@@ -36,10 +36,6 @@ const portalSchema = workspaceReferenceSchema.extend({
   returnPath: returnPathSchema,
 })
 
-const organizationBillingOverviewSchema = z.object({
-  organizationId: z.string().trim().min(1),
-})
-
 const startSubscriptionCheckout = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => checkoutSchema.parse(input))
   .handler(async ({ data }) => {
@@ -124,20 +120,14 @@ const startBillingPortal = createServerFn({ method: "POST" })
       userId: session.user.id,
     })
 
-    const billingAccounts =
-      await import("@/features/billing/server/billing-accounts")
-    const billing = data.organizationId
-      ? await billingAccounts.getOrganizationBillingAccess(data.organizationId)
-      : await billingAccounts.getLocationBillingAccess(data.locationId ?? "")
-
-    if (!billing?.stripeCustomerId) {
-      throw new Error("No Stripe customer exists for this workspace yet.")
-    }
-
-    const portal = await import("@/features/billing/server/portal")
+    const [customers, portal] = await Promise.all([
+      import("@/features/billing/server/portal-customer"),
+      import("@/features/billing/server/portal"),
+    ])
+    const stripeCustomerId = await customers.getBillingPortalCustomer(data)
 
     return portal.createBillingPortalSession({
-      stripeCustomerId: billing.stripeCustomerId,
+      stripeCustomerId,
       returnPath: data.returnPath,
     })
   })
@@ -168,29 +158,8 @@ const updateTimeAttendanceAddon = createServerFn({ method: "POST" })
       : addons.cancelTimeAttendance(data.locationId)
   })
 
-const getOrganizationBillingOverview = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    organizationBillingOverviewSchema.parse(input)
-  )
-  .handler(async ({ data }) => {
-    const { session } = await requireVerifiedSessionOrThrow()
-    const { getOrganizationRole } =
-      await import("@/lib/auth/has-org-permission")
-    const role = await getOrganizationRole(data.organizationId, session.user.id)
-
-    if (!role || !["owner", "admin"].includes(role)) {
-      throw new Error(
-        "You do not have permission to view organization billing."
-      )
-    }
-
-    const overview = await import("@/features/billing/server/overview")
-    return overview.getOrganizationBillingOverview(data.organizationId)
-  })
-
 export {
   getWorkspaceBillingStatus,
-  getOrganizationBillingOverview,
   startBillingPortal,
   startSubscriptionCheckout,
   updateTimeAttendanceAddon,

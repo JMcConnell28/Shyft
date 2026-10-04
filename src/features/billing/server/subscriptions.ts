@@ -7,10 +7,9 @@ import {
   ensureOrganizationBillingAccount,
   setBillingAccountPaymentMethod,
 } from "@/features/billing/server/billing-accounts"
-import {
-  buildSubscriptionItems,
-  getBillingPricingQuantities,
-} from "@/features/billing/server/pricing"
+import { getBillingPricingQuantities } from "@/features/billing/server/pricing"
+import { buildSubscriptionItems } from "@/features/billing/server/subscription-items"
+import { validateSubscriptionPrices } from "@/features/billing/server/subscription-prices"
 import {
   getCoreBasePriceId,
   getCoreExtraEmployeePriceId,
@@ -18,9 +17,7 @@ import {
   getOptionalTimeAttendanceEmployeePriceId,
   getStripe,
 } from "@/features/billing/server/stripe"
-import {
-  syncSubscriptionUsagePeriods,
-} from "@/features/billing/server/usage"
+import { syncSubscriptionUsagePeriods } from "@/features/billing/server/usage"
 import { ensureWorkspaceTrial } from "@/features/billing/server/trials"
 import { getDatabase } from "@/lib/db"
 
@@ -444,7 +441,7 @@ async function createTrialSubscriptionForSavedPaymentMethod(input: {
   const subscription = await getStripe().subscriptions.create({
     customer: input.stripeCustomerId,
     default_payment_method: input.stripePaymentMethodId,
-    items: buildSubscriptionItems(quantities),
+    items: await buildSubscriptionItems(),
     automatic_tax: { enabled: true },
     metadata: {
       billingAccountId: input.billingAccountId,
@@ -575,6 +572,7 @@ async function syncBillingSubscriptionQuantities(billingAccountId: string) {
   }
 
   const coreBasePriceId = getCoreBasePriceId()
+  await validateSubscriptionPrices()
   const coreBaseItem = findSubscriptionItem(subscription, coreBasePriceId)
 
   if (!coreBaseItem) {

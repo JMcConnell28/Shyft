@@ -462,10 +462,11 @@ function useRotaWorkspaceState({
     [assignmentsById, shiftsById]
   )
 
-  const markChangesSaved = React.useCallback(() => {
+  const markChangesSaved = React.useCallback((contentVersion?: number) => {
     setHasUnsavedChanges(false)
     setMeta((currentMeta) => ({
       ...currentMeta,
+      contentVersion: contentVersion ?? currentMeta.contentVersion,
       hasUnpublishedChanges:
         currentMeta.status === "published"
           ? true
@@ -473,25 +474,31 @@ function useRotaWorkspaceState({
     }))
   }, [])
 
-  const setMetaNote = React.useCallback((note: string | null) => {
-    setMeta((currentMeta) => ({
-      ...currentMeta,
-      note,
-      hasUnpublishedChanges:
-        currentMeta.status === "published"
-          ? true
-          : currentMeta.hasUnpublishedChanges,
-    }))
-  }, [])
+  const setMetaNote = React.useCallback(
+    (note: string | null, contentVersion?: number) => {
+      setMeta((currentMeta) => ({
+        ...currentMeta,
+        note,
+        contentVersion: contentVersion ?? currentMeta.contentVersion,
+        hasUnpublishedChanges:
+          currentMeta.status === "published"
+            ? true
+            : currentMeta.hasUnpublishedChanges,
+      }))
+    },
+    []
+  )
 
   const setBudgetPence = React.useCallback((budgetPence: number | null) => {
     setMeta((currentMeta) => ({ ...currentMeta, budgetPence }))
   }, [])
 
-  const markPublished = React.useCallback(() => {
+  const markPublished = React.useCallback((contentVersion: number) => {
     setMeta((currentMeta) => ({
       ...currentMeta,
       status: "published",
+      contentVersion,
+      publishedContentVersion: contentVersion,
       publishedVersion: currentMeta.publishedVersion + 1,
       hasUnpublishedChanges: false,
       publishedSnapshotAvailable: true,

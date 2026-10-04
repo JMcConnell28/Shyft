@@ -169,7 +169,7 @@ function DashboardShell({
               className={cn(
                 "-ml-1 md:hidden",
                 hasMobileBrandHeader &&
-                  "size-11 rounded-xl bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white"
+                  "size-9 rounded-lg bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white"
               )}
             />
             {hasMobileBrandHeader ? (
@@ -263,7 +263,7 @@ function DashboardShell({
                 size="icon"
                 className={cn(
                   hasMobileBrandHeader &&
-                    "size-11 rounded-xl bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
+                    "size-9 rounded-lg bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
                 )}
                 nativeButton={false}
                 render={

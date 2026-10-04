@@ -1,12 +1,5 @@
 import "@tanstack/react-start/server-only"
 
-import type Stripe from "stripe"
-
-import {
-  getCoreBasePriceId,
-  getCoreExtraEmployeePriceId,
-  getTimeAttendanceEmployeePriceId,
-} from "@/features/billing/server/stripe"
 import {
   INCLUDED_CORE_EMPLOYEES,
   calculateBillingSeatQuantities,
@@ -177,10 +170,9 @@ async function getEmployeeCounts(organizationId: string) {
          join current_period period on period.id = usage.organization_billing_period_id
        ) as used_employee_count,
        (
-         select count(distinct usage.employee_id)::integer
-         from billing_private.organization_employee_usage_events usage
-         join current_period period on period.id = usage.organization_billing_period_id
-         where usage.time_attendance_billable = true
+         select count(distinct overage.employee_id)::integer
+         from current_period period
+         cross join lateral billing_private.time_attendance_overage_employee_ids(period.id) overage
        ) as time_attendance_employee_count`,
     [organizationId]
   )
@@ -204,43 +196,6 @@ function getEmptyBillingPricingQuantities(): BillingPricingQuantities {
   }
 }
 
-function buildSubscriptionLineItems(
-  _quantities: BillingPricingQuantities
-): Stripe.Checkout.SessionCreateParams.LineItem[] {
-  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-    {
-      price: getCoreBasePriceId(),
-      quantity: 1,
-    },
-  ]
-
-  lineItems.push({ price: getCoreExtraEmployeePriceId() })
-  lineItems.push({ price: getTimeAttendanceEmployeePriceId() })
-
-  return lineItems
-}
-
-function buildSubscriptionItems(
-  _quantities: BillingPricingQuantities
-): Stripe.SubscriptionCreateParams.Item[] {
-  const items: Stripe.SubscriptionCreateParams.Item[] = [
-    {
-      price: getCoreBasePriceId(),
-      quantity: 1,
-    },
-  ]
-
-  items.push({ price: getCoreExtraEmployeePriceId() })
-  items.push({ price: getTimeAttendanceEmployeePriceId() })
-
-  return items
-}
-
-export {
-  INCLUDED_CORE_EMPLOYEES,
-  buildSubscriptionLineItems,
-  buildSubscriptionItems,
-  getBillingPricingQuantities,
-}
+export { INCLUDED_CORE_EMPLOYEES, getBillingPricingQuantities }
 export type { BillingPricingQuantities }
 export type { LocationPricingQuantity }

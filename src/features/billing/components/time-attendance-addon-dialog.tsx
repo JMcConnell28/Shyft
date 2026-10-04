@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Clock3Icon } from "lucide-react"
 
+import * as timeAttendanceAddonSchemas from "@/features/billing/schemas/time-attendance-addon-schemas"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -18,10 +19,9 @@ import {
   emptyTimeAttendanceAddress,
   toTimeAttendanceDeliveryAddress,
 } from "@/features/billing/components/time-attendance-address-fields"
-import {
-  timeAttendanceDeliveryAddressSchema,
-  type TimeAttendanceDeliveryAddress,
-} from "@/features/billing/schemas/time-attendance-addon-schemas"
+
+type TimeAttendanceDeliveryAddress =
+  timeAttendanceAddonSchemas.TimeAttendanceDeliveryAddress
 
 function TimeAttendanceAddonDialog({
   hardwareEntitlementAvailable,
@@ -59,7 +59,9 @@ function TimeAttendanceAddonDialog({
     event.preventDefault()
     const address = toTimeAttendanceDeliveryAddress(deliveryAddress)
     const parsedDeliveryAddress =
-      timeAttendanceDeliveryAddressSchema.safeParse(address)
+      timeAttendanceAddonSchemas.timeAttendanceDeliveryAddressSchema.safeParse(
+        address
+      )
     const postcodeIssue = parsedDeliveryAddress.success
       ? undefined
       : parsedDeliveryAddress.error.issues.find(
@@ -111,7 +113,7 @@ function TimeAttendanceAddonDialog({
               <span className="text-xs leading-5 text-muted-foreground">
                 {isTestMode
                   ? "I confirm this is a test submission and understand that no billing or hardware records will change."
-                  : "I confirm that Time & Attendance will add £1 per month, plus VAT where applicable, for each used employee in enabled locations. Usage is billed in arrears for each billing period."}
+                  : "I confirm that Time & Attendance will add £1 per month, plus VAT where applicable, for each used employee above the 10 included at this location. Usage is billed in arrears for each billing period."}
               </span>
             </label>
           </div>
@@ -147,8 +149,8 @@ function getDescription(input: {
     return "This repeats the complete setup form without changing billing, Stripe, or hardware records."
   }
   return input.hardwareEntitlementAvailable
-    ? "Time & Attendance adds £1 per used employee in enabled locations, plus VAT where applicable. Your first activation includes one standard NFC clock-in stand where delivery is available."
-    : "Time & Attendance adds £1 per used employee in enabled locations, plus VAT where applicable. This location has already used its included hardware entitlement, so another stand is not included."
+    ? "Time & Attendance is included for the first 10 used employees at this location, then adds £1 per extra employee, plus VAT where applicable. Your first activation includes one standard NFC clock-in stand where delivery is available."
+    : "Time & Attendance is included for the first 10 used employees at this location, then adds £1 per extra employee, plus VAT where applicable. This location has already used its included hardware entitlement, so another stand is not included."
 }
 
 export { TimeAttendanceAddonDialog }

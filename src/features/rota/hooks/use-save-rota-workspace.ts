@@ -52,11 +52,11 @@ function useSaveRotaWorkspace() {
           assignmentsById,
         }),
       }),
-    onSuccess: () => {
+    onSuccess: (result) => {
       const nextCooldownUntil = Date.now() + SAVE_RATE_LIMIT_MS
       setCooldownUntil(nextCooldownUntil)
       setNow(Date.now())
-      markChangesSaved()
+      markChangesSaved(result.contentVersion)
       updateRotaListSaveState(queryClient, meta.rotaId, meta.status)
 
       void Promise.all([

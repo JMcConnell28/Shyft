@@ -22,14 +22,6 @@ type TimesheetLocation = {
   name: string
 }
 
-type TimesheetExportableRota = {
-  id: string
-  label: string
-  locationId: string
-  locationName: string
-  weekStart: string
-}
-
 type TimesheetTotals = {
   actualMinutes: number
   openEntryCount: number
@@ -73,6 +65,12 @@ type TimesheetDay = TimesheetTotals & {
   entries: Array<TimesheetEntry>
 }
 
+type TimesheetEntryRow = {
+  day: TimesheetDay
+  entry: TimesheetEntry | null
+  key: string
+}
+
 type EmployeeTimesheet = TimesheetTotals & {
   employeeId: string | null
   employeeName: string
@@ -94,7 +92,6 @@ type TimesheetPageData = {
   canManage: boolean
   writableLocationIds: Array<string>
   employeeTimesheet: EmployeeTimesheet
-  exportableRotas: Array<TimesheetExportableRota>
   locations: Array<TimesheetLocation>
   managerTimesheet: ManagerTimesheet | null
   weekEnd: string
@@ -106,7 +103,8 @@ type SageTimesheetExportInput = {
   organizationId?: string | null
   locationId?: string
   userId: string
-  rotaId: string
+  exportLocationId: string
+  weekStart: string
 }
 
 type SageTimesheetExportRow = PayrollExportRow
@@ -136,7 +134,7 @@ export type {
   SageTimesheetExportRow,
   TimesheetDay,
   TimesheetEntry,
-  TimesheetExportableRota,
+  TimesheetEntryRow,
   TimesheetLocation,
   TimesheetPageData,
   TimesheetScopeInput,

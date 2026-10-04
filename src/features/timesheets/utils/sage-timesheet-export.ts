@@ -1,22 +1,21 @@
 import { addDays, format } from "date-fns"
 
-import {
-  DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE,
-  buildSagePayrollExportRow,
-  serializeSagePayrollExportCsv,
-} from "@/features/payroll/adapters/sage-csv"
 import type { PayrollExportProfile } from "@/features/payroll/types"
 import type {
   SageTimesheetExportData,
   TimesheetEntry,
 } from "@/features/timesheets/types"
+import {
+  DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE,
+  buildSagePayrollExportRow,
+  serializeSagePayrollExportCsv,
+} from "@/features/payroll/adapters/sage-csv"
 
 function buildSageTimesheetExportData(input: {
-  entries: TimesheetEntry[]
+  entries: Array<TimesheetEntry>
   locationName: string
   locationSlug: string | null
   profile?: PayrollExportProfile
-  rotaId: string
   weekStart: string
 }): SageTimesheetExportData {
   const profile = input.profile ?? DEFAULT_SAGE_PAYROLL_EXPORT_PROFILE
@@ -34,7 +33,6 @@ function buildSageTimesheetExportData(input: {
       locationName: input.locationName,
       locationSlug: input.locationSlug,
       profile,
-      rotaId: input.rotaId,
       weekStart: input.weekStart,
     }),
     missingPayrollEmployees: getMissingPayrollEmployees(input.entries),
@@ -47,7 +45,7 @@ function serializeSageTimesheetExportCsv(data: SageTimesheetExportData) {
   return serializeSagePayrollExportCsv(data)
 }
 
-function getMissingPayrollEmployees(entries: TimesheetEntry[]) {
+function getMissingPayrollEmployees(entries: Array<TimesheetEntry>) {
   return Array.from(
     new Set(
       entries
@@ -59,7 +57,7 @@ function getMissingPayrollEmployees(entries: TimesheetEntry[]) {
 }
 
 function buildSagePayrollRows(input: {
-  entries: TimesheetEntry[]
+  entries: Array<TimesheetEntry>
   locationName: string
   profile: PayrollExportProfile
   weekEnd: string
@@ -80,7 +78,7 @@ function buildSagePayrollRows(input: {
     )
 }
 
-function getPayableMinutesByEmployee(entries: TimesheetEntry[]) {
+function getPayableMinutesByEmployee(entries: Array<TimesheetEntry>) {
   return entries.reduce<
     Map<
       string,
@@ -106,7 +104,7 @@ function getPayableMinutesByEmployee(entries: TimesheetEntry[]) {
   }, new Map())
 }
 
-function getUnresolvedEntryEmployees(entries: TimesheetEntry[]) {
+function getUnresolvedEntryEmployees(entries: Array<TimesheetEntry>) {
   return Array.from(
     new Set(
       entries
@@ -123,14 +121,11 @@ function buildSageTimesheetFileName(input: {
   locationName: string
   locationSlug: string | null
   profile: { fileNamePrefix: string }
-  rotaId: string
   weekStart: string
 }) {
   const locationSlug =
     input.locationSlug?.trim() || slugifyFilePart(input.locationName)
-  const rotaShortId = input.rotaId.slice(0, 8)
-
-  return `${input.profile.fileNamePrefix}-${locationSlug || "location"}-${input.weekStart}-${rotaShortId}.csv`
+  return `${input.profile.fileNamePrefix}-${locationSlug || "location"}-${input.weekStart}.csv`
 }
 
 function formatDateOnly(value: string | null | undefined) {

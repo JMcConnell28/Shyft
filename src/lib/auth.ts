@@ -13,6 +13,7 @@ import { passwordResetExpiryHours } from "@/features/email/constants/password-re
 import { requireTermsAcceptance } from "@/features/legal/server/require-terms-acceptance"
 import { ac, roles } from "@/lib/auth/permissions"
 import { requireSignUpAccessCode } from "@/lib/auth/sign-up-access.server"
+import { requireAllowedProfileUpdate } from "@/lib/auth/require-profile-update.server"
 import { authUserAdditionalFields } from "@/lib/auth-fields"
 import { getDatabase } from "@/lib/db"
 import { isDevelopmentEmailVerificationBypassed } from "@/lib/email-verification"
@@ -91,6 +92,9 @@ const auth = betterAuth({
   },
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === "/update-user") {
+        requireAllowedProfileUpdate(ctx.body)
+      }
       if (ctx.path === "/sign-up/email") {
         requireSignUpAccessCode(ctx.headers?.get("x-signup-access-code"))
         requireTermsAcceptance(ctx.headers?.get("x-terms-version"))

@@ -21,8 +21,8 @@ function useUpdateRotaNote() {
           note,
         },
       }),
-    onSuccess: async (_, note) => {
-      setMetaNote(note.trim() || null)
+    onSuccess: async (result, note) => {
+      setMetaNote(note.trim() || null, result.contentVersion)
       await queryClient.invalidateQueries({
         queryKey: rotaQueryKeys.workspaces,
         refetchType: "none",

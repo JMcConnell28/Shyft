@@ -9,16 +9,12 @@ import {
 
 import type { RotaPdfDocumentData } from "@/features/rota/types/rota-pdf"
 
-function RotaPdfDocument({
-  data,
-}: {
-  data: RotaPdfDocumentData
-}) {
+function RotaPdfDocument({ data }: { data: RotaPdfDocumentData }) {
   return (
     <Document
       author="RocketRota"
       creator="RocketRota"
-      title={`${data.locationName} rota - ${data.weekLabel}`}
+      title={`${data.locationName} rota - ${data.weekLabel} - ${data.versionLabel}`}
     >
       {data.pages.map((page) => (
         <Page
@@ -34,7 +30,9 @@ function RotaPdfDocument({
               ) : null}
               <View>
                 <Text style={styles.brandName}>RocketRota</Text>
-                <Text style={styles.brandCaption}>Weekly rota export</Text>
+                <Text style={styles.brandCaption}>
+                  Weekly rota export · {data.versionLabel}
+                </Text>
               </View>
             </View>
 
@@ -87,7 +85,10 @@ function RotaPdfDocument({
                             <Text style={styles.openShiftText}>Open shift</Text>
                           ) : (
                             shift.employees.map((employee) => (
-                              <View key={employee.id} style={styles.employeeRow}>
+                              <View
+                                key={employee.id}
+                                style={styles.employeeRow}
+                              >
                                 <Text
                                   style={[
                                     styles.employeeGroupText,
@@ -115,7 +116,9 @@ function RotaPdfDocument({
             <View style={styles.legend}>
               {page.legend.map((item) => (
                 <View key={item.id} style={styles.legendItem}>
-                  <Text style={[styles.legendGroupText, { color: item.colorHex }]}>
+                  <Text
+                    style={[styles.legendGroupText, { color: item.colorHex }]}
+                  >
                     {item.badgeText}
                   </Text>
                   <Text style={styles.legendText}>{item.name}</Text>
@@ -135,13 +138,7 @@ function RotaPdfDocument({
   )
 }
 
-function SummaryPill({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
+function SummaryPill({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.summaryPill}>
       <Text style={styles.summaryLabel}>{label}</Text>
@@ -167,10 +164,18 @@ function StatsRow({
       />
     ) : null,
     visibleStats.includes("labourCost") ? (
-      <SummaryPill key="labourCost" label="Labour cost" value={page.totalCostLabel} />
+      <SummaryPill
+        key="labourCost"
+        label="Labour cost"
+        value={page.totalCostLabel}
+      />
     ) : null,
     visibleStats.includes("shiftCount") ? (
-      <SummaryPill key="shiftCount" label="Shifts" value={`${page.totalShiftCount}`} />
+      <SummaryPill
+        key="shiftCount"
+        label="Shifts"
+        value={`${page.totalShiftCount}`}
+      />
     ) : null,
   ].filter(Boolean)
 

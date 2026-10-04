@@ -68,12 +68,11 @@ describe("buildSageTimesheetExportData", () => {
       ],
       locationName: "Harbour House",
       locationSlug: "harbour-house",
-      rotaId: "rota-12345678",
       weekStart: "2026-06-01",
     })
 
     expect(exportData.fileName).toBe(
-      "sage-payroll-harbour-house-2026-06-01-rota-123.csv"
+      "sage-payroll-harbour-house-2026-06-01.csv"
     )
     expect(exportData.missingPayrollEmployees).toEqual([])
     expect(exportData.rows).toEqual([
@@ -169,7 +168,6 @@ describe("serializeSageTimesheetExportCsv", () => {
       locationName: "Harbour House",
       locationSlug: "harbour-house",
       profile: customProfile,
-      rotaId: "rota-12345678",
       weekStart: "2026-06-01",
     })
     const csv = serializeSageTimesheetExportCsv(exportData)

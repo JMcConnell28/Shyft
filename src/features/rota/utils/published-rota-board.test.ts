@@ -17,6 +17,8 @@ const board: WorkspaceBoardData = {
     weekStart: "2026-09-28",
     weekEnd: "2026-10-04",
     weekLabel: "28 Sep – 4 Oct",
+    contentVersion: 1,
+    publishedContentVersion: 1,
     publishedVersion: 1,
     hasUnpublishedChanges: false,
     publishedSnapshotAvailable: true,

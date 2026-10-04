@@ -4,15 +4,7 @@ import {
   changeAccountPasswordSchema,
   requestPasswordResetSchema,
   resetPasswordSchema,
-  updateAccountProfileSchema,
 } from "@/features/account/schemas/account-schemas"
-
-const updateAccountProfile = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => updateAccountProfileSchema.parse(input))
-  .handler(async ({ data }) => {
-    const module = await import("@/features/account/server/actions")
-    return module.updateAccountProfile(data)
-  })
 
 const changeAccountPassword = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => changeAccountPasswordSchema.parse(input))
@@ -35,9 +27,4 @@ const resetPassword = createServerFn({ method: "POST" })
     return module.resetPassword(data)
   })
 
-export {
-  changeAccountPassword,
-  requestPasswordReset,
-  resetPassword,
-  updateAccountProfile,
-}
+export { changeAccountPassword, requestPasswordReset, resetPassword }

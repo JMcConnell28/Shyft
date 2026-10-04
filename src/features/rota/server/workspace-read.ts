@@ -98,7 +98,7 @@ async function getRotaWorkspaceData({
   const rotaQuery = supabase
     .from("rotas")
     .select(
-      "id, status, note, week_start, published_version, published_snapshot_version, has_unpublished_changes"
+      "id, status, note, week_start, content_version, published_content_version, published_version, published_snapshot_version, has_unpublished_changes"
     )
     .eq("location_id", selectedLocation.id)
     .eq("id", rotaId)
@@ -233,6 +233,10 @@ async function getRotaWorkspaceData({
       weekStart: rota.week_start,
       weekEnd: days[6]?.isoDate ?? rota.week_start,
       weekLabel: buildWeekLabel(rota.week_start),
+      contentVersion: publishedOnly
+        ? rota.published_content_version
+        : rota.content_version,
+      publishedContentVersion: rota.published_content_version,
       publishedVersion: rota.published_version,
       hasUnpublishedChanges: rota.has_unpublished_changes,
       publishedSnapshotAvailable: rota.published_snapshot_version > 0,

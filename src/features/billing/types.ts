@@ -114,7 +114,6 @@ type BillingSettingsPageProps = {
   trial: WorkspaceTrial | null
   organizationId?: string | null
   locationId?: string | null
-  organizationLocations?: Array<OrganizationBillingLocationSummary>
 }
 
 type BillingSettingsStatus = {

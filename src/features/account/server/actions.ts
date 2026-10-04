@@ -1,33 +1,17 @@
 import type { z } from "zod"
 
-import {
+import type {
   changeAccountPasswordSchema,
   requestPasswordResetSchema,
   resetPasswordSchema,
-  updateAccountProfileSchema,
 } from "@/features/account/schemas/account-schemas"
 import { auth } from "@/lib/auth"
 import { getAuthRequestHeaders } from "@/lib/auth-session.server"
 import { ensureSession } from "@/lib/auth-server"
 
-type UpdateAccountProfileInput = z.infer<typeof updateAccountProfileSchema>
 type ChangeAccountPasswordInput = z.infer<typeof changeAccountPasswordSchema>
 type RequestPasswordResetInput = z.infer<typeof requestPasswordResetSchema>
 type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
-
-async function updateAccountProfile(input: UpdateAccountProfileInput) {
-  await ensureSession()
-  const headers = getAuthRequestHeaders()
-
-  await auth.api.updateUser({
-    headers,
-    body: {
-      name: input.name,
-    },
-  })
-
-  return { success: true }
-}
 
 async function changeAccountPassword(input: ChangeAccountPasswordInput) {
   await ensureSession()
@@ -67,9 +51,4 @@ async function resetPassword(input: ResetPasswordInput) {
   return { success: true }
 }
 
-export {
-  changeAccountPassword,
-  requestPasswordReset,
-  resetPassword,
-  updateAccountProfile,
-}
+export { changeAccountPassword, requestPasswordReset, resetPassword }

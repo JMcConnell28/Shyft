@@ -159,9 +159,8 @@ async function finalizeEndedBillingPeriods(billingAccountId: string) {
        select
          period.id,
          count(distinct usage.employee_id)::integer as used_employee_count,
-         count(distinct usage.employee_id) filter (
-           where usage.time_attendance_billable
-         )::integer as time_attendance_employee_count
+         (select count(*)::integer
+          from billing_private.time_attendance_overage_employee_ids(period.id)) as time_attendance_employee_count
        from locked_periods period
        left join billing_private.organization_employee_usage_events usage
          on usage.organization_billing_period_id = period.id
@@ -195,9 +194,7 @@ async function finalizeEndedBillingPeriods(billingAccountId: string) {
   )
 }
 
-type MeteredUsageItemType =
-  | "core_extra_employee"
-  | "time_attendance_employee"
+type MeteredUsageItemType = "core_extra_employee" | "time_attendance_employee"
 
 type FinalizedUsagePeriodRow = {
   id: string

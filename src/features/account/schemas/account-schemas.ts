@@ -2,10 +2,6 @@ import { z } from "zod"
 
 import { emailSchema, passwordSchema } from "@/lib/onboarding-schemas"
 
-const updateAccountProfileSchema = z.object({
-  name: z.string().trim().min(1, "Enter your name.").max(120),
-})
-
 const changeAccountPasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Enter your current password."),
@@ -37,5 +33,4 @@ export {
   changeAccountPasswordSchema,
   requestPasswordResetSchema,
   resetPasswordSchema,
-  updateAccountProfileSchema,
 }

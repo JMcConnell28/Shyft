@@ -3,19 +3,19 @@
 import * as React from "react"
 import { useServerFn } from "@tanstack/react-start"
 
-import { getSageTimesheetExportData } from "@/features/timesheets/server-fns"
 import type { SageTimesheetExportInput } from "@/features/timesheets/types"
+import { getSageTimesheetExportData } from "@/features/timesheets/server-fns"
 import { serializeSageTimesheetExportCsv } from "@/features/timesheets/utils/sage-timesheet-export"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
 function useSageTimesheetExport(
-  input: Omit<SageTimesheetExportInput, "rotaId">
+  input: Omit<SageTimesheetExportInput, "exportLocationId">
 ) {
   const getSageTimesheetExportDataFn = useServerFn(getSageTimesheetExportData)
   const [isExporting, setIsExporting] = React.useState(false)
 
   const exportCsv = React.useCallback(
-    async (rotaId: string) => {
+    async (exportLocationId: string) => {
       if (isExporting) {
         return
       }
@@ -26,7 +26,7 @@ function useSageTimesheetExport(
         const exportData = await getSageTimesheetExportDataFn({
           data: {
             ...input,
-            rotaId,
+            exportLocationId,
           },
         })
         const csv = serializeSageTimesheetExportCsv(exportData)

@@ -129,7 +129,7 @@ function PricingExplainer() {
       <PricingCard
         eyebrow="Optional"
         title={`${formatGbp(TIME_ATTENDANCE_EMPLOYEE_PRICE_GBP)} Time & Attendance`}
-        body="Enable clocking per location and pay per used employee in enabled locations. One NFC stand is included per location."
+        body="Enable clocking per location. The first 10 used staff at each enabled location are included; pay £1 for each extra T&A employee. One NFC stand is included per location."
       />
     </section>
   )

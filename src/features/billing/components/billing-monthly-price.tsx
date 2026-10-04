@@ -51,7 +51,7 @@ function BillingMonthlyPrice({
             value={
               pricing
                 ? formatMonthlyPrice(pricing.timeAttendancePrice)
-                : `${formatMonthlyPrice(TIME_ATTENDANCE_MONTHLY_PRICE_PENCE)} per employee`
+                : `${formatMonthlyPrice(TIME_ATTENDANCE_MONTHLY_PRICE_PENCE)} per employee above 10 per location`
             }
           />
         </dl>

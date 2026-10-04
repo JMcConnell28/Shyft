@@ -1,13 +1,7 @@
 "use client"
 
 import { Link } from "@tanstack/react-router"
-import {
-  FilterIcon,
-  Layers3Icon,
-  MapPinIcon,
-  PlusIcon,
-  SearchIcon,
-} from "lucide-react"
+import { FilterIcon, Layers3Icon, MapPinIcon, SearchIcon } from "lucide-react"
 
 import type { StaffGroupSettingsLocation } from "@/features/staff-groups/types"
 import type { TeamStatusFilter } from "@/features/staff-groups/utils/team-settings"
@@ -94,13 +88,6 @@ function TeamSettingsToolbar({
           </NativeSelect>
         </div>
 
-        {/* <Button
-          render={<Link to="/onboarding/invite" />}
-          className="order-3 h-10 justify-center rounded-lg bg-[#0968f5] px-4 text-white shadow-[0_5px_12px_rgba(9,104,245,0.22)] hover:bg-[#075edc] lg:order-none"
-        >
-          <PlusIcon className="size-4" />
-          Add team member
-        </Button> */}
       </div>
     </section>
   )

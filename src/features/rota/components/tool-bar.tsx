@@ -19,6 +19,7 @@ import { useRotaWorkspace } from "./rota-workspace-provider"
 import { RotaExportDialog } from "./rota-export-dialog"
 import { RotaTemplateMenu } from "./rota-template-menu"
 import ZonePicker from "./zone-picker"
+import { RotaVersionLabel } from "@/features/rota/components/rota-version-label"
 import {
   rotaToolbarButtonClassName,
   rotaToolbarIconButtonClassName,
@@ -54,6 +55,7 @@ function ConnectedToolBar() {
     locationId:
       meta.workspaceType === "location" ? selectedLocation.id : undefined,
     userId: meta.userId,
+    weekStart: meta.weekStart,
   }
 
   return (
@@ -125,7 +127,7 @@ function ConnectedToolBar() {
               canExportSage ? (
                 <SageTimesheetExportButton
                   input={sageExportInput}
-                  rotaId={meta.rotaId}
+                  exportLocationId={selectedLocation.id}
                   variant="pill"
                   className="w-full justify-start gap-2 rounded-lg"
                 />
@@ -316,6 +318,10 @@ function ToolBarFrame({
           <span className="mt-0.5 text-xs font-semibold text-[#61709a] md:mt-0 md:font-normal md:text-muted-foreground">
             {weekRangeLabel}
           </span>
+          <RotaVersionLabel
+            version={meta.contentVersion}
+            publishedVersion={meta.publishedContentVersion}
+          />
         </div>
       </div>
 

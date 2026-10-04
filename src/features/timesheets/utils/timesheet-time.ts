@@ -8,7 +8,7 @@ import {
 import { getDateKeyInTimeZone } from "@/lib/time-zone"
 
 type TimesheetWeek = {
-  days: TimesheetWeekDay[]
+  days: Array<TimesheetWeekDay>
   weekEnd: string
   weekLabel: string
   weekStart: string
@@ -45,6 +45,10 @@ function getTimesheetWeek(value?: string | null): TimesheetWeek {
     )}`,
     weekStart,
   }
+}
+
+function isTimesheetWeekComplete(weekStart: string): boolean {
+  return getTimesheetWeek(weekStart).weekStart < getTimesheetWeek().weekStart
 }
 
 function getDateKey(value: string | null | undefined, timeZone?: string) {
@@ -113,5 +117,6 @@ export {
   getDateKey,
   getMinutesBetween,
   getTimesheetWeek,
+  isTimesheetWeekComplete,
 }
 export type { TimesheetWeek, TimesheetWeekDay }

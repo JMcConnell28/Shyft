@@ -8,10 +8,8 @@ import { WorkplaceSettingsSection } from "@/features/settings/components/workpla
 
 function WorkplaceOverviewSection({
   organizationName,
-  organizationSlug,
 }: {
   organizationName: string
-  organizationSlug: string
 }) {
   return (
     <WorkplaceSettingsSection
@@ -24,12 +22,6 @@ function WorkplaceOverviewSection({
         title="Organisation name"
       >
         <WorkplaceReadOnlyValue value={organizationName} />
-      </WorkplaceSettingRow>
-      <WorkplaceSettingRow
-        description="The permanent identifier used in your workspace address."
-        title="Workspace ID"
-      >
-        <WorkplaceReadOnlyValue value={organizationSlug} />
       </WorkplaceSettingRow>
     </WorkplaceSettingsSection>
   )

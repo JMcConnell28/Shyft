@@ -7,6 +7,7 @@ import { WorkplaceLocationsSection } from "@/features/settings/components/workpl
 import { WorkplaceOverviewSection } from "@/features/settings/components/workplace-overview-section"
 import { useGeneralSettingsQuery } from "@/features/settings/hooks/use-general-settings-query"
 import { useUpdateGeneralSettings } from "@/features/settings/hooks/use-update-general-settings"
+import { generalSettingsFeatures } from "@/features/settings/constants/general-settings-features"
 
 function GeneralSettingsPage({
   organizationId,
@@ -46,22 +47,21 @@ function GeneralSettingsPage({
 
   return (
     <div className="space-y-3">
-      <WorkplaceOverviewSection
-        organizationName={data.organization.name}
-        organizationSlug={data.organization.slug}
-      />
+      <WorkplaceOverviewSection organizationName={data.organization.name} />
       <WorkplaceLocationsSection locations={data.locations} />
-      <WorkplaceContactSection
-        contactEmail={contactEmail}
-        contactPhone={contactPhone}
-        hasChanges={hasChanges}
-        isSaving={isSaving}
-        onContactEmailChange={setContactEmail}
-        onContactPhoneChange={setContactPhone}
-        onSave={() => {
-          void saveGeneralSettings({ contactEmail, contactPhone })
-        }}
-      />
+      {generalSettingsFeatures.contactDetails && (
+        <WorkplaceContactSection
+          contactEmail={contactEmail}
+          contactPhone={contactPhone}
+          hasChanges={hasChanges}
+          isSaving={isSaving}
+          onContactEmailChange={setContactEmail}
+          onContactPhoneChange={setContactPhone}
+          onSave={() => {
+            void saveGeneralSettings({ contactEmail, contactPhone })
+          }}
+        />
+      )}
     </div>
   )
 }

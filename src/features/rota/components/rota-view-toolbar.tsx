@@ -20,7 +20,7 @@ function RotaViewToolbar({
 
   return (
     <div className="flex min-h-14 w-full shrink-0 items-center justify-between gap-3 px-2">
-      <div className="hidden min-w-0 items-center gap-3 md:flex">
+      <div className="flex min-w-0 items-center gap-3">
         <div className="flex min-w-0 flex-col justify-center rounded-xl bg-card px-3 py-2">
           <div className="flex items-center gap-2">
             <span className="truncate text-sm font-semibold text-foreground">
@@ -29,6 +29,9 @@ function RotaViewToolbar({
           </div>
           <span className="text-xs text-muted-foreground">
             {weekRangeLabel}
+          </span>
+          <span className="text-[10px] font-semibold text-muted-foreground">
+            Published v{meta.contentVersion}
           </span>
         </div>
       </div>
@@ -43,8 +46,9 @@ function RotaViewToolbar({
                     ? selectedLocation.id
                     : undefined,
                 userId: meta.userId,
+                weekStart: meta.weekStart,
               }}
-              rotaId={meta.rotaId}
+              exportLocationId={selectedLocation.id}
               variant="pill"
             />
           ) : null}

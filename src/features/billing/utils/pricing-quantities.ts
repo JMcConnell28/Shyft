@@ -24,5 +24,13 @@ function calculateBillingSeatQuantities(
   }
 }
 
-export { INCLUDED_CORE_EMPLOYEES, calculateBillingSeatQuantities }
+function calculateTimeAttendanceOverageQuantity(employeeCount: number): number {
+  return Math.max(Math.floor(employeeCount) - INCLUDED_CORE_EMPLOYEES, 0)
+}
+
+export {
+  INCLUDED_CORE_EMPLOYEES,
+  calculateBillingSeatQuantities,
+  calculateTimeAttendanceOverageQuantity,
+}
 export type { BillingSeatQuantities }

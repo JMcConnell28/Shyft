@@ -1,7 +1,7 @@
 type RotaPdfStatKey = "scheduledHours" | "labourCost" | "shiftCount"
 
 type RotaPdfExportOptions = {
-  visibleStats: RotaPdfStatKey[]
+  visibleStats: Array<RotaPdfStatKey>
 }
 
 type RotaPdfLegendItem = {
@@ -22,15 +22,15 @@ type RotaPdfShiftEmployee = {
 
 type RotaPdfShiftCard = {
   id: string
-  timeLines: string[]
-  employees: RotaPdfShiftEmployee[]
+  timeLines: Array<string>
+  employees: Array<RotaPdfShiftEmployee>
 }
 
 type RotaPdfDayColumn = {
   id: string
   label: string
   dateLabel: string
-  shifts: RotaPdfShiftCard[]
+  shifts: Array<RotaPdfShiftCard>
 }
 
 type RotaPdfZonePage = {
@@ -39,19 +39,20 @@ type RotaPdfZonePage = {
   totalCostLabel: string
   totalHoursLabel: string
   totalShiftCount: number
-  days: RotaPdfDayColumn[]
-  legend: RotaPdfLegendItem[]
+  days: Array<RotaPdfDayColumn>
+  legend: Array<RotaPdfLegendItem>
 }
 
 type RotaPdfDocumentData = {
   fileName: string
+  versionLabel: string
   generatedAtLabel: string
   brandLogoUrl: string | null
   locationName: string
   note: string | null
   options: RotaPdfExportOptions
   weekLabel: string
-  pages: RotaPdfZonePage[]
+  pages: Array<RotaPdfZonePage>
 }
 
 export type {

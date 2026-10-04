@@ -26,10 +26,10 @@ describe("calculatePricing", () => {
 
     expect(pricing.extraEmployees).toBe(30)
     expect(pricing.extraPrice).toBe(75)
-    expect(pricing.totalPrice).toBe(110)
+    expect(pricing.totalPrice).toBe(100)
   })
 
-  it("adds Time & Attendance per employee in enabled locations", () => {
+  it("includes T&A for a location with fewer than 10 used staff", () => {
     const pricing = calculatePricing({
       locations: [
         { employeeCount: 8, timeAttendanceEnabled: true },
@@ -37,7 +37,30 @@ describe("calculatePricing", () => {
       ],
     })
 
-    expect(pricing.timeAttendancePrice).toBe(8)
-    expect(pricing.totalPrice).toBe(58)
+    expect(pricing.timeAttendancePrice).toBe(0)
+    expect(pricing.totalPrice).toBe(50)
+  })
+
+  it.each([false, true])(
+    "charges T&A only above 10 per location (small location enabled: %s)",
+    (timeAttendanceEnabled) => {
+      const pricing = calculatePricing({
+        locations: [
+          { employeeCount: 20, timeAttendanceEnabled: true },
+          { employeeCount: 8, timeAttendanceEnabled },
+        ],
+      })
+      expect(pricing.extraEmployees).toBe(18)
+      expect(pricing.timeAttendancePrice).toBe(10)
+      expect(pricing.totalPrice).toBe(80)
+    }
+  )
+
+  it("charges £3.50 for each extra employee using T&A after 10", () => {
+    expect(
+      calculatePricing({
+        locations: [{ employeeCount: 11, timeAttendanceEnabled: true }],
+      }).totalPrice
+    ).toBe(28.5)
   })
 })

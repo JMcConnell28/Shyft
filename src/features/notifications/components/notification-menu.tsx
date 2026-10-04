@@ -53,7 +53,7 @@ function NotificationMenu({
             className={cn(
               "relative ml-auto",
               prominent &&
-                "size-11 rounded-xl bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
+                "size-9 rounded-lg bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
             )}
           />
         }

@@ -41,7 +41,8 @@ const statOptions: Array<{
 ]
 
 function RotaExportDialog() {
-  const { canExport, exportPdf, isExporting } = useExportRotaPdf()
+  const { canExport, exportPdf, exportBlockedReason, isExporting } =
+    useExportRotaPdf()
   const [open, setOpen] = React.useState(false)
   const [visibleStats, setVisibleStats] = React.useState<Array<RotaPdfStatKey>>(
     ["scheduledHours", "labourCost", "shiftCount"]
@@ -73,6 +74,7 @@ function RotaExportDialog() {
             size="icon"
             disabled={!canExport}
             aria-label="Export rota"
+            title={exportBlockedReason}
             className={rotaToolbarButtonClassName}
           />
         }

@@ -139,6 +139,7 @@ type CreateDraftRotaRecordResult = {
 }
 
 type PublishRotaVersionResult = {
+  contentVersion: number
   notificationEmailError?: string
   notificationEmailCount: number
   target: RotaRouteTarget

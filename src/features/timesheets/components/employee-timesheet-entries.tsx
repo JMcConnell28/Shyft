@@ -1,7 +1,10 @@
 import { format, parseISO } from "date-fns"
 import { CalendarDaysIcon } from "lucide-react"
 
-import type { TimesheetDay, TimesheetEntry } from "@/features/timesheets/types"
+import type {
+  TimesheetDay,
+  TimesheetEntryRow,
+} from "@/features/timesheets/types"
 import {
   Table,
   TableBody,
@@ -16,20 +19,15 @@ import {
 } from "@/features/timesheets/components/timesheet-panel"
 import { TimesheetEntryBadge } from "@/features/timesheets/components/timesheet-status"
 import { useViewerTimeZone } from "@/features/timesheets/hooks/use-viewer-time-zone"
+import { getTimesheetEntryRows } from "@/features/timesheets/utils/timesheet-entry-rows"
 import {
   formatTimesheetDuration,
   getEntryClockLabel,
   getEntryScheduleLabel,
 } from "@/features/timesheets/utils/timesheet-view"
 
-type TimesheetEntryRow = {
-  day: TimesheetDay
-  entry: TimesheetEntry | null
-  key: string
-}
-
 function EmployeeTimesheetEntries({ days }: { days: Array<TimesheetDay> }) {
-  const rows = getEntryRows(days)
+  const rows = getTimesheetEntryRows(days)
   const viewerTimeZone = useViewerTimeZone()
 
   return (
@@ -155,18 +153,6 @@ function MobileEntryRow({
         <p className="mt-1 text-[10px] font-medium text-[#8792ad]">payable</p>
       </div>
     </div>
-  )
-}
-
-function getEntryRows(days: Array<TimesheetDay>) {
-  return days.flatMap<TimesheetEntryRow>((day) =>
-    day.entries.length === 0
-      ? [{ day, entry: null, key: day.date }]
-      : day.entries.map((entry, index) => ({
-          day,
-          entry,
-          key: entry.id ?? `${day.date}:${index}`,
-        }))
   )
 }
 

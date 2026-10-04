@@ -8,11 +8,9 @@ import {
   ensureOrganizationBillingAccount,
   setBillingAccountStripeCustomer,
 } from "@/features/billing/server/billing-accounts"
-import {
-  buildSubscriptionLineItems,
-  getBillingPricingQuantities,
-} from "@/features/billing/server/pricing"
+import { getBillingPricingQuantities } from "@/features/billing/server/pricing"
 import { getBillingCurrency, getStripe } from "@/features/billing/server/stripe"
+import { buildSubscriptionLineItems } from "@/features/billing/server/subscription-items"
 import {
   buildAppUrl,
   getSafeAppReturnPath,
@@ -193,7 +191,9 @@ async function createSubscriptionCheckoutSession(
         includedEmployeeQuantity: String(quantities.includedEmployeeQuantity),
         billableEmployeeQuantity: String(quantities.extraEmployeeQuantity),
         extraEmployeeQuantity: String(quantities.extraEmployeeQuantity),
-        timeAttendanceEmployeeQuantity: String(quantities.timeAttendanceQuantity),
+        timeAttendanceEmployeeQuantity: String(
+          quantities.timeAttendanceQuantity
+        ),
       },
     }
   const session = await stripe.checkout.sessions.create({
@@ -205,7 +205,7 @@ async function createSubscriptionCheckoutSession(
     tax_id_collection: { enabled: true },
     automatic_tax: { enabled: true },
     submit_type: "subscribe",
-    line_items: buildSubscriptionLineItems(quantities),
+    line_items: await buildSubscriptionLineItems(),
     metadata: {
       billingAccountId: billingAccount.id,
       organizationId: input.organizationId ?? "",

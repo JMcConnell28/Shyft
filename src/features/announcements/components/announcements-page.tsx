@@ -78,12 +78,9 @@ function AnnouncementsPage({
           onMarkAllRead={() => mutations.markAllReadMutation.mutate()}
         />
 
-        <section
-          aria-label="Announcement feed"
-          className="overflow-hidden rounded-xl border border-[#dfe5f0] bg-white shadow-[0_5px_18px_rgba(30,50,96,0.04)]"
-        >
+        <section aria-label="Announcement feed" className="space-y-4">
           {visibleAnnouncements.length === 0 ? (
-            <Empty className="min-h-56 border-0 px-5 py-10">
+            <Empty className="min-h-56 rounded-xl border border-[#dfe5f0] bg-white px-5 py-10">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <MegaphoneIcon />
@@ -97,7 +94,7 @@ function AnnouncementsPage({
               </EmptyHeader>
             </Empty>
           ) : (
-            <div className="divide-y divide-[#e7ebf3]">
+            <div className="space-y-4 [&>article]:overflow-hidden [&>article]:rounded-xl [&>article]:border [&>article]:border-[#dfe5f0] [&>article]:bg-white [&>article]:shadow-[0_5px_18px_rgba(30,50,96,0.04)]">
               {visibleAnnouncements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}

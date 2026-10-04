@@ -2,9 +2,11 @@
 
 import * as React from "react"
 import { FileDownIcon, LoaderCircleIcon } from "lucide-react"
-import type { VariantProps } from "class-variance-authority"
-
-import { Button, buttonVariants } from "@/components/ui/button"
+import type {
+  SageTimesheetExportInput,
+  TimesheetLocation,
+} from "@/features/timesheets/types"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -15,19 +17,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useSageTimesheetExport } from "@/features/timesheets/hooks/use-sage-timesheet-export"
-import type {
-  SageTimesheetExportInput,
-  TimesheetExportableRota,
-} from "@/features/timesheets/types"
 import { cn } from "@/lib/utils"
 
-type SageTimesheetExportButtonProps = VariantProps<typeof buttonVariants> & {
+type SageTimesheetExportButtonProps = Pick<
+  React.ComponentProps<typeof Button>,
+  "size" | "variant"
+> & {
   className?: string
   disabledReason?: string | null
-  input: Omit<SageTimesheetExportInput, "rotaId">
+  input: Omit<SageTimesheetExportInput, "exportLocationId">
   label?: string
-  rotaId?: string | null
-  rotas?: TimesheetExportableRota[]
+  exportLocationId?: string | null
+  locations?: Array<TimesheetLocation>
 }
 
 function SageTimesheetExportButton({
@@ -35,45 +36,46 @@ function SageTimesheetExportButton({
   disabledReason,
   input,
   label = "Export Sage payroll CSV",
-  rotaId,
-  rotas = [],
+  exportLocationId,
+  locations = [],
   size = "default",
   variant = "outline",
 }: SageTimesheetExportButtonProps) {
   const { exportCsv, isExporting } = useSageTimesheetExport(input)
   const [open, setOpen] = React.useState(false)
-  const [selectedRotaId, setSelectedRotaId] = React.useState("")
-  const resolvedRotaId = rotaId ?? (rotas.length === 1 ? rotas[0]?.id : null)
-  const hasMultipleRotas = !rotaId && rotas.length > 1
+  const [selectedLocationId, setSelectedLocationId] = React.useState("")
+  const resolvedLocationId =
+    exportLocationId ?? (locations.length === 1 ? locations[0]?.id : null)
+  const hasMultipleLocations = !exportLocationId && locations.length > 1
   const isDisabled =
     Boolean(disabledReason) ||
     isExporting ||
-    (!resolvedRotaId && !hasMultipleRotas)
+    (!resolvedLocationId && !hasMultipleLocations)
   const title =
     disabledReason ??
-    (!resolvedRotaId && !hasMultipleRotas
-      ? "No published rota is available to export."
+    (!resolvedLocationId && !hasMultipleLocations
+      ? "No location is available to export."
       : undefined)
 
   async function handleDirectExport() {
-    if (!resolvedRotaId) {
+    if (!resolvedLocationId) {
       return
     }
 
-    await exportCsv(resolvedRotaId)
+    await exportCsv(resolvedLocationId)
   }
 
   async function handleSelectedExport() {
-    if (!selectedRotaId) {
+    if (!selectedLocationId) {
       return
     }
 
-    await exportCsv(selectedRotaId)
+    await exportCsv(selectedLocationId)
     setOpen(false)
-    setSelectedRotaId("")
+    setSelectedLocationId("")
   }
 
-  if (hasMultipleRotas) {
+  if (hasMultipleLocations) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger
@@ -95,23 +97,23 @@ function SageTimesheetExportButton({
             <DialogHeader>
               <DialogTitle>Export Sage payroll CSV</DialogTitle>
               <DialogDescription>
-                Choose the published rota to include in the payroll export.
+                Choose the location to include for this timesheet week.
               </DialogDescription>
             </DialogHeader>
             <label className="grid gap-2 text-sm">
-              <span className="font-medium">Published rota</span>
+              <span className="font-medium">Location</span>
               <select
-                value={selectedRotaId}
-                onChange={(event) => setSelectedRotaId(event.target.value)}
+                value={selectedLocationId}
+                onChange={(event) => setSelectedLocationId(event.target.value)}
                 className={cn(
                   "h-9 rounded-md border border-border bg-background px-3 text-sm outline-none",
                   "focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
                 )}
               >
-                <option value="">Choose a rota</option>
-                {rotas.map((rota) => (
-                  <option key={rota.id} value={rota.id}>
-                    {rota.label}
+                <option value="">Choose a location</option>
+                {locations.map((location) => (
+                  <option key={location.id} value={location.id}>
+                    {location.name}
                   </option>
                 ))}
               </select>
@@ -128,7 +130,7 @@ function SageTimesheetExportButton({
             </Button>
             <Button
               type="button"
-              disabled={!selectedRotaId || isExporting}
+              disabled={!selectedLocationId || isExporting}
               onClick={() => void handleSelectedExport()}
             >
               <ExportButtonContent

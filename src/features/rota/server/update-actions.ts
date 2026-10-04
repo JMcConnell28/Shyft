@@ -140,14 +140,14 @@ const publishRotaVersion = createServerFn({ method: "POST" })
       })
       .eq("id", data.rotaId)
       .eq("organization_id", context.organizationId)
-      .select("id")
+      .select("id, content_version, published_content_version")
       .single()
 
     assertSupabaseSuccess(
       publishResult.error,
       "We could not publish that rota."
     )
-    getRequiredSupabaseRow(
+    const publishedRota = getRequiredSupabaseRow(
       publishResult.data,
       "We could not publish that rota."
     )
@@ -163,6 +163,7 @@ const publishRotaVersion = createServerFn({ method: "POST" })
       : { errorMessage: undefined, sentCount: 0 }
 
     return {
+      contentVersion: publishedRota.content_version,
       notificationEmailCount: notificationResult.sentCount,
       notificationEmailError: notificationResult.errorMessage,
       target: {
@@ -191,16 +192,26 @@ const updateRotaNote = createServerFn({ method: "POST" })
         updated_at: new Date().toISOString(),
       })
       .eq("id", data.rotaId)
-    const noteResult = await (context.organizationId
-      ? noteQuery.eq("organization_id", context.organizationId)
-      : noteQuery.is("organization_id", null))
+    const noteResult = await (
+      context.organizationId
+        ? noteQuery.eq("organization_id", context.organizationId)
+        : noteQuery.is("organization_id", null)
+    )
+      .select("content_version")
+      .single()
 
     assertSupabaseSuccess(
       noteResult.error,
       "We could not update that rota note."
     )
 
-    return { success: true }
+    return {
+      success: true,
+      contentVersion: getRequiredSupabaseRow(
+        noteResult.data,
+        "We could not load the saved rota version."
+      ).content_version,
+    }
   })
 
 const updateRotaBudget = createServerFn({ method: "POST" })

@@ -27,17 +27,17 @@ import {
 import { formatMinutesAsHours } from "@/features/rota/utils/workspace-time"
 
 function buildRotaPdfDocumentData(input: {
-  assignmentIdsByShiftId: Record<string, string[]>
+  assignmentIdsByShiftId: Record<string, Array<string>>
   assignmentsById: Record<string, WorkspaceAssignment>
   brandLogoUrl: string | null
-  days: WorkspaceDay[]
-  employeeGroups: Array<WorkspaceEmployeeGroup & { employeeIds?: string[] }>
+  days: Array<WorkspaceDay>
+  employeeGroups: Array<WorkspaceEmployeeGroup & { employeeIds?: Array<string> }>
   employeesById: Record<string, WorkspaceEmployee>
   location: WorkspaceLocation
   meta: WorkspaceBoardMeta
   options: RotaPdfExportOptions
   shiftsById: Record<string, WorkspaceShift>
-  zones: WorkspaceZone[]
+  zones: Array<WorkspaceZone>
 }): RotaPdfDocumentData {
   const pages = input.zones.map((zone) =>
     buildZonePage({
@@ -48,7 +48,12 @@ function buildRotaPdfDocumentData(input: {
 
   return {
     brandLogoUrl: input.brandLogoUrl,
-    fileName: buildRotaPdfFileName(input.location.name, input.meta.weekStart),
+    fileName: buildRotaPdfFileName(
+      input.location.name,
+      input.meta.weekStart,
+      input.meta.contentVersion
+    ),
+    versionLabel: `v${input.meta.contentVersion}`,
     generatedAtLabel: format(new Date(), "d MMM yyyy, HH:mm"),
     locationName: input.location.name,
     note: input.meta.note,
@@ -58,14 +63,18 @@ function buildRotaPdfDocumentData(input: {
   }
 }
 
-function buildRotaPdfFileName(locationName: string, weekStart: string) {
+function buildRotaPdfFileName(
+  locationName: string,
+  weekStart: string,
+  version: number
+) {
   const slug = locationName
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
 
-  return `rocketrota-${slug || "location"}-${weekStart}.pdf`
+  return `rocketrota-${slug || "location"}-${weekStart}-v${version}.pdf`
 }
 
 function buildZonePage(
@@ -149,7 +158,7 @@ function buildZonePage(
     return sum + assignedCount * getShiftDurationMinutes(shift, input.location)
   }, 0)
   const zoneShiftIds = new Set(zoneShiftEntries.map((shift) => shift.id))
-  const shiftIdsByDayId = input.days.reduce<Record<string, string[]>>(
+  const shiftIdsByDayId = input.days.reduce<Record<string, Array<string>>>(
     (map, day) => {
       map[day.id] = Object.values(input.shiftsById)
         .filter((shift) => shift.dayId === day.id && zoneShiftIds.has(shift.id))
@@ -158,7 +167,7 @@ function buildZonePage(
     },
     {}
   )
-  const allShiftIdsByDayId = input.days.reduce<Record<string, string[]>>(
+  const allShiftIdsByDayId = input.days.reduce<Record<string, Array<string>>>(
     (map, day) => {
       map[day.id] = Object.values(input.shiftsById)
         .filter((shift) => shift.dayId === day.id)
@@ -189,7 +198,7 @@ function buildZonePage(
   }
 }
 
-function getGroupBadgeText(groupName: string, allGroupNames: string[]) {
+function getGroupBadgeText(groupName: string, allGroupNames: Array<string>) {
   const words = groupName.trim().split(/\s+/).filter(Boolean)
 
   const primary = words[0]?.[0]?.toUpperCase() ?? "T"

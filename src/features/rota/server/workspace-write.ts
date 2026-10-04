@@ -133,7 +133,12 @@ const saveRotaWorkspace = createServerFn({ method: "POST" })
 
       await recalculateRotaSummaryWithClient(context, client)
       await markRotaDraftDirtyIfNeededWithClient(context, client)
+      const version = await client.query<{ content_version: number }>(
+        "select content_version from public.rotas where id = $1",
+        [context.rota.id]
+      )
       await client.query("COMMIT")
+      return { success: true, contentVersion: version.rows[0].content_version }
     } catch (error) {
       await client.query("ROLLBACK")
       throw error
@@ -141,7 +146,6 @@ const saveRotaWorkspace = createServerFn({ method: "POST" })
       client.release()
     }
 
-    return { success: true }
   })
 
 const createRotaShift = createServerFn({ method: "POST" })

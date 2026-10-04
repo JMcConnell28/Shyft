@@ -52,7 +52,7 @@ type WorkspaceEmployee = {
         type: "salary"
         weeklySalaryPence: number
       }
-  rotaNotes?: WorkspaceEmployeeRotaNote[]
+  rotaNotes?: Array<WorkspaceEmployeeRotaNote>
 }
 
 type WorkspaceEmployeeGroup = {
@@ -153,6 +153,8 @@ type WorkspaceBoardMeta = {
   weekStart: string
   weekEnd: string
   weekLabel: string
+  contentVersion: number
+  publishedContentVersion: number
   publishedVersion: number
   hasUnpublishedChanges: boolean
   publishedSnapshotAvailable: boolean
@@ -163,13 +165,13 @@ type WorkspaceBoardMeta = {
 type WorkspaceBoardData = {
   meta: WorkspaceBoardMeta
   location: WorkspaceLocation
-  days: WorkspaceDay[]
-  zones: WorkspaceZone[]
-  employeeGroups: WorkspaceEmployeeGroup[]
-  employees: WorkspaceEmployee[]
-  shifts: WorkspaceShift[]
-  assignments: WorkspaceAssignment[]
-  templates: RotaTemplateSummary[]
+  days: Array<WorkspaceDay>
+  zones: Array<WorkspaceZone>
+  employeeGroups: Array<WorkspaceEmployeeGroup>
+  employees: Array<WorkspaceEmployee>
+  shifts: Array<WorkspaceShift>
+  assignments: Array<WorkspaceAssignment>
+  templates: Array<RotaTemplateSummary>
 }
 
 export type {

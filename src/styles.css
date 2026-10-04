@@ -175,14 +175,6 @@
     .settings-content [data-slot="card-header"] {
       padding-top: 0;
     }
-
-    .settings-content
-      [class~="rounded-xl"][class~="border"]:not(
-        [data-clock-settings-section]
-      ) {
-      padding-right: 0 !important;
-      padding-left: 0 !important;
-    }
   }
 
   @media (min-width: 768px) {

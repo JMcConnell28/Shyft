@@ -3,6 +3,7 @@
 import * as React from "react"
 import { PlusIcon, Trash2Icon } from "lucide-react"
 
+import type { LocationPricingInput } from "@/features/marketing/pricing-types"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
@@ -10,7 +11,6 @@ import {
   TIME_ATTENDANCE_EMPLOYEE_PRICE_GBP,
   calculatePricing,
   formatGbp,
-  type LocationPricingInput,
 } from "@/features/marketing/utils/pricing"
 
 const initialLocation: LocationPricingInput = {
@@ -114,14 +114,14 @@ function PricingCalculator() {
                         })
                       }
                     />
-                    Time & Attendance (+
-                    {formatGbp(TIME_ATTENDANCE_EMPLOYEE_PRICE_GBP)} per
+                    Time & Attendance (first 10 included, then +
+                    {formatGbp(TIME_ATTENDANCE_EMPLOYEE_PRICE_GBP)} per extra
                     employee)
                   </label>
                   <p className="text-xs text-[#64789e]">
-                    {breakdown?.timeAttendanceEmployees ?? 0} Time &
-                    Attendance employee
-                    {breakdown?.timeAttendanceEmployees === 1 ? "" : "s"} at{" "}
+                    {breakdown.timeAttendanceEmployees} Time & Attendance extra
+                    employee
+                    {breakdown.timeAttendanceEmployees === 1 ? "" : "s"} at{" "}
                     {formatGbp(TIME_ATTENDANCE_EMPLOYEE_PRICE_GBP)} each
                   </p>
                 </div>
