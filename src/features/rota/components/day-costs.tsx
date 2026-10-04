@@ -6,22 +6,21 @@ function DayCosts({ readOnly = false }: { readOnly?: boolean }) {
     daySummaries,
     formatCurrency,
     formatMinutesAsHours,
-    selectedZoneId,
-  } =
-    useRotaWorkspace()
-  const dayBudgetById = Object.fromEntries(
+    zones,
+  } = useRotaWorkspace()
+  const dayBudgetById = new Map(
     budgetInsights.dayBreakdown.map((day) => [day.id, day])
   )
 
   return (
     <div className="grid h-full flex-1 grid-cols-7 rounded-lg border border-border/70 bg-card px-2 py-2 shadow-sm">
       {daySummaries.map((day) => {
-        const budgetDay = dayBudgetById[day.dayId]
-        const showBudgetState = selectedZoneId === "all" && !readOnly
+        const budgetDay = dayBudgetById.get(day.dayId)
+        const showBudgetState = zones.length === 1 && !readOnly
         const isOverBudget =
           showBudgetState &&
-          budgetDay?.variance !== null &&
-          budgetDay?.variance !== undefined &&
+          budgetDay !== undefined &&
+          budgetDay.variance !== null &&
           budgetDay.variance < 0
 
         return (

@@ -6,14 +6,14 @@ import type { WorkspaceBoardData } from "@/features/rota/types/workspace"
 import RotaViewToolbar from "@/features/rota/components/rota-view-toolbar"
 import { PublishedRotaDay } from "@/features/rota/components/published-rota-day"
 import { buildPublishedRotaBoardIndex } from "@/features/rota/utils/published-rota-board"
+import { useRotaZoneSelection } from "@/features/rota/hooks/use-rota-zone-selection"
 
 function RotaViewWorkspace({ boardData }: { boardData: WorkspaceBoardData }) {
-  const [selectedZoneId, setSelectedZoneId] = React.useState(
-    boardData.meta.settings.defaultZoneId ?? "all"
-  )
-  React.useEffect(() => {
-    setSelectedZoneId(boardData.meta.settings.defaultZoneId ?? "all")
-  }, [boardData])
+  const { selectedZoneId, setSelectedZoneId } = useRotaZoneSelection({
+    rotaId: boardData.meta.rotaId,
+    defaultZoneId: boardData.meta.settings.defaultZoneId,
+    zones: boardData.zones,
+  })
   const boardIndex = React.useMemo(
     () => buildPublishedRotaBoardIndex(boardData, selectedZoneId),
     [boardData, selectedZoneId]

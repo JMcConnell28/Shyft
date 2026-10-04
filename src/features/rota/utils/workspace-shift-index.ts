@@ -13,7 +13,7 @@ function indexWorkspaceShifts({
 }: {
   days: Array<WorkspaceDay>
   location: WorkspaceLocation
-  selectedZoneId: string
+  selectedZoneId: string | null
   shiftsById: Record<string, WorkspaceShift>
 }) {
   const allShiftIdsByDayId: Record<string, Array<string>> = {}
@@ -27,7 +27,7 @@ function indexWorkspaceShifts({
   for (const shift of Object.values(shiftsById)) {
     if (!Object.hasOwn(allShiftIdsByDayId, shift.dayId)) continue
     allShiftIdsByDayId[shift.dayId].push(shift.id)
-    if (selectedZoneId === "all" || shift.zoneId === selectedZoneId) {
+    if (shift.zoneId === selectedZoneId) {
       visibleShiftsByDayId[shift.dayId].push(shift)
     }
   }

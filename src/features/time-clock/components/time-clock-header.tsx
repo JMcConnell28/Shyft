@@ -1,13 +1,10 @@
 import { addDays, format, isToday, parseISO } from "date-fns"
-import { Link } from "@tanstack/react-router"
-import {
-  CalendarDaysIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  RefreshCwIcon,
-} from "lucide-react"
+import { useNavigate } from "@tanstack/react-router"
+import { RefreshCwIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { DateStepControls } from "@/components/shared/date-step-controls"
+import { useDebouncedDateSelection } from "@/hooks/use-debounced-date-selection"
 import { cn } from "@/lib/utils"
 
 type TimeClockHeaderProps = {
@@ -23,6 +20,22 @@ function TimeClockHeader({
   selectedDate,
   workspaceSlug,
 }: TimeClockHeaderProps) {
+  const navigate = useNavigate()
+  const {
+    selectedValue: date,
+    isPending,
+    updateSelection,
+  } = useDebouncedDateSelection({
+    value: selectedDate,
+    scopeKey: workspaceSlug,
+    onChange: (nextDate) =>
+      navigate({
+        to: "/app/$workspaceSlug/time-clock",
+        params: { workspaceSlug },
+        search: { date: nextDate },
+        resetScroll: false,
+      }),
+  })
   return (
     <header className="flex animate-in flex-col gap-4 duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none md:flex-row md:items-end md:justify-between">
       <div>
@@ -39,14 +52,20 @@ function TimeClockHeader({
           <span className="size-2 rounded-full bg-emerald-500" />
           Auto-refreshing
         </div>
-        <DateControls
-          selectedDate={selectedDate}
-          workspaceSlug={workspaceSlug}
+        <DateStepControls
+          label={formatDateLabel(date)}
+          unit="day"
+          isPending={isPending}
+          onStep={(direction) =>
+            updateSelection((previous) =>
+              format(addDays(parseISO(previous), direction), "yyyy-MM-dd")
+            )
+          }
         />
         <Button
           aria-label="Refresh clock activity"
           className="size-10 rounded-xl border-[#dfe4ef] bg-white text-[#10204b] shadow-none hover:bg-[#f9faff] sm:w-auto sm:px-3"
-          disabled={isRefreshing}
+          disabled={isRefreshing || isPending}
           onClick={onRefresh}
           size="icon-lg"
           variant="outline"
@@ -58,68 +77,6 @@ function TimeClockHeader({
         </Button>
       </div>
     </header>
-  )
-}
-
-function DateControls({
-  selectedDate,
-  workspaceSlug,
-}: {
-  selectedDate: string
-  workspaceSlug: string
-}) {
-  const date = parseISO(selectedDate)
-
-  return (
-    <div className="grid min-w-0 flex-1 grid-cols-[2.5rem_minmax(7.5rem,1fr)_2.5rem] items-center overflow-hidden rounded-xl border border-[#dfe4ef] bg-white sm:flex-none">
-      <DateLink
-        date={format(addDays(date, -1), "yyyy-MM-dd")}
-        direction="previous"
-        workspaceSlug={workspaceSlug}
-      />
-      <div className="flex h-10 items-center justify-center gap-2 border-x border-[#e9edf5] px-2 text-xs font-semibold sm:min-w-36">
-        <CalendarDaysIcon className="size-4 text-[#236cff]" />
-        <span className="truncate">{formatDateLabel(selectedDate)}</span>
-      </div>
-      <DateLink
-        date={format(addDays(date, 1), "yyyy-MM-dd")}
-        direction="next"
-        workspaceSlug={workspaceSlug}
-      />
-    </div>
-  )
-}
-
-function DateLink({
-  date,
-  direction,
-  workspaceSlug,
-}: {
-  date: string
-  direction: "next" | "previous"
-  workspaceSlug: string
-}) {
-  const Icon = direction === "previous" ? ChevronLeftIcon : ChevronRightIcon
-
-  return (
-    <Button
-      className="size-10 rounded-none border-0 bg-white text-[#46577d] shadow-none hover:bg-[#f6f8fc]"
-      nativeButton={false}
-      render={
-        <Link
-          params={{ workspaceSlug }}
-          search={{ date }}
-          to="/app/$workspaceSlug/time-clock"
-        />
-      }
-      size="icon-lg"
-      variant="ghost"
-    >
-      <Icon className="size-4" />
-      <span className="sr-only">
-        {direction === "previous" ? "Previous day" : "Next day"}
-      </span>
-    </Button>
   )
 }
 

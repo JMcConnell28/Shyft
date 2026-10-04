@@ -8,9 +8,10 @@ import type {
   WorkspaceBoardData,
   WorkspaceEmployee,
   WorkspaceShift,
-  WorkspaceZone,
 } from "@/features/rota/types/workspace"
+import { getAssignmentOverlapResult } from "@/features/rota/utils/assignment-overlap"
 import { useTouchInput } from "@/features/rota/hooks/use-touch-input"
+import { useRotaZoneSelection } from "@/features/rota/hooks/use-rota-zone-selection"
 
 import { formatMinutesAsHours } from "@/features/rota/utils/workspace-time"
 import {
@@ -20,10 +21,7 @@ import {
   getScheduledZoneCostSummaries,
 } from "@/features/rota/utils/workspace-budget"
 import { buildBudgetInsights } from "@/features/rota/utils/budget-insights"
-import {
-  getShiftAbsoluteSegments,
-  shiftsHaveMatchingTimes,
-} from "@/features/rota/utils/workspace-shifts"
+import { shiftsHaveMatchingTimes } from "@/features/rota/utils/workspace-shifts"
 import { indexWorkspaceShifts } from "@/features/rota/utils/workspace-shift-index"
 import {
   buildWorkspaceInsights,
@@ -38,9 +36,11 @@ function useRotaWorkspaceState({
   mode?: "default" | "demo"
 }) {
   const [meta, setMeta] = React.useState(boardData.meta)
-  const [selectedZoneId, setSelectedZoneId] = React.useState(
-    boardData.meta.settings.defaultZoneId ?? "all"
-  )
+  const { selectedZoneId, setSelectedZoneId } = useRotaZoneSelection({
+    rotaId: boardData.meta.rotaId,
+    defaultZoneId: boardData.meta.settings.defaultZoneId,
+    zones: boardData.zones,
+  })
   const [searchQuery, setSearchQuery] = React.useState("")
   const [shiftsById, setShiftsById] = React.useState(() =>
     mapById(boardData.shifts)
@@ -53,7 +53,6 @@ function useRotaWorkspaceState({
 
   React.useEffect(() => {
     setMeta(boardData.meta)
-    setSelectedZoneId(boardData.meta.settings.defaultZoneId ?? "all")
     setShiftsById(mapById(boardData.shifts))
     setAssignmentsById(mapById(boardData.assignments))
     setHasUnsavedChanges(false)
@@ -507,6 +506,7 @@ function useRotaWorkspaceState({
   }, [])
 
   return {
+    allEmployeeGroups: boardData.employeeGroups,
     assignmentsById,
     assignmentIdsByShiftId,
     assignEmployeeToShift,
@@ -569,88 +569,6 @@ function createLocalId(prefix: string) {
       : `${Date.now()}-${Math.round(Math.random() * 1000)}`
 
   return `${prefix}-${id}`
-}
-
-function getAssignmentOverlapResult({
-  assignmentsById,
-  days,
-  employeeId,
-  employeesById,
-  excludeAssignmentId,
-  location,
-  shiftId,
-  shiftsById,
-  zones,
-}: {
-  assignmentsById: Record<string, WorkspaceAssignment>
-  days: WorkspaceBoardData["days"]
-  employeeId: string
-  employeesById: Record<string, WorkspaceEmployee>
-  excludeAssignmentId?: string
-  location: WorkspaceBoardData["location"]
-  shiftId: string
-  shiftsById: Record<string, WorkspaceShift>
-  zones: Array<WorkspaceZone>
-}): WorkspaceAssignmentMutationResult | null {
-  const nextShift = shiftsById[shiftId]
-
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!nextShift) {
-    return null
-  }
-
-  const hasOverlap = Object.values(assignmentsById).some((assignment) => {
-    if (assignment.employeeId !== employeeId) {
-      return false
-    }
-
-    if (excludeAssignmentId && assignment.id === excludeAssignmentId) {
-      return false
-    }
-
-    const existingShift = shiftsById[assignment.shiftId]
-
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!existingShift) {
-      return false
-    }
-
-    const existingSegments = getShiftAbsoluteSegments(existingShift, {
-      days,
-      location,
-    })
-    const nextSegments = getShiftAbsoluteSegments(nextShift, {
-      days,
-      location,
-    })
-
-    return existingSegments.some((existingSegment) =>
-      nextSegments.some(
-        (nextSegment) =>
-          existingSegment.startMinutes < nextSegment.endMinutes &&
-          nextSegment.startMinutes < existingSegment.endMinutes
-      )
-    )
-  })
-
-  if (!hasOverlap) {
-    return null
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const employeeName = employeesById[employeeId]?.name ?? "This team member"
-  const day = days.find((entry) => entry.id === nextShift.dayId)
-  const zoneName =
-    zones.find((entry) => entry.id === nextShift.zoneId)?.name ??
-    nextShift.zoneName ??
-    "this zone"
-
-  return {
-    status: "overlap",
-    employeeName,
-    dayLabel: day?.shortLabel ?? "that day",
-    zoneName,
-  }
 }
 
 export { useRotaWorkspaceState }

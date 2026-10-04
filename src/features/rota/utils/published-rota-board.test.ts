@@ -90,10 +90,10 @@ const board: WorkspaceBoardData = {
 describe("published rota board index", () => {
   it("keeps published shifts ordered and filters only the selected zone", () => {
     expect(
-      buildPublishedRotaBoardIndex(board, "all").shiftsByDayId.monday?.map(
+      buildPublishedRotaBoardIndex(board, "floor").shiftsByDayId.monday?.map(
         (shift) => shift.id
       )
-    ).toEqual(["other-zone", "early", "late"])
+    ).toEqual(["other-zone"])
 
     const filtered = buildPublishedRotaBoardIndex(board, "bar")
     expect(filtered.shiftsByDayId.monday?.map((shift) => shift.id)).toEqual([
@@ -102,5 +102,8 @@ describe("published rota board index", () => {
     ])
     expect(filtered.assignmentsByShiftId.early).toEqual(board.assignments)
     expect(filtered.employeesById.employee?.name).toBe("Alex")
+  })
+  it("shows no shifts without a selected zone", () => {
+    expect(buildPublishedRotaBoardIndex(board, null).shiftsByDayId).toEqual({})
   })
 })

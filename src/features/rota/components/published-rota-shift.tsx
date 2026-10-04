@@ -11,25 +11,16 @@ function PublishedRotaShift({
   boardIndex: PublishedRotaBoardIndex
 }) {
   const timeLines = getShiftDisplayLines(shift)
-  const zoneLabel =
-    boardIndex.zoneNamesById[shift.zoneId] ?? shift.zoneName ?? "Shift"
   const assignments = boardIndex.assignmentsByShiftId[shift.id] ?? []
 
   return (
     <div className="space-y-1">
       <div className="space-y-0.5">
-        <div className="flex h-7 w-full items-center justify-between rounded-sm border border-[#edf0f6] bg-card p-2 shadow-xs">
-          <div className="flex h-full w-full items-center justify-between">
-            <div className="min-w-0 text-[10px] font-extrabold tracking-[-0.015em] text-[#11245a]">
-              {timeLines.map((line) => (
-                <p key={line} className="truncate">
-                  {line}
-                </p>
-              ))}
-            </div>
-            <p className="mt-0.5 text-[10px] font-bold text-[#61709a]">
-              {zoneLabel}
-            </p>
+        <div className="flex min-h-7 w-full items-center rounded-sm border border-[#edf0f6] bg-card px-2 py-1 shadow-xs">
+          <div className="min-w-0 text-[10px] font-extrabold tracking-[-0.015em] text-[#11245a]">
+            {timeLines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
           </div>
         </div>
         <div className="flex w-full flex-col items-center justify-center">

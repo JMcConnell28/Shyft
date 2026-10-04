@@ -12,11 +12,12 @@ import {
   NativeSelectOptGroup,
   NativeSelectOption,
 } from "@/components/ui/native-select"
+import { useDebouncedDateSelection } from "@/hooks/use-debounced-date-selection"
 import { rotaPageSizeValues } from "@/lib/rota-schemas"
 
 type MobileRotaFiltersProps = {
   canEditRotas: boolean
-  data: RotaListPageData
+  data: Pick<RotaListPageData, "locations" | "selectedLocation" | "filters">
   onLocationChange: (locationSlug: string) => void
   onPageSizeChange: (pageSize: RotaPageSize) => void
   onStatusChange: (status: RotaStatusFilter) => void
@@ -44,6 +45,11 @@ function MobileRotaFilters({
   onStatusChange,
   onRangeChange,
 }: MobileRotaFiltersProps) {
+  const rangeSelection = useDebouncedDateSelection({
+    value: data.filters.range,
+    scopeKey: data.selectedLocation?.id ?? "",
+    onChange: onRangeChange,
+  })
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2">
       {canEditRotas ? (
@@ -95,7 +101,7 @@ function MobileRotaFilters({
           const [kind, nextValue] = value.split(":")
 
           if (kind === "range") {
-            onRangeChange(nextValue as RotaRangeFilter)
+            rangeSelection.updateSelection(() => nextValue as RotaRangeFilter)
             return
           }
 

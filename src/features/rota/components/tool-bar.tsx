@@ -225,17 +225,7 @@ function DemoToolBar() {
       }
       tools={
         <>
-          <Button
-            type="button"
-            variant="pill"
-            size="icon"
-            aria-label="All zones"
-            title="Demo only"
-            className={rotaToolbarButtonClassName}
-          >
-            <span className="hidden md:inline">All zones</span>
-            <ChevronDown className="hidden size-3.5 md:block" />
-          </Button>
+          <ZonePicker />
           <Button
             type="button"
             variant="raised"

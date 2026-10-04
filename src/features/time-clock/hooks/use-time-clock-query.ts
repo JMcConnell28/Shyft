@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
+import { managerClockQueryOptions } from "@/features/time-clock/manager-query-options"
 import { timeClockQueryKeys } from "@/features/time-clock/query-keys"
 import {
   getAdminClockTagsPageData,
@@ -11,7 +12,10 @@ import {
   getManagerClockPageData,
 } from "@/features/time-clock/server-fns"
 
-function useEmployeeClockQuery(input: { scanSessionId: string; userId: string }) {
+function useEmployeeClockQuery(input: {
+  scanSessionId: string
+  userId: string
+}) {
   const getEmployeeClockPageDataFn = useServerFn(getEmployeeClockPageData)
 
   return useQuery({
@@ -37,11 +41,7 @@ function useManagerClockQuery(input: {
 }) {
   const getManagerClockPageDataFn = useServerFn(getManagerClockPageData)
 
-  return useQuery({
-    queryKey: timeClockQueryKeys.manager(input),
-    queryFn: () => getManagerClockPageDataFn({ data: input }),
-    refetchInterval: 30000,
-  })
+  return useQuery(managerClockQueryOptions(input, getManagerClockPageDataFn))
 }
 
 function useClockSettingsQuery(input: {

@@ -140,7 +140,10 @@ function NewRotaDialog({
     weekStart,
   })
   const preview = previewQuery.data ?? null
-  const isPreviewPending = previewQuery.isPending || previewQuery.isFetching
+  const isPreviewPending =
+    previewQuery.isSelectingWeek ||
+    previewQuery.isPending ||
+    previewQuery.isFetching
   const previewErrorMessage = previewQuery.error
     ? getErrorMessage(previewQuery.error)
     : null

@@ -10,18 +10,17 @@ type PublishedRotaBoardIndex = {
   assignmentsByShiftId: Partial<Record<string, Array<WorkspaceAssignment>>>
   employeesById: Partial<Record<string, WorkspaceEmployee>>
   shiftsByDayId: Partial<Record<string, Array<WorkspaceShift>>>
-  zoneNamesById: Partial<Record<string, string>>
 }
 
 function buildPublishedRotaBoardIndex(
   boardData: WorkspaceBoardData,
-  selectedZoneId: string
+  selectedZoneId: string | null
 ): PublishedRotaBoardIndex {
   const shiftsByDayId: Record<string, Array<WorkspaceShift>> = {}
   const assignmentsByShiftId: Record<string, Array<WorkspaceAssignment>> = {}
 
   for (const shift of boardData.shifts) {
-    if (selectedZoneId !== "all" && shift.zoneId !== selectedZoneId) continue
+    if (shift.zoneId !== selectedZoneId) continue
     const dayShifts = (shiftsByDayId[shift.dayId] ??= [])
     dayShifts.push(shift)
   }
@@ -43,9 +42,6 @@ function buildPublishedRotaBoardIndex(
       boardData.employees.map((employee) => [employee.id, employee])
     ),
     shiftsByDayId,
-    zoneNamesById: Object.fromEntries(
-      boardData.zones.map((zone) => [zone.id, zone.name])
-    ),
   }
 }
 

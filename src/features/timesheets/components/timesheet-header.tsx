@@ -1,12 +1,6 @@
 import { addDays, format, parseISO } from "date-fns"
-import { Link } from "@tanstack/react-router"
-import {
-  CalendarDaysIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  UserRoundIcon,
-  UsersRoundIcon,
-} from "lucide-react"
+import { useNavigate } from "@tanstack/react-router"
+import { UserRoundIcon, UsersRoundIcon } from "lucide-react"
 
 import type {
   TimesheetPageData,
@@ -15,7 +9,12 @@ import type {
 } from "@/features/timesheets/types"
 import { Button } from "@/components/ui/button"
 import { SageTimesheetExportButton } from "@/features/timesheets/components/sage-timesheet-export-button"
-import { isTimesheetWeekComplete } from "@/features/timesheets/utils/timesheet-time"
+import {
+  getTimesheetWeek,
+  isTimesheetWeekComplete,
+} from "@/features/timesheets/utils/timesheet-time"
+import { DateStepControls } from "@/components/shared/date-step-controls"
+import { useDebouncedDateSelection } from "@/hooks/use-debounced-date-selection"
 import { cn } from "@/lib/utils"
 
 type TimesheetHeaderProps = {
@@ -36,6 +35,22 @@ function TimesheetHeader({
   workspaceSlug,
 }: TimesheetHeaderProps) {
   const isTeamView = activeView === "team"
+  const navigate = useNavigate()
+  const {
+    selectedValue: selectedWeek,
+    isPending,
+    updateSelection,
+  } = useDebouncedDateSelection({
+    value: data.weekStart,
+    scopeKey: workspaceSlug,
+    onChange: (weekStart) =>
+      navigate({
+        to: "/app/$workspaceSlug/timesheets",
+        params: { workspaceSlug },
+        search: { weekStart },
+        resetScroll: false,
+      }),
+  })
 
   return (
     <header className="flex animate-in flex-col gap-4 duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
@@ -52,18 +67,25 @@ function TimesheetHeader({
         </div>
 
         <div className="flex w-full min-w-0 items-center gap-2 lg:w-auto">
-          <WeekControls
-            weekLabel={data.weekLabel}
-            weekStart={data.weekStart}
-            workspaceSlug={workspaceSlug}
+          <DateStepControls
+            label={getTimesheetWeek(selectedWeek).weekLabel}
+            unit="week"
+            isPending={isPending}
+            onStep={(direction) =>
+              updateSelection((previous) =>
+                format(addDays(parseISO(previous), direction * 7), "yyyy-MM-dd")
+              )
+            }
           />
           {isTeamView ? (
             <SageTimesheetExportButton
               className="h-10 rounded-xl border-[#dfe4ef] bg-white px-3 font-semibold shadow-none"
               disabledReason={
-                !isTimesheetWeekComplete(data.weekStart)
-                  ? "Sage exports are only available for completed timesheet weeks."
-                  : null
+                isPending
+                  ? "Wait for the selected week to load before exporting."
+                  : !isTimesheetWeekComplete(data.weekStart)
+                    ? "Sage exports are only available for completed timesheet weeks."
+                    : null
               }
               input={{ ...input, weekStart: data.weekStart }}
               label="Export"
@@ -129,70 +151,6 @@ function ViewButton({
     >
       <Icon className="size-4" />
       {label}
-    </Button>
-  )
-}
-
-function WeekControls({
-  weekLabel,
-  weekStart,
-  workspaceSlug,
-}: {
-  weekLabel: string
-  weekStart: string
-  workspaceSlug: string
-}) {
-  const current = parseISO(weekStart)
-
-  return (
-    <div className="grid min-w-0 flex-1 grid-cols-[2.5rem_minmax(8rem,1fr)_2.5rem] items-center overflow-hidden rounded-xl border border-[#dfe4ef] bg-white sm:flex-none">
-      <WeekLink
-        direction="previous"
-        weekStart={format(addDays(current, -7), "yyyy-MM-dd")}
-        workspaceSlug={workspaceSlug}
-      />
-      <div className="flex h-10 items-center justify-center gap-2 border-x border-[#e9edf5] px-2 text-xs font-semibold sm:min-w-40">
-        <CalendarDaysIcon className="size-4 text-[#236cff]" />
-        <span className="truncate">{weekLabel}</span>
-      </div>
-      <WeekLink
-        direction="next"
-        weekStart={format(addDays(current, 7), "yyyy-MM-dd")}
-        workspaceSlug={workspaceSlug}
-      />
-    </div>
-  )
-}
-
-function WeekLink({
-  direction,
-  weekStart,
-  workspaceSlug,
-}: {
-  direction: "next" | "previous"
-  weekStart: string
-  workspaceSlug: string
-}) {
-  const Icon = direction === "previous" ? ChevronLeftIcon : ChevronRightIcon
-
-  return (
-    <Button
-      className="size-10 rounded-none border-0 bg-white text-[#46577d] shadow-none hover:bg-[#f6f8fc]"
-      nativeButton={false}
-      render={
-        <Link
-          params={{ workspaceSlug }}
-          search={{ weekStart }}
-          to="/app/$workspaceSlug/timesheets"
-        />
-      }
-      size="icon-lg"
-      variant="ghost"
-    >
-      <Icon className="size-4" />
-      <span className="sr-only">
-        {direction === "previous" ? "Previous week" : "Next week"}
-      </span>
     </Button>
   )
 }

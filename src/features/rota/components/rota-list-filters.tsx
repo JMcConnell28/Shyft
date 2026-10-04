@@ -5,12 +5,10 @@ import type {
   RotaRangeFilter,
   RotaStatusFilter,
 } from "@/lib/rota-schemas"
-import { Input } from "@/components/ui/input"
+import { RotaListCustomDateRange } from "@/features/rota/components/rota-list-custom-date-range"
+import { useRotaDateFilters } from "@/features/rota/hooks/use-rota-date-filters"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import {
-  rotaListInputClassName,
-  rotaListSelectClassName,
-} from "@/features/rota/constants/rota-list-styles"
+import { rotaListSelectClassName } from "@/features/rota/constants/rota-list-styles"
 
 type RotaListFilterLocation = {
   id: string
@@ -63,6 +61,14 @@ function RotaListFilters({
   onPageSizeChange: (pageSize: RotaPageSize) => void
   onCustomRangeChange: (value: { from?: string; to?: string }) => void
 }) {
+  const dateFilters = useRotaDateFilters({
+    range,
+    from,
+    to,
+    scopeKey: selectedLocationId ?? "",
+    onRangeChange,
+    onCustomRangeChange,
+  })
   return (
     <div className="flex flex-col gap-3">
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_8rem]">
@@ -96,9 +102,10 @@ function RotaListFilters({
         <label className="relative">
           <CalendarRangeIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-3.5 -translate-y-1/2 text-blue-600" />
           <NativeSelect
-            value={range}
+            aria-label="Rota date range"
+            value={dateFilters.selected.range}
             onChange={(event) =>
-              onRangeChange(event.target.value as RotaRangeFilter)
+              dateFilters.changeRange(event.target.value as RotaRangeFilter)
             }
             className={`${rotaListSelectClassName} [&_select]:pl-8`}
           >
@@ -144,31 +151,14 @@ function RotaListFilters({
         </label>
       </div>
 
-      {range === "custom" ? (
-        <div className="grid gap-2 md:grid-cols-2 xl:max-w-md">
-          <Input
-            type="date"
-            className={rotaListInputClassName}
-            value={from ?? ""}
-            onChange={(event) =>
-              onCustomRangeChange({
-                from: event.target.value || undefined,
-                to,
-              })
-            }
-          />
-          <Input
-            type="date"
-            className={rotaListInputClassName}
-            value={to ?? ""}
-            onChange={(event) =>
-              onCustomRangeChange({
-                from,
-                to: event.target.value || undefined,
-              })
-            }
-          />
-        </div>
+      {dateFilters.selected.range === "custom" ? (
+        <RotaListCustomDateRange
+          from={dateFilters.selected.from}
+          to={dateFilters.selected.to}
+          isPending={dateFilters.isPending}
+          onFromChange={dateFilters.changeFrom}
+          onToChange={dateFilters.changeTo}
+        />
       ) : null}
     </div>
   )

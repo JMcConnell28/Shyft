@@ -1,26 +1,12 @@
 "use client"
 
-import * as React from "react"
 import { useDroppable } from "@dnd-kit/core"
-import { Ellipsis, Trash2 } from "lucide-react"
-
 import AssignedEmployeeName from "@/features/rota/components/assigned-employee-name"
 import DraggableAssignedEmployeeName from "@/features/rota/components/draggable-assigned-employee-name"
+import { ShiftActionsMenu } from "@/features/rota/components/shift-actions-menu"
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
-import { useDeleteShift } from "@/features/rota/hooks/use-delete-shift"
 import { getShiftDisplayLines } from "@/features/rota/utils/workspace-shifts"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-
-const ConfirmDeleteShiftDialog = React.lazy(
-  () => import("@/features/rota/components/confirm-delete-shift-dialog")
-)
 
 function Shift({
   shiftId,
@@ -33,104 +19,57 @@ function Shift({
     assignmentIdsByShiftId,
     assignmentsById,
     getEmployee,
-    isTouchInput,
     meta,
     shiftsById,
     zones,
+    days,
+    selectedLocation,
   } = useRotaWorkspace()
-  const { removeShift } = useDeleteShift()
-  const [menuOpen, setMenuOpen] = React.useState(false)
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false)
   const shift = shiftsById[shiftId]
   const assignmentIds = assignmentIdsByShiftId[shiftId] ?? []
+  const canEdit = !readOnly && meta.canEdit
   const droppable = useDroppable({
     id: shiftId,
-    data: {
-      type: "shift",
-      shiftId,
-    },
-    disabled: readOnly,
+    data: { type: "shift", shiftId },
+    disabled: !canEdit,
   })
-
-  const zone = zones.find((entry) => entry.id === shift.zoneId)
-  const zoneLabel = zone?.name ?? shift.zoneName ?? "Shift"
+  const zoneLabel =
+    zones.find((zone) => zone.id === shift.zoneId)?.name ??
+    shift.zoneName ??
+    "Shift"
   const timeLines = getShiftDisplayLines(shift)
-  function handleDeleteAction() {
-    setMenuOpen(false)
+  const day = days.find((entry) => entry.id === shift.dayId)
+  const shiftLabel = [
+    day ? [day.shortLabel, day.dayNumber, day.monthLabel].join(" ") : "",
+    timeLines.join(" / "),
+    zoneLabel,
+    selectedLocation.name,
+  ]
+    .filter(Boolean)
+    .join(", ")
 
-    if (!meta.settings.confirmShiftDelete && assignmentIds.length === 0) {
-      void removeShift(shiftId)
-      return
-    }
-
-    setConfirmDeleteOpen(true)
-  }
-
-  const shiftCard = (
+  return (
     <div
+      ref={canEdit ? droppable.setNodeRef : undefined}
       className={cn(
         "space-y-0.5",
-        !readOnly && droppable.isOver
-          ? "border-[#0069ff] bg-[#eef3ff]"
-          : undefined,
-        !readOnly && isTouchInput ? "cursor-pointer" : undefined
+        canEdit && droppable.isOver && "border-[#0069ff] bg-[#eef3ff]"
       )}
     >
-      <div className="flex h-7 w-full items-center justify-between rounded-sm border border-[#edf0f6] bg-card p-2 shadow-xs transition-colors">
-        <div className="flex h-full w-full items-center justify-between">
-          <div
-            className={cn(
-              "min-w-0 text-[10px] font-extrabold tracking-[-0.015em] text-[#11245a]",
-              timeLines.length > 1 ? "" : "truncate"
-            )}
-          >
-            {timeLines.map((line) => (
-              <p key={line} className="truncate">
-                {line}
-              </p>
-            ))}
-          </div>
-          {readOnly ? (
-            <p className="mt-0.5 text-[10px] font-bold text-[#61709a]">
-              {zoneLabel}
-            </p>
-          ) : isTouchInput ? (
-            <p className="mt-0.5 text-[10px] font-bold text-[#61709a]">
-              {zoneLabel}
-            </p>
-          ) : (
-            <div className="relative ml-2 flex min-w-0 items-center justify-end">
-              <p className="mt-0.5 truncate text-[10px] font-semibold text-[#61709a] transition-opacity group-focus-within/shift:opacity-0 group-hover/shift:opacity-0">
-                {zoneLabel}
-              </p>
-              <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      className="pointer-events-none absolute top-1/2 right-0 -translate-y-1/2 rounded-md opacity-0 transition-opacity group-focus-within/shift:pointer-events-auto group-focus-within/shift:opacity-100 group-hover/shift:pointer-events-auto group-hover/shift:opacity-100"
-                    />
-                  }
-                >
-                  <Ellipsis />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={handleDeleteAction}
-                  >
-                    <Trash2 />
-                    Delete shift
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
+      <div className="flex min-h-7 w-full items-center justify-between gap-1 rounded-sm border border-[#edf0f6] bg-card px-2 shadow-xs transition-colors">
+        <div className="min-w-0 flex-1 py-1 text-[10px] font-extrabold tracking-[-0.015em] text-[#11245a]">
+          {timeLines.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
         </div>
+        {canEdit ? (
+          <ShiftActionsMenu
+            shiftId={shiftId}
+            shiftLabel={shiftLabel}
+            assignmentCount={assignmentIds.length}
+          />
+        ) : null}
       </div>
-
       <div className="flex w-full flex-col items-center justify-center">
         {assignmentIds.length === 0 ? (
           <p className="text-[10px] font-medium text-[#7a86a4]">
@@ -140,79 +79,25 @@ function Shift({
           assignmentIds.map((assignmentId) => {
             const assignment = assignmentsById[assignmentId]
             const employee = getEmployee(assignment.employeeId)
-
-            if (!employee) {
-              return null
-            }
-
-            return readOnly ? (
-              <AssignedEmployeeName key={assignment.id} employee={employee} />
-            ) : (
+            if (!employee) return null
+            return canEdit ? (
               <DraggableAssignedEmployeeName
                 key={assignment.id}
                 employee={employee}
-                dragId={`assignment-${assignment.id}`}
+                dragId={"assignment-" + assignment.id}
                 dragData={{
                   type: "assignment",
                   assignmentId: assignment.id,
                   employeeId: assignment.employeeId,
                 }}
               />
+            ) : (
+              <AssignedEmployeeName key={assignment.id} employee={employee} />
             )
           })
         )}
       </div>
     </div>
-  )
-
-  return (
-    <>
-      <div
-        ref={readOnly ? undefined : droppable.setNodeRef}
-        className="space-y-1"
-      >
-        {readOnly ? (
-          shiftCard
-        ) : isTouchInput ? (
-          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-            <DropdownMenuTrigger
-              render={
-                <button
-                  type="button"
-                  className="block w-full text-left outline-none"
-                />
-              }
-            >
-              {shiftCard}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={handleDeleteAction}
-              >
-                <Trash2 />
-                Delete shift
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <div className="group/shift">{shiftCard}</div>
-        )}
-      </div>
-
-      <React.Suspense fallback={null}>
-        {confirmDeleteOpen ? (
-          <ConfirmDeleteShiftDialog
-            assignmentCount={assignmentIds.length}
-            onClose={() => setConfirmDeleteOpen(false)}
-            onConfirm={() => {
-              setConfirmDeleteOpen(false)
-              void removeShift(shiftId)
-            }}
-          />
-        ) : null}
-      </React.Suspense>
-    </>
   )
 }
 

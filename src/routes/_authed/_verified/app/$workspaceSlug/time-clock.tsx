@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { AccessDeniedState } from "@/components/errors/access-denied-state"
 import { ManagerTimeClockPage } from "@/features/time-clock/components/manager-time-clock-page"
-import { getManagerClockPageData } from "@/features/time-clock/server-fns"
+import { managerClockQueryOptions } from "@/features/time-clock/manager-query-options"
 import { getWorkspaceDashboardPath } from "@/lib/organization-paths"
 
 type TimeClockSearch = {
@@ -27,13 +27,13 @@ export const Route = createFileRoute(
       return { status: "forbidden" as const }
     }
 
-    const data = await getManagerClockPageData({
-      data: {
+    const data = await context.queryClient.ensureQueryData(
+      managerClockQueryOptions({
         date: deps.date,
         organizationId: activeWorkspace.id,
         userId: context.viewer.user.id,
-      },
-    })
+      })
+    )
 
     return { data, status: "allowed" as const }
   },

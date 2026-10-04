@@ -23,6 +23,7 @@ import { CreateShiftTimeField } from "@/features/rota/components/create-shift-ti
 import { CreateShiftTypeField } from "@/features/rota/components/create-shift-type-field"
 import { CreateShiftZoneField } from "@/features/rota/components/create-shift-zone-field"
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
+import { getDefaultRotaZoneId } from "@/features/rota/utils/default-rota-zone"
 // eslint-disable-next-line no-duplicate-imports
 import {
   createShiftFormSchema,
@@ -33,8 +34,14 @@ import { showSuccessToast } from "@/lib/toast"
 import { createZodFieldValidator } from "@/lib/validation"
 
 function CreateShiftDialog({ onClose }: { onClose: () => void }) {
-  const { createShift, days, locations, selectedLocationId, zones } =
-    useRotaWorkspace()
+  const {
+    createShift,
+    days,
+    locations,
+    selectedLocationId,
+    selectedZoneId,
+    zones,
+  } = useRotaWorkspace()
   const activeZones = React.useMemo(
     () => zones.filter((zone) => !zone.isDeleted),
     [zones]
@@ -45,7 +52,11 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
     locations.find((location) => location.id === selectedLocationId) ?? null
 
   const form = useForm({
-    defaultValues: getDefaultValues({ days, zones: activeZones }),
+    defaultValues: getDefaultValues({
+      days,
+      zones: activeZones,
+      selectedZoneId,
+    }),
     onSubmit: async ({ value }) => {
       if (isCreatingShift) {
         return
@@ -62,7 +73,9 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
         await createShift(input)
         showSuccessToast("Shift added to the rota.")
         onClose()
-        form.reset(getDefaultValues({ days, zones: activeZones }))
+        form.reset(
+          getDefaultValues({ days, zones: activeZones, selectedZoneId })
+        )
       } catch (submissionError) {
         setError(
           getErrorMessage(submissionError, "We could not create that shift.")
@@ -370,13 +383,15 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
 function getDefaultValues({
   days,
   zones,
+  selectedZoneId,
 }: {
   days: Array<{ id: string }>
   zones: Array<{ id: string }>
+  selectedZoneId: string | null
 }): CreateShiftFormSchema {
   return {
     dayId: days[0]?.id ?? "",
-    zoneId: zones.length === 1 ? zones[0].id : "",
+    zoneId: getDefaultRotaZoneId(zones, selectedZoneId) ?? "",
     shiftType: "standard",
     useCloseTime: false,
     startTime: "09:00",

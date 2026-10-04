@@ -12,7 +12,7 @@ function RotaViewToolbar({
   onSelectZone,
 }: {
   boardData: WorkspaceBoardData
-  selectedZoneId: string
+  selectedZoneId: string | null
   onSelectZone: (zoneId: string) => void
 }) {
   const { days, meta, location: selectedLocation, zones } = boardData

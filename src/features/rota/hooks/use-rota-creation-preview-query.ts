@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { rotaQueryKeys } from "@/features/rota/query-keys"
 import { previewRotaCreation } from "@/features/rota/server-fns"
 
@@ -16,9 +17,12 @@ function useRotaCreationPreviewQuery({
   weekStart: string
 }) {
   const previewRotaCreationFn = useServerFn(previewRotaCreation)
+  const settledWeek = useDebouncedValue(weekStart)
+  const isSelectingWeek = settledWeek !== weekStart
 
-  return useQuery({
-    enabled: enabled && Boolean(locationId) && Boolean(weekStart),
+  const query = useQuery({
+    enabled:
+      enabled && !isSelectingWeek && Boolean(locationId) && Boolean(weekStart),
     queryKey: rotaQueryKeys.creationPreview({
       locationId,
       weekStart,
@@ -31,6 +35,8 @@ function useRotaCreationPreviewQuery({
         },
       }),
   })
+
+  return { ...query, isSelectingWeek }
 }
 
 export { useRotaCreationPreviewQuery }

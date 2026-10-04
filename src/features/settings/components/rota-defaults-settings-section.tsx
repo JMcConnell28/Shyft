@@ -10,6 +10,7 @@ import {
   RotaSettingValue,
 } from "@/features/settings/components/rota-setting-row"
 import { RotaSettingsSection } from "@/features/settings/components/rota-settings-section"
+import { getDefaultRotaZoneId } from "@/features/rota/utils/default-rota-zone"
 
 function RotaDefaultsSettingsSection({
   onUpdate,
@@ -20,10 +21,11 @@ function RotaDefaultsSettingsSection({
   values: RotaSettingsValues
   zones: Array<RotaSettingsZone>
 }) {
-  const zoneOptions = [
-    { label: "All zones", value: "all" },
-    ...zones.map((zone) => ({ label: zone.name, value: zone.id })),
-  ]
+  const zoneOptions = zones.map((zone) => ({
+    label: zone.name,
+    value: zone.id,
+  }))
+  const defaultZoneId = getDefaultRotaZoneId(zones, values.defaultZoneId)
 
   return (
     <RotaSettingsSection
@@ -33,16 +35,18 @@ function RotaDefaultsSettingsSection({
     >
       <RotaSettingRow
         description="Select which zone is shown first when a rota opens."
-        title="Default zone filter"
+        title="Default zone"
       >
-        <RotaSettingSelect
-          label="Default zone filter"
-          onChange={(value) =>
-            onUpdate({ defaultZoneId: value === "all" ? null : value })
-          }
-          options={zoneOptions}
-          value={values.defaultZoneId ?? "all"}
-        />
+        {defaultZoneId ? (
+          <RotaSettingSelect
+            label="Default zone"
+            onChange={(value) => onUpdate({ defaultZoneId: value })}
+            options={zoneOptions}
+            value={defaultZoneId}
+          />
+        ) : (
+          <RotaSettingValue>No zones available</RotaSettingValue>
+        )}
       </RotaSettingRow>
       <RotaSettingRow
         description="RocketRota uses Monday-to-Sunday planning weeks."
