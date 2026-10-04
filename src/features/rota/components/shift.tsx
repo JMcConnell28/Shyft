@@ -37,7 +37,7 @@ function Shift({
     zones.find((zone) => zone.id === shift.zoneId)?.name ??
     shift.zoneName ??
     "Shift"
-  const timeLines = getShiftDisplayLines(shift)
+  const timeLines = getShiftDisplayLines(shift, meta.settings.timeFormat)
   const day = days.find((entry) => entry.id === shift.dayId)
   const shiftLabel = [
     day ? [day.shortLabel, day.dayNumber, day.monthLabel].join(" ") : "",

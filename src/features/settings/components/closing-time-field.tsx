@@ -1,12 +1,13 @@
 "use client"
 
+import type { ShiftTimeParts } from "@/features/rota/types/shift-time"
+
 import {
   buildShiftTimeValue,
   parseShiftTimeParts,
   shiftTimeHourOptions,
   shiftTimeMinuteOptions,
   shiftTimePeriodOptions,
-  type ShiftTimeParts,
 } from "@/features/rota/utils/shift-time"
 import {
   Field,

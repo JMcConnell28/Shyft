@@ -10,7 +10,7 @@ function PublishedRotaShift({
   shift: WorkspaceShift
   boardIndex: PublishedRotaBoardIndex
 }) {
-  const timeLines = getShiftDisplayLines(shift)
+  const timeLines = getShiftDisplayLines(shift, boardIndex.timeFormat)
   const assignments = boardIndex.assignmentsByShiftId[shift.id] ?? []
 
   return (

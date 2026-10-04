@@ -1,5 +1,6 @@
 import type { RotaSettingsValues } from "@/features/rota/types/settings"
 import { DEFAULT_ROTA_SETTINGS } from "@/features/rota/constants/rota-settings"
+import { rotaTimeFormatSchema } from "@/features/rota/schemas/time-format-schema"
 import { getDatabase } from "@/lib/db"
 
 async function getLocationRotaSettings(
@@ -12,6 +13,7 @@ async function getLocationRotaSettings(
     default_zone_id: string | null
     notify_staff_on_publish: boolean
     show_notes_to_staff: boolean
+    time_format: string
   }>(
     `select
        settings.allow_edit_after_publish,
@@ -22,7 +24,8 @@ async function getLocationRotaSettings(
          else null
        end as default_zone_id,
        settings.notify_staff_on_publish,
-       settings.show_notes_to_staff
+       settings.show_notes_to_staff,
+       settings.time_format
      from public.location_rota_settings settings
      left join public.zones zone on zone.id = settings.default_zone_id
      where settings.location_id = $1::uuid
@@ -42,6 +45,7 @@ async function getLocationRotaSettings(
     defaultZoneId: row.default_zone_id,
     notifyStaffOnPublish: row.notify_staff_on_publish,
     showNotesToStaff: row.show_notes_to_staff,
+    timeFormat: rotaTimeFormatSchema.parse(row.time_format),
   }
 }
 

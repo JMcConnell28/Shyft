@@ -1,4 +1,6 @@
 import { z } from "zod"
+import { rotaTimeFormatSchema } from "@/features/rota/schemas/time-format-schema"
+import { DEFAULT_ROTA_TIME_FORMAT } from "@/features/rota/constants/time-format"
 import { rotaTemplateNameSchema } from "@/features/rota/schemas/rota-server-schemas"
 
 const workspaceScopedUserSchema = z.object({
@@ -29,6 +31,7 @@ const rotaSettingsValuesSchema = z.object({
   defaultZoneId: z.uuid("Choose a valid default zone.").nullable(),
   notifyStaffOnPublish: z.boolean(),
   showNotesToStaff: z.boolean(),
+  timeFormat: rotaTimeFormatSchema.default(DEFAULT_ROTA_TIME_FORMAT),
 })
 
 const updateRotaSettingsInputSchema = workspaceScopedUserSchema

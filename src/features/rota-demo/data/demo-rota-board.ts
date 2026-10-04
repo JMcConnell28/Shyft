@@ -54,6 +54,7 @@ const demoRotaBoardData = {
       defaultZoneId: null,
       notifyStaffOnPublish: true,
       showNotesToStaff: true,
+      timeFormat: "12h",
     },
     budgetPence: 475000,
   },

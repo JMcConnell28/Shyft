@@ -57,8 +57,9 @@ async function updateRotaSettings(
        confirm_shift_delete,
        copy_notes_by_default,
        notify_staff_on_publish,
-       show_notes_to_staff
-     ) values ($1,$2,$3,$4,$5,$6,$7,$8)
+       show_notes_to_staff,
+       time_format
+     ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9)
      on conflict (location_id)
      do update set
        organization_id = excluded.organization_id,
@@ -68,6 +69,7 @@ async function updateRotaSettings(
        copy_notes_by_default = excluded.copy_notes_by_default,
        notify_staff_on_publish = excluded.notify_staff_on_publish,
        show_notes_to_staff = excluded.show_notes_to_staff,
+       time_format = excluded.time_format,
        updated_at = timezone('utc', now())`,
     [
       input.locationId,
@@ -78,6 +80,7 @@ async function updateRotaSettings(
       input.copyNotesByDefault,
       input.notifyStaffOnPublish,
       input.showNotesToStaff,
+      input.timeFormat,
     ]
   )
 
@@ -88,6 +91,7 @@ async function updateRotaSettings(
     defaultZoneId: input.defaultZoneId,
     notifyStaffOnPublish: input.notifyStaffOnPublish,
     showNotesToStaff: input.showNotesToStaff,
+    timeFormat: input.timeFormat,
   }
 }
 

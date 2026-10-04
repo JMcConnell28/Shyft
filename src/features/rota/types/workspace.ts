@@ -6,8 +6,8 @@ type WorkspaceLocation = {
   id: string
   name: string
   slug?: string
-  closeTimeByDayId: Record<string, string>
-  closeTimeNextDayByDayId: Record<string, boolean>
+  closeTimeByDayId: Partial<Record<string, string>>
+  closeTimeNextDayByDayId: Partial<Record<string, boolean>>
   estimatedCloseTime: string
   estimatedCloseTimeNextDay: boolean
 }

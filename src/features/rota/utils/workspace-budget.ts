@@ -1,3 +1,4 @@
+import type { RotaTimeFormat } from "@/features/rota/schemas/time-format-schema"
 import type {
   WorkspaceAssignment,
   WorkspaceDay,
@@ -50,7 +51,7 @@ type ScheduledShiftCostSummary = {
 
 function getScheduledCostSummaries(
   input: ScheduledCostSummaryInput
-): ScheduledDayCostSummary[] {
+): Array<ScheduledDayCostSummary> {
   const totalMinutesByEmployeeId = getTotalMinutesByEmployeeId({
     ...input,
     shiftIdsByDayId: input.allShiftIdsByDayId ?? input.shiftIdsByDayId,
@@ -93,8 +94,8 @@ function getScheduledCostSummaries(
 }
 
 function getScheduledZoneCostSummaries(
-  input: ScheduledCostSummaryInput & { zones: WorkspaceZone[] }
-): ScheduledZoneCostSummary[] {
+  input: ScheduledCostSummaryInput & { zones: Array<WorkspaceZone> }
+): Array<ScheduledZoneCostSummary> {
   const totalMinutesByEmployeeId = getTotalMinutesByEmployeeId({
     ...input,
     shiftIdsByDayId: input.allShiftIdsByDayId ?? input.shiftIdsByDayId,
@@ -136,15 +137,16 @@ function getScheduledZoneCostSummaries(
 }
 
 function getScheduledShiftCostSummaries(
-  input: ScheduledCostSummaryInput & { zones: WorkspaceZone[] }
-): ScheduledShiftCostSummary[] {
+  input: ScheduledCostSummaryInput & {
+    zones: Array<WorkspaceZone>
+    timeFormat?: RotaTimeFormat
+  }
+): Array<ScheduledShiftCostSummary> {
   const totalMinutesByEmployeeId = getTotalMinutesByEmployeeId({
     ...input,
     shiftIdsByDayId: input.allShiftIdsByDayId ?? input.shiftIdsByDayId,
   })
-  const zoneNameById = Object.fromEntries(
-    input.zones.map((zone) => [zone.id, zone.name])
-  )
+  const zoneNameById = new Map(input.zones.map((zone) => [zone.id, zone.name]))
 
   return Object.values(input.shiftIdsByDayId).flatMap((shiftIds) =>
     (shiftIds ?? []).flatMap((shiftId) => {
@@ -167,11 +169,12 @@ function getScheduledShiftCostSummaries(
           assignedCount: assignmentIds.length,
           dayId: shift.dayId,
           shiftId,
-          timeLabel: getShiftDisplayLines(shift).join(", "),
+          timeLabel: getShiftDisplayLines(shift, input.timeFormat).join(", "),
           totalCost,
           totalMinutes: durationMinutes * assignmentIds.length,
           zoneId: shift.zoneId,
-          zoneName: zoneNameById[shift.zoneId] ?? shift.zoneName ?? "Unknown zone",
+          zoneName:
+            zoneNameById.get(shift.zoneId) ?? shift.zoneName ?? "Unknown zone",
         },
       ]
     })
@@ -206,7 +209,7 @@ function getShiftCostPence({
   employeesById,
   totalMinutesByEmployeeId,
 }: {
-  assignmentIds: string[]
+  assignmentIds: Array<string>
   assignmentsById: ScheduledCostSummaryInput["assignmentsById"]
   durationMinutes: number
   employeesById: ScheduledCostSummaryInput["employeesById"]

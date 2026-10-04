@@ -1,9 +1,11 @@
 import { CalendarDaysIcon } from "lucide-react"
-
 import type {
   RotaSettingsValues,
   RotaSettingsZone,
 } from "@/features/settings/types"
+import { rotaTimeFormatOptions } from "@/features/rota/constants/time-format"
+import { rotaTimeFormatSchema } from "@/features/rota/schemas/time-format-schema"
+
 import {
   RotaSettingRow,
   RotaSettingSelect,
@@ -47,6 +49,20 @@ function RotaDefaultsSettingsSection({
         ) : (
           <RotaSettingValue>No zones available</RotaSettingValue>
         )}
+      </RotaSettingRow>
+      <RotaSettingRow
+        title="Time format"
+        description="Choose how shift times are entered and displayed."
+      >
+        <RotaSettingSelect
+          label="Time format"
+          value={values.timeFormat}
+          options={[...rotaTimeFormatOptions]}
+          onChange={(value) => {
+            const parsed = rotaTimeFormatSchema.safeParse(value)
+            if (parsed.success) onUpdate({ timeFormat: parsed.data })
+          }}
+        />
       </RotaSettingRow>
       <RotaSettingRow
         description="RocketRota uses Monday-to-Sunday planning weeks."

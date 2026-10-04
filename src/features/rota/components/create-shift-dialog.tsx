@@ -38,6 +38,7 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
     createShift,
     days,
     locations,
+    meta,
     selectedLocationId,
     selectedZoneId,
     zones,
@@ -185,7 +186,11 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
                         }}
                       >
                         {(field) => (
-                          <CreateShiftTimeField field={field} label="Start" />
+                          <CreateShiftTimeField
+                            timeFormat={meta.settings.timeFormat}
+                            field={field}
+                            label="Start"
+                          />
                         )}
                       </form.Field>
                       <form.Subscribe
@@ -202,6 +207,7 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
                           >
                             {(field) => (
                               <CreateShiftTimeField
+                                timeFormat={meta.settings.timeFormat}
                                 field={field}
                                 label="Finish"
                                 disabled={useCloseTime}
@@ -251,6 +257,7 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
                         >
                           {(field) => (
                             <CreateShiftTimeField
+                              timeFormat={meta.settings.timeFormat}
                               field={field}
                               label="Start time"
                             />
@@ -266,6 +273,7 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
                         >
                           {(field) => (
                             <CreateShiftTimeField
+                              timeFormat={meta.settings.timeFormat}
                               field={field}
                               label="Finish time"
                             />
@@ -299,6 +307,7 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
                         >
                           {(field) => (
                             <CreateShiftTimeField
+                              timeFormat={meta.settings.timeFormat}
                               field={field}
                               label="Start time"
                             />
@@ -318,6 +327,7 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
                             >
                               {(field) => (
                                 <CreateShiftTimeField
+                                  timeFormat={meta.settings.timeFormat}
                                   field={field}
                                   label="Finish time"
                                   disabled={useCloseTime}
@@ -368,7 +378,7 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
             <Button
               type="submit"
               disabled={isCreatingShift}
-              className="h-10 rounded-xl bg-[#00a84f] text-sm font-extrabold text-white shadow-[0_8px_20px_rgba(0,168,79,0.2)] hover:bg-[#009647]"
+              className="h-10 rounded-xl bg-blue-600 text-sm font-extrabold text-white shadow-[0_8px_20px_rgba(37,99,235,0.2)] hover:bg-blue-700"
             >
               <Plus data-icon="inline-start" />
               Create shift

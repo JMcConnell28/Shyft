@@ -1,3 +1,7 @@
+import type { RotaTimeFormat } from "@/features/rota/schemas/time-format-schema"
+import type { ShiftTimeParts } from "@/features/rota/types/shift-time"
+import { DEFAULT_ROTA_TIME_FORMAT } from "@/features/rota/constants/time-format"
+
 const shiftTimePattern = /^([01]\d|2[0-3]):(00|15|30|45)$/
 
 const shiftTimeHourOptions = Array.from({ length: 12 }, (_, index) => {
@@ -7,6 +11,11 @@ const shiftTimeHourOptions = Array.from({ length: 12 }, (_, index) => {
     label: String(hour),
     value: String(hour).padStart(2, "0"),
   }
+})
+
+const shiftTime24HourOptions = Array.from({ length: 24 }, (_, hour) => {
+  const value = String(hour).padStart(2, "0")
+  return { label: value, value }
 })
 
 const shiftTimeMinuteOptions = ["00", "15", "30", "45"].map((value) => ({
@@ -19,15 +28,10 @@ const shiftTimePeriodOptions = [
   { label: "PM", value: "PM" },
 ] as const
 
-type ShiftTimePeriod = (typeof shiftTimePeriodOptions)[number]["value"]
-
-type ShiftTimeParts = {
-  hour: string
-  minute: string
-  period: ShiftTimePeriod
-}
-
-function parseShiftTimeParts(time: string): ShiftTimeParts {
+function parseShiftTimeParts(
+  time: string,
+  timeFormat: RotaTimeFormat = DEFAULT_ROTA_TIME_FORMAT
+): ShiftTimeParts {
   const [hourText = "09", minuteText = "00"] = time.split(":")
   const hour24 = Number(hourText)
 
@@ -40,7 +44,10 @@ function parseShiftTimeParts(time: string): ShiftTimeParts {
   }
 
   return {
-    hour: String(hour24 % 12 || 12).padStart(2, "0"),
+    hour: String(timeFormat === "24h" ? hour24 : hour24 % 12 || 12).padStart(
+      2,
+      "0"
+    ),
     minute: shiftTimeMinuteOptions.some((option) => option.value === minuteText)
       ? minuteText
       : "00",
@@ -48,9 +55,17 @@ function parseShiftTimeParts(time: string): ShiftTimeParts {
   }
 }
 
-function buildShiftTimeValue(parts: ShiftTimeParts) {
+function buildShiftTimeValue(
+  parts: ShiftTimeParts,
+  timeFormat: RotaTimeFormat = DEFAULT_ROTA_TIME_FORMAT
+): string {
   const hour = Number(parts.hour) % 12
-  const hour24 = parts.period === "PM" ? hour + 12 : hour
+  const hour24 =
+    timeFormat === "24h"
+      ? Number(parts.hour)
+      : parts.period === "PM"
+        ? hour + 12
+        : hour
 
   return `${String(hour24).padStart(2, "0")}:${parts.minute}`
 }
@@ -58,9 +73,9 @@ function buildShiftTimeValue(parts: ShiftTimeParts) {
 export {
   buildShiftTimeValue,
   parseShiftTimeParts,
+  shiftTime24HourOptions,
   shiftTimeHourOptions,
   shiftTimeMinuteOptions,
   shiftTimePattern,
   shiftTimePeriodOptions,
 }
-export type { ShiftTimeParts, ShiftTimePeriod }

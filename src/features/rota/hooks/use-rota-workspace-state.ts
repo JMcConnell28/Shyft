@@ -201,6 +201,7 @@ function useRotaWorkspaceState({
       shiftIdsByDayId: allShiftIdsByDayId,
       shiftsById,
       zones: boardData.zones,
+      timeFormat: meta.settings.timeFormat,
     })
   }, [
     allShiftIdsByDayId,
@@ -210,6 +211,7 @@ function useRotaWorkspaceState({
     boardData.location,
     boardData.zones,
     employeesById,
+    meta.settings.timeFormat,
     shiftsById,
   ])
 

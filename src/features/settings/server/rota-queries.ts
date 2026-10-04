@@ -3,6 +3,7 @@ import { DEFAULT_ROTA_SETTINGS } from "@/features/rota/constants/rota-settings"
 import { isShiftSwappingEnabled } from "@/features/shift-swaps/server/availability"
 import { requireRotaSettingsPermission } from "@/features/settings/server/rota-settings-shared"
 import { getLocationOrganizationId } from "@/features/rota/server/lookups"
+import { rotaTimeFormatSchema } from "@/features/rota/schemas/time-format-schema"
 import { getDatabase } from "@/lib/db"
 
 async function getRotaSettingsPageData(input: {
@@ -29,6 +30,7 @@ async function getRotaSettingsPageData(input: {
         name: string
         notify_staff_on_publish: boolean | null
         show_notes_to_staff: boolean | null
+        time_format: string | null
         slug: string
       }>(
         `select
@@ -43,7 +45,8 @@ async function getRotaSettingsPageData(input: {
            else null
          end as default_zone_id,
          rota_settings.notify_staff_on_publish,
-         rota_settings.show_notes_to_staff
+         rota_settings.show_notes_to_staff,
+         rota_settings.time_format
        from public.locations location
        left join public.location_rota_settings rota_settings
          on rota_settings.location_id = location.id
@@ -134,6 +137,9 @@ async function getRotaSettingsPageData(input: {
           location.copy_notes_by_default ??
           DEFAULT_ROTA_SETTINGS.copyNotesByDefault,
         defaultZoneId: location.default_zone_id,
+        timeFormat: rotaTimeFormatSchema.parse(
+          location.time_format ?? DEFAULT_ROTA_SETTINGS.timeFormat
+        ),
         notifyStaffOnPublish:
           location.notify_staff_on_publish ??
           DEFAULT_ROTA_SETTINGS.notifyStaffOnPublish,

@@ -1,9 +1,12 @@
+import type { RotaTimeFormat } from "@/features/rota/schemas/time-format-schema"
 import type {
   WorkspaceDay,
   WorkspaceLocation,
   WorkspaceShift,
   WorkspaceShiftSegment,
 } from "@/features/rota/types/workspace"
+import { DEFAULT_ROTA_TIME_FORMAT } from "@/features/rota/constants/time-format"
+import { formatShiftTime } from "@/features/rota/utils/format-shift-time"
 
 type ResolvedWorkspaceShiftSegment = WorkspaceShiftSegment & {
   startMinutes: number
@@ -13,9 +16,11 @@ type ResolvedWorkspaceShiftSegment = WorkspaceShiftSegment & {
 function getShiftSegments(
   shift: WorkspaceShift,
   location: WorkspaceLocation
-): ResolvedWorkspaceShiftSegment[] {
+): Array<ResolvedWorkspaceShiftSegment> {
   if (shift.shiftType === "standard") {
-    return [resolveSegment({ startTime: shift.startTime, endTime: shift.endTime })]
+    return [
+      resolveSegment({ startTime: shift.startTime, endTime: shift.endTime }),
+    ]
   }
 
   if (shift.shiftType === "closing") {
@@ -26,7 +31,9 @@ function getShiftSegments(
     return [
       resolveSegment(
         { startTime: shift.startTime, endTime: closeTime },
-        dayCloseTime ? Boolean(dayCloseTimeNextDay) : location.estimatedCloseTimeNextDay
+        dayCloseTime
+          ? Boolean(dayCloseTimeNextDay)
+          : location.estimatedCloseTimeNextDay
       ),
     ]
   }
@@ -66,11 +73,11 @@ function getShiftDurationMinutes(
   )
 }
 
-function getShiftSortStart(
-  shift: WorkspaceShift,
-  location: WorkspaceLocation
-) {
-  return getShiftSegments(shift, location)[0]?.startMinutes ?? Number.MAX_SAFE_INTEGER
+function getShiftSortStart(shift: WorkspaceShift, location: WorkspaceLocation) {
+  return (
+    getShiftSegments(shift, location)[0]?.startMinutes ??
+    Number.MAX_SAFE_INTEGER
+  )
 }
 
 function getShiftSortEnd(shift: WorkspaceShift, location: WorkspaceLocation) {
@@ -93,25 +100,29 @@ function compareShiftsByTime(
   return getShiftSortEnd(left, location) - getShiftSortEnd(right, location)
 }
 
-function getShiftDisplayLines(shift: WorkspaceShift) {
+function getShiftDisplayLines(
+  shift: WorkspaceShift,
+  timeFormat: RotaTimeFormat = DEFAULT_ROTA_TIME_FORMAT
+): Array<string> {
+  const formatTime = (time: string) => formatShiftTime(time, timeFormat)
   if (shift.shiftType === "standard") {
-    return [`${shift.startTime} - ${shift.endTime}`]
+    return [`${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`]
   }
 
   if (shift.shiftType === "closing") {
-    return [`${shift.startTime} - Close`]
+    return [`${formatTime(shift.startTime)} - Close`]
   }
 
   return shift.segments.map((segment) =>
     segment.endKind === "locationClose"
-      ? `${segment.startTime} - Close`
-      : `${segment.startTime} - ${segment.endTime ?? segment.startTime}`
+      ? `${formatTime(segment.startTime)} - Close`
+      : `${formatTime(segment.startTime)} - ${formatTime(segment.endTime ?? segment.startTime)}`
   )
 }
 
 function getShiftPrimaryStart(shift: WorkspaceShift) {
   if (shift.shiftType === "split") {
-    return shift.segments[0]?.startTime ?? "00:00"
+    return shift.segments[0].startTime
   }
 
   return shift.startTime
@@ -176,7 +187,7 @@ function getTimeMinutes(value: string) {
 function getShiftAbsoluteSegments(
   shift: WorkspaceShift,
   options: {
-    days: WorkspaceDay[]
+    days: Array<WorkspaceDay>
     location: WorkspaceLocation
   }
 ) {

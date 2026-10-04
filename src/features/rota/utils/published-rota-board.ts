@@ -1,3 +1,4 @@
+import type { RotaTimeFormat } from "@/features/rota/schemas/time-format-schema"
 import type {
   WorkspaceAssignment,
   WorkspaceBoardData,
@@ -7,6 +8,7 @@ import type {
 import { compareShiftsByTime } from "@/features/rota/utils/workspace-shifts"
 
 type PublishedRotaBoardIndex = {
+  timeFormat: RotaTimeFormat
   assignmentsByShiftId: Partial<Record<string, Array<WorkspaceAssignment>>>
   employeesById: Partial<Record<string, WorkspaceEmployee>>
   shiftsByDayId: Partial<Record<string, Array<WorkspaceShift>>>
@@ -37,6 +39,7 @@ function buildPublishedRotaBoardIndex(
   }
 
   return {
+    timeFormat: boardData.meta.settings.timeFormat,
     assignmentsByShiftId,
     employeesById: Object.fromEntries(
       boardData.employees.map((employee) => [employee.id, employee])

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import type { RotaSettingsValues } from "@/features/settings/types"
+import { rotaSettingsValuesSchema } from "@/features/settings/schemas/rota-settings-schemas"
 import { normalizeRotaSettingsValues } from "@/features/settings/utils/rota-settings"
 
 const SETTINGS: RotaSettingsValues = {
@@ -10,6 +11,7 @@ const SETTINGS: RotaSettingsValues = {
   defaultZoneId: null,
   notifyStaffOnPublish: true,
   showNotesToStaff: true,
+  timeFormat: "12h",
 }
 
 describe("rota settings", () => {
@@ -33,5 +35,24 @@ describe("rota settings", () => {
 
     expect(next).not.toBe(SETTINGS)
     expect(SETTINGS.notifyStaffOnPublish).toBe(true)
+  })
+  it("accepts and preserves a 24-hour preference and rejects invalid formats", () => {
+    const updated = normalizeRotaSettingsValues(SETTINGS, { timeFormat: "24h" })
+    expect(updated.timeFormat).toBe("24h")
+    expect(
+      normalizeRotaSettingsValues(updated, { confirmShiftDelete: false })
+        .timeFormat
+    ).toBe("24h")
+    expect(rotaSettingsValuesSchema.parse(updated).timeFormat).toBe("24h")
+    expect(
+      rotaSettingsValuesSchema.safeParse({
+        ...SETTINGS,
+        timeFormat: "unsupported",
+      }).success
+    ).toBe(false)
+    expect(
+      rotaSettingsValuesSchema.parse({ ...SETTINGS, timeFormat: undefined })
+        .timeFormat
+    ).toBe("12h")
   })
 })

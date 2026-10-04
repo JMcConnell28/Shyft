@@ -31,7 +31,9 @@ function buildRotaPdfDocumentData(input: {
   assignmentsById: Record<string, WorkspaceAssignment>
   brandLogoUrl: string | null
   days: Array<WorkspaceDay>
-  employeeGroups: Array<WorkspaceEmployeeGroup & { employeeIds?: Array<string> }>
+  employeeGroups: Array<
+    WorkspaceEmployeeGroup & { employeeIds?: Array<string> }
+  >
   employeesById: Record<string, WorkspaceEmployee>
   location: WorkspaceLocation
   meta: WorkspaceBoardMeta
@@ -54,7 +56,12 @@ function buildRotaPdfDocumentData(input: {
       input.meta.contentVersion
     ),
     versionLabel: `v${input.meta.contentVersion}`,
-    generatedAtLabel: format(new Date(), "d MMM yyyy, HH:mm"),
+    generatedAtLabel: format(
+      new Date(),
+      input.meta.settings.timeFormat === "24h"
+        ? "d MMM yyyy, HH:mm"
+        : "d MMM yyyy, h:mm a"
+    ),
     locationName: input.location.name,
     note: input.meta.note,
     options: input.options,
@@ -131,7 +138,7 @@ function buildZonePage(
             }
           }),
         id: shift.id,
-        timeLines: getShiftDisplayLines(shift),
+        timeLines: getShiftDisplayLines(shift, input.meta.settings.timeFormat),
       })),
   }))
 
