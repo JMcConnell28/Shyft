@@ -1,9 +1,9 @@
 import type { OrganizationRole } from "@/lib/auth/permissions"
 import { getAuthRequestHeaders } from "@/lib/auth-session.server"
 import { getDevRoleOverride } from "@/lib/auth/dev-role-override"
+// eslint-disable-next-line no-duplicate-imports
 import { roles } from "@/lib/auth/permissions"
-import { createSupabaseServerClient } from "@/lib/supabase.server"
-import { assertSupabaseSuccess } from "@/lib/supabase-errors"
+import { readOrganizationMembershipRole } from "@/lib/auth/server/organization-membership"
 
 type OrganizationPermissionRequest = Parameters<
   (typeof roles)[OrganizationRole]["authorize"]
@@ -11,37 +11,25 @@ type OrganizationPermissionRequest = Parameters<
 
 async function getOrganizationRole(
   organizationId: string,
-  userId: string,
+  userId: string
 ): Promise<OrganizationRole | null> {
-  const supabase = createSupabaseServerClient()
-  const result = await supabase
-    .from("member")
-    .select("role")
-    .eq("organizationId", organizationId)
-    .eq("userId", userId)
-    .maybeSingle()
-
-  assertSupabaseSuccess(result.error, "We could not load your role.")
-
-  const role = result.data?.role
-
-  if (!role || !(role in roles)) {
+  const role = await readOrganizationMembershipRole(organizationId, userId)
+  if (!role) {
     return null
   }
 
-  const resolvedRole = role as OrganizationRole
   const requestHeaders = getAuthRequestHeaders()
   const devRoleOverride = getDevRoleOverride(
     requestHeaders.get("cookie"),
-    organizationId,
+    organizationId
   )
 
-  return devRoleOverride ?? resolvedRole
+  return devRoleOverride ?? role
 }
 
 function hasOrgPermissionForRole(
   role: OrganizationRole | null,
-  permissions: OrganizationPermissionRequest,
+  permissions: OrganizationPermissionRequest
 ) {
   if (!role) {
     return false

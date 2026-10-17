@@ -12,6 +12,7 @@ import type {
 } from "@/features/time-clock/types"
 import { updateTimeAttendanceAddon } from "@/features/billing/server-fns"
 import { timeClockQueryKeys } from "@/features/time-clock/query-keys"
+import { managerDashboardKeys } from "@/features/dashboard/manager/query-options"
 import {
   approveTimeEntryAsRecorded,
   generateAdminClockTagSetup,
@@ -67,14 +68,16 @@ function useManagerClockMutations(input: {
   const managerClockOverrideFn = useServerFn(managerClockOverride)
 
   async function invalidate() {
-    await queryClient.invalidateQueries({
-      queryKey: timeClockQueryKeys.all,
-    })
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: timeClockQueryKeys.all }),
+      queryClient.invalidateQueries({ queryKey: managerDashboardKeys.all }),
+    ])
   }
 
   return {
     overrideMutation: useMutation({
       mutationFn: (variables: {
+        shiftSegment?: ClockShiftSegment
         action: ClockAction
         employeeId: string
         locationId: string

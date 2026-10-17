@@ -161,6 +161,7 @@ async function managerClockOverride(input: {
   userId: string
   employeeId: string
   action: ClockAction
+  shiftSegment?: ClockShiftSegment
   reason: string
 }) {
   const scope = await requireClockManagerScope(input)
@@ -189,7 +190,11 @@ async function managerClockOverride(input: {
       now,
       timeZone,
     })
-    const scheduledWindow = getScheduledWindow(matchedShift, "full")
+    const shiftSegment = input.shiftSegment ?? "full"
+    const scheduledWindow = getScheduledWindow(matchedShift, shiftSegment)
+    if (input.shiftSegment) {
+      await ensureShiftSegmentCanStart({ employeeId: employee.id, rotaPublishedShiftId: matchedShift?.id ?? null, shiftSegment })
+    }
     const payable = getPayableClockIn({
       actualClockInAt: now,
       rules,
@@ -204,7 +209,7 @@ async function managerClockOverride(input: {
       performedByUserId: scope.userId,
       rotaPublishedShiftId: matchedShift?.id ?? null,
       scheduledWindow,
-      shiftSegment: "full",
+      shiftSegment,
       source: "manager_override",
       status: payable.reviewReason ? "requires_review" : "open",
     })
@@ -255,7 +260,7 @@ async function managerClockOverride(input: {
       : "closed"
   const entry = await updateTimeEntryForClockOut({
     entryId: openEntries[0].id,
-    notes: joinNotes(input.reason, payable.reviewReason),
+    notes: joinNotes(openEntries[0].notes, input.reason, payable.reviewReason),
     payableEndAt: payable.payableEndAt,
     performedByUserId: scope.userId,
     status,

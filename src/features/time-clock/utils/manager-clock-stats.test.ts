@@ -79,6 +79,7 @@ describe("getManagerClockStats", () => {
       ],
       reviewEntries: [
         {
+          notes: "Clock-in did not match a published shift.",
           clockedInAt: "2026-07-13T08:00:00.000Z",
           clockedOutAt: null,
           employeeName: "Alex Turner",

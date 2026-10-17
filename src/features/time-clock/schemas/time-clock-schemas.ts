@@ -52,6 +52,7 @@ const getManagerClockPageInputSchema = workspaceClockScopeSchema.extend({
 
 const managerClockOverrideInputSchema = workspaceClockScopeBaseSchema
   .extend({
+    shiftSegment: clockShiftSegmentSchema.optional(),
     employeeId: z.uuid("Choose a valid team member."),
     locationId: z.uuid("Choose a valid location."),
     action: clockActionSchema,

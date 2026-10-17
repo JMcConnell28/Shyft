@@ -161,6 +161,7 @@ type ManagerClockPageData = {
   failedAttempts: Array<ClockAttemptSummary>
   reviewEntries: Array<{
     id: string
+    notes: string | null
     locationId: string
     employeeName: string
     clockedInAt: string

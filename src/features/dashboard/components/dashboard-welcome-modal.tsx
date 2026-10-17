@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import type { WelcomeCapabilities } from "@/features/dashboard/components/dashboard-welcome-content"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -19,10 +21,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { dismissDashboardWelcome } from "@/features/dashboard/server-fns"
-import {
-  getDashboardWelcomeSteps,
-  type WelcomeCapabilities,
-} from "@/features/dashboard/components/dashboard-welcome-content"
+import { dashboardWelcomeQueryOptions } from "@/features/dashboard/query-options"
+// eslint-disable-next-line no-duplicate-imports
+import { getDashboardWelcomeSteps } from "@/features/dashboard/components/dashboard-welcome-content"
 
 type WelcomeWorkspace = {
   id: string
@@ -34,14 +35,17 @@ function DashboardWelcomeModal({
   capabilities,
   initiallyOpen,
   userName,
+  userId,
   workspace,
 }: {
   capabilities: WelcomeCapabilities
   initiallyOpen: boolean
   userName: string
+  userId: string
   workspace: WelcomeWorkspace
 }) {
   const [open, setOpen] = React.useState(initiallyOpen)
+  const queryClient = useQueryClient()
   const [step, setStep] = React.useState(0)
   const [isDismissing, setIsDismissing] = React.useState(false)
   const firstName = userName.trim().split(/\s+/)[0] || "there"
@@ -57,6 +61,10 @@ function DashboardWelcomeModal({
       await dismissDashboardWelcome({
         data: { id: workspace.id, type: workspace.type },
       })
+      queryClient.setQueryData(
+        dashboardWelcomeQueryOptions(workspace, userId).queryKey,
+        { shouldShow: false }
+      )
     } catch {
       setOpen(true)
       toast.error("We could not save your welcome preference.")
@@ -79,7 +87,7 @@ function DashboardWelcomeModal({
           return
         }
 
-        if (!nextOpen) void dismiss()
+        void dismiss()
       }}
     >
       {/* <DialogTrigger

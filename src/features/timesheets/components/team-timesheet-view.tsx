@@ -5,7 +5,6 @@ import { SearchIcon, UsersRoundIcon } from "lucide-react"
 
 import type {
   ManagerTimesheet,
-  TimesheetEntry,
   TimesheetScopeInput,
 } from "@/features/timesheets/types"
 import type { TeamTimesheetStatusFilter } from "@/features/timesheets/utils/timesheet-view.types"
@@ -18,6 +17,7 @@ import {
   TimesheetPill,
 } from "@/features/timesheets/components/timesheet-panel"
 import { filterTeamTimesheetEmployees } from "@/features/timesheets/utils/timesheet-view"
+import { useTimesheetEntrySelection } from "@/features/timesheets/hooks/use-timesheet-entry-selection"
 
 function TeamTimesheetView({
   input,
@@ -32,8 +32,8 @@ function TeamTimesheetView({
   const [location, setLocation] = React.useState("all")
   const [status, setStatus] = React.useState<TeamTimesheetStatusFilter>("all")
   const [expandedEmployeeId, setExpandedEmployeeId] = React.useState("")
-  const [selectedEntry, setSelectedEntry] =
-    React.useState<TimesheetEntry | null>(null)
+  const { selectedEntry, setSelectedEntry, unavailable } =
+    useTimesheetEntrySelection(timesheet, writableLocationIds)
   const locations = Array.from(
     new Set(timesheet.employees.flatMap((employee) => employee.locations))
   ).sort()
@@ -45,6 +45,15 @@ function TeamTimesheetView({
 
   return (
     <div className="flex flex-col gap-4 sm:gap-5">
+      {unavailable ? (
+        <p
+          role="status"
+          className="rounded-xl bg-white p-4 text-xs text-[#7481a0]"
+        >
+          The requested entry is not available for editing in this week or
+          location.
+        </p>
+      ) : null}
       <TeamTimesheetMetrics timesheet={timesheet} />
       <TimesheetPanel>
         <TimesheetPanelHeader

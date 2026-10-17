@@ -1,10 +1,11 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useLocation } from "@tanstack/react-router"
 import * as React from "react"
 
 import LocationName from "./location-name"
 import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
 import type { OrganizationAppRouteKey } from "@/lib/organization-paths"
 import type { OrganizationSummary, WorkspaceSummary } from "@/lib/onboarding"
+import { getWorkspaceShellConfig } from "@/features/navigation/utils/workspace-shell"
 import { navItems } from "@/components/app/shell/nav-items"
 import { SidebarInviteLink } from "@/components/app/shell/sidebar-invite-link"
 import { SidebarInviteDialog } from "@/components/app/shell/sidebar-invite-dialog"
@@ -57,6 +58,12 @@ function AppSidebar({
   shiftSwapsEnabled: boolean
 }) {
   const { isMobile, setOpenMobile } = useSidebar()
+  const requestedPathname = useLocation({
+    select: (location) => location.pathname,
+  })
+  const selectedRouteKey = activeWorkspace
+    ? getWorkspaceShellConfig(requestedPathname, activeWorkspace).routeKey
+    : routeKey
   const [inviteOpen, setInviteOpen] = React.useState(false)
   const visibleNavItems = navItems.filter(
     (item) =>
@@ -106,7 +113,7 @@ function AppSidebar({
                         )
                       }
                       tooltip={item.title}
-                      isActive={routeKey === item.routeKey}
+                      isActive={selectedRouteKey === item.routeKey}
                       className="max-md:text-md max-md:h-10 max-md:gap-4 max-md:rounded-xl max-md:px-5 max-md:font-bold max-md:tracking-[-0.03em] max-md:text-[#071a54] max-md:shadow-none max-md:data-active:border-[#0069ff]/20 max-md:data-active:bg-[#eef3ff] max-md:data-active:font-medium max-md:data-active:text-[#0069ff] max-md:data-active:shadow-sm max-md:[&_svg]:size-7"
                     >
                       <div className="relative flex shrink-0">

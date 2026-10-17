@@ -1,12 +1,13 @@
 "use client"
 
 import * as React from "react"
-
 import type {
   ClockAction,
   ManagerClockEmployee,
   ManagerClockPageData,
 } from "@/features/time-clock/types"
+import { Button } from "@/components/ui/button"
+
 import { ManagerClockOverrideDialog } from "@/features/time-clock/components/manager-clock-override-dialog"
 import { TimeClockDashboard } from "@/features/time-clock/components/time-clock-dashboard"
 import { useLiveNow } from "@/features/time-clock/hooks/use-live-now"
@@ -61,6 +62,22 @@ function ManagerTimeClockPage({
 
   return (
     <>
+      {query.isError && (
+        <div
+          role="alert"
+          className="mx-4 mt-4 rounded-xl border bg-card p-4 text-sm"
+        >
+          <p>Could not refresh attendance. Showing the last loaded data.</p>
+          <Button
+            className="mt-3"
+            variant="outline"
+            disabled={query.isFetching}
+            onClick={() => void query.refetch()}
+          >
+            {query.isFetching ? "Retrying…" : "Try again"}
+          </Button>
+        </div>
+      )}
       <TimeClockDashboard
         data={data}
         isApproving={approveAsRecordedMutation.isPending}

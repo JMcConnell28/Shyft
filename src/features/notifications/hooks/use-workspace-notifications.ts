@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useLocation } from "@tanstack/react-router"
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 
 import { dashboardAnnouncementsQueryOptions } from "@/features/announcements/query-options"
 import { rotaQueryKeys } from "@/features/rota/query-keys"
@@ -14,8 +14,8 @@ type WorkspaceNotificationScope = {
 }
 
 function useWorkspaceNotifications(scope: WorkspaceNotificationScope) {
+  const queryClient = useQueryClient()
   const pathname = useLocation({ select: (location) => location.pathname })
-  const previousPathname = useRef(pathname)
   const announcements = useQuery(dashboardAnnouncementsQueryOptions(scope))
   const rotaUpdates = useQuery({
     queryKey: rotaQueryKeys.unreadUpdates(scope),
@@ -27,11 +27,13 @@ function useWorkspaceNotifications(scope: WorkspaceNotificationScope) {
   })
 
   useEffect(() => {
-    if (previousPathname.current !== pathname && scope.canUseSupport) {
-      void support.refetch()
-    }
-    previousPathname.current = pathname
-  }, [pathname, scope.canUseSupport, support.refetch])
+    if (!scope.canUseSupport) return
+    // Reuse fresh notifications on navigation instead of forcing a request.
+    // The query renders failures and still refreshes on focus and mutations.
+    void queryClient.prefetchQuery(
+      supportNotificationsQueryOptions(scope.organizationId)
+    )
+  }, [pathname, queryClient, scope.canUseSupport, scope.organizationId])
 
   return {
     hasError: announcements.isError || rotaUpdates.isError || support.isError,

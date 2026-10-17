@@ -53,6 +53,7 @@ type NewRotaDialogProps = {
   triggerIcon?: "plus" | "template"
   disabled?: boolean
   defaultSourceType?: NewRotaSource
+  initialWeekStart?: string
 }
 
 function NewRotaDialog({
@@ -63,6 +64,7 @@ function NewRotaDialog({
   triggerIcon = "plus",
   disabled = false,
   defaultSourceType = "blank",
+  initialWeekStart,
 }: NewRotaDialogProps) {
   const navigate = useNavigate()
   const [open, setOpen] = React.useState(false)
@@ -70,8 +72,8 @@ function NewRotaDialog({
   const createRotaDraftMutation = useCreateRotaDraftMutation()
   const fallbackLocationId = selectedLocation?.id ?? locations.at(0)?.id ?? ""
   const currentWeekStart = React.useMemo(
-    () => normalizeWeekStart(new Date()),
-    []
+    () => normalizeWeekStart(initialWeekStart ?? new Date()),
+    [initialWeekStart]
   )
 
   const form = useForm({

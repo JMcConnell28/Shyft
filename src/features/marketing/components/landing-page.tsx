@@ -1,11 +1,7 @@
 import { Link } from "@tanstack/react-router"
-import {
-  ArrowRightIcon,
-  CheckIcon,
-  ChevronRightIcon,
-} from "lucide-react"
+import { ArrowRightIcon, CheckIcon } from "lucide-react"
 
-import { adminBenefits, customerLogos, featureHighlights } from "@/features/marketing/content"
+import { adminBenefits, featureHighlights } from "@/features/marketing/content"
 import {
   marketingPrimaryHeroButtonClassName,
   marketingSecondaryButtonClassName,
@@ -13,6 +9,7 @@ import {
 import { MarketingFooter } from "@/features/marketing/components/marketing-footer"
 import { MarketingHeader } from "@/features/marketing/components/marketing-header"
 import { LandingRotaImage } from "@/features/marketing/components/landing-rota-image"
+import { LandingWorkflowSection } from "@/features/marketing/components/landing-workflow-section"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -37,7 +34,7 @@ function LandingPage({ isAuthenticated = false }: { isAuthenticated?: boolean })
       <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-8 px-4 pb-12 sm:px-6 lg:gap-10 lg:px-8">
         <FeatureSection />
         <ProductSection />
-        <ProofSection />
+        <LandingWorkflowSection />
         <FinalCtaSection />
       </main>
 
@@ -239,55 +236,6 @@ function ProductSection() {
   )
 }
 
-function ProofSection() {
-  return (
-    <section className="grid gap-8 px-2 py-4 lg:grid-cols-[0.85fr_1.15fr]">
-      <div className="max-w-[380px]">
-        <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[#2c69ff]">
-          Trusted by teams like yours
-        </p>
-        <h2 className="mt-5 text-5xl font-extrabold leading-tight tracking-tight text-[#18316a]">
-          Loved by managers
-          <br />
-          and teams
-        </h2>
-
-        <div className="mt-5 flex items-center gap-1 text-[#2c69ff]">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <ChevronRightIcon
-              key={index}
-              className="size-4 fill-current stroke-[3]"
-            />
-          ))}
-        </div>
-
-        <p className="mt-5 text-base leading-8 text-[#60739a]">
-          "RocketRota has completely transformed the way we schedule. It&apos;s
-          saved us hours every week and the team love how easy it is to use."
-        </p>
-
-        <div className="mt-7 flex items-center gap-4">
-          <div className="flex size-12 items-center justify-center rounded-full bg-[#dbe7ff] text-sm font-extrabold text-[#18316a]">
-            SW
-          </div>
-          <div>
-            <p className="text-sm font-extrabold text-[#18316a]">Sophie Williams</p>
-            <p className="text-sm text-[#667ba1]">Operations Manager, Apexive</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-x-8 gap-y-10 pt-6 text-[30px] font-extrabold tracking-tight text-[#a5b2cb] sm:grid-cols-3">
-        {customerLogos.map((logo) => (
-          <div key={logo} className="flex min-h-14 items-center">
-            {logo}
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 function FinalCtaSection() {
   return (
     <section className="relative overflow-hidden rounded-[30px] border border-[#dce7fb] bg-[#f6f9ff] px-6 py-8 shadow-[0_18px_50px_rgba(38,80,160,0.08)] sm:px-8">
@@ -299,7 +247,8 @@ function FinalCtaSection() {
             your productivity?
           </h2>
           <p className="mt-4 text-base leading-7 text-[#60739a]">
-            Join thousands of teams already scheduling smarter with RocketRota.
+            Try RocketRota with your own team and see how it fits your working
+            week.
           </p>
         </div>
 

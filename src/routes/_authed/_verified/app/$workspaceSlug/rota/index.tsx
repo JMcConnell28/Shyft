@@ -20,6 +20,8 @@ type RotaListSearch = ReturnType<typeof parseRotaListSearch>
 export const Route = createFileRoute(
   "/_authed/_verified/app/$workspaceSlug/rota/"
 )({
+  staleTime: 0,
+  preloadStaleTime: 0,
   validateSearch: parseRotaListSearch,
   loaderDeps: ({ search }) => ({ search }),
   loader: ({ context, deps }) => {
@@ -29,14 +31,15 @@ export const Route = createFileRoute(
       throw new Error("An active workspace is required for rota routes.")
     }
 
-    return context.queryClient.ensureQueryData(
-      rotaListQueryOptions({
+    return context.queryClient.ensureQueryData({
+      ...rotaListQueryOptions({
         organizationId: workspace.id,
         orgSlug: workspace.slug,
         userId: context.viewer.user.id,
         search: deps.search,
-      })
-    )
+      }),
+      revalidateIfStale: true,
+    })
   },
   component: RotaWorkspaceRoute,
 })

@@ -87,6 +87,7 @@ type ClockRules = {
 type OpenEntryRow = {
   clocked_in_at: string
   id: string
+  notes: string | null
   scheduled_end_at: string | null
   scheduled_start_at: string | null
   shift_segment: string
@@ -331,6 +332,7 @@ async function getManagerClockPageData(input: {
       .filter((entry) => entry.status === "requires_review")
       .map((entry) => ({
         id: entry.id,
+        notes: entry.notes,
         locationId: entry.location_id,
         employeeName: employeeNameById.get(entry.employee_id) ?? "Unknown",
         clockedInAt: entry.clocked_in_at,
@@ -643,7 +645,7 @@ async function listOpenEntries(input: {
   const result = await supabase
     .from("time_entries")
     .select(
-      "id, clocked_in_at, scheduled_start_at, scheduled_end_at, shift_segment, status, source"
+      "id, clocked_in_at, scheduled_start_at, scheduled_end_at, shift_segment, status, source, notes"
     )
     .eq("employee_id", input.employeeId)
     .eq("location_id", input.locationId)
@@ -731,7 +733,7 @@ async function listActivityEntries(
   const result = await supabase
     .from("time_entries")
     .select(
-      "id, employee_id, location_id, rota_published_shift_id, clocked_in_at, clocked_out_at, scheduled_end_at, source, status"
+      "id, employee_id, location_id, rota_published_shift_id, clocked_in_at, clocked_out_at, scheduled_end_at, source, status, notes"
     )
     .in("location_id", locationIds)
     .gte("clocked_in_at", selectedDate)

@@ -12,6 +12,8 @@ type TimeClockSearch = {
 export const Route = createFileRoute(
   "/_authed/_verified/app/$workspaceSlug/time-clock"
 )({
+  staleTime: 0,
+  preloadStaleTime: 0,
   validateSearch: (search: Record<string, unknown>): TimeClockSearch => ({
     date: typeof search.date === "string" ? search.date : undefined,
   }),
@@ -27,13 +29,14 @@ export const Route = createFileRoute(
       return { status: "forbidden" as const }
     }
 
-    const data = await context.queryClient.ensureQueryData(
-      managerClockQueryOptions({
+    const data = await context.queryClient.ensureQueryData({
+      ...managerClockQueryOptions({
         date: deps.date,
         organizationId: activeWorkspace.id,
         userId: context.viewer.user.id,
-      })
-    )
+      }),
+      revalidateIfStale: true,
+    })
 
     return { data, status: "allowed" as const }
   },

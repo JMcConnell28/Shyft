@@ -1,4 +1,4 @@
-import { listAccessibleLocations } from "@/features/rota/server/access"
+import { listPermittedRotaLocations } from "@/features/rota/server/access"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
 import { assertCurrentUser } from "@/features/time-clock/server/shared"
 import { getOrgCapabilitiesForRole } from "@/lib/auth/get-org-capabilities"
@@ -8,7 +8,7 @@ import { getDatabase } from "@/lib/db"
 
 type TimesheetAccessScope = {
   canManage: boolean
-  locationIds: string[]
+  locationIds: Array<string>
   locations: Array<{
     id: string
     name: string
@@ -50,10 +50,10 @@ async function resolveTimesheetAccess(input: {
 
   const role = await getOrganizationRole(input.organizationId, session.user.id)
   const capabilities = getOrgCapabilitiesForRole(role)
-  const locations = await listAccessibleLocations(
+  const locations = await listPermittedRotaLocations(
     input.organizationId,
     session.user.id,
-    role,
+    role
   )
 
   return {
@@ -77,9 +77,9 @@ async function getLocation(locationId: string) {
      from public.locations
      where id = $1::uuid
      limit 1`,
-    [locationId],
+    [locationId]
   )
-  const location = result.rows[0]
+  const location = result.rows.at(0)
 
   if (!location) {
     throw new Error("Choose a valid location.")
@@ -90,7 +90,7 @@ async function getLocation(locationId: string) {
 
 function getEmptyScope(
   userId: string,
-  organizationId: string | null,
+  organizationId: string | null
 ): TimesheetAccessScope {
   return {
     canManage: false,

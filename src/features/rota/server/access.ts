@@ -1,7 +1,7 @@
 import type { AccessibleRotaLocation } from "@/features/rota/types"
-import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
+import type { OrganizationCapabilities } from "@/lib/auth/workspace-capabilities"
 // eslint-disable-next-line no-duplicate-imports
-import { getOrgCapabilitiesForRole } from "@/lib/auth/get-org-capabilities"
+import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
 import { getLocationRole } from "@/lib/auth/has-location-permission"
 import { getDatabase } from "@/lib/db"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
@@ -13,12 +13,12 @@ import {
 } from "@/features/rota/server/related-data"
 import { getMembershipRole } from "@/features/rota/server/membership"
 
-async function listAccessibleLocations(
+async function listPermittedRotaLocations(
   organizationId: string | null,
   userId: string,
   role?: Awaited<ReturnType<typeof getMembershipRole>>,
   locationId?: string
-): Promise<Array<AccessibleRotaLocation>> {
+): Promise<Array<Omit<AccessibleRotaLocation, "hasUnreadPublished">>> {
   const supabase = createSupabaseServerClient()
   const resolvedRole =
     role ??
@@ -34,20 +34,35 @@ async function listAccessibleLocations(
   }
 
   if (locationId) {
-    return listLocationWorkspaceAccess({
-      capabilities,
-      locationId,
-      organizationId,
-      supabase,
-      userId,
-    })
+    return capabilities.canManageRota || capabilities.canManageTimeClock
+      ? listLocationById(supabase, locationId, organizationId)
+      : listEmployeeAccessibleLocationById({
+          locationId,
+          organizationId,
+          supabase,
+          userId,
+        })
   }
 
   const canViewManagedLocations =
     capabilities.canManageRota || capabilities.canManageTimeClock
-  const baseLocations = canViewManagedLocations
-    ? await listManagerAccessibleLocations(supabase, organizationId, userId)
-    : await listEmployeeAccessibleLocations(supabase, organizationId, userId)
+  return canViewManagedLocations
+    ? listManagerAccessibleLocations(supabase, organizationId, userId)
+    : listEmployeeAccessibleLocations(supabase, organizationId, userId)
+}
+
+async function listAccessibleLocations(
+  organizationId: string | null,
+  userId: string,
+  role?: Awaited<ReturnType<typeof getMembershipRole>>,
+  locationId?: string
+): Promise<Array<AccessibleRotaLocation>> {
+  const baseLocations = await listPermittedRotaLocations(
+    organizationId,
+    userId,
+    role,
+    locationId
+  )
 
   if (baseLocations.length === 0) {
     return []
@@ -123,6 +138,7 @@ export {
   ensureLocationAccessOrThrow,
   getHasUnreadRotaUpdates,
   listAccessibleLocations,
+  listPermittedRotaLocations,
 }
 
 async function listEmployeeAccessibleLocations(
@@ -212,54 +228,6 @@ async function listManagerAccessibleLocations(
     id: location.id,
     name: location.name,
     slug: location.slug,
-  }))
-}
-
-async function listLocationWorkspaceAccess({
-  capabilities,
-  locationId,
-  organizationId,
-  supabase,
-  userId,
-}: {
-  capabilities: OrganizationCapabilities
-  locationId: string
-  organizationId: string | null
-  supabase: ReturnType<typeof createSupabaseServerClient>
-  userId: string
-}): Promise<Array<AccessibleRotaLocation>> {
-  const canViewManagedLocations =
-    capabilities.canManageRota || capabilities.canManageTimeClock
-  const baseLocations = canViewManagedLocations
-    ? await listLocationById(supabase, locationId, organizationId)
-    : await listEmployeeAccessibleLocationById({
-        locationId,
-        organizationId,
-        supabase,
-        userId,
-      })
-
-  if (baseLocations.length === 0) {
-    return []
-  }
-
-  const publishedRotas = await listPublishedRotasForLocations(organizationId, [
-    locationId,
-  ])
-  const seenVersions = await getSeenPublishedVersionsMap(
-    publishedRotas.map((rota) => rota.id),
-    userId
-  )
-  const hasUnreadPublished = publishedRotas.some((rota) => {
-    return (
-      rota.published_version > (seenVersions.get(rota.id) ?? 0) &&
-      rota.published_by_user_id !== userId
-    )
-  })
-
-  return baseLocations.map((location) => ({
-    ...location,
-    hasUnreadPublished,
   }))
 }
 

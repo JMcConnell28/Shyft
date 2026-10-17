@@ -2,16 +2,32 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { ShiftOverviewCards } from "@/features/dashboard/components/shift-overview-cards"
 import { DashboardWelcomeModal } from "@/features/dashboard/components/dashboard-welcome-modal"
-import { dashboardAnnouncementsQueryOptions } from "@/features/announcements/query-options"
+import { ManagerDashboard } from "@/features/dashboard/manager/components/manager-dashboard"
+import { managerDashboardSearchSchema } from "@/features/dashboard/manager/schemas"
+import { loadDashboardAccess } from "@/features/dashboard/manager/load-dashboard-access"
+import { dashboardWelcomeQueryOptions } from "@/features/dashboard/query-options"
 import {
-  getDashboardShiftOverview,
-  getDashboardWelcome,
-} from "@/features/dashboard/server-fns"
+  DashboardRouteError,
+  ManagerDashboardLoading,
+} from "@/features/dashboard/manager/components/dashboard-state"
+import { dashboardAnnouncementsQueryOptions } from "@/features/announcements/query-options"
+import { getDashboardShiftOverview } from "@/features/dashboard/server-fns"
 
 export const Route = createFileRoute(
   "/_authed/_verified/app/$workspaceSlug/dashboard"
 )({
-  loader: async ({ context }) => {
+  pendingMs: 150,
+  pendingMinMs: 0,
+  pendingComponent: ManagerDashboardLoading,
+  errorComponent: DashboardRouteError,
+  validateSearch: (search) => managerDashboardSearchSchema.parse(search),
+  staleTime: 0,
+  preloadStaleTime: 0,
+  loaderDeps: ({ search }) => ({
+    location: search.location,
+    date: search.date,
+  }),
+  loader: async ({ context, deps }) => {
     const activeWorkspace = context.viewer.activeWorkspace
 
     if (!activeWorkspace) {
@@ -22,6 +38,28 @@ export const Route = createFileRoute(
       organizationId: activeWorkspace.id,
       userId: context.viewer.user.id,
     }
+    const welcomePromise = context.queryClient.ensureQueryData(
+      dashboardWelcomeQueryOptions(
+        { id: activeWorkspace.id, type: activeWorkspace.type },
+        context.viewer.user.id
+      )
+    )
+
+    if (
+      context.capabilities.canManageRota ||
+      context.capabilities.canManageTimeClock
+    ) {
+      const [, welcome] = await Promise.all([
+        loadDashboardAccess(
+          context.queryClient,
+          activeWorkspace.id,
+          context.viewer.user.id,
+          deps
+        ),
+        welcomePromise,
+      ])
+      return { mode: "manager" as const, welcome }
+    }
 
     const [announcements, overview, welcome] = await Promise.all([
       context.queryClient.ensureQueryData(
@@ -30,15 +68,10 @@ export const Route = createFileRoute(
       getDashboardShiftOverview({
         data: announcementInput,
       }),
-      getDashboardWelcome({
-        data: {
-          id: activeWorkspace.id,
-          type: activeWorkspace.type,
-        },
-      }),
+      welcomePromise,
     ])
 
-    return { announcements, overview, welcome }
+    return { mode: "employee" as const, announcements, overview, welcome }
   },
   head: () => ({
     meta: [
@@ -54,7 +87,9 @@ export const Route = createFileRoute(
 
 function DashboardWorkspaceRoute() {
   const context = Route.useRouteContext()
-  const { announcements, overview, welcome } = Route.useLoaderData()
+  const result = Route.useLoaderData()
+  const search = Route.useSearch()
+  const navigate = Route.useNavigate()
   const activeWorkspace = context.viewer.activeWorkspace
 
   if (!activeWorkspace) {
@@ -62,24 +97,39 @@ function DashboardWorkspaceRoute() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
+    <div className="flex flex-1 flex-col">
       <DashboardWelcomeModal
         capabilities={context.capabilities}
-        initiallyOpen={welcome.shouldShow}
+        initiallyOpen={result.welcome.shouldShow}
         userName={context.viewer.user.name}
+        userId={context.viewer.user.id}
         workspace={activeWorkspace}
       />
 
-      <ShiftOverviewCards
-        organizationName={activeWorkspace.name}
-        announcements={announcements}
-        mobileContext={{
-          userName: context.viewer.user.name,
-          workspaceSlug: activeWorkspace.slug,
-          workspaceType: activeWorkspace.type,
-        }}
-        overview={overview}
-      />
+      {result.mode === "manager" ? (
+        <ManagerDashboard
+          organizationId={activeWorkspace.id}
+          userId={context.viewer.user.id}
+          workspaceSlug={activeWorkspace.slug}
+          search={search}
+          onSearch={(value) => {
+            void navigate({ search: value })
+          }}
+        />
+      ) : (
+        <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
+          <ShiftOverviewCards
+            organizationName={activeWorkspace.name}
+            announcements={result.announcements}
+            mobileContext={{
+              userName: context.viewer.user.name,
+              workspaceSlug: activeWorkspace.slug,
+              workspaceType: activeWorkspace.type,
+            }}
+            overview={result.overview}
+          />
+        </div>
+      )}
     </div>
   )
 }

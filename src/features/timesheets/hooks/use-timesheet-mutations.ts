@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
 import { timesheetQueryKeys } from "@/features/timesheets/query-keys"
+import { managerDashboardKeys } from "@/features/dashboard/manager/query-options"
 import { updateTimesheetEntry } from "@/features/timesheets/server-fns"
 import type {
   TimesheetScopeInput,
@@ -30,9 +31,10 @@ function useTimesheetMutations(input: TimesheetScopeInput) {
           },
         }),
       onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: timesheetQueryKeys.all,
-        })
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: timesheetQueryKeys.all }),
+          queryClient.invalidateQueries({ queryKey: managerDashboardKeys.all }),
+        ])
         showSuccessToast("Timesheet entry updated.")
       },
       onError: (error) => {

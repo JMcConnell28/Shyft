@@ -3,6 +3,7 @@ import { AlertTriangleIcon, CheckIcon, ShieldAlertIcon } from "lucide-react"
 import type { ManagerClockPageData } from "@/features/time-clock/types"
 import { Button } from "@/components/ui/button"
 import { EmployeeIdentity } from "@/features/time-clock/components/employee-identity"
+import { TimeEntryNotes } from "@/features/time-clock/components/time-entry-notes"
 import {
   TimeClockEmptyState,
   TimeClockPanel,
@@ -36,29 +37,36 @@ function TimeClockExceptionsSection({
       ) : (
         <div className="divide-y divide-[#edf0f6]">
           {data.reviewEntries.slice(0, 4).map((entry) => (
-            <div className="flex items-center gap-3 px-4 py-3" key={entry.id}>
-              <EmployeeIdentity
-                name={entry.employeeName}
-                secondary={`In ${formatClockDateTime(entry.clockedInAt)}`}
-                size="compact"
-              />
-              <span className="ml-auto hidden rounded-md bg-orange-50 px-2 py-1 text-[10px] font-semibold text-orange-700 sm:inline-flex">
-                Review
-              </span>
-              <Button
-                aria-label={`Approve ${entry.employeeName}'s time entry`}
-                className="h-8 rounded-lg border-[#dfe4ef] bg-white px-2.5 text-[#236cff] shadow-none hover:bg-blue-50"
-                disabled={
-                  isApproving ||
-                  !data.writableLocationIds.includes(entry.locationId)
-                }
-                onClick={() => onApprove(entry.id)}
-                size="sm"
-                variant="outline"
-              >
-                <CheckIcon className="size-3.5" />
-                Approve
-              </Button>
+            <div className="px-4 py-3" key={entry.id}>
+              <div className="flex items-center gap-3">
+                <EmployeeIdentity
+                  name={entry.employeeName}
+                  secondary={`In ${formatClockDateTime(entry.clockedInAt)}${
+                    entry.clockedOutAt
+                      ? ` · Out ${formatClockDateTime(entry.clockedOutAt)}`
+                      : ""
+                  }`}
+                  size="compact"
+                />
+                <span className="ml-auto hidden rounded-md bg-orange-50 px-2 py-1 text-[10px] font-semibold text-orange-700 sm:inline-flex">
+                  Review
+                </span>
+                <Button
+                  aria-label={`Approve ${entry.employeeName}'s time entry`}
+                  className="h-8 rounded-lg border-[#dfe4ef] bg-white px-2.5 text-[#236cff] shadow-none hover:bg-blue-50"
+                  disabled={
+                    isApproving ||
+                    !data.writableLocationIds.includes(entry.locationId)
+                  }
+                  onClick={() => onApprove(entry.id)}
+                  size="sm"
+                  variant="outline"
+                >
+                  <CheckIcon className="size-3.5" />
+                  Approve
+                </Button>
+              </div>
+              <TimeEntryNotes notes={entry.notes} requiresReview />
             </div>
           ))}
           {data.failedAttempts.slice(0, 4).map((attempt) => (

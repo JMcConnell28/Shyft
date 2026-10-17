@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import type { TimesheetEntry, TimesheetScopeInput } from "@/features/timesheets/types"
 import { useTimesheetMutations } from "@/features/timesheets/hooks/use-timesheet-mutations"
+import { TimeEntryNotes } from "@/features/time-clock/components/time-entry-notes"
 
 function EditTimesheetEntryDialog({
   entry,
@@ -51,13 +52,20 @@ function EditTimesheetEntryDialog({
 
   return (
     <Dialog open={Boolean(entry)} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit time entry</DialogTitle>
           <DialogDescription>
             Changes are audited and saved as a manager adjustment.
           </DialogDescription>
         </DialogHeader>
+
+        {entry ? (
+          <TimeEntryNotes
+            notes={entry.notes}
+            requiresReview={entry.status === "requires_review"}
+          />
+        ) : null}
 
         <div className="grid gap-3 sm:grid-cols-2">
           <TimeField

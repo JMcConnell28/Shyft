@@ -5,6 +5,7 @@ import type {
   TimesheetEntry,
 } from "@/features/timesheets/types"
 import { TimesheetEntryBadge } from "@/features/timesheets/components/timesheet-status"
+import { TimeEntryNotes } from "@/features/time-clock/components/time-entry-notes"
 import { useViewerTimeZone } from "@/features/timesheets/hooks/use-viewer-time-zone"
 import { getTimesheetEntryRows } from "@/features/timesheets/utils/timesheet-entry-rows"
 import {
@@ -51,7 +52,7 @@ function EmployeeWeekDetails({
               {day.dateLabel.split(" ")[0]}
             </span>
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-2">
               <p className="truncate text-xs font-semibold">
                 {getEntryScheduleLabel(entry, viewerTimeZone ?? undefined)}
@@ -62,6 +63,12 @@ function EmployeeWeekDetails({
               {getEntryClockLabel(entry, viewerTimeZone ?? undefined)} ·{" "}
               {entry?.locationName ?? "No hours recorded"}
             </p>
+            {entry ? (
+              <TimeEntryNotes
+                notes={entry.notes}
+                requiresReview={entry.status === "requires_review"}
+              />
+            ) : null}
           </div>
           <div className="ml-auto shrink-0 text-right">
             <p className="text-xs font-semibold">

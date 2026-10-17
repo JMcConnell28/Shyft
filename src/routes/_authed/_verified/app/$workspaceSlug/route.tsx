@@ -1,4 +1,5 @@
-import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router"
+import { Outlet, createFileRoute } from "@tanstack/react-router"
+import { Profiler } from "react"
 
 import type { WorkspaceSummary } from "@/features/onboarding/types"
 import { DashboardShell } from "@/components/app/dashboard-shell"
@@ -6,6 +7,8 @@ import { getWorkspaceShellConfig } from "@/features/navigation/utils/workspace-s
 import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
 import { loadWorkspaceViewer } from "@/features/navigation/load-navigation-context"
 import { useWorkspaceNotifications } from "@/features/notifications/hooks/use-workspace-notifications"
+import { useRenderedPathname } from "@/features/navigation/hooks/use-rendered-pathname"
+import { recordWorkspaceRender } from "@/features/navigation/utils/render-timing"
 
 export const Route = createFileRoute("/_authed/_verified/app/$workspaceSlug")({
   beforeLoad: async ({ context, params, preload, location }) => {
@@ -23,9 +26,7 @@ export const Route = createFileRoute("/_authed/_verified/app/$workspaceSlug")({
 
 function WorkspaceRoute() {
   const { capabilities, viewer } = Route.useRouteContext()
-  const pathname = useLocation({
-    select: (location) => location.pathname,
-  })
+  const pathname = useRenderedPathname()
   const activeWorkspace = viewer.activeWorkspace
 
   if (!activeWorkspace) {
@@ -94,7 +95,13 @@ function WorkspaceShellRoute({
       capabilities={capabilities}
       shiftSwapsEnabled={viewer.shiftSwapsEnabled}
     >
-      <Outlet />
+      {import.meta.env.DEV ? (
+        <Profiler id="workspace" onRender={recordWorkspaceRender}>
+          <Outlet />
+        </Profiler>
+      ) : (
+        <Outlet />
+      )}
     </DashboardShell>
   )
 }

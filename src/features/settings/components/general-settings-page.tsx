@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Button } from "@/components/ui/button"
 
 import { WorkplaceContactSection } from "@/features/settings/components/workplace-contact-section"
 import { WorkplaceLocationsSection } from "@/features/settings/components/workplace-locations-section"
@@ -37,7 +38,11 @@ function GeneralSettingsPage({
 
   if (settingsQuery.isError) {
     return (
-      <GeneralSettingsState message="We could not load workplace settings right now." />
+      <GeneralSettingsState
+        message="We could not load workplace settings right now."
+        onRetry={() => void settingsQuery.refetch()}
+        pending={settingsQuery.isFetching}
+      />
     )
   }
 
@@ -66,10 +71,31 @@ function GeneralSettingsPage({
   )
 }
 
-function GeneralSettingsState({ message }: { message: string }) {
+function GeneralSettingsState({
+  message,
+  onRetry,
+  pending = false,
+}: {
+  message: string
+  onRetry?: () => void
+  pending?: boolean
+}) {
   return (
-    <section className="rounded-xl border border-[#dce3ef] bg-white px-4 py-8 text-center text-xs font-semibold text-[#7180a2]">
+    <section
+      role={onRetry ? "alert" : "status"}
+      className="rounded-xl border border-[#dce3ef] bg-white px-4 py-8 text-center text-xs font-semibold text-[#7180a2]"
+    >
       {message}
+      {onRetry && (
+        <Button
+          className="mx-auto mt-4"
+          variant="outline"
+          disabled={pending}
+          onClick={onRetry}
+        >
+          {pending ? "Retrying…" : "Try again"}
+        </Button>
+      )}
     </section>
   )
 }

@@ -21,7 +21,7 @@ type MarketingFeaturePageContent = {
   navTitle: string
   description: string
   eyebrow: string
-  heroPoints: string[]
+  heroPoints: Array<string>
   workflowTitle: string
   workflowDescription: string
   workflowItems: Array<{
@@ -29,7 +29,7 @@ type MarketingFeaturePageContent = {
     description: string
   }>
   proofTitle: string
-  proofItems: string[]
+  proofItems: Array<string>
   icon: typeof CalendarDaysIcon
 }
 
@@ -250,24 +250,14 @@ const featureHighlights = [
 ] as const
 
 const adminBenefits = [
-  "Publish rotas with one click",
-  "Reduce no-shows and last-minute changes",
-  "Stay compliant with clear audit trails",
-  "Access anywhere, on any device",
-] as const
-
-const customerLogos = [
-  "cloudbase",
-  "apexive",
-  "Summit",
-  "PULSE",
-  "velocity",
-  "NORTHWAY",
+  "Publish rotas when they're ready",
+  "Reuse templates for repeat weeks",
+  "Review recorded hours before payroll",
+  "Organise staff across locations",
 ] as const
 
 export {
   adminBenefits,
-  customerLogos,
   featureHighlights,
   featurePageTrustItems,
   marketingFeaturePages,
