@@ -1,14 +1,10 @@
-import { ChevronLeftIcon, ChevronRightIcon, RefreshCwIcon } from "lucide-react"
+import { RefreshCwIcon } from "lucide-react"
 import { Link } from "@tanstack/react-router"
-import { dashboardSelectClass } from "../constants"
-import { moveDashboardDate } from "../utils/date"
 import { DashboardCreateRotaButton } from "./create-rota-button"
 import { DashboardStaffingStatus } from "./staffing-status"
+import { ManagerDashboardFilters } from "./dashboard-filters"
 import type { ManagerDashboardAccess, ManagerDayData } from "../types"
-import {
-  isoDateSchema,
-  parseRotaListSearch,
-} from "@/features/rota/schemas/rota-schemas"
+import { parseRotaListSearch } from "@/features/rota/schemas/rota-schemas"
 import { Button } from "@/components/ui/button"
 
 function ManagerDashboardHeader({
@@ -103,59 +99,14 @@ function ManagerDashboardHeader({
           </Button>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="min-w-40 flex-1 sm:max-w-64">
-          <span className="sr-only">Location</span>
-          <select
-            className={`${dashboardSelectClass} w-full`}
-            value={locationId}
-            onChange={(event) => onLocation(event.target.value)}
-          >
-            {access.locations.map((location) => (
-              <option key={location.id} value={location.id}>
-                {location.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="flex items-center gap-1">
-          <Button
-            aria-label="Previous day"
-            variant="outline"
-            className="size-10 rounded-lg"
-            onClick={() => onDate(moveDashboardDate(data.date, -1))}
-          >
-            <ChevronLeftIcon />
-          </Button>
-          <label>
-            <span className="sr-only">Staffing date</span>
-            <input
-              type="date"
-              className={`${dashboardSelectClass} w-36`}
-              value={data.date}
-              onChange={(event) => {
-                const parsed = isoDateSchema.safeParse(event.target.value)
-                if (parsed.success) onDate(parsed.data)
-              }}
-            />
-          </label>
-          <Button
-            aria-label="Next day"
-            variant="outline"
-            className="size-10 rounded-lg"
-            onClick={() => onDate(moveDashboardDate(data.date, 1))}
-          >
-            <ChevronRightIcon />
-          </Button>
-        </div>
-        <Button
-          variant={data.isToday ? "secondary" : "outline"}
-          className="h-10 rounded-lg"
-          onClick={() => onDate(undefined)}
-        >
-          Today
-        </Button>
-      </div>
+      <ManagerDashboardFilters
+        locations={access.locations}
+        locationId={locationId}
+        date={data.date}
+        isToday={data.isToday}
+        onLocation={onLocation}
+        onDate={onDate}
+      />
     </header>
   )
 }
