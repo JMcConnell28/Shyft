@@ -1,6 +1,6 @@
 import type { HelpPage } from "@/features/help-center/types"
 
-const rotaTipPages: readonly HelpPage[] = [
+const rotaTipPages: ReadonlyArray<HelpPage> = [
   {
     slug: "tips/weekly-rota-checklist",
     title: "Weekly rota checklist",
@@ -9,7 +9,10 @@ const rotaTipPages: readonly HelpPage[] = [
     categoryId: "rota-tips",
     audience: "Rota tips",
     readingTime: "3 min",
-    popular: true,
+    relatedSlugs: [
+      "managers/publish-and-update-rota",
+      "tips/build-fairer-rotas",
+    ],
     sections: [
       {
         type: "bullets",
@@ -38,6 +41,7 @@ const rotaTipPages: readonly HelpPage[] = [
     categoryId: "rota-tips",
     audience: "Rota tips",
     readingTime: "4 min",
+    relatedSlugs: ["tips/weekly-rota-checklist", "managers/create-first-rota"],
     sections: [
       {
         type: "paragraphs",

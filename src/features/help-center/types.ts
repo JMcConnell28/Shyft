@@ -1,21 +1,28 @@
-type HelpCategoryId = "managers" | "employees" | "rota-tips"
+type HelpCategoryId =
+  | "managers"
+  | "employees"
+  | "account"
+  | "troubleshooting"
+  | "rota-tips"
+
+type HelpCategoryFilter = HelpCategoryId | "all"
 
 type HelpSection =
   | {
       type: "paragraphs"
       title: string
-      body: readonly string[]
+      body: ReadonlyArray<string>
     }
   | {
       type: "steps"
       title: string
       intro?: string
-      items: readonly string[]
+      items: ReadonlyArray<string>
     }
   | {
       type: "bullets"
       title: string
-      items: readonly string[]
+      items: ReadonlyArray<string>
     }
   | {
       type: "callout"
@@ -30,15 +37,22 @@ type HelpPage = {
   categoryId: HelpCategoryId
   audience: string
   readingTime: string
-  popular?: boolean
-  sections: readonly HelpSection[]
+  keywords?: ReadonlyArray<string>
+  relatedSlugs?: ReadonlyArray<string>
+  sections: ReadonlyArray<HelpSection>
 }
 
 type HelpCategory = {
   id: HelpCategoryId
   title: string
   description: string
-  pages: readonly HelpPage[]
+  pages: ReadonlyArray<HelpPage>
 }
 
-export type { HelpCategory, HelpCategoryId, HelpPage, HelpSection }
+export type {
+  HelpCategory,
+  HelpCategoryId,
+  HelpCategoryFilter,
+  HelpPage,
+  HelpSection,
+}

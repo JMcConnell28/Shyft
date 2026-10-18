@@ -92,7 +92,7 @@ function ForgotPasswordRoute() {
                 id="forgot-email"
                 value={email}
                 type="email"
-                placeholder="you@company.com"
+                placeholder="you@example.com"
                 autoComplete="email"
                 required
                 onChange={(event) => setEmail(event.target.value)}

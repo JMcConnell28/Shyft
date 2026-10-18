@@ -9,7 +9,7 @@ export const Route = createFileRoute("/help/")({
       {
         name: "description",
         content:
-          "Find setup guidance and practical answers for using RocketRota.",
+          "Guides for employees and managers: rotas, clocking, timesheets, shift swaps, accounts and troubleshooting.",
       },
     ],
   }),

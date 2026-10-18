@@ -1,18 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 import { HelpCenterPage } from "@/features/help-center/components/help-center-page"
+import { getHelpPage } from "@/features/help-center/source"
 
 export const Route = createFileRoute("/help/$")({
-  head: () => ({
-    meta: [
-      { title: "RocketRota Help Centre" },
-      {
-        name: "description",
-        content:
-          "Find setup guidance and practical answers for using RocketRota.",
-      },
-    ],
-  }),
+  head: ({ params }) => {
+    const page = getHelpPage(params._splat?.split("/").filter(Boolean))
+    return {
+      meta: [
+        {
+          title: page
+            ? `${page.title} | RocketRota Help`
+            : "RocketRota Help Centre",
+        },
+        {
+          name: "description",
+          content:
+            page?.description ?? "Practical answers for using RocketRota.",
+        },
+      ],
+    }
+  },
   component: HelpSplatRoute,
 })
 

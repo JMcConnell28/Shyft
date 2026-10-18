@@ -1,8 +1,7 @@
-import type { ReactNode } from "react"
-import { ArrowLeftIcon } from "lucide-react"
+import { ArrowLeftIcon, ChevronDownIcon } from "lucide-react"
 
-import { helpCategories } from "@/features/help-center/source"
-import { cn } from "@/lib/utils"
+import { HelpNavigation } from "./help-navigation"
+import type { ReactNode } from "react"
 
 type HelpCenterShellProps = {
   children: ReactNode
@@ -12,70 +11,55 @@ type HelpCenterShellProps = {
 function HelpCenterShell({ children, currentSlug = "" }: HelpCenterShellProps) {
   return (
     <div className="min-h-svh bg-[#f7faff] text-[#12285c]">
-      <div className="mx-auto grid min-h-svh w-full max-w-[1440px] lg:grid-cols-[320px_1fr]">
-        <aside className="border-b border-[#dfe8f8] bg-white/95 px-5 py-5 lg:sticky lg:top-0 lg:h-svh lg:border-b-0 lg:border-r lg:px-6">
-          <div className="flex items-center justify-between gap-4 lg:block">
-            <a href="/help" className="flex items-center gap-3">
+      <a
+        href="#help-content"
+        className="sr-only rounded bg-white p-3 text-[#2457d6] focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50"
+      >
+        Skip to content
+      </a>
+      <div className="mx-auto grid min-h-svh w-full max-w-[1440px] lg:grid-cols-[290px_minmax(0,1fr)]">
+        <aside className="border-b border-[#dfe8f8] bg-white px-5 py-5 lg:sticky lg:top-0 lg:flex lg:h-svh lg:flex-col lg:border-r lg:border-b-0 lg:px-5">
+          <div className="flex items-center justify-between gap-3 lg:block">
+            <a href="/help" className="flex min-w-0 items-center gap-2.5">
               <img
                 src="/brand/rocketrota-logo.png"
-                alt="RocketRota"
-                className="h-8 w-auto object-contain"
+                alt=""
+                className="h-7 w-auto object-contain"
               />
-              <span className="font-extrabold tracking-tight text-[#16346e]">
+              <span className="text-sm font-extrabold tracking-tight text-[#16346e]">
                 RocketRota Help
               </span>
             </a>
-
             <a
               href="/"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[#65799f] transition-colors hover:text-[#16346e] lg:mt-9"
+              className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[#65799f] hover:text-[#16346e] lg:mt-6"
             >
-              <ArrowLeftIcon className="size-4" />
+              <ArrowLeftIcon aria-hidden="true" className="size-4" />
               RocketRota
             </a>
           </div>
-
-          <nav className="mt-7 hidden space-y-7 lg:block" aria-label="Help Centre">
-            <a
-              href="/help"
-              className={cn(
-                "block rounded-lg px-3 py-2 text-sm font-bold transition-colors",
-                currentSlug === ""
-                  ? "bg-[#edf4ff] text-[#2457d6]"
-                  : "text-[#506994] hover:bg-[#f4f8ff] hover:text-[#16346e]",
-              )}
-            >
-              Help Centre home
-            </a>
-
-            {helpCategories.map((category) => (
-              <div key={category.id}>
-                <p className="px-3 text-xs font-extrabold uppercase tracking-[0.16em] text-[#91a1be]">
-                  {category.title}
-                </p>
-                <div className="mt-2 space-y-1">
-                  {category.pages.map((page) => (
-                    <a
-                      key={page.slug}
-                      href={`/help/${page.slug}`}
-                      className={cn(
-                        "block rounded-lg px-3 py-2 text-sm font-medium leading-5 transition-colors",
-                        currentSlug === page.slug
-                          ? "bg-[#edf4ff] text-[#2457d6]"
-                          : "text-[#506994] hover:bg-[#f4f8ff] hover:text-[#16346e]",
-                      )}
-                    >
-                      {page.title}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </nav>
+          <div className="mt-7 hidden min-h-0 flex-1 overflow-y-auto pb-4 lg:block">
+            <HelpNavigation currentSlug={currentSlug} />
+          </div>
+          <details key={currentSlug} className="group mt-4 lg:hidden">
+            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between rounded-lg border border-[#dfe8f8] px-3 text-sm font-semibold text-[#40577f] [&::-webkit-details-marker]:hidden">
+              Browse help guides
+              <ChevronDownIcon
+                aria-hidden="true"
+                className="size-4 group-open:rotate-180"
+              />
+            </summary>
+            <div className="mt-4 max-h-[60svh] overflow-y-auto pb-3">
+              <HelpNavigation currentSlug={currentSlug} />
+            </div>
+          </details>
         </aside>
-
-        <main className="px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
-          <div className="mx-auto w-full max-w-[980px]">{children}</div>
+        <main
+          id="help-content"
+          tabIndex={-1}
+          className="min-w-0 px-5 py-8 outline-none sm:px-8 lg:px-12 lg:py-12"
+        >
+          <div className="mx-auto w-full max-w-[900px]">{children}</div>
         </main>
       </div>
     </div>

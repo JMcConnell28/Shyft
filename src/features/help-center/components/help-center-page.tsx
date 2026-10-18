@@ -6,7 +6,7 @@ import { HelpCenterShell } from "@/features/help-center/components/help-center-s
 import { getHelpPage } from "@/features/help-center/source"
 
 type HelpCenterPageProps = {
-  slug?: string[]
+  slug?: Array<string>
 }
 
 function HelpCenterPage({ slug }: HelpCenterPageProps) {
