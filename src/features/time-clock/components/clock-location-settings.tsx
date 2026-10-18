@@ -46,7 +46,11 @@ function ClockLocationSettings({
         values={values}
       />
       <ClockingRulesSettingsSection onUpdate={update} values={values} />
-      <MissedClockOutSettingsSection onUpdate={update} values={values} />
+      <MissedClockOutSettingsSection
+        onUpdate={update}
+        values={values}
+        disabled={isSaving}
+      />
       <ClockStationHealthSection
         location={location}
         workspaceSlug={workspaceSlug}

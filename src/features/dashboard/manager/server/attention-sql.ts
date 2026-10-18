@@ -1,4 +1,16 @@
 import { dashboardScheduleSql, matchingArrivalSql } from "./schedule-sql"
+import {
+  CLOCK_OUT_REMINDER_MINUTES,
+  UNSCHEDULED_CLOCK_OUT_LIMIT_MINUTES,
+  UNSCHEDULED_CLOCK_OUT_REMINDER_MINUTES,
+} from "@/features/time-clock/constants/automatic-clock-out"
+
+const missedClockOutSql = `
+  $4::timestamptz >= coalesce(
+    te.scheduled_end_at + make_interval(mins => coalesce(c.forgotten_clock_out_alert_minutes, ${CLOCK_OUT_REMINDER_MINUTES})),
+    te.clocked_in_at + make_interval(mins => coalesce(c.unscheduled_clock_out_after_minutes, ${UNSCHEDULED_CLOCK_OUT_LIMIT_MINUTES})
+      - coalesce(c.unscheduled_clock_out_reminder_minutes, ${UNSCHEDULED_CLOCK_OUT_REMINDER_MINUTES}))
+  )`
 
 const unresolvedArrivalSql = `
   w.clock_enabled and w.starts_at >= w.tracking_started_at
@@ -15,8 +27,7 @@ const dashboardAttentionSql = `with ${dashboardScheduleSql},
   clock_issues as (
     select te.id::text as id,
       case when te.clocked_out_at is null and (
-        $4::timestamptz > te.scheduled_end_at + make_interval(mins => coalesce(c.forgotten_clock_out_alert_minutes, 120))
-        or $4::timestamptz > te.clocked_in_at + make_interval(mins => coalesce(c.hard_review_after_minutes, 720))
+        ${missedClockOutSql}
       ) then 'missing_clock_out' else 'review' end as kind,
       te.employee_id, e.full_name as employee_name, l.id as location_id, l.name as location_name,
       coalesce(c.timezone, 'Europe/London') as time_zone, te.clocked_in_at as occurred_at,
@@ -29,8 +40,7 @@ const dashboardAttentionSql = `with ${dashboardScheduleSql},
     left join public.location_clock_settings c on c.location_id = l.id
     where te.organization_id = $1 and te.location_id = any($2::uuid[])
       and (te.status = 'requires_review' or (te.clocked_out_at is null and (
-        $4::timestamptz > te.scheduled_end_at + make_interval(mins => coalesce(c.forgotten_clock_out_alert_minutes, 120))
-        or $4::timestamptz > te.clocked_in_at + make_interval(mins => coalesce(c.hard_review_after_minutes, 720))
+        ${missedClockOutSql}
       )))
   ), issues as materialized (
     select id, kind, employee_id, employee_name, location_id, location_name, time_zone,

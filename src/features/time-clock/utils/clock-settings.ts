@@ -11,6 +11,9 @@ function getClockSettingsValues(
     earlyStartReviewMinutes: location.earlyStartReviewMinutes,
     forgottenClockOutAlertMinutes: location.forgottenClockOutAlertMinutes,
     hardReviewAfterMinutes: location.hardReviewAfterMinutes,
+    unscheduledClockOutAfterMinutes: location.unscheduledClockOutAfterMinutes,
+    unscheduledClockOutReminderMinutes:
+      location.unscheduledClockOutReminderMinutes,
     isEnabled: location.isEnabled,
     lateClockInGraceMinutes: location.lateClockInGraceMinutes,
     lateClockOutGraceMinutes: location.lateClockOutGraceMinutes,
@@ -37,8 +40,12 @@ function normalizeClockSettingsValues(
       next.earlyStartReviewMinutes
     ),
     hardReviewAfterMinutes: Math.max(
-      next.forgottenClockOutAlertMinutes,
+      next.forgottenClockOutAlertMinutes + 1,
       next.hardReviewAfterMinutes
+    ),
+    unscheduledClockOutAfterMinutes: Math.max(
+      next.unscheduledClockOutReminderMinutes + 1,
+      next.unscheduledClockOutAfterMinutes
     ),
     lateFinishReviewMinutes: Math.max(
       next.lateClockOutGraceMinutes,

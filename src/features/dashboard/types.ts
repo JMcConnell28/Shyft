@@ -1,3 +1,5 @@
+type ShiftOverviewInput = { organizationId: string; userId: string }
+
 type DashboardShiftSummary = {
   id: string
   date: string
@@ -32,6 +34,7 @@ type DashboardClockStatus = {
 }
 
 export type {
+  ShiftOverviewInput,
   DashboardClockStatus,
   DashboardShiftOverview,
   DashboardShiftSummary,

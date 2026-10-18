@@ -1450,6 +1450,8 @@ export type Database = {
       }
       location_clock_settings: {
         Row: {
+          unscheduled_clock_out_after_minutes: number
+          unscheduled_clock_out_reminder_minutes: number
           created_at: string
           early_clock_in_grace_minutes: number
           early_start_review_minutes: number
@@ -1470,6 +1472,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          unscheduled_clock_out_after_minutes?: number
+          unscheduled_clock_out_reminder_minutes?: number
           created_at?: string
           early_clock_in_grace_minutes?: number
           early_start_review_minutes?: number
@@ -1490,6 +1494,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          unscheduled_clock_out_after_minutes?: number
+          unscheduled_clock_out_reminder_minutes?: number
           created_at?: string
           early_clock_in_grace_minutes?: number
           early_start_review_minutes?: number
@@ -2957,6 +2963,9 @@ export type Database = {
       }
       time_entries: {
         Row: {
+          auto_clocked_out_at: string | null
+          clock_out_reminder_claimed_at: string | null
+          clock_out_reminder_sent_at: string | null
           clocked_in_at: string
           clocked_out_at: string | null
           created_at: string
@@ -2979,6 +2988,9 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          auto_clocked_out_at?: string | null
+          clock_out_reminder_claimed_at?: string | null
+          clock_out_reminder_sent_at?: string | null
           clocked_in_at?: string
           clocked_out_at?: string | null
           created_at?: string
@@ -3001,6 +3013,9 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          auto_clocked_out_at?: string | null
+          clock_out_reminder_claimed_at?: string | null
+          clock_out_reminder_sent_at?: string | null
           clocked_in_at?: string
           clocked_out_at?: string | null
           created_at?: string

@@ -142,6 +142,7 @@ describe("manual clock-out review", () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       is: vi.fn().mockReturnThis(),
+      gt: () => ({ limit: () => Promise.resolve({ data: [], error: null }) }),
       maybeSingle: () =>
         Promise.resolve({ data: { id: "employee-1" }, error: null }),
       single: () => Promise.resolve({ data: { id: "entry-2" }, error: null }),

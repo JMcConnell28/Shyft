@@ -1,8 +1,6 @@
 "use client"
 
-import * as React from "react"
-import { LogInIcon, LogOutIcon } from "lucide-react"
-
+import { ManualClockActionButton } from "./manual-clock-action-button"
 import type {
   ClockAction,
   ManagerClockEmployee,
@@ -16,16 +14,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  getManagerClockEmployeeKey,
-  getSuggestedManagerClockEmployeeKey,
-} from "@/features/time-clock/utils/manager-clock-employees"
+import { Input } from "@/components/ui/input"
+import { getManagerClockEmployeeKey } from "@/features/time-clock/utils/manager-clock-employees"
+import { toLocalClockInput } from "@/features/time-clock/utils/manual-clock-time"
+import { useManualClockOverrideForm } from "@/features/time-clock/hooks/use-manual-clock-override-form"
 import { cn } from "@/lib/utils"
 
 type OverrideSubmission = {
   action: ClockAction
   employee: ManagerClockEmployee
   reason: string
+  occurredAt: string
 }
 
 type ManagerClockOverrideDialogProps = {
@@ -47,27 +46,13 @@ function ManagerClockOverrideDialog({
   onSubmit,
   open,
 }: ManagerClockOverrideDialogProps) {
-  const [action, setAction] = React.useState<ClockAction>(initialAction)
-  const [employeeKey, setEmployeeKey] = React.useState(initialEmployeeKey)
-  const [reason, setReason] = React.useState("")
-  const suggestedEmployeeKey = getSuggestedManagerClockEmployeeKey(
+  const form = useManualClockOverrideForm({
     employees,
-    initialAction
-  )
-
-  React.useEffect(() => {
-    if (!open) return
-
-    setAction(initialAction)
-    setEmployeeKey(initialEmployeeKey || suggestedEmployeeKey)
-    setReason("")
-  }, [initialAction, initialEmployeeKey, open, suggestedEmployeeKey])
-
-  const employee =
-    employees.find(
-      (item) => getManagerClockEmployeeKey(item) === employeeKey
-    ) ?? null
-  const isValid = employee !== null && reason.trim().length >= 5
+    initialAction,
+    initialEmployeeKey,
+    open,
+  })
+  const { action, employee, employeeKey, reason, isValid } = form
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
@@ -87,25 +72,15 @@ function ManagerClockOverrideDialog({
               Action
             </legend>
             <div className="mt-2 grid grid-cols-2 gap-2">
-              <ActionButton
+              <ManualClockActionButton
                 action="clock_in"
                 currentAction={action}
-                onClick={() => {
-                  setAction("clock_in")
-                  setEmployeeKey(
-                    getSuggestedManagerClockEmployeeKey(employees, "clock_in")
-                  )
-                }}
+                onClick={() => form.setAction("clock_in")}
               />
-              <ActionButton
+              <ManualClockActionButton
                 action="clock_out"
                 currentAction={action}
-                onClick={() => {
-                  setAction("clock_out")
-                  setEmployeeKey(
-                    getSuggestedManagerClockEmployeeKey(employees, "clock_out")
-                  )
-                }}
+                onClick={() => form.setAction("clock_out")}
               />
             </div>
           </fieldset>
@@ -114,7 +89,7 @@ function ManagerClockOverrideDialog({
             Team member
             <select
               className="mt-2 h-11 w-full rounded-xl border border-[#dfe4ef] bg-white px-3 text-sm font-semibold text-[#10204b] transition outline-none focus:border-[#236cff] focus:ring-2 focus:ring-blue-100"
-              onChange={(event) => setEmployeeKey(event.target.value)}
+              onChange={(event) => form.setEmployeeKey(event.target.value)}
               value={employeeKey}
             >
               <option value="">Select a team member</option>
@@ -130,11 +105,34 @@ function ManagerClockOverrideDialog({
           </label>
 
           <label className="block text-xs font-semibold text-[#617096]">
+            Clock {action === "clock_in" ? "in" : "out"} date and time
+            <Input
+              type="datetime-local"
+              className="mt-2 h-11 bg-white text-sm"
+              value={form.time}
+              max={toLocalClockInput()}
+              min={
+                action === "clock_out" && employee?.openEntry
+                  ? toLocalClockInput(new Date(employee.openEntry.clockedInAt))
+                  : undefined
+              }
+              onChange={(event) => form.setTime(event.target.value)}
+              aria-invalid={Boolean(form.timeError)}
+              aria-describedby="manual-clock-time-help"
+              required
+            />
+          </label>
+          <p id="manual-clock-time-help" className="text-xs text-[#617096]">
+            {form.timeError ??
+              `Times use your device timezone (${Intl.DateTimeFormat().resolvedOptions().timeZone}). Choose an earlier time for a missed clock-in or clock-out.`}
+          </p>
+
+          <label className="block text-xs font-semibold text-[#617096]">
             Reason
             <Textarea
               className="mt-2 min-h-24 rounded-xl border-[#dfe4ef] bg-white text-sm text-[#10204b] shadow-none placeholder:text-[#9aa4ba] focus-visible:border-[#236cff] focus-visible:ring-blue-100"
               maxLength={300}
-              onChange={(event) => setReason(event.target.value)}
+              onChange={(event) => form.setReason(event.target.value)}
               placeholder="For example, station would not scan their tag."
               value={reason}
             />
@@ -149,7 +147,13 @@ function ManagerClockOverrideDialog({
             )}
             disabled={!isValid || isPending}
             onClick={() => {
-              if (employee) onSubmit({ action, employee, reason })
+              if (employee && form.occurredAt && isValid)
+                onSubmit({
+                  action,
+                  employee,
+                  reason,
+                  occurredAt: form.occurredAt,
+                })
             }}
           >
             {isPending
@@ -161,38 +165,6 @@ function ManagerClockOverrideDialog({
         </div>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function ActionButton({
-  action,
-  currentAction,
-  onClick,
-}: {
-  action: ClockAction
-  currentAction: ClockAction
-  onClick: () => void
-}) {
-  const isSelected = action === currentAction
-  const Icon = action === "clock_in" ? LogInIcon : LogOutIcon
-
-  return (
-    <Button
-      aria-pressed={isSelected}
-      className={cn(
-        "h-11 rounded-xl border-[#dfe4ef] bg-white text-sm font-semibold shadow-none",
-        isSelected &&
-          (action === "clock_in"
-            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-            : "border-rose-200 bg-rose-50 text-rose-700")
-      )}
-      onClick={onClick}
-      type="button"
-      variant="outline"
-    >
-      <Icon className="size-4" />
-      Clock {action === "clock_in" ? "in" : "out"}
-    </Button>
   )
 }
 

@@ -1,56 +1,93 @@
 import { BellRingIcon } from "lucide-react"
-
+import { ClockDurationInput } from "./clock-duration-input"
 import type { ClockSettingsValues } from "@/features/time-clock/types"
-import {
-  HARD_REVIEW_OPTIONS,
-  MISSED_CLOCK_OUT_ALERT_OPTIONS,
-} from "@/features/time-clock/constants/clock-settings-options"
-import {
-  ClockSettingRow,
-  ClockSettingSelect,
-} from "@/features/time-clock/components/clock-setting-row"
+import { ClockSettingRow } from "@/features/time-clock/components/clock-setting-row"
+import { CLOCK_OUT_TIME_LIMITS } from "@/features/time-clock/constants/automatic-clock-out"
 import { ClockSettingsSection } from "@/features/time-clock/components/clock-settings-section"
 
 function MissedClockOutSettingsSection({
-  onUpdate,
   values,
+  onUpdate,
+  disabled,
 }: {
-  onUpdate: (patch: Partial<ClockSettingsValues>) => void
   values: ClockSettingsValues
+  onUpdate: (patch: Partial<ClockSettingsValues>) => void
+  disabled?: boolean
 }) {
   return (
     <ClockSettingsSection
-      description="Catch open shifts quickly and route unusually long entries to a manager."
+      description="Set this location's timings in minutes. Changes save when you leave a field and apply to open shifts at the next check. All automatic clock-outs require manager review."
       icon={BellRingIcon}
       title="Missed clock-outs"
     >
       <ClockSettingRow
-        description="Show managers a warning after the scheduled shift has ended."
-        title="Forgotten clock-out alert"
+        description="Send a push notification after the scheduled finish. Employees must enable notifications on their device."
+        title="Clock-out reminder"
       >
-        <ClockSettingSelect
-          label="Forgotten clock-out alert"
-          onChange={(value) =>
-            onUpdate({ forgottenClockOutAlertMinutes: Number(value) })
+        <ClockDurationInput
+          label="Clock-out reminder after scheduled finish"
+          value={values.forgottenClockOutAlertMinutes}
+          min={CLOCK_OUT_TIME_LIMITS.reminder.min}
+          max={Math.min(
+            CLOCK_OUT_TIME_LIMITS.reminder.max,
+            values.hardReviewAfterMinutes - 1
+          )}
+          disabled={disabled}
+          onChange={(minutes) =>
+            onUpdate({ forgottenClockOutAlertMinutes: minutes })
           }
-          options={MISSED_CLOCK_OUT_ALERT_OPTIONS}
-          value={values.forgottenClockOutAlertMinutes.toString()}
         />
       </ClockSettingRow>
       <ClockSettingRow
-        description="Force an open entry into review after this amount of time."
-        title="Require manager review"
+        description="Close the timer and flag the scheduled finish as an estimate for manager review."
+        title="Scheduled automatic clock-out"
       >
-        <ClockSettingSelect
-          label="Require manager review"
-          onChange={(value) =>
-            onUpdate({ hardReviewAfterMinutes: Number(value) })
-          }
-          options={HARD_REVIEW_OPTIONS.filter(
-            (option) =>
-              Number(option.value) >= values.forgottenClockOutAlertMinutes
+        <ClockDurationInput
+          label="Automatic clock-out after scheduled finish"
+          value={values.hardReviewAfterMinutes}
+          min={Math.max(
+            CLOCK_OUT_TIME_LIMITS.scheduledDelay.min,
+            values.forgottenClockOutAlertMinutes + 1
           )}
-          value={values.hardReviewAfterMinutes.toString()}
+          max={CLOCK_OUT_TIME_LIMITS.scheduledDelay.max}
+          disabled={disabled}
+          onChange={(minutes) => onUpdate({ hardReviewAfterMinutes: minutes })}
+        />
+      </ClockSettingRow>
+      <ClockSettingRow
+        title="Unscheduled shift maximum"
+        description="Automatically close unscheduled entries after this amount of time from clock-in."
+      >
+        <ClockDurationInput
+          label="Maximum unscheduled shift duration"
+          value={values.unscheduledClockOutAfterMinutes}
+          min={Math.max(
+            CLOCK_OUT_TIME_LIMITS.unscheduledLimit.min,
+            values.unscheduledClockOutReminderMinutes + 1
+          )}
+          max={CLOCK_OUT_TIME_LIMITS.unscheduledLimit.max}
+          disabled={disabled}
+          onChange={(minutes) =>
+            onUpdate({ unscheduledClockOutAfterMinutes: minutes })
+          }
+        />
+      </ClockSettingRow>
+      <ClockSettingRow
+        title="Unscheduled reminder"
+        description="Remind the employee this long before the unscheduled shift maximum."
+      >
+        <ClockDurationInput
+          label="Unscheduled reminder before maximum"
+          value={values.unscheduledClockOutReminderMinutes}
+          min={CLOCK_OUT_TIME_LIMITS.unscheduledReminder.min}
+          max={Math.min(
+            CLOCK_OUT_TIME_LIMITS.unscheduledReminder.max,
+            values.unscheduledClockOutAfterMinutes - 1
+          )}
+          disabled={disabled}
+          onChange={(minutes) =>
+            onUpdate({ unscheduledClockOutReminderMinutes: minutes })
+          }
         />
       </ClockSettingRow>
     </ClockSettingsSection>

@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { clockAutomationSettingsSchema } from "./clock-automation-settings-schema"
 
 const workspaceClockScopeBaseSchema = z.object({
   organizationId: z.string().trim().min(1).optional(),
@@ -56,6 +57,7 @@ const managerClockOverrideInputSchema = workspaceClockScopeBaseSchema
     employeeId: z.uuid("Choose a valid team member."),
     locationId: z.uuid("Choose a valid location."),
     action: clockActionSchema,
+    occurredAt: z.iso.datetime({ offset: true }).optional(),
     reason: z
       .string()
       .trim()
@@ -86,8 +88,9 @@ const generateAdminClockTagSetupInputSchema = adminUserInputSchema.extend({
   locationId: z.uuid("Choose a valid location."),
 })
 
-const updateClockSettingsInputSchema = workspaceClockScopeBaseSchema
-  .extend({
+const updateClockSettingsInputSchema = clockAutomationSettingsSchema
+  .safeExtend({
+    ...workspaceClockScopeBaseSchema.shape,
     locationId: z.uuid("Choose a valid location."),
     isEnabled: z.boolean(),
     latitude: z.number().min(-90).max(90).nullable(),
@@ -97,8 +100,6 @@ const updateClockSettingsInputSchema = workspaceClockScopeBaseSchema
     timezone: z.string().trim().min(1).max(80),
     earlyClockInGraceMinutes: z.number().int().min(0).max(120),
     earlyStartReviewMinutes: z.number().int().min(0).max(240),
-    forgottenClockOutAlertMinutes: z.number().int().min(15).max(1440),
-    hardReviewAfterMinutes: z.number().int().min(60).max(2880),
     lateClockInGraceMinutes: z.number().int().min(0).max(120),
     lateClockOutGraceMinutes: z.number().int().min(0).max(120),
     lateFinishReviewMinutes: z.number().int().min(0).max(240),

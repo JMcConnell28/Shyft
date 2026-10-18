@@ -1,3 +1,5 @@
+import type { ClockAutomationSettings } from "@/features/time-clock/schemas/clock-automation-settings-schema"
+
 type ClockAction = "clock_in" | "clock_out"
 
 type ClockEntryStatus = "open" | "closed" | "requires_review"
@@ -170,11 +172,9 @@ type ManagerClockPageData = {
   }>
 }
 
-type ClockSettingsValues = {
+type ClockSettingsValues = ClockAutomationSettings & {
   earlyClockInGraceMinutes: number
   earlyStartReviewMinutes: number
-  forgottenClockOutAlertMinutes: number
-  hardReviewAfterMinutes: number
   isEnabled: boolean
   lateClockInGraceMinutes: number
   lateClockOutGraceMinutes: number

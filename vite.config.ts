@@ -1,12 +1,13 @@
-import type { RenderedChunk } from "rollup"
+import { fileURLToPath } from "node:url"
 import { defineConfig } from "vite"
 import { devtools } from "@tanstack/devtools-vite"
-//import mdx from "fumadocs-mdx/vite"
+// import mdx from "fumadocs-mdx/vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
 import viteTsConfigPaths from "vite-tsconfig-paths"
 import tailwindcss from "@tailwindcss/vite"
 import { nitro } from "nitro/vite"
+import type { RenderedChunk } from "rollup"
 
 function reflectMetadataServerBanner(chunk: RenderedChunk): string {
   const isServerChunk =
@@ -41,9 +42,25 @@ const config = defineConfig({
   },
   plugins: [
     tanstackStart(),
-    //mdx(),
+    // mdx(),
     devtools(),
     nitro({
+      alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+      experimental: { tasks: true },
+      tasks: {
+        "time-clock:process": {
+          handler: fileURLToPath(
+            new URL(
+              "./src/features/time-clock/server/automatic-clock-out-task.ts",
+              import.meta.url
+            )
+          ),
+        },
+      },
+      scheduledTasks:
+        process.env.NODE_ENV === "production"
+          ? { "* * * * *": ["time-clock:process"] }
+          : {},
       compressPublicAssets: {
         brotli: true,
         gzip: true,

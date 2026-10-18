@@ -79,6 +79,7 @@ function useManagerClockMutations(input: {
       mutationFn: (variables: {
         shiftSegment?: ClockShiftSegment
         action: ClockAction
+        occurredAt?: string
         employeeId: string
         locationId: string
         reason: string

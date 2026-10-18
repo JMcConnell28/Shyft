@@ -8,6 +8,8 @@ const SETTINGS: ClockSettingsValues = {
   earlyStartReviewMinutes: 15,
   forgottenClockOutAlertMinutes: 120,
   hardReviewAfterMinutes: 720,
+  unscheduledClockOutAfterMinutes: 480,
+  unscheduledClockOutReminderMinutes: 15,
   isEnabled: true,
   lateClockInGraceMinutes: 5,
   lateClockOutGraceMinutes: 10,
@@ -40,6 +42,6 @@ describe("clock settings", () => {
       normalizeClockSettingsValues(SETTINGS, {
         forgottenClockOutAlertMinutes: 960,
       }).hardReviewAfterMinutes
-    ).toBe(960)
+    ).toBe(961)
   })
 })

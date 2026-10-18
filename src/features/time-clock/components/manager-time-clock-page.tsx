@@ -97,10 +97,11 @@ function ManagerTimeClockPage({
         initialEmployeeKey={overrideRequest.employeeKey}
         isPending={overrideMutation.isPending}
         onOpenChange={setIsOverrideOpen}
-        onSubmit={({ action, employee, reason }) => {
+        onSubmit={({ action, employee, reason, occurredAt }) => {
           overrideMutation.mutate(
             {
               action,
+              occurredAt,
               employeeId: employee.id,
               locationId: employee.locationId,
               reason,

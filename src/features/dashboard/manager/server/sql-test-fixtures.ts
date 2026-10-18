@@ -26,7 +26,8 @@ async function seedDashboardSqlFixtures(client: PoolClient): Promise<void> {
     create temp table location_clock_settings (
       location_id uuid, timezone text, is_enabled boolean default true,
       late_clock_in_grace_minutes int default 5, created_at timestamptz default '2026-01-01Z',
-      forgotten_clock_out_alert_minutes int default 120, hard_review_after_minutes int default 720
+      forgotten_clock_out_alert_minutes int default 15, hard_review_after_minutes int default 120,
+      unscheduled_clock_out_after_minutes int default 480, unscheduled_clock_out_reminder_minutes int default 15
     );
     create temp table location_operating_hours (location_id uuid, weekday int, close_time time, close_time_next_day boolean);
     create temp table rotas (id uuid, organization_id text, location_id uuid, status text, week_start date, has_unpublished_changes boolean default false);

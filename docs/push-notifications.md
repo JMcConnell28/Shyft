@@ -52,6 +52,10 @@ Apply `supabase/migrations/20260711202136_push_subscriptions.sql` to the hosted 
 
 Rota publication sends only a privacy-conscious “New rota published” message after the database operation succeeds. Email and push delivery failures do not roll back the publication.
 
+Clock-out reminders use the same VAPID configuration and device subscriptions.
+See [automatic clock-out](automatic-clock-out.md) for reminder timings, review,
+the migration, and the production background task.
+
 ## Forced tests
 
 - **CLI user test:** `npm run push:test -- --user <better-auth-user-id>` from a server environment containing the database and VAPID variables.

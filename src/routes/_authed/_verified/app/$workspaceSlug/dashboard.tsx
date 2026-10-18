@@ -1,9 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { ShiftOverviewCards } from "@/features/dashboard/components/shift-overview-cards"
+import { PersonalDashboard } from "@/features/dashboard/components/personal-dashboard"
 import { DashboardWelcomeModal } from "@/features/dashboard/components/dashboard-welcome-modal"
+import { DashboardViewTabs } from "@/features/dashboard/components/dashboard-view-tabs"
 import { ManagerDashboard } from "@/features/dashboard/manager/components/manager-dashboard"
-import { managerDashboardSearchSchema } from "@/features/dashboard/manager/schemas"
+import { dashboardSearchSchema } from "@/features/dashboard/schemas/dashboard-search"
+import {
+  canViewManagerDashboard,
+  getDashboardView,
+} from "@/features/dashboard/utils/dashboard-view"
 import { loadDashboardAccess } from "@/features/dashboard/manager/load-dashboard-access"
 import { dashboardWelcomeQueryOptions } from "@/features/dashboard/query-options"
 import {
@@ -11,7 +16,7 @@ import {
   ManagerDashboardLoading,
 } from "@/features/dashboard/manager/components/dashboard-state"
 import { dashboardAnnouncementsQueryOptions } from "@/features/announcements/query-options"
-import { getDashboardShiftOverview } from "@/features/dashboard/server-fns"
+import { shiftOverviewQueryOptions } from "@/features/dashboard/shift-overview-query-options"
 
 export const Route = createFileRoute(
   "/_authed/_verified/app/$workspaceSlug/dashboard"
@@ -20,10 +25,11 @@ export const Route = createFileRoute(
   pendingMinMs: 0,
   pendingComponent: ManagerDashboardLoading,
   errorComponent: DashboardRouteError,
-  validateSearch: (search) => managerDashboardSearchSchema.parse(search),
+  validateSearch: (search) => dashboardSearchSchema.parse(search),
   staleTime: 0,
   preloadStaleTime: 0,
   loaderDeps: ({ search }) => ({
+    view: search.view,
     location: search.location,
     date: search.date,
   }),
@@ -45,10 +51,7 @@ export const Route = createFileRoute(
       )
     )
 
-    if (
-      context.capabilities.canManageRota ||
-      context.capabilities.canManageTimeClock
-    ) {
+    if (getDashboardView(context.capabilities, deps.view) === "manager") {
       const [, welcome] = await Promise.all([
         loadDashboardAccess(
           context.queryClient,
@@ -65,9 +68,9 @@ export const Route = createFileRoute(
       context.queryClient.ensureQueryData(
         dashboardAnnouncementsQueryOptions(announcementInput)
       ),
-      getDashboardShiftOverview({
-        data: announcementInput,
-      }),
+      context.queryClient.ensureQueryData(
+        shiftOverviewQueryOptions(announcementInput)
+      ),
       welcomePromise,
     ])
 
@@ -106,30 +109,42 @@ function DashboardWorkspaceRoute() {
         workspace={activeWorkspace}
       />
 
-      {result.mode === "manager" ? (
-        <ManagerDashboard
-          organizationId={activeWorkspace.id}
-          userId={context.viewer.user.id}
-          workspaceSlug={activeWorkspace.slug}
-          search={search}
-          onSearch={(value) => {
-            void navigate({ search: value })
-          }}
-        />
-      ) : (
-        <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
-          <ShiftOverviewCards
-            organizationName={activeWorkspace.name}
-            announcements={result.announcements}
-            mobileContext={{
-              userName: context.viewer.user.name,
-              workspaceSlug: activeWorkspace.slug,
-              workspaceType: activeWorkspace.type,
+      <DashboardViewTabs
+        canManage={canViewManagerDashboard(context.capabilities)}
+        view={result.mode === "manager" ? "manager" : "personal"}
+        onViewChange={(view) => {
+          void navigate({ search: { ...search, view } })
+        }}
+      >
+        {result.mode === "manager" ? (
+          <ManagerDashboard
+            organizationId={activeWorkspace.id}
+            userId={context.viewer.user.id}
+            workspaceSlug={activeWorkspace.slug}
+            search={search}
+            onSearch={(value) => {
+              void navigate({ search: { view: search.view, ...value } })
             }}
-            overview={result.overview}
           />
-        </div>
-      )}
+        ) : (
+          <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
+            <PersonalDashboard
+              input={{
+                organizationId: activeWorkspace.id,
+                userId: context.viewer.user.id,
+              }}
+              organizationName={activeWorkspace.name}
+              announcements={result.announcements}
+              mobileContext={{
+                userName: context.viewer.user.name,
+                workspaceSlug: activeWorkspace.slug,
+                workspaceType: activeWorkspace.type,
+              }}
+              overview={result.overview}
+            />
+          </div>
+        )}
+      </DashboardViewTabs>
     </div>
   )
 }

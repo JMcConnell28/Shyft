@@ -45,10 +45,11 @@ function ManagerDashboardDialogs({
           onOpenChange={(open) => {
             if (!open) close()
           }}
-          onSubmit={({ action, employee, reason }) =>
+          onSubmit={({ action, employee, reason, occurredAt }) =>
             clock.overrideMutation.mutate(
               {
                 action,
+                occurredAt,
                 shiftSegment: request.segment,
                 employeeId: employee.id,
                 locationId: employee.locationId,

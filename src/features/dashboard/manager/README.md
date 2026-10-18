@@ -1,7 +1,11 @@
 # Manager dashboard
 
-Managers and supervisors enter through the existing workspace dashboard route;
-employees retain their personal dashboard. Every server function verifies the
+Managers and supervisors enter through the existing workspace dashboard route
+and can switch between My dashboard and Manager dashboard using the dashboard
+tabs. The `view` search parameter preserves the selected view across refreshes
+and browser history; management remains their default. Employees retain their
+personal dashboard and cannot select the management view. Only the selected
+dashboard's data is loaded. Every server function verifies the
 session, active organisation, management capability and permitted locations.
 Time & Attendance data is gated by each location's existing entitlement.
 

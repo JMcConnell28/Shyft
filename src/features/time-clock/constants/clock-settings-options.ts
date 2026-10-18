@@ -11,14 +11,6 @@ const REVIEW_THRESHOLD_OPTIONS = createMinuteOptions([
   5, 10, 15, 30, 45, 60, 90, 120, 180, 240,
 ])
 
-const MISSED_CLOCK_OUT_ALERT_OPTIONS = createMinuteOptions([
-  15, 30, 60, 90, 120, 180, 240, 360, 480, 720, 1440,
-])
-
-const HARD_REVIEW_OPTIONS = createMinuteOptions([
-  60, 120, 180, 240, 360, 480, 720, 960, 1440, 2160, 2880,
-])
-
 const CLOCK_TIMEZONE_OPTIONS: Array<ClockSettingOption> = [
   { label: "London", value: "Europe/London" },
   { label: "Dublin", value: "Europe/Dublin" },
@@ -51,8 +43,6 @@ function formatMinuteOption(minutes: number) {
 export {
   CLOCK_TIMEZONE_OPTIONS,
   GRACE_PERIOD_OPTIONS,
-  HARD_REVIEW_OPTIONS,
-  MISSED_CLOCK_OUT_ALERT_OPTIONS,
   REVIEW_THRESHOLD_OPTIONS,
   formatMinuteOption,
 }

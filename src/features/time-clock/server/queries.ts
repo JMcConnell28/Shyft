@@ -11,6 +11,12 @@ import type {
   ManagerClockPageData,
 } from "@/features/time-clock/types"
 import type { PublishedShiftCandidate } from "@/features/time-clock/utils/shift-matching"
+import {
+  CLOCK_OUT_REMINDER_MINUTES,
+  SCHEDULED_CLOCK_OUT_DELAY_MINUTES,
+  UNSCHEDULED_CLOCK_OUT_LIMIT_MINUTES,
+  UNSCHEDULED_CLOCK_OUT_REMINDER_MINUTES,
+} from "@/features/time-clock/constants/automatic-clock-out"
 // eslint-disable-next-line no-duplicate-imports
 import {
   findBestShiftMatch,
@@ -74,6 +80,8 @@ type ClockStationHealthRow = {
 }
 
 type ClockRules = {
+  unscheduledClockOutAfterMinutes: number
+  unscheduledClockOutReminderMinutes: number
   earlyClockInGraceMinutes: number
   earlyStartReviewMinutes: number
   forgottenClockOutAlertMinutes: number
@@ -402,6 +410,9 @@ async function getClockSettingsPageData(input: {
         earlyStartReviewMinutes: rules.earlyStartReviewMinutes,
         forgottenClockOutAlertMinutes: rules.forgottenClockOutAlertMinutes,
         hardReviewAfterMinutes: rules.hardReviewAfterMinutes,
+        unscheduledClockOutAfterMinutes: rules.unscheduledClockOutAfterMinutes,
+        unscheduledClockOutReminderMinutes:
+          rules.unscheduledClockOutReminderMinutes,
         lateClockInGraceMinutes: rules.lateClockInGraceMinutes,
         lateClockOutGraceMinutes: rules.lateClockOutGraceMinutes,
         lateFinishReviewMinutes: rules.lateFinishReviewMinutes,
@@ -518,7 +529,7 @@ async function listClockSettingsForLocations(
   const result = await supabase
     .from("location_clock_settings")
     .select(
-      "location_id, is_enabled, latitude, longitude, radius_meters, max_accuracy_meters, timezone, early_clock_in_grace_minutes, early_start_review_minutes, late_clock_in_grace_minutes, late_start_review_minutes, forgotten_clock_out_alert_minutes, hard_review_after_minutes, late_clock_out_grace_minutes, late_finish_review_minutes"
+      "location_id, is_enabled, latitude, longitude, radius_meters, max_accuracy_meters, timezone, early_clock_in_grace_minutes, early_start_review_minutes, late_clock_in_grace_minutes, late_start_review_minutes, forgotten_clock_out_alert_minutes, hard_review_after_minutes, unscheduled_clock_out_after_minutes, unscheduled_clock_out_reminder_minutes, late_clock_out_grace_minutes, late_finish_review_minutes"
     )
     .in("location_id", locationIds)
 
@@ -537,6 +548,10 @@ async function listClockSettingsForLocations(
       earlyStartReviewMinutes: setting.early_start_review_minutes,
       forgottenClockOutAlertMinutes: setting.forgotten_clock_out_alert_minutes,
       hardReviewAfterMinutes: setting.hard_review_after_minutes,
+      unscheduledClockOutAfterMinutes:
+        setting.unscheduled_clock_out_after_minutes,
+      unscheduledClockOutReminderMinutes:
+        setting.unscheduled_clock_out_reminder_minutes,
       lateClockInGraceMinutes: setting.late_clock_in_grace_minutes,
       lateClockOutGraceMinutes: setting.late_clock_out_grace_minutes,
       lateFinishReviewMinutes: setting.late_finish_review_minutes,
@@ -1012,8 +1027,10 @@ function defaultClockRules(): ClockRules {
   return {
     earlyClockInGraceMinutes: 10,
     earlyStartReviewMinutes: 15,
-    forgottenClockOutAlertMinutes: 120,
-    hardReviewAfterMinutes: 720,
+    forgottenClockOutAlertMinutes: CLOCK_OUT_REMINDER_MINUTES,
+    hardReviewAfterMinutes: SCHEDULED_CLOCK_OUT_DELAY_MINUTES,
+    unscheduledClockOutAfterMinutes: UNSCHEDULED_CLOCK_OUT_LIMIT_MINUTES,
+    unscheduledClockOutReminderMinutes: UNSCHEDULED_CLOCK_OUT_REMINDER_MINUTES,
     lateClockInGraceMinutes: 5,
     lateClockOutGraceMinutes: 10,
     lateFinishReviewMinutes: 15,
