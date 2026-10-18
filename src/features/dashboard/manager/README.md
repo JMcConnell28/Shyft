@@ -9,6 +9,17 @@ dashboard's data is loaded. Every server function verifies the
 session, active organisation, management capability and permitted locations.
 Time & Attendance data is gated by each location's existing entitlement.
 
+Personal and manager views are separate lazy client chunks. The dashboard loader
+imports the manager data loader only for an authorised management view; employee
+visits, including a forged `view=manager` URL, use the personal view. The welcome
+tour is imported only when it should be shown. Public JavaScript is not an access
+control boundary: manager data and actions remain authorised on the server.
+
+Create rota uses a lightweight trigger and dialog shell. Its form and preview
+logic load on first open, then remain mounted for subsequent opens and closing
+transitions. Keep the form behind that first-open condition: mounting a lazy
+component immediately starts its import even when its dialog is closed.
+
 - Day staffing uses published assignments and recorded attendance. Local day
   boundaries, operating hours, split shifts and overnight shifts are resolved in
   the location's configured timezone. Repeated local times use the same earlier

@@ -1,14 +1,8 @@
-import { Suspense, lazy } from "react"
 import { Link } from "@tanstack/react-router"
 import { format, parseISO } from "date-fns"
 import type { ManagerDashboardAccess, ManagerDayData } from "../types"
 import { Button } from "@/components/ui/button"
-
-const NewRotaDialog = lazy(() =>
-  import("@/features/rota/components/new-rota-dialog").then((module) => ({
-    default: module.NewRotaDialog,
-  }))
-)
+import { NewRotaDialog } from "@/features/rota/components/new-rota-dialog"
 
 function ManagerComingUp({
   data,
@@ -85,16 +79,14 @@ function ManagerComingUp({
                   : "Open rota"}
               </Button>
             ) : canCreate ? (
-              <Suspense fallback={<Button disabled>Create rota</Button>}>
-                <NewRotaDialog
-                  key={`${data.location.id}:${week.weekStart}`}
-                  locations={locations}
-                  selectedLocation={selectedLocation}
-                  initialWeekStart={week.weekStart}
-                  triggerLabel="Create rota"
-                  triggerClassName="h-9 rounded-lg border border-[#dfe4ef] bg-white text-[#236cff] hover:bg-blue-50"
-                />
-              </Suspense>
+              <NewRotaDialog
+                key={`${data.location.id}:${week.weekStart}`}
+                locations={locations}
+                selectedLocation={selectedLocation}
+                initialWeekStart={week.weekStart}
+                triggerLabel="Create rota"
+                triggerClassName="h-9 rounded-lg border border-[#dfe4ef] bg-white text-[#236cff] hover:bg-blue-50"
+              />
             ) : null}
           </div>
         ))}

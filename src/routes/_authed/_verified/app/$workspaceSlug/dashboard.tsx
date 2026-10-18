@@ -1,29 +1,41 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { Suspense, lazy } from "react"
 
-import { PersonalDashboard } from "@/features/dashboard/components/personal-dashboard"
-import { DashboardWelcomeModal } from "@/features/dashboard/components/dashboard-welcome-modal"
 import { DashboardViewTabs } from "@/features/dashboard/components/dashboard-view-tabs"
-import { ManagerDashboard } from "@/features/dashboard/manager/components/manager-dashboard"
 import { dashboardSearchSchema } from "@/features/dashboard/schemas/dashboard-search"
-import {
-  canViewManagerDashboard,
-  getDashboardView,
-} from "@/features/dashboard/utils/dashboard-view"
-import { loadDashboardAccess } from "@/features/dashboard/manager/load-dashboard-access"
-import { dashboardWelcomeQueryOptions } from "@/features/dashboard/query-options"
-import {
-  DashboardRouteError,
-  ManagerDashboardLoading,
-} from "@/features/dashboard/manager/components/dashboard-state"
-import { dashboardAnnouncementsQueryOptions } from "@/features/announcements/query-options"
-import { shiftOverviewQueryOptions } from "@/features/dashboard/shift-overview-query-options"
+import { canViewManagerDashboard } from "@/features/dashboard/utils/dashboard-view"
+import { loadDashboard } from "@/features/dashboard/load-dashboard"
+import { DashboardRouteError } from "@/features/dashboard/manager/components/dashboard-state"
+import { WorkspaceRoutePending } from "@/features/navigation/components/workspace-route-pending"
+
+const PersonalDashboard = lazy(() =>
+  import("@/features/dashboard/components/personal-dashboard").then(
+    (module) => ({
+      default: module.PersonalDashboard,
+    })
+  )
+)
+const ManagerDashboard = lazy(() =>
+  import("@/features/dashboard/manager/components/manager-dashboard").then(
+    (module) => ({
+      default: module.ManagerDashboard,
+    })
+  )
+)
+const DashboardWelcomeModal = lazy(() =>
+  import("@/features/dashboard/components/dashboard-welcome-modal").then(
+    (module) => ({
+      default: module.DashboardWelcomeModal,
+    })
+  )
+)
 
 export const Route = createFileRoute(
   "/_authed/_verified/app/$workspaceSlug/dashboard"
 )({
   pendingMs: 150,
   pendingMinMs: 0,
-  pendingComponent: ManagerDashboardLoading,
+  pendingComponent: WorkspaceRoutePending,
   errorComponent: DashboardRouteError,
   validateSearch: (search) => dashboardSearchSchema.parse(search),
   staleTime: 0,
@@ -40,41 +52,13 @@ export const Route = createFileRoute(
       throw new Error("An active workspace is required.")
     }
 
-    const announcementInput = {
-      organizationId: activeWorkspace.id,
+    return loadDashboard({
+      queryClient: context.queryClient,
+      workspace: activeWorkspace,
       userId: context.viewer.user.id,
-    }
-    const welcomePromise = context.queryClient.ensureQueryData(
-      dashboardWelcomeQueryOptions(
-        { id: activeWorkspace.id, type: activeWorkspace.type },
-        context.viewer.user.id
-      )
-    )
-
-    if (getDashboardView(context.capabilities, deps.view) === "manager") {
-      const [, welcome] = await Promise.all([
-        loadDashboardAccess(
-          context.queryClient,
-          activeWorkspace.id,
-          context.viewer.user.id,
-          deps
-        ),
-        welcomePromise,
-      ])
-      return { mode: "manager" as const, welcome }
-    }
-
-    const [announcements, overview, welcome] = await Promise.all([
-      context.queryClient.ensureQueryData(
-        dashboardAnnouncementsQueryOptions(announcementInput)
-      ),
-      context.queryClient.ensureQueryData(
-        shiftOverviewQueryOptions(announcementInput)
-      ),
-      welcomePromise,
-    ])
-
-    return { mode: "employee" as const, announcements, overview, welcome }
+      capabilities: context.capabilities,
+      search: deps,
+    })
   },
   head: () => ({
     meta: [
@@ -101,13 +85,17 @@ function DashboardWorkspaceRoute() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <DashboardWelcomeModal
-        capabilities={context.capabilities}
-        initiallyOpen={result.welcome.shouldShow}
-        userName={context.viewer.user.name}
-        userId={context.viewer.user.id}
-        workspace={activeWorkspace}
-      />
+      {result.welcome.shouldShow ? (
+        <Suspense fallback={null}>
+          <DashboardWelcomeModal
+            capabilities={context.capabilities}
+            initiallyOpen={result.welcome.shouldShow}
+            userName={context.viewer.user.name}
+            userId={context.viewer.user.id}
+            workspace={activeWorkspace}
+          />
+        </Suspense>
+      ) : null}
 
       <DashboardViewTabs
         canManage={canViewManagerDashboard(context.capabilities)}
@@ -116,34 +104,36 @@ function DashboardWorkspaceRoute() {
           void navigate({ search: { ...search, view } })
         }}
       >
-        {result.mode === "manager" ? (
-          <ManagerDashboard
-            organizationId={activeWorkspace.id}
-            userId={context.viewer.user.id}
-            workspaceSlug={activeWorkspace.slug}
-            search={search}
-            onSearch={(value) => {
-              void navigate({ search: { view: search.view, ...value } })
-            }}
-          />
-        ) : (
-          <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
-            <PersonalDashboard
-              input={{
-                organizationId: activeWorkspace.id,
-                userId: context.viewer.user.id,
+        <Suspense fallback={<WorkspaceRoutePending />}>
+          {result.mode === "manager" ? (
+            <ManagerDashboard
+              organizationId={activeWorkspace.id}
+              userId={context.viewer.user.id}
+              workspaceSlug={activeWorkspace.slug}
+              search={search}
+              onSearch={(value) => {
+                void navigate({ search: { view: search.view, ...value } })
               }}
-              organizationName={activeWorkspace.name}
-              announcements={result.announcements}
-              mobileContext={{
-                userName: context.viewer.user.name,
-                workspaceSlug: activeWorkspace.slug,
-                workspaceType: activeWorkspace.type,
-              }}
-              overview={result.overview}
             />
-          </div>
-        )}
+          ) : (
+            <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
+              <PersonalDashboard
+                input={{
+                  organizationId: activeWorkspace.id,
+                  userId: context.viewer.user.id,
+                }}
+                organizationName={activeWorkspace.name}
+                announcements={result.announcements}
+                mobileContext={{
+                  userName: context.viewer.user.name,
+                  workspaceSlug: activeWorkspace.slug,
+                  workspaceType: activeWorkspace.type,
+                }}
+                overview={result.overview}
+              />
+            </div>
+          )}
+        </Suspense>
       </DashboardViewTabs>
     </div>
   )
