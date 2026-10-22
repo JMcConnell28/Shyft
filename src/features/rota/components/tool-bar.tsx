@@ -27,8 +27,6 @@ import {
 } from "@/features/rota/constants/rota-toolbar-styles"
 import { usePublishRota } from "@/features/rota/hooks/use-publish-rota"
 import { useSaveRotaWorkspace } from "@/features/rota/hooks/use-save-rota-workspace"
-import { canExportSageTimesheetForRota } from "@/features/rota/utils/week-utils"
-import { SageTimesheetExportButton } from "@/features/timesheets/components/sage-timesheet-export-button"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -44,19 +42,11 @@ function ToolBar({ mode = "default" }: { mode?: "default" | "demo" }) {
 }
 
 function ConnectedToolBar() {
-  const { meta, selectedLocation } = useRotaWorkspace()
+  const { meta } = useRotaWorkspace()
   const { canSave, isSaving, save, saveBlockedReason } = useSaveRotaWorkspace()
   const { canPublish, isPublishing, publish, publishBlockedReason } =
     usePublishRota()
   const canEdit = meta.canEdit
-  const canExportSage = meta.canManage && canExportSageTimesheetForRota(meta)
-  const sageExportInput = {
-    organizationId: meta.organizationId,
-    locationId:
-      meta.workspaceType === "location" ? selectedLocation.id : undefined,
-    userId: meta.userId,
-    weekStart: meta.weekStart,
-  }
 
   return (
     <ToolBarFrame
@@ -123,16 +113,6 @@ function ConnectedToolBar() {
           <MobileMoreMenu
             canEdit={canEdit}
             isSaving={isSaving}
-            sageExportButton={
-              canExportSage ? (
-                <SageTimesheetExportButton
-                  input={sageExportInput}
-                  exportLocationId={selectedLocation.id}
-                  variant="pill"
-                  className="w-full justify-start gap-2 rounded-lg"
-                />
-              ) : null
-            }
             saveCurrentRota={save}
             saveButton={
               canEdit ? (
@@ -329,13 +309,11 @@ function ToolBarFrame({
 function MobileMoreMenu({
   canEdit,
   isSaving,
-  sageExportButton,
   saveButton,
   saveCurrentRota,
 }: {
   canEdit: boolean
   isSaving: boolean
-  sageExportButton: React.ReactNode
   saveButton: React.ReactNode
   saveCurrentRota: () => Promise<void>
 }) {
@@ -368,7 +346,6 @@ function MobileMoreMenu({
         <div className="grid gap-1 [&_button]:h-9 [&_button]:w-full [&_button]:justify-start [&_button]:gap-2 [&_button]:rounded-lg [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-2.5 [&_button]:text-xs [&_button]:font-bold [&_button]:shadow-none [&_button:hover]:bg-[#f5f7ff]">
           {saveButton}
           <RotaExportDialog />
-          {sageExportButton}
           {canEdit ? (
             <>
               <RotaTemplateMenu
