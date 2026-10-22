@@ -31,7 +31,7 @@ import { sendOrganizationWelcomeNotification } from "@/features/onboarding/serve
 import { getMinimumWagePenceForDateOfBirth } from "@/features/staff-groups/utils/minimum-wage"
 
 const resendVerificationEmail = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => verifyEmailSchema.parse(input))
+  .validator((input: unknown) => verifyEmailSchema.parse(input))
   .handler(async ({ data }) => {
     await auth.api.sendVerificationEmail({
       body: {
@@ -44,7 +44,7 @@ const resendVerificationEmail = createServerFn({ method: "POST" })
   })
 
 const activateOrganization = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => activateOrganizationSchema.parse(input))
+  .validator((input: unknown) => activateOrganizationSchema.parse(input))
   .handler(async ({ data }) => {
     const { headers } = await requireSessionOrThrow()
 
@@ -54,7 +54,7 @@ const activateOrganization = createServerFn({ method: "POST" })
   })
 
 const createOrganizationWithBootstrap = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => onboardingOrganizationSchema.parse(input))
+  .validator((input: unknown) => onboardingOrganizationSchema.parse(input))
   .handler(async ({ data }) => {
     const { headers } = await requireVerifiedSessionOrThrow()
     const organizationName = data.name.trim()
@@ -89,7 +89,7 @@ const createOrganizationWithBootstrap = createServerFn({ method: "POST" })
   })
 
 const createFirstLocationAndZone = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => locationSetupSchema.parse(input))
+  .validator((input: unknown) => locationSetupSchema.parse(input))
   .handler(async ({ data }) => {
     const { session } = await requireVerifiedSessionOrThrow()
     const organizationId = session.session.activeOrganizationId

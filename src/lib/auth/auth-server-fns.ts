@@ -7,7 +7,7 @@ import {
 import { ensureSession } from "@/lib/auth-server"
 
 const getOrgCapabilities = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => getOrgCapabilitiesInputSchema.parse(input))
+  .validator((input: unknown) => getOrgCapabilitiesInputSchema.parse(input))
   .handler(async ({ data }) => {
     const session = await ensureSession()
 
@@ -20,7 +20,7 @@ const getOrgCapabilities = createServerFn({ method: "POST" })
   })
 
 const getWorkspaceCapabilities = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getWorkspaceCapabilitiesInputSchema.parse(input),
   )
   .handler(async ({ data }) => {

@@ -83,10 +83,12 @@ describe("workspace navigation feedback", () => {
     await router.load()
     render(<RouterProvider router={router} />)
     await act(async () => {
-      await router.navigate({
+      // A blocked navigation has no committed load to await.
+      void router.navigate({
         to: "/app/$workspaceSlug/timesheets",
         params: { workspaceSlug: "team" },
       })
+      await Promise.resolve()
     })
     expect(router.state.location.pathname).toBe("/app/team/rota")
     expect(
@@ -122,7 +124,7 @@ describe("workspace navigation feedback", () => {
     expect(screen.getByTestId("selection")).toBeTruthy()
   })
 
-  it("preserves the shell while a shared authentication boundary revalidates", async () => {
+  it("preserves the current view and shell while a shared authentication boundary revalidates", async () => {
     vi.useFakeTimers()
     const loading = deferred()
     let firstLoad = true
@@ -145,16 +147,17 @@ describe("workspace navigation feedback", () => {
       await vi.advanceTimersByTimeAsync(160)
     })
     expect(screen.getByTestId("selection").textContent).toContain("timesheets")
+    expect(screen.getByTestId("breadcrumb").textContent).toContain("rota")
     expect(
-      screen.getByRole("status", { name: "Loading Timesheets" })
+      screen.getByRole("button", { name: "Save current rota" })
     ).toBeTruthy()
-    expect(
-      screen.queryByRole("button", { name: "Save current rota" })
-    ).toBeNull()
+    expect(screen.queryByRole("heading", { name: "Team timesheets" })).toBeNull()
     await act(async () => {
       loading.resolve()
       await vi.advanceTimersByTimeAsync(0)
     })
+    expect(screen.getByRole("heading", { name: "Team timesheets" })).toBeTruthy()
+    expect(screen.getByTestId("breadcrumb").textContent).toContain("timesheets")
     expect(mountCount()).toBe(1)
   })
 

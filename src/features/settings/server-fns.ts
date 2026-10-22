@@ -22,7 +22,7 @@ import {
 } from "@/features/settings/schemas/rota-settings-schemas"
 
 const getGeneralSettingsPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getGeneralSettingsInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -31,7 +31,7 @@ const getGeneralSettingsPageData = createServerFn({ method: "POST" })
   })
 
 const updateGeneralSettings = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateGeneralSettingsInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -41,7 +41,7 @@ const updateGeneralSettings = createServerFn({ method: "POST" })
   })
 
 const getLocationSettingsPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getLocationSettingsInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -50,7 +50,7 @@ const getLocationSettingsPageData = createServerFn({ method: "POST" })
   })
 
 const createLocation = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createLocationInputSchema.parse(input))
+  .validator((input: unknown) => createLocationInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/location-actions")
@@ -58,7 +58,7 @@ const createLocation = createServerFn({ method: "POST" })
   })
 
 const updateLocationSettings = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateLocationSettingsInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -68,14 +68,14 @@ const updateLocationSettings = createServerFn({ method: "POST" })
   })
 
 const getRotaSettingsPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => getRotaSettingsInputSchema.parse(input))
+  .validator((input: unknown) => getRotaSettingsInputSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/settings/server/rota-queries")
     return module.getRotaSettingsPageData(data)
   })
 
 const updateRotaSettings = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateRotaSettingsInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -85,7 +85,7 @@ const updateRotaSettings = createServerFn({ method: "POST" })
   })
 
 const updateShiftSwapSetting = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateShiftSwapSettingInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -95,7 +95,7 @@ const updateShiftSwapSetting = createServerFn({ method: "POST" })
   })
 
 const createZone = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createZoneInputSchema.parse(input))
+  .validator((input: unknown) => createZoneInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/zone-actions")
@@ -103,7 +103,7 @@ const createZone = createServerFn({ method: "POST" })
   })
 
 const updateZone = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => updateZoneInputSchema.parse(input))
+  .validator((input: unknown) => updateZoneInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/zone-actions")
@@ -111,7 +111,7 @@ const updateZone = createServerFn({ method: "POST" })
   })
 
 const deleteZone = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => deleteZoneInputSchema.parse(input))
+  .validator((input: unknown) => deleteZoneInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/zone-actions")
@@ -119,7 +119,7 @@ const deleteZone = createServerFn({ method: "POST" })
   })
 
 const renameRotaTemplate = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     renameRotaTemplateInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -129,7 +129,7 @@ const renameRotaTemplate = createServerFn({ method: "POST" })
   })
 
 const deleteRotaTemplate = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     deleteRotaTemplateInputSchema.parse(input)
   )
   .handler(async ({ data }) => {

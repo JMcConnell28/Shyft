@@ -14,7 +14,7 @@ import type {
 import { getDatabase } from "@/lib/db"
 
 const createRotaTemplateFromRota = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     createRotaTemplateFromRotaInputSchema.parse(input),
   )
   .handler(async ({ data }): Promise<RotaTemplateMutationResult> => {
@@ -71,7 +71,7 @@ const createRotaTemplateFromRota = createServerFn({ method: "POST" })
   })
 
 const overrideRotaTemplateFromRota = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     overrideRotaTemplateFromRotaInputSchema.parse(input),
   )
   .handler(async ({ data }): Promise<RotaTemplateMutationResult> => {
@@ -121,7 +121,7 @@ const overrideRotaTemplateFromRota = createServerFn({ method: "POST" })
   })
 
 const applyRotaTemplateToRota = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     applyRotaTemplateToRotaInputSchema.parse(input),
   )
   .handler(async ({ data }): Promise<ApplyRotaTemplateResult> => {

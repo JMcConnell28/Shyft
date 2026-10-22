@@ -6,7 +6,8 @@
     "scripts/**/*.js",
     "eslint.config.js",
     "prettier.config.js",
-    "vite.config.ts"
+    "vite.config.ts",
+    "vitest.config.ts"
   ],
   "exclude": ["apps/**/*", "packages/**/*", ".output/**/*"],
 
@@ -20,7 +21,6 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
     "noEmit": true,
 
     /* Linting */

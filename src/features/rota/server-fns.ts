@@ -35,7 +35,7 @@ import {
 } from "@/features/rota/server/template-actions"
 
 const getHasUnreadRotaUpdates = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getHasUnreadRotaUpdatesInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -44,7 +44,7 @@ const getHasUnreadRotaUpdates = createServerFn({ method: "POST" })
   })
 
 const getRotaListPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getRotaListPageDataInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -53,7 +53,7 @@ const getRotaListPageData = createServerFn({ method: "POST" })
   })
 
 const getRotaDetailPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getRotaDetailPageDataInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -62,7 +62,7 @@ const getRotaDetailPageData = createServerFn({ method: "POST" })
   })
 
 const getRotaWorkspaceData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getRotaWorkspaceDataInputSchema.parse(input)
   )
   .handler(async ({ data }) => {

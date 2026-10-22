@@ -8,7 +8,7 @@ import {
 } from "@/features/support/schemas"
 
 const getSupportThreads = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => supportListSchema.parse(input))
+  .validator((input: unknown) => supportListSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireAdminPermission } =
       await import("@/features/auth/server/admin-session")
@@ -31,7 +31,7 @@ const getUnreadSupportCount = createServerFn({ method: "GET" }).handler(
 )
 
 const getSupportThread = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => supportThreadIdSchema.parse(input))
+  .validator((input: unknown) => supportThreadIdSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireAdminPermission } =
       await import("@/features/auth/server/admin-session")
@@ -42,7 +42,7 @@ const getSupportThread = createServerFn({ method: "POST" })
   })
 
 const replyToSupportThreadServerFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => replyToSupportThreadSchema.parse(input))
+  .validator((input: unknown) => replyToSupportThreadSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireAdminPermission } =
       await import("@/features/auth/server/admin-session")
@@ -54,7 +54,7 @@ const replyToSupportThreadServerFn = createServerFn({ method: "POST" })
   })
 
 const updateSupportThreadStatusServerFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateSupportThreadStatusSchema.parse(input)
   )
   .handler(async ({ data }) => {

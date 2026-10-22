@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import {
   NTAG_CMAC_OFFSET_PLACEHOLDER,
@@ -6,6 +6,17 @@ import {
   NTAG_PUBLIC_ID_LENGTH,
 } from "@/features/time-clock/constants/ntag-clock"
 import { verifyNtagClockScanWithKey } from "@/features/time-clock/server/ntag-clock-test"
+
+vi.mock("@tanstack/react-start/server-only", () => ({}))
+vi.mock("@/features/time-clock/server/queries", () => ({
+  buildEmployeeClockPageData: vi.fn(),
+}))
+vi.mock("@/features/onboarding/server/session", () => ({
+  requireVerifiedSessionOrThrow: vi.fn(),
+}))
+vi.mock("@/lib/supabase.server", () => ({
+  createSupabaseServerClient: vi.fn(),
+}))
 
 describe("verifyNtagClockScan", () => {
   const keyContext = {
@@ -20,7 +31,7 @@ describe("verifyNtagClockScan", () => {
     expect(NTAG_CMAC_OFFSET_PLACEHOLDER).toHaveLength(16)
   })
 
-  it("validates the configured SDM URL CMAC input", async () => {
+  it("validates the configured SDM URL CMAC input", () => {
     const result = verifyNtagClockScanWithKey({
       cmac: "43CC1F21B971D887",
       picc: "B22FCE3B948CCD05BAB2B6AB0D219C1C",
@@ -51,7 +62,7 @@ describe("verifyNtagClockScan", () => {
     expect(result.counterClaim.status).toBe("skipped")
   })
 
-  it("rejects malformed encrypted PICC data", async () => {
+  it("rejects malformed encrypted PICC data", () => {
     const result = verifyNtagClockScanWithKey({
       cmac: "43CC1F21B971D887",
       picc: "not-hex",
@@ -62,7 +73,7 @@ describe("verifyNtagClockScan", () => {
     expect(result.error).toBe("Expected picc to be 32 hex characters / 16 bytes.")
   })
 
-  it("requires a valid cmac parameter", async () => {
+  it("requires a valid cmac parameter", () => {
     const result = verifyNtagClockScanWithKey({
       cmac: "",
       picc: "B22FCE3B948CCD05BAB2B6AB0D219C1C",

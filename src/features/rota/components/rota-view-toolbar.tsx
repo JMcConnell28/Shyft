@@ -2,8 +2,6 @@ import type {
   WorkspaceBoardData,
   WorkspaceDay,
 } from "@/features/rota/types/workspace"
-import { canExportSageTimesheetForRota } from "@/features/rota/utils/week-utils"
-import { SageTimesheetExportButton } from "@/features/timesheets/components/sage-timesheet-export-button"
 import { ZoneSelect } from "@/features/rota/components/zone-select"
 
 function RotaViewToolbar({
@@ -37,21 +35,6 @@ function RotaViewToolbar({
       </div>
       <div className="shrink-0">
         <div className="flex items-center gap-2">
-          {meta.canManage && canExportSageTimesheetForRota(meta) ? (
-            <SageTimesheetExportButton
-              input={{
-                organizationId: meta.organizationId,
-                locationId:
-                  meta.workspaceType === "location"
-                    ? selectedLocation.id
-                    : undefined,
-                userId: meta.userId,
-                weekStart: meta.weekStart,
-              }}
-              exportLocationId={selectedLocation.id}
-              variant="pill"
-            />
-          ) : null}
           <ZoneSelect
             selectedZoneId={selectedZoneId}
             onSelectZone={onSelectZone}

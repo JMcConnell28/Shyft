@@ -7,7 +7,7 @@ import {
 } from "@/features/timesheets/schemas/timesheet-schemas"
 
 const getSageTimesheetExportData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     sageTimesheetExportInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -16,14 +16,14 @@ const getSageTimesheetExportData = createServerFn({ method: "POST" })
   })
 
 const getTimesheetPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => timesheetScopeSchema.parse(input))
+  .validator((input: unknown) => timesheetScopeSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/timesheets/server/queries")
     return module.getTimesheetPageData(data)
   })
 
 const updateTimesheetEntry = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateTimesheetEntryInputSchema.parse(input)
   )
   .handler(async ({ data }) => {

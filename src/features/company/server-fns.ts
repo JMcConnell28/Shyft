@@ -18,21 +18,21 @@ import {
 } from "@/features/company/schemas/company-schemas"
 
 const getCompanyEmployeesPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => companyWorkspaceInputSchema.parse(input))
+  .validator((input: unknown) => companyWorkspaceInputSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/company/server/queries")
     return module.getCompanyEmployeesPageData(data)
   })
 
 const getCompanyEmployeePageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => companyEmployeeInputSchema.parse(input))
+  .validator((input: unknown) => companyEmployeeInputSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/company/server/queries")
     return module.getCompanyEmployeePageData(data)
   })
 
 const updateCompanyEmployeeRole = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateCompanyEmployeeRoleInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -42,7 +42,7 @@ const updateCompanyEmployeeRole = createServerFn({ method: "POST" })
   })
 
 const updateCompanyEmployeeLocationActivity = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateCompanyEmployeeLocationInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -52,7 +52,7 @@ const updateCompanyEmployeeLocationActivity = createServerFn({ method: "POST" })
   })
 
 const updateCompanyEmployeeRotaVisibility = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateCompanyEmployeeRotaVisibilityInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -62,7 +62,7 @@ const updateCompanyEmployeeRotaVisibility = createServerFn({ method: "POST" })
   })
 
 const removeCompanyEmployee = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     removeCompanyEmployeeInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -72,7 +72,7 @@ const removeCompanyEmployee = createServerFn({ method: "POST" })
   })
 
 const rehireCompanyEmployee = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     rehireCompanyEmployeeInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -82,7 +82,7 @@ const rehireCompanyEmployee = createServerFn({ method: "POST" })
   })
 
 const updateCompanyEmployeeCompensation = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateCompanyEmployeeCompensationInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -92,7 +92,7 @@ const updateCompanyEmployeeCompensation = createServerFn({ method: "POST" })
   })
 
 const updateCompanyEmployeePayrollId = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateCompanyEmployeePayrollIdInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -102,7 +102,7 @@ const updateCompanyEmployeePayrollId = createServerFn({ method: "POST" })
   })
 
 const createCompanyEmployeeRotaNote = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     createCompanyEmployeeRotaNoteInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -112,7 +112,7 @@ const createCompanyEmployeeRotaNote = createServerFn({ method: "POST" })
   })
 
 const updateCompanyEmployeeRotaNote = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateCompanyEmployeeRotaNoteInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -122,7 +122,7 @@ const updateCompanyEmployeeRotaNote = createServerFn({ method: "POST" })
   })
 
 const archiveCompanyEmployeeRotaNote = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     archiveCompanyEmployeeRotaNoteInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -132,7 +132,7 @@ const archiveCompanyEmployeeRotaNote = createServerFn({ method: "POST" })
   })
 
 const bulkUpdateCompanyEmployeePayrollIds = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     bulkUpdateCompanyEmployeePayrollIdsInputSchema.parse(input)
   )
   .handler(async ({ data }) => {

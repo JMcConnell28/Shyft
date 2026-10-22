@@ -7,7 +7,7 @@ import { deleteDraftRotaSchema, unpublishRotaSchema } from "@/lib/rota-schemas"
 import { requireRotaWriteAccess } from "@/features/rota/server/write-access"
 
 const unpublishRota = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => unpublishRotaSchema.parse(input))
+  .validator((input: unknown) => unpublishRotaSchema.parse(input))
   .handler(async ({ data }) => {
     const context = await getRotaLifecycleContext(data.rotaId, "publish")
 
@@ -44,7 +44,7 @@ const unpublishRota = createServerFn({ method: "POST" })
   })
 
 const deleteDraftRota = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => deleteDraftRotaSchema.parse(input))
+  .validator((input: unknown) => deleteDraftRotaSchema.parse(input))
   .handler(async ({ data }) => {
     const context = await getRotaLifecycleContext(data.rotaId, "update")
 

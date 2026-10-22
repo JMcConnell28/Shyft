@@ -1,13 +1,9 @@
+import type { ErrorComponentProps } from "@tanstack/react-router"
+
 import { Button } from "@/components/ui/button"
 import { getErrorMessage } from "@/lib/errors"
 
-function RootErrorState({
-  error,
-  reset,
-}: {
-  error: Error
-  reset: () => void
-}) {
+function RootErrorState({ error, reset }: ErrorComponentProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md rounded-3xl border border-border/70 bg-card p-6 shadow-lg shadow-slate-950/10">

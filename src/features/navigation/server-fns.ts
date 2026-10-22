@@ -11,7 +11,7 @@ const getNavigationSession = createServerFn({ method: "GET" }).handler(
 )
 
 const getWorkspaceViewer = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => workspaceViewerInputSchema.parse(input))
+  .validator((input: unknown) => workspaceViewerInputSchema.parse(input))
   .handler(async ({ data }) => {
     const { readWorkspaceViewer } =
       await import("@/features/navigation/server/workspace-viewer")

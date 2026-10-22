@@ -12,7 +12,7 @@ import {
 } from "@/features/announcements/schemas/announcement-schemas"
 
 const getAnnouncementsPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     announcementWorkspaceInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -21,7 +21,7 @@ const getAnnouncementsPageData = createServerFn({ method: "POST" })
   })
 
 const getDashboardAnnouncements = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     announcementWorkspaceInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -30,7 +30,7 @@ const getDashboardAnnouncements = createServerFn({ method: "POST" })
   })
 
 const getHasUnreadAnnouncements = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     announcementWorkspaceInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -39,7 +39,7 @@ const getHasUnreadAnnouncements = createServerFn({ method: "POST" })
   })
 
 const createAnnouncement = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     createAnnouncementInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -49,7 +49,7 @@ const createAnnouncement = createServerFn({ method: "POST" })
   })
 
 const updateAnnouncement = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateAnnouncementInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -59,7 +59,7 @@ const updateAnnouncement = createServerFn({ method: "POST" })
   })
 
 const archiveAnnouncement = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     archiveAnnouncementInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -69,7 +69,7 @@ const archiveAnnouncement = createServerFn({ method: "POST" })
   })
 
 const markAnnouncementRead = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     markAnnouncementReadInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -78,7 +78,7 @@ const markAnnouncementRead = createServerFn({ method: "POST" })
   })
 
 const markAllAnnouncementsRead = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     markAllAnnouncementsReadInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -87,7 +87,7 @@ const markAllAnnouncementsRead = createServerFn({ method: "POST" })
   })
 
 const voteAnnouncementPoll = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     voteAnnouncementPollInputSchema.parse(input)
   )
   .handler(async ({ data }) => {

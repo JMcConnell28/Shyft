@@ -36,7 +36,7 @@ import {
 } from "@/features/staff-groups/server/shared"
 
 const createStaffInviteLink = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => staffInviteSelectionSchema.parse(input))
+  .validator((input: unknown) => staffInviteSelectionSchema.parse(input))
   .handler(async ({ data }) => {
     const { session } = await requireVerifiedSessionOrThrow()
     const organizationId = session.session.activeOrganizationId
@@ -234,7 +234,7 @@ const getActiveStaffInviteLink = createServerFn({ method: "GET" }).handler(
 )
 
 const inviteOrganizationMemberByEmail = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     organizationMemberInviteSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -269,7 +269,7 @@ const inviteOrganizationMemberByEmail = createServerFn({ method: "POST" })
   })
 
 const getStaffInvitePreview = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => acceptInviteSchema.parse(input))
+  .validator((input: unknown) => acceptInviteSchema.parse(input))
   .handler(async ({ data }) => {
     const supabase = createSupabaseServerClient()
     const inviteResult = await supabase
@@ -346,7 +346,7 @@ const getStaffInvitePreview = createServerFn({ method: "GET" })
   })
 
 const acceptStaffInvite = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => acceptInviteSchema.parse(input))
+  .validator((input: unknown) => acceptInviteSchema.parse(input))
   .handler(async ({ data }) => {
     const { session } = await requireVerifiedSessionOrThrow()
     const supabase = createSupabaseServerClient()
@@ -438,7 +438,7 @@ async function assertCanAcceptOrganizationStaffInvite(input: {
 }
 
 const acceptOrganizationInvitation = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     acceptOrganizationInvitationSchema.parse(input)
   )
   .handler(async ({ data }) => {

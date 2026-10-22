@@ -1,10 +1,8 @@
-import { defineConfig } from "vite"
-import { fileURLToPath } from "node:url"
 import { dirname, resolve } from "node:path"
-import { loadEnv } from "vite"
+import { fileURLToPath } from "node:url"
+import { defineConfig, loadEnv } from "vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
-import viteTsConfigPaths from "vite-tsconfig-paths"
 import tailwindcss from "@tailwindcss/vite"
 import { nitro } from "nitro/vite"
 
@@ -16,6 +14,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     envDir: rootEnvDir,
+    resolve: { tsconfigPaths: true },
     server: {
       host: true,
       port: 3001,
@@ -25,12 +24,9 @@ export default defineConfig(({ mode }) => {
       port: 3001,
     },
     plugins: [
-      nitro(),
-      viteTsConfigPaths({
-        projects: ["./tsconfig.json"],
-      }),
-      tailwindcss(),
       tanstackStart(),
+      nitro(),
+      tailwindcss(),
       viteReact(),
     ],
   }

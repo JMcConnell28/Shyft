@@ -18,7 +18,7 @@ const getFeatureFlags = createServerFn({ method: "GET" }).handler(async () => {
 })
 
 const createFeatureFlagServerFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createFeatureFlagSchema.parse(input))
+  .validator((input: unknown) => createFeatureFlagSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireAdminPermission } = await import(
       "@/features/auth/server/admin-session"
@@ -35,7 +35,7 @@ const createFeatureFlagServerFn = createServerFn({ method: "POST" })
   })
 
 const updateFeatureFlagServerFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => updateFeatureFlagSchema.parse(input))
+  .validator((input: unknown) => updateFeatureFlagSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireAdminPermission } = await import(
       "@/features/auth/server/admin-session"

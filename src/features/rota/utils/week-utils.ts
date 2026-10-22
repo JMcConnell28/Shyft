@@ -83,26 +83,9 @@ function isRotaWeekBeforeCurrentWeek(weekStart: string) {
   return weekStart < getCurrentWeekStart()
 }
 
-function canExportSageTimesheetForRota({
-  publishedSnapshotAvailable,
-  status,
-  weekStart,
-}: {
-  publishedSnapshotAvailable: boolean
-  status: "draft" | "published" | string
-  weekStart: string
-}) {
-  return (
-    status === "published" &&
-    publishedSnapshotAvailable &&
-    isRotaWeekBeforeCurrentWeek(weekStart)
-  )
-}
-
 export {
   buildRangeBounds,
   buildWeekLabel,
-  canExportSageTimesheetForRota,
   coerceNumber,
   formatUpdatedAt,
   getCurrentWeekStart,

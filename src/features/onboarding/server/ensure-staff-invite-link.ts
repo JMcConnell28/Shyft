@@ -11,7 +11,7 @@ import { getDatabase } from "@/lib/db"
 import { staffInviteSelectionSchema } from "@/lib/onboarding-schemas"
 
 const ensureActiveStaffInviteLink = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => staffInviteSelectionSchema.parse(input))
+  .validator((input: unknown) => staffInviteSelectionSchema.parse(input))
   .handler(async ({ data }) => {
     const { session } = await requireVerifiedSessionOrThrow()
     const organizationId = session.session.activeOrganizationId

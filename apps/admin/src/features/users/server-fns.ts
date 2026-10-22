@@ -7,7 +7,7 @@ import {
 } from "@/features/users/schemas"
 
 const getUsers = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => searchUsersSchema.parse(input))
+  .validator((input: unknown) => searchUsersSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireAdminPermission } = await import(
       "@/features/auth/server/admin-session"
@@ -19,7 +19,7 @@ const getUsers = createServerFn({ method: "POST" })
   })
 
 const updateAppUserStatusServerFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => updateAppUserStatusSchema.parse(input))
+  .validator((input: unknown) => updateAppUserStatusSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireAdminPermission } = await import(
       "@/features/auth/server/admin-session"
@@ -34,7 +34,7 @@ const updateAppUserStatusServerFn = createServerFn({ method: "POST" })
   })
 
 const createImpersonationSessionServerFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     createImpersonationSessionSchema.parse(input),
   )
   .handler(async ({ data }) => {
