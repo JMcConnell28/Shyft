@@ -25,6 +25,7 @@ import {
   getShiftSortStart,
 } from "@/features/rota/utils/workspace-shifts"
 import { formatMinutesAsHours } from "@/features/rota/utils/workspace-time"
+import { getRotaPublicationLabel } from "@/features/rota/utils/rota-publication-label"
 
 function buildRotaPdfDocumentData(input: {
   assignmentIdsByShiftId: Record<string, Array<string>>
@@ -53,9 +54,13 @@ function buildRotaPdfDocumentData(input: {
     fileName: buildRotaPdfFileName(
       input.location.name,
       input.meta.weekStart,
-      input.meta.contentVersion
+      input.meta
     ),
-    versionLabel: `v${input.meta.contentVersion}`,
+    versionLabel: `${getRotaPublicationLabel(input.meta)}${
+      input.meta.status === "published" && input.meta.hasUnpublishedChanges
+        ? " · Unpublished changes"
+        : ""
+    }`,
     generatedAtLabel: format(
       new Date(),
       input.meta.settings.timeFormat === "24h"
@@ -73,7 +78,10 @@ function buildRotaPdfDocumentData(input: {
 function buildRotaPdfFileName(
   locationName: string,
   weekStart: string,
-  version: number
+  meta: Pick<
+    WorkspaceBoardMeta,
+    "status" | "publishedVersion" | "hasUnpublishedChanges"
+  >
 ) {
   const slug = locationName
     .trim()
@@ -81,7 +89,12 @@ function buildRotaPdfFileName(
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
 
-  return `rocketrota-${slug || "location"}-${weekStart}-v${version}.pdf`
+  const version =
+    meta.status === "published"
+      ? `v${meta.publishedVersion}${meta.hasUnpublishedChanges ? "-draft" : ""}`
+      : "draft"
+
+  return `rocketrota-${slug || "location"}-${weekStart}-${version}.pdf`
 }
 
 function buildZonePage(

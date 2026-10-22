@@ -1,16 +1,25 @@
+import type { WorkspaceBoardMeta } from "@/features/rota/types/workspace"
+import { getRotaPublicationLabel } from "@/features/rota/utils/rota-publication-label"
+
 function RotaVersionLabel({
-  version,
-  publishedVersion,
+  meta,
+  hasUnsavedChanges,
 }: {
-  version: number
-  publishedVersion: number
+  meta: Pick<
+    WorkspaceBoardMeta,
+    "status" | "publishedVersion" | "hasUnpublishedChanges"
+  >
+  hasUnsavedChanges: boolean
 }) {
+  const editingStatus = hasUnsavedChanges
+    ? "Unsaved changes"
+    : meta.status === "published" && meta.hasUnpublishedChanges
+      ? "Unpublished changes"
+      : "Saved"
+
   return (
     <span className="text-[10px] font-semibold text-[#61709a]">
-      Latest saved v{version}
-      {publishedVersion > 0 && publishedVersion !== version
-        ? ` · Published v${publishedVersion}`
-        : ""}
+      {getRotaPublicationLabel(meta)} · {editingStatus}
     </span>
   )
 }

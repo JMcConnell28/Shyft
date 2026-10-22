@@ -3,6 +3,7 @@ import type {
   WorkspaceDay,
 } from "@/features/rota/types/workspace"
 import { ZoneSelect } from "@/features/rota/components/zone-select"
+import { getRotaPublicationLabel } from "@/features/rota/utils/rota-publication-label"
 
 function RotaViewToolbar({
   boardData,
@@ -29,7 +30,7 @@ function RotaViewToolbar({
             {weekRangeLabel}
           </span>
           <span className="text-[10px] font-semibold text-muted-foreground">
-            Published v{meta.contentVersion}
+            {getRotaPublicationLabel(meta)}
           </span>
         </div>
       </div>

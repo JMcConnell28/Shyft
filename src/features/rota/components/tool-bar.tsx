@@ -254,7 +254,7 @@ function ToolBarFrame({
   actions: React.ReactNode
   tools: React.ReactNode
 }) {
-  const { days, meta, selectedLocation } = useRotaWorkspace()
+  const { days, hasUnsavedChanges, meta, selectedLocation } = useRotaWorkspace()
   const weekRangeLabel = getWeekRangeLabel(days)
   const status = meta.status
 
@@ -276,21 +276,13 @@ function ToolBarFrame({
               />
               {getStatusLabel(status)}
             </Badge>
-            {status === "published" && meta.hasUnpublishedChanges ? (
-              <Badge
-                variant="outline"
-                className="hidden border-amber-200/80 bg-amber-50/90 text-[10px] font-semibold tracking-[0.08em] text-amber-700 uppercase shadow-sm shadow-amber-100/70 sm:inline-flex"
-              >
-                Changes not live
-              </Badge>
-            ) : null}
           </div>
           <span className="mt-0.5 text-xs font-semibold text-[#61709a] md:mt-0 md:font-normal md:text-muted-foreground">
             {weekRangeLabel}
           </span>
           <RotaVersionLabel
-            version={meta.contentVersion}
-            publishedVersion={meta.publishedContentVersion}
+            meta={meta}
+            hasUnsavedChanges={hasUnsavedChanges}
           />
         </div>
       </div>
