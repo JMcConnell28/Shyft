@@ -17,7 +17,7 @@ import {
 } from "lucide-react"
 import { useEffect, useRef } from "react"
 
-import type { AdminMembership } from "@/features/auth/server/admin-session"
+import type { AdminMembership } from "@/features/auth/types"
 import { SupportInboxIndicator } from "@/features/support/components/support-inbox-indicator"
 
 const navItems = [

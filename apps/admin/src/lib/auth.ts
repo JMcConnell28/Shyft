@@ -2,12 +2,18 @@ import "@tanstack/react-start/server-only"
 import "reflect-metadata"
 
 import { betterAuth } from "better-auth"
-import { APIError } from "better-auth/api"
+import { APIError, createAuthMiddleware } from "better-auth/api"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 
 import { getAdminAuthDatabase } from "@/lib/admin-auth-database"
 import { getOptionalEnv, getRequiredEnv } from "@/lib/env.server"
-import { ensureAdminMembershipForUser } from "@/features/auth/server/admin-session"
+import {
+  ensureAdminMembershipForUser,
+  requireAdminMembership,
+  revokeAdminSessionsForUser,
+} from "@/features/auth/server/admin-session"
+import { adminUserAdditionalFields } from "@/features/auth/server/admin-user-fields"
+import { requireAllowedAdminProfileUpdate } from "@/features/auth/server/require-admin-profile-update"
 
 const adminAuthBaseUrl =
   getOptionalEnv("ADMIN_BETTER_AUTH_URL") ?? "http://localhost:3001"
@@ -19,18 +25,7 @@ const auth = betterAuth({
   database: getAdminAuthDatabase(),
   user: {
     modelName: "admin_user",
-    additionalFields: {
-      role: {
-        type: "string",
-        required: false,
-        defaultValue: "readonly",
-      },
-      disabledAt: {
-        type: "date",
-        required: false,
-        fieldName: "disabled_at",
-      },
-    },
+    additionalFields: adminUserAdditionalFields,
   },
   session: {
     modelName: "admin_session",
@@ -47,21 +42,29 @@ const auth = betterAuth({
     enabled: true,
     requireEmailVerification: false,
   },
+  hooks: {
+    before: createAuthMiddleware((ctx) => {
+      if (ctx.path === "/update-user") {
+        requireAllowedAdminProfileUpdate(ctx.body)
+      }
+      return Promise.resolve()
+    }),
+  },
   databaseHooks: {
     user: {
       create: {
-        before: async (user) => {
+        before: (user) => {
           if (!isBootstrapAdminEmail(String(user.email))) {
             throw new APIError("FORBIDDEN", {
               message: "Admin accounts must be provisioned before sign in.",
             })
           }
 
-          return {
+          return Promise.resolve({
             data: {
               role: "owner",
             },
-          }
+          })
         },
         after: async (user) => {
           await ensureAdminMembershipForUser({
@@ -70,19 +73,18 @@ const auth = betterAuth({
           })
         },
       },
+      update: {
+        after: async (user) => {
+          if (user.disabledAt) {
+            await revokeAdminSessionsForUser(user.id)
+          }
+        },
+      },
     },
     session: {
       create: {
         before: async (session) => {
-          const membership = await ensureAdminMembershipForUser({
-            userId: session.userId,
-          })
-
-          if (membership.disabledAt) {
-            throw new APIError("FORBIDDEN", {
-              message: "This admin account has been disabled.",
-            })
-          }
+          await requireAdminMembership(session.userId)
         },
       },
     },
