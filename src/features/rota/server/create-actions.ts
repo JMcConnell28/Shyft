@@ -31,7 +31,7 @@ import {
 import { coerceNumber } from "@/features/rota/utils/week-utils"
 
 const previewRotaCreation = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => previewRotaCreationSchema.parse(input))
+  .validator((input: unknown) => previewRotaCreationSchema.parse(input))
   .handler(async ({ data }): Promise<RotaCreationPreview> => {
     const { requireVerifiedSessionOrThrow } =
       await import("@/features/rota/server/request-session")
@@ -92,7 +92,7 @@ const previewRotaCreation = createServerFn({ method: "POST" })
   })
 
 const createRotaDraft = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createRotaDialogSchema.parse(input))
+  .validator((input: unknown) => createRotaDialogSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireVerifiedSessionOrThrow } =
       await import("@/features/rota/server/request-session")
@@ -146,7 +146,7 @@ const createRotaDraft = createServerFn({ method: "POST" })
   })
 
 const duplicateRotaToNextWeek = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => duplicateRotaSchema.parse(input))
+  .validator((input: unknown) => duplicateRotaSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireVerifiedSessionOrThrow } =
       await import("@/features/rota/server/request-session")

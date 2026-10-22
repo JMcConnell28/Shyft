@@ -9,64 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminWorkspacesRouteImport } from './routes/_admin/workspaces'
-import { Route as AdminUsersRouteImport } from './routes/_admin/users'
-import { Route as AdminFeatureFlagsRouteImport } from './routes/_admin/feature-flags'
-import { Route as AdminEventsRouteImport } from './routes/_admin/events'
-import { Route as AdminErrorsRouteImport } from './routes/_admin/errors'
-import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
-import { Route as AdminClockStationsRouteImport } from './routes/_admin/clock-stations'
+import { Route as AdminRouteImport } from './routes/_admin'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminBillingRouteImport } from './routes/_admin/billing'
+import { Route as AdminClockStationsRouteImport } from './routes/_admin/clock-stations'
+import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
+import { Route as AdminErrorsRouteImport } from './routes/_admin/errors'
+import { Route as AdminEventsRouteImport } from './routes/_admin/events'
+import { Route as AdminFeatureFlagsRouteImport } from './routes/_admin/feature-flags'
 import { Route as AdminSupportRouteRouteImport } from './routes/_admin/support/route'
+import { Route as AdminUsersRouteImport } from './routes/_admin/users'
+import { Route as AdminWorkspacesRouteImport } from './routes/_admin/workspaces'
 import { Route as AdminSupportIndexRouteImport } from './routes/_admin/support/index'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminSupportThreadIdRouteImport } from './routes/_admin/support/$threadId'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminWorkspacesRoute = AdminWorkspacesRouteImport.update({
-  id: '/workspaces',
-  path: '/workspaces',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFeatureFlagsRoute = AdminFeatureFlagsRouteImport.update({
-  id: '/feature-flags',
-  path: '/feature-flags',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminEventsRoute = AdminEventsRouteImport.update({
-  id: '/events',
-  path: '/events',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminErrorsRoute = AdminErrorsRouteImport.update({
-  id: '/errors',
-  path: '/errors',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminDashboardRoute = AdminDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AdminBillingRoute = AdminBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminClockStationsRoute = AdminClockStationsRouteImport.update({
@@ -74,9 +49,24 @@ const AdminClockStationsRoute = AdminClockStationsRouteImport.update({
   path: '/clock-stations',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminBillingRoute = AdminBillingRouteImport.update({
-  id: '/billing',
-  path: '/billing',
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminErrorsRoute = AdminErrorsRouteImport.update({
+  id: '/errors',
+  path: '/errors',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEventsRoute = AdminEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFeatureFlagsRoute = AdminFeatureFlagsRouteImport.update({
+  id: '/feature-flags',
+  path: '/feature-flags',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSupportRouteRoute = AdminSupportRouteRouteImport.update({
@@ -84,20 +74,30 @@ const AdminSupportRouteRoute = AdminSupportRouteRouteImport.update({
   path: '/support',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminWorkspacesRoute = AdminWorkspacesRouteImport.update({
+  id: '/workspaces',
+  path: '/workspaces',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSupportIndexRoute = AdminSupportIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminSupportRouteRoute,
+} as any)
+const AdminSupportThreadIdRoute = AdminSupportThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
   getParentRoute: () => AdminSupportRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSupportThreadIdRoute = AdminSupportThreadIdRouteImport.update({
-  id: '/$threadId',
-  path: '/$threadId',
-  getParentRoute: () => AdminSupportRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -209,11 +209,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_admin': {
@@ -223,53 +223,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_admin/workspaces': {
-      id: '/_admin/workspaces'
-      path: '/workspaces'
-      fullPath: '/workspaces'
-      preLoaderRoute: typeof AdminWorkspacesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/users': {
-      id: '/_admin/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/feature-flags': {
-      id: '/_admin/feature-flags'
-      path: '/feature-flags'
-      fullPath: '/feature-flags'
-      preLoaderRoute: typeof AdminFeatureFlagsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/events': {
-      id: '/_admin/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof AdminEventsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/errors': {
-      id: '/_admin/errors'
-      path: '/errors'
-      fullPath: '/errors'
-      preLoaderRoute: typeof AdminErrorsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/dashboard': {
-      id: '/_admin/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AdminDashboardRouteImport
+    '/_admin/billing': {
+      id: '/_admin/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AdminBillingRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/clock-stations': {
@@ -279,11 +244,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClockStationsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/billing': {
-      id: '/_admin/billing'
-      path: '/billing'
-      fullPath: '/billing'
-      preLoaderRoute: typeof AdminBillingRouteImport
+    '/_admin/dashboard': {
+      id: '/_admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/errors': {
+      id: '/_admin/errors'
+      path: '/errors'
+      fullPath: '/errors'
+      preLoaderRoute: typeof AdminErrorsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/events': {
+      id: '/_admin/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof AdminEventsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/feature-flags': {
+      id: '/_admin/feature-flags'
+      path: '/feature-flags'
+      fullPath: '/feature-flags'
+      preLoaderRoute: typeof AdminFeatureFlagsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/support': {
@@ -293,11 +279,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSupportRouteRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/users': {
+      id: '/_admin/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/workspaces': {
+      id: '/_admin/workspaces'
+      path: '/workspaces'
+      fullPath: '/workspaces'
+      preLoaderRoute: typeof AdminWorkspacesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/support/': {
       id: '/_admin/support/'
       path: '/'
       fullPath: '/support/'
       preLoaderRoute: typeof AdminSupportIndexRouteImport
+      parentRoute: typeof AdminSupportRouteRoute
+    }
+    '/_admin/support/$threadId': {
+      id: '/_admin/support/$threadId'
+      path: '/$threadId'
+      fullPath: '/support/$threadId'
+      preLoaderRoute: typeof AdminSupportThreadIdRouteImport
       parentRoute: typeof AdminSupportRouteRoute
     }
     '/api/auth/$': {
@@ -306,13 +313,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_admin/support/$threadId': {
-      id: '/_admin/support/$threadId'
-      path: '/$threadId'
-      fullPath: '/support/$threadId'
-      preLoaderRoute: typeof AdminSupportThreadIdRouteImport
-      parentRoute: typeof AdminSupportRouteRoute
     }
   }
 }

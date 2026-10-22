@@ -22,7 +22,7 @@ import {
 } from "@/features/shift-swaps/server/actions"
 
 const getShiftSwapPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     listShiftSwapPageDataInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -31,7 +31,7 @@ const getShiftSwapPageData = createServerFn({ method: "POST" })
   })
 
 const getShiftSwapAvailability = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getShiftSwapAvailabilityInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -40,14 +40,14 @@ const getShiftSwapAvailability = createServerFn({ method: "POST" })
   })
 
 const createShiftSwapRequest = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createSwapRequestInputSchema.parse(input))
+  .validator((input: unknown) => createSwapRequestInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     return createSwapRequest(data)
   })
 
 const createShiftCoverRequest = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     createCoverRequestInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -56,7 +56,7 @@ const createShiftCoverRequest = createServerFn({ method: "POST" })
   })
 
 const respondToShiftSwapRequest = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     respondToSwapRequestInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -65,14 +65,14 @@ const respondToShiftSwapRequest = createServerFn({ method: "POST" })
   })
 
 const offerShiftCover = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => offerCoverInputSchema.parse(input))
+  .validator((input: unknown) => offerCoverInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     return offerCover(data)
   })
 
 const cancelShiftSwap = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     cancelShiftSwapRequestInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -81,7 +81,7 @@ const cancelShiftSwap = createServerFn({ method: "POST" })
   })
 
 const approveShiftSwap = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     managerShiftSwapActionInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -90,7 +90,7 @@ const approveShiftSwap = createServerFn({ method: "POST" })
   })
 
 const denyShiftSwap = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     managerShiftSwapActionInputSchema.parse(input)
   )
   .handler(async ({ data }) => {

@@ -15,7 +15,7 @@ const getClockStations = createServerFn({ method: "GET" }).handler(async () => {
 })
 
 const generateClockStationTagServerFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     generateClockStationTagInputSchema.parse(input),
   )
   .handler(async ({ data }) => {

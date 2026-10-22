@@ -10,7 +10,7 @@ const getAccountPreferences = createServerFn({ method: "GET" }).handler(
 )
 
 const updateAccountPreferences = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => accountPreferencesSchema.parse(input))
+  .validator((input: unknown) => accountPreferencesSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/account/server/preferences")
     return module.updateAccountPreferences(data)

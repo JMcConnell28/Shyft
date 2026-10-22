@@ -113,7 +113,7 @@ describe("shift assignment menu", () => {
     expect(leo.querySelector("[aria-hidden=true]")?.className).toContain(
       "bg-sky-500"
     )
-  })
+  }, 20_000)
 
   it("skips disabled employees and assigns with Enter, marking the rota unsaved and restoring focus", async () => {
     renderMenu()

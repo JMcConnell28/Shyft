@@ -17,7 +17,7 @@ const getBillingPageData = createServerFn({ method: "GET" }).handler(
 )
 
 const extendTrialServerFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => extendTrialSchema.parse(input))
+  .validator((input: unknown) => extendTrialSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireAdminPermission } = await import(
       "@/features/auth/server/admin-session"

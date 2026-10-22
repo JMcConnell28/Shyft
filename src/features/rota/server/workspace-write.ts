@@ -35,7 +35,7 @@ import {
 } from "@/features/rota/utils/workspace-shifts"
 
 const saveRotaWorkspace = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => saveRotaWorkspaceInputSchema.parse(input))
+  .validator((input: unknown) => saveRotaWorkspaceInputSchema.parse(input))
   .handler(async ({ data }) => {
     const context = await getManagedRotaContext(data.rotaId)
     const zoneSnapshotById = await getZoneSnapshotById(context)
@@ -149,7 +149,7 @@ const saveRotaWorkspace = createServerFn({ method: "POST" })
   })
 
 const createRotaShift = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createRotaShiftInputSchema.parse(input))
+  .validator((input: unknown) => createRotaShiftInputSchema.parse(input))
   .handler(async ({ data }) => {
     const context = await getManagedRotaContext(data.rotaId)
     const zone = await getZoneForLocationOrThrow(
@@ -225,7 +225,7 @@ const createRotaShift = createServerFn({ method: "POST" })
   })
 
 const assignRotaShiftEmployee = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     assignRotaShiftEmployeeInputSchema.parse(input)
   )
   .handler(async ({ data }): Promise<WorkspaceAssignmentMutationResult> => {
@@ -278,7 +278,7 @@ const assignRotaShiftEmployee = createServerFn({ method: "POST" })
   })
 
 const moveRotaShiftAssignment = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     moveRotaShiftAssignmentInputSchema.parse(input)
   )
   .handler(async ({ data }): Promise<WorkspaceAssignmentMutationResult> => {
@@ -337,7 +337,7 @@ const moveRotaShiftAssignment = createServerFn({ method: "POST" })
   })
 
 const removeRotaShiftAssignment = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     removeRotaShiftAssignmentInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -361,7 +361,7 @@ const removeRotaShiftAssignment = createServerFn({ method: "POST" })
   })
 
 const copyRotaBoard = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => copyRotaBoardInputSchema.parse(input))
+  .validator((input: unknown) => copyRotaBoardInputSchema.parse(input))
   .handler(async ({ data }): Promise<CopyRotaBoardResult> => {
     const context = await getManagedRotaContext(data.rotaId)
 

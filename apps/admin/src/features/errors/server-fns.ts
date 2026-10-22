@@ -13,7 +13,7 @@ const getErrors = createServerFn({ method: "GET" }).handler(async () => {
 })
 
 const updateErrorStatusServerFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => updateErrorStatusSchema.parse(input))
+  .validator((input: unknown) => updateErrorStatusSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireAdminPermission } = await import(
       "@/features/auth/server/admin-session"

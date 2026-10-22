@@ -14,7 +14,7 @@ import {
 } from "@/features/time-clock/schemas/time-clock-schemas"
 
 const getEmployeeClockPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getEmployeeClockPageInputSchema.parse(input),
   )
   .handler(async ({ data }) => {
@@ -23,21 +23,21 @@ const getEmployeeClockPageData = createServerFn({ method: "POST" })
   })
 
 const getClockScanPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => clockScanSearchSchema.parse(input))
+  .validator((input: unknown) => clockScanSearchSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/time-clock/server/ntag-clock-test")
     return module.getClockScanPageData(data)
   })
 
 const getAdminClockTagsPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => adminUserInputSchema.parse(input))
+  .validator((input: unknown) => adminUserInputSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/time-clock/server/admin-tags")
     return module.getAdminClockTagsPageData(data)
   })
 
 const generateAdminClockTagSetup = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     generateAdminClockTagSetupInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -46,7 +46,7 @@ const generateAdminClockTagSetup = createServerFn({ method: "POST" })
   })
 
 const submitEmployeeClock = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     submitEmployeeClockInputSchema.parse(input),
   )
   .handler(async ({ data }) => {
@@ -55,7 +55,7 @@ const submitEmployeeClock = createServerFn({ method: "POST" })
   })
 
 const getManagerClockPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getManagerClockPageInputSchema.parse(input),
   )
   .handler(async ({ data }) => {
@@ -64,7 +64,7 @@ const getManagerClockPageData = createServerFn({ method: "POST" })
   })
 
 const managerClockOverride = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     managerClockOverrideInputSchema.parse(input),
   )
   .handler(async ({ data }) => {
@@ -73,7 +73,7 @@ const managerClockOverride = createServerFn({ method: "POST" })
   })
 
 const approveTimeEntryAsRecorded = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     approveTimeEntryAsRecordedInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -82,7 +82,7 @@ const approveTimeEntryAsRecorded = createServerFn({ method: "POST" })
   })
 
 const getClockSettingsPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getClockSettingsPageInputSchema.parse(input),
   )
   .handler(async ({ data }) => {
@@ -91,7 +91,7 @@ const getClockSettingsPageData = createServerFn({ method: "POST" })
   })
 
 const updateClockSettings = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     updateClockSettingsInputSchema.parse(input),
   )
   .handler(async ({ data }) => {

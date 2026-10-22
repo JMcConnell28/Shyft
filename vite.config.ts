@@ -1,23 +1,14 @@
 import { fileURLToPath } from "node:url"
 import { defineConfig } from "vite"
 import { devtools } from "@tanstack/devtools-vite"
-// import mdx from "fumadocs-mdx/vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
-import viteTsConfigPaths from "vite-tsconfig-paths"
 import tailwindcss from "@tailwindcss/vite"
 import { nitro } from "nitro/vite"
-import type { RenderedChunk } from "rollup"
-
-function reflectMetadataServerBanner(chunk: RenderedChunk): string {
-  const isServerChunk =
-    chunk.fileName.startsWith("_libs/") || chunk.fileName.startsWith("_ssr/")
-
-  return isServerChunk ? `import "reflect-metadata";` : ""
-}
 
 const config = defineConfig({
   resolve: {
+    tsconfigPaths: true,
     alias: [
       {
         find: "@noble/ciphers/utils.js",
@@ -33,16 +24,17 @@ const config = defineConfig({
     host: true,
     port: 3000,
   },
-  build: {
-    rollupOptions: {
-      output: {
-        banner: reflectMetadataServerBanner,
+  environments: {
+    ssr: {
+      build: {
+        rolldownOptions: {
+          output: { banner: 'import "reflect-metadata";' },
+        },
       },
     },
   },
   plugins: [
     tanstackStart(),
-    // mdx(),
     devtools(),
     nitro({
       alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
@@ -84,10 +76,6 @@ const config = defineConfig({
           },
         },
       },
-    }),
-    // this is the plugin that enables path aliases
-    viteTsConfigPaths({
-      projects: ["./tsconfig.json"],
     }),
     tailwindcss(),
     viteReact(),

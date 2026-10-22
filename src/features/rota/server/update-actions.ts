@@ -19,7 +19,7 @@ import { getLocationRotaSettings } from "@/features/rota/server/rota-settings"
 import { reapplyApprovedShiftSwapOverrides } from "@/features/shift-swaps/server/publish-overrides"
 
 const publishRotaVersion = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => publishRotaSchema.parse(input))
+  .validator((input: unknown) => publishRotaSchema.parse(input))
   .handler(async ({ data }): Promise<PublishRotaVersionResult> => {
     const context = await requireRotaWriteAccess({
       rotaId: data.rotaId,
@@ -175,7 +175,7 @@ const publishRotaVersion = createServerFn({ method: "POST" })
   })
 
 const updateRotaNote = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => updateRotaNoteSchema.parse(input))
+  .validator((input: unknown) => updateRotaNoteSchema.parse(input))
   .handler(async ({ data }) => {
     const context = await requireRotaWriteAccess({
       rotaId: data.rotaId,
@@ -215,7 +215,7 @@ const updateRotaNote = createServerFn({ method: "POST" })
   })
 
 const updateRotaBudget = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => updateRotaBudgetSchema.parse(input))
+  .validator((input: unknown) => updateRotaBudgetSchema.parse(input))
   .handler(async ({ data }) => {
     const context = await requireRotaWriteAccess({
       rotaId: data.rotaId,

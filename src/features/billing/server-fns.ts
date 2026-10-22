@@ -37,7 +37,7 @@ const portalSchema = workspaceReferenceSchema.extend({
 })
 
 const startSubscriptionCheckout = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => checkoutSchema.parse(input))
+  .validator((input: unknown) => checkoutSchema.parse(input))
   .handler(async ({ data }) => {
     const { session } = await requireVerifiedSessionOrThrow()
 
@@ -62,7 +62,7 @@ const startSubscriptionCheckout = createServerFn({ method: "POST" })
   })
 
 const getWorkspaceBillingStatus = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => billingStatusSchema.parse(input))
+  .validator((input: unknown) => billingStatusSchema.parse(input))
   .handler(async ({ data }) => {
     const { session } = await requireVerifiedSessionOrThrow()
 
@@ -110,7 +110,7 @@ const getWorkspaceBillingStatus = createServerFn({ method: "POST" })
   })
 
 const startBillingPortal = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => portalSchema.parse(input))
+  .validator((input: unknown) => portalSchema.parse(input))
   .handler(async ({ data }) => {
     const { session } = await requireVerifiedSessionOrThrow()
 
@@ -133,7 +133,7 @@ const startBillingPortal = createServerFn({ method: "POST" })
   })
 
 const updateTimeAttendanceAddon = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     timeAttendanceAddonInputSchema.parse(input)
   )
   .handler(async ({ data }) => {

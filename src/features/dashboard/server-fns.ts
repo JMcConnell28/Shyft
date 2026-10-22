@@ -4,7 +4,7 @@ import { getDashboardShiftOverviewInputSchema } from "@/features/dashboard/schem
 import { dashboardWelcomeWorkspaceSchema } from "@/features/dashboard/schemas/welcome-schemas"
 
 const getDashboardShiftOverview = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getDashboardShiftOverviewInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -13,7 +13,7 @@ const getDashboardShiftOverview = createServerFn({ method: "POST" })
   })
 
 const getDashboardWelcome = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     dashboardWelcomeWorkspaceSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -22,7 +22,7 @@ const getDashboardWelcome = createServerFn({ method: "POST" })
   })
 
 const dismissDashboardWelcome = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     dashboardWelcomeWorkspaceSchema.parse(input)
   )
   .handler(async ({ data }) => {

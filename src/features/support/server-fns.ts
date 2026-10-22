@@ -9,7 +9,7 @@ import {
 } from "@/features/support/schemas"
 
 const listSupportThreads = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => supportListSchema.parse(input))
+  .validator((input: unknown) => supportListSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireCustomerSupportAccess } =
       await import("@/features/support/server/access")
@@ -20,7 +20,7 @@ const listSupportThreads = createServerFn({ method: "POST" })
   })
 
 const getSupportThread = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => supportThreadIdSchema.parse(input))
+  .validator((input: unknown) => supportThreadIdSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireCustomerSupportAccess } =
       await import("@/features/support/server/access")
@@ -31,7 +31,7 @@ const getSupportThread = createServerFn({ method: "POST" })
   })
 
 const getSupportNotifications = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => supportScopeSchema.parse(input))
+  .validator((input: unknown) => supportScopeSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireCustomerSupportAccess } =
       await import("@/features/support/server/access")
@@ -42,7 +42,7 @@ const getSupportNotifications = createServerFn({ method: "POST" })
   })
 
 const getSupportLocations = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => supportScopeSchema.parse(input))
+  .validator((input: unknown) => supportScopeSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireCustomerSupportAccess } =
       await import("@/features/support/server/access")
@@ -53,7 +53,7 @@ const getSupportLocations = createServerFn({ method: "POST" })
   })
 
 const createSupportThread = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createSupportThreadSchema.parse(input))
+  .validator((input: unknown) => createSupportThreadSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireCustomerSupportAccess } =
       await import("@/features/support/server/access")
@@ -64,7 +64,7 @@ const createSupportThread = createServerFn({ method: "POST" })
   })
 
 const replyToSupportThread = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => replyToSupportThreadSchema.parse(input))
+  .validator((input: unknown) => replyToSupportThreadSchema.parse(input))
   .handler(async ({ data }) => {
     const { requireCustomerSupportAccess } =
       await import("@/features/support/server/access")

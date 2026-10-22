@@ -16,7 +16,7 @@ import {
 } from "@/features/staff-groups/schemas/staff-group-schemas"
 
 const getStaffGroupSettingsPageData = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     getStaffGroupSettingsInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -25,7 +25,7 @@ const getStaffGroupSettingsPageData = createServerFn({ method: "POST" })
   })
 
 const createStaffGroup = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => createStaffGroupInputSchema.parse(input))
+  .validator((input: unknown) => createStaffGroupInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/staff-groups/server/actions")
@@ -33,7 +33,7 @@ const createStaffGroup = createServerFn({ method: "POST" })
   })
 
 const renameStaffGroup = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => renameStaffGroupInputSchema.parse(input))
+  .validator((input: unknown) => renameStaffGroupInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/staff-groups/server/actions")
@@ -41,7 +41,7 @@ const renameStaffGroup = createServerFn({ method: "POST" })
   })
 
 const setStaffGroupColor = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     setStaffGroupColorInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -51,7 +51,7 @@ const setStaffGroupColor = createServerFn({ method: "POST" })
   })
 
 const deleteStaffGroup = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => deleteStaffGroupInputSchema.parse(input))
+  .validator((input: unknown) => deleteStaffGroupInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/staff-groups/server/actions")
@@ -59,7 +59,7 @@ const deleteStaffGroup = createServerFn({ method: "POST" })
   })
 
 const assignEmployeeStaffGroup = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     assignEmployeeStaffGroupInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -69,7 +69,7 @@ const assignEmployeeStaffGroup = createServerFn({ method: "POST" })
   })
 
 const bulkAssignEmployeeStaffGroup = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     bulkAssignEmployeeStaffGroupInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -79,7 +79,7 @@ const bulkAssignEmployeeStaffGroup = createServerFn({ method: "POST" })
   })
 
 const setEmployeeActiveStatus = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => setEmployeeActiveInputSchema.parse(input))
+  .validator((input: unknown) => setEmployeeActiveInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/staff-groups/server/actions")
@@ -87,7 +87,7 @@ const setEmployeeActiveStatus = createServerFn({ method: "POST" })
   })
 
 const setEmployeeCompensation = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     setEmployeeCompensationInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -97,7 +97,7 @@ const setEmployeeCompensation = createServerFn({ method: "POST" })
   })
 
 const bulkSetEmployeeCompensation = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     bulkSetEmployeeCompensationInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
@@ -107,7 +107,7 @@ const bulkSetEmployeeCompensation = createServerFn({ method: "POST" })
   })
 
 const removeEmployeeFromWorkspace = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     removeEmployeeFromWorkspaceInputSchema.parse(input)
   )
   .handler(async ({ data }) => {
