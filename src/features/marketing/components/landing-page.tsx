@@ -3,7 +3,7 @@ import { LandingPageShell } from "./landing-page-shell"
 import { LandingRotaImage } from "./landing-rota-image"
 import { MarketingHeader } from "./marketing-header"
 import { PreviewClosing } from "./landing-preview/preview-closing"
-import { PreviewFooter } from "./landing-preview/preview-footer"
+import { MarketingFooter } from "./marketing-footer"
 import { PreviewWorkflow } from "./landing-preview/preview-workflow"
 
 function LandingPage({
@@ -34,7 +34,7 @@ function LandingPage({
         <PreviewWorkflow />
         <PreviewClosing />
       </main>
-      <PreviewFooter />
+      <MarketingFooter />
     </LandingPageShell>
   )
 }

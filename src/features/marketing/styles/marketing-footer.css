@@ -1,0 +1,74 @@
+.marketing-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: min(100% - 96px, 1152px);
+  margin-inline: auto;
+  padding-block: 30px;
+  color: #182565;
+  font-family: "Manrope Variable", sans-serif;
+}
+.marketing-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.055em;
+}
+.marketing-footer-brand img {
+  width: 35px;
+  height: auto;
+  object-fit: contain;
+}
+.marketing-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  color: #627394;
+  font-size: 12px;
+}
+.marketing-footer nav a {
+  padding-block: 12px;
+  transition: color 0.15s;
+}
+.marketing-footer nav a:hover {
+  color: #325cff;
+}
+.marketing-footer a:focus-visible {
+  outline: 3px solid #325cff;
+  outline-offset: 5px;
+}
+@media (max-width: 1100px) {
+  .marketing-footer-brand {
+    gap: 10px;
+  }
+}
+@media (max-width: 900px) {
+  .marketing-footer {
+    width: calc(100% - 64px);
+  }
+}
+@media (max-width: 640px) {
+  .marketing-footer {
+    width: calc(100% - 40px);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-block: 26px;
+  }
+  .marketing-footer-brand {
+    gap: 8px;
+  }
+  .marketing-footer nav {
+    gap: 20px;
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marketing-footer nav a {
+    transition: none;
+  }
+}

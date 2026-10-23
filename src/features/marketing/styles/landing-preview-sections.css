@@ -103,31 +103,3 @@
   margin-top: 18px;
   font-size: 12px;
 }
-.landing-preview .preview-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding-block: 30px;
-}
-.preview-footer .preview-brand {
-  font-size: 17px;
-}
-.preview-footer .preview-brand img {
-  width: 35px;
-  height: auto;
-}
-.preview-footer nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 26px;
-  color: var(--preview-muted);
-  font-size: 12px;
-}
-.preview-footer nav a {
-  padding-block: 12px;
-  transition: color 0.15s;
-}
-.preview-footer nav a:hover {
-  color: var(--preview-blue);
-}

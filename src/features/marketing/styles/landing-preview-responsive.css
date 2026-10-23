@@ -72,16 +72,6 @@
     margin-top: 12px;
     font-size: 11px;
   }
-  .landing-preview .preview-footer {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding-block: 26px;
-  }
-  .preview-footer nav {
-    gap: 20px;
-    font-size: 11px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .landing-preview *,

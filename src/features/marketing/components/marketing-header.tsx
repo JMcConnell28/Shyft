@@ -46,7 +46,7 @@ function MarketingHeader({
             <NavigationMenuTrigger
               className={cn(
                 "bg-transparent text-sm font-semibold hover:bg-white/50 hover:text-[#16346e] focus:bg-white/50",
-                activePage === "features" ? "text-[#16346e]" : "text-[#19356f]",
+                activePage === "features" ? "text-[#16346e]" : "text-[#19356f]"
               )}
             >
               Features
@@ -81,16 +81,14 @@ function MarketingHeader({
               className={cn(
                 navigationMenuTriggerStyle(),
                 "bg-transparent text-sm font-semibold hover:bg-white/50 hover:text-[#16346e]",
-                activePage === "pricing" ? "text-[#16346e]" : "text-[#19356f]",
+                activePage === "pricing" ? "text-[#16346e]" : "text-[#19356f]"
               )}
             >
               Pricing
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger
-              className="bg-transparent text-sm font-semibold text-[#19356f] hover:bg-white/50 hover:text-[#16346e] focus:bg-white/50"
-            >
+            <NavigationMenuTrigger className="bg-transparent text-sm font-semibold text-[#19356f] hover:bg-white/50 hover:text-[#16346e] focus:bg-white/50">
               Resources
             </NavigationMenuTrigger>
             <NavigationMenuContent className="w-[280px] p-2">
@@ -99,7 +97,9 @@ function MarketingHeader({
                   href="/help"
                   className="block rounded-xl p-3 hover:bg-[#f4f8ff]"
                 >
-                  <p className="text-sm font-semibold text-[#16346e]">Help Centre</p>
+                  <p className="text-sm font-semibold text-[#16346e]">
+                    Help Centre
+                  </p>
                   <p className="mt-1 text-xs leading-5 text-[#667ba1]">
                     Quick answers for managers and teams.
                   </p>
@@ -107,7 +107,7 @@ function MarketingHeader({
               </div>
             </NavigationMenuContent>
           </NavigationMenuItem>
-          <NavigationMenuItem>
+          {/* <NavigationMenuItem>
             <button
               type="button"
               className={cn(
@@ -117,7 +117,7 @@ function MarketingHeader({
             >
               About
             </button>
-          </NavigationMenuItem>
+          </NavigationMenuItem> */}
         </NavigationMenuList>
       </NavigationMenu>
 
@@ -128,7 +128,7 @@ function MarketingHeader({
           reloadDocument={isAuthenticated}
           className={cn(
             buttonVariants({ variant: "pill", size: "lg" }),
-            marketingLoginButtonClassName,
+            marketingLoginButtonClassName
           )}
         >
           <AuthButtonIcon className="size-4" />
@@ -140,7 +140,7 @@ function MarketingHeader({
           className={cn(
             buttonVariants({ size: "lg" }),
             marketingPrimaryButtonClassName,
-            "hidden sm:inline-flex",
+            "hidden sm:inline-flex"
           )}
         >
           Start free trial
