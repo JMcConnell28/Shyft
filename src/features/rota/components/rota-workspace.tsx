@@ -25,6 +25,7 @@ import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import type {
   WorkspaceBoardData,
   WorkspaceDragData,
+  WorkspaceEmployee,
 } from "@/features/rota/types/workspace"
 import {
   RotaWorkspaceProvider,
@@ -35,18 +36,33 @@ import { ROTA_EMPLOYEE_LIST_DROP_ID } from "@/features/rota/constants/drag-and-d
 function RotaWorkspace({
   boardData,
   mode = "default",
+  demoEmployees,
+  showSummary = mode === "default",
 }: {
   boardData: WorkspaceBoardData
   mode?: "default" | "demo"
+  demoEmployees?: Array<WorkspaceEmployee>
+  showSummary?: boolean
 }) {
   return (
-    <RotaWorkspaceProvider boardData={boardData} mode={mode}>
-      <RotaWorkspaceCanvas mode={mode} />
+    <RotaWorkspaceProvider
+      boardData={boardData}
+      mode={mode}
+      demoEmployees={demoEmployees}
+    >
+      <RotaWorkspaceCanvas mode={mode} showSummary={showSummary} />
     </RotaWorkspaceProvider>
   )
 }
 
-function RotaWorkspaceCanvas({ mode }: { mode: "default" | "demo" }) {
+function RotaWorkspaceCanvas({
+  mode,
+  showSummary,
+}: {
+  mode: "default" | "demo"
+  showSummary: boolean
+}) {
+  const dragContextId = React.useId()
   const {
     assignEmployeeToShift,
     employeeMetricsById,
@@ -138,6 +154,7 @@ function RotaWorkspaceCanvas({ mode }: { mode: "default" | "demo" }) {
 
   return (
     <DndContext
+      id={dragContextId}
       collisionDetection={pointerWithin}
       sensors={sensors}
       onDragStart={handleDragStart}
@@ -157,7 +174,7 @@ function RotaWorkspaceCanvas({ mode }: { mode: "default" | "demo" }) {
             readOnly={readOnly}
           />
         </div>
-        {mode === "default" ? (
+        {showSummary ? (
           <div className="hidden md:block">
             <WeekSummary readOnly={readOnly} />
           </div>

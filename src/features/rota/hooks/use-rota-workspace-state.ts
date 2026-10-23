@@ -23,6 +23,7 @@ import {
 import { buildBudgetInsights } from "@/features/rota/utils/budget-insights"
 import { shiftsHaveMatchingTimes } from "@/features/rota/utils/workspace-shifts"
 import { indexWorkspaceShifts } from "@/features/rota/utils/workspace-shift-index"
+import { filterRosterAssignments } from "@/features/rota/utils/filter-roster-assignments"
 import {
   buildWorkspaceInsights,
   getZoneAppearance,
@@ -31,9 +32,11 @@ import {
 function useRotaWorkspaceState({
   boardData,
   mode = "default",
+  demoEmployees,
 }: {
   boardData: WorkspaceBoardData
   mode?: "default" | "demo"
+  demoEmployees?: Array<WorkspaceEmployee>
 }) {
   const [meta, setMeta] = React.useState(boardData.meta)
   const { selectedZoneId, setSelectedZoneId } = useRotaZoneSelection({
@@ -45,7 +48,7 @@ function useRotaWorkspaceState({
   const [shiftsById, setShiftsById] = React.useState(() =>
     mapById(boardData.shifts)
   )
-  const [assignmentsById, setAssignmentsById] = React.useState(() =>
+  const [storedAssignmentsById, setAssignmentsById] = React.useState(() =>
     mapById(boardData.assignments)
   )
   const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false)
@@ -58,9 +61,15 @@ function useRotaWorkspaceState({
     setHasUnsavedChanges(false)
   }, [boardData])
 
-  const employeesById = React.useMemo(
-    () => mapById(boardData.employees),
-    [boardData.employees]
+  const employees =
+    mode === "demo" && demoEmployees ? demoEmployees : boardData.employees
+  const employeesById = React.useMemo(() => mapById(employees), [employees])
+  const assignmentsById = React.useMemo(
+    () =>
+      mode === "demo"
+        ? filterRosterAssignments(storedAssignmentsById, employeesById)
+        : storedAssignmentsById,
+    [mode, storedAssignmentsById, employeesById]
   )
   const lowerSearchQuery = searchQuery.trim().toLowerCase()
 
@@ -108,7 +117,7 @@ function useRotaWorkspaceState({
   const employeeGroups = React.useMemo(() => {
     return boardData.employeeGroups
       .map((group) => {
-        const employeeIds = boardData.employees
+        const employeeIds = employees
           .filter((employee) => employee.groupId === group.id)
           .filter((employee) => {
             if (!lowerSearchQuery) {
@@ -125,7 +134,7 @@ function useRotaWorkspaceState({
         }
       })
       .filter((group) => group.employeeIds.length > 0 || !lowerSearchQuery)
-  }, [boardData.employeeGroups, boardData.employees, lowerSearchQuery])
+  }, [boardData.employeeGroups, employees, lowerSearchQuery])
 
   const daySummaries = React.useMemo(() => {
     return getScheduledCostSummaries({

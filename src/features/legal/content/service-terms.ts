@@ -1,11 +1,12 @@
 import type { TermsSection } from "@/features/legal/types"
+import { legalBusinessDetails } from "@/features/legal/business-details"
 
 const serviceTermsSections: ReadonlyArray<TermsSection> = [
   {
     title: "About RocketRota",
     paragraphs: [
       "These Terms and Conditions govern access to and use of RocketRota, a workforce scheduling, rota management and time and attendance service for businesses employing shift-based workers (the Service).",
-      "The Service is provided by [LEGAL BUSINESS NAME], trading as RocketRota, at [BUSINESS ADDRESS]. Email: [CONTACT EMAIL]. Company registration number, if applicable: [COMPANY NUMBER]. Website: rocketrota.com. RocketRota, we, us and our mean this service provider.",
+      `The Service is provided by ${legalBusinessDetails.providerName}, a sole trader, at ${legalBusinessDetails.address}. Email: ${legalBusinessDetails.contactEmail}. Website: rocketrota.com. RocketRota, we, us and our mean this service provider.`,
       "Customer means the organisation or business using or purchasing the Service. Authorised Users means owners, administrators, managers, employees and other workforce members permitted to access it. Customer Data means information and records submitted by the Customer or its Authorised Users.",
     ],
   },
@@ -57,9 +58,9 @@ const serviceTermsSections: ReadonlyArray<TermsSection> = [
   {
     title: "Cancellation",
     paragraphs: [
-      "An authorised billing administrator can manage or cancel the subscription through Manage billing. Contact [CONTACT EMAIL] if these controls are unavailable. Cancellation normally stops renewal at the end of the current subscription period; check the effective date shown. To prevent a trial subscription becoming paid, cancel before the displayed trial end.",
+      `An authorised billing administrator can manage or cancel the subscription through Manage billing. Contact ${legalBusinessDetails.contactEmail} if these controls are unavailable. Cancellation stops automatic renewal at the end of the current subscription period. The Customer retains access to the subscribed Service until that period ends, subject to the other suspension and termination provisions of these Terms. The effective cancellation date is shown in Manage billing. To prevent a trial subscription becoming paid, cancel before the displayed trial end.`,
       "Time & Attendance can be cancelled separately for a location through its add-on controls and remains enabled until the cancellation date shown. Cancelling an add-on does not cancel the core subscription. Cancelling a subscription does not itself delete the workplace or its records.",
-      "Unless otherwise agreed or required by law, fees already paid are non-refundable and unused portions of a billing period are not credited. Cancellation does not waive outstanding fees or final metered usage charges, which may be invoiced afterwards. This does not remove remedies for our breach or rights that cannot lawfully be excluded.",
+      "We do not offer refunds or credits for cancellation, non-use or unused portions of a billing period, except where required by law or to give effect to remedies for our breach. Cancellation does not waive outstanding fees or final metered usage charges, which may be invoiced afterwards. Nothing in this policy removes rights or remedies that cannot lawfully be excluded.",
     ],
   },
   {

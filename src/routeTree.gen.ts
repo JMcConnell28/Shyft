@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as ClockRouteImport } from './routes/clock'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LandingRouteImport } from './routes/landing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -98,9 +101,19 @@ const ClockRoute = ClockRouteImport.update({
   path: '/clock',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -111,6 +124,11 @@ const LoginRoute = LoginRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -506,9 +524,12 @@ const AuthedVerifiedAppWorkspaceSlugRotaLocationSlugRotaIdViewRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/clock': typeof ClockRouteWithChildren
+  '/demo': typeof DemoRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-up': typeof SignUpRoute
   '/terms': typeof TermsRoute
@@ -580,9 +601,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/clock': typeof ClockRouteWithChildren
+  '/demo': typeof DemoRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-up': typeof SignUpRoute
   '/terms': typeof TermsRoute
@@ -648,9 +672,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteRouteWithChildren
   '/clock': typeof ClockRouteWithChildren
+  '/demo': typeof DemoRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-up': typeof SignUpRoute
   '/terms': typeof TermsRoute
@@ -725,9 +752,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/clock'
+    | '/demo'
     | '/forgot-password'
+    | '/landing'
     | '/login'
     | '/pricing'
+    | '/privacy'
     | '/reset-password'
     | '/sign-up'
     | '/terms'
@@ -799,9 +829,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/clock'
+    | '/demo'
     | '/forgot-password'
+    | '/landing'
     | '/login'
     | '/pricing'
+    | '/privacy'
     | '/reset-password'
     | '/sign-up'
     | '/terms'
@@ -866,9 +899,12 @@ export interface FileRouteTypes {
     | '/'
     | '/_authed'
     | '/clock'
+    | '/demo'
     | '/forgot-password'
+    | '/landing'
     | '/login'
     | '/pricing'
+    | '/privacy'
     | '/reset-password'
     | '/sign-up'
     | '/terms'
@@ -943,9 +979,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
   ClockRoute: typeof ClockRouteWithChildren
+  DemoRoute: typeof DemoRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignUpRoute: typeof SignUpRoute
   TermsRoute: typeof TermsRoute
@@ -989,11 +1028,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClockRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1008,6 +1061,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -1753,9 +1813,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRouteRoute: AuthedRouteRouteWithChildren,
   ClockRoute: ClockRouteWithChildren,
+  DemoRoute: DemoRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignUpRoute: SignUpRoute,
   TermsRoute: TermsRoute,

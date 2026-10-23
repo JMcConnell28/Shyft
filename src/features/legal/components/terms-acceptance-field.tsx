@@ -38,6 +38,18 @@ function TermsAcceptanceField({
           .
         </span>
       </div>
+      <p className="px-1 text-xs leading-5 text-[#52698f]">
+        Read our{" "}
+        <a
+          href="/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-[#075fe6] underline underline-offset-4"
+        >
+          Privacy Policy
+        </a>{" "}
+        for information about how we handle personal data.
+      </p>
       <FieldError id="accepts-terms-error">{error}</FieldError>
     </div>
   )

@@ -1,4 +1,5 @@
 import type { TermsSection } from "@/features/legal/types"
+import { legalBusinessDetails } from "@/features/legal/business-details"
 
 const dataTermsSections: ReadonlyArray<TermsSection> = [
   {
@@ -12,7 +13,7 @@ const dataTermsSections: ReadonlyArray<TermsSection> = [
     title: "Customer Data",
     paragraphs: [
       "The Customer must have the right and lawful basis to provide Customer Data. It is responsible for accuracy, informing workforce members how their information is used, managing access and exports, responding to employment-related questions, and determining appropriate workforce-record retention requirements.",
-      "We process Customer Data to provide, secure, maintain and support the Service under documented instructions and the terms below. Account administration, billing and other processing for which we independently determine purposes are described in our Privacy Notice: [PRIVACY NOTICE URL].",
+      `We process Customer Data to provide, secure, maintain and support the Service under documented instructions and the terms below. Account administration, billing and other processing for which we independently determine purposes are described in our Privacy Notice: ${legalBusinessDetails.privacyNoticeUrl}.`,
     ],
   },
   {
@@ -37,20 +38,23 @@ const dataTermsSections: ReadonlyArray<TermsSection> = [
       {
         title: "Security",
         paragraphs: [
-          "We will implement appropriate technical and organisational measures required by Article 32 UK GDPR, accounting for the nature of processing and risks to individuals. Applicable measures: [SECURITY MEASURES OR SECURITY SCHEDULE URL]. The Customer must secure its own devices, credentials, permissions and exported files.",
+          "We will implement appropriate technical and organisational measures required by Article 32 UK GDPR, accounting for the nature of processing and risks to individuals. Application controls include individual authenticated accounts, session checks and organisation- and location-based permission checks. Privileged database and email-service credentials are used in server-side code. Payment-card collection takes place through Stripe-hosted checkout; RocketRota stores payment references rather than full card details.",
+          "Production infrastructure, access-management and recovery measures: [VERIFIED PRODUCTION SECURITY AND RECOVERY MEASURES]. The Customer must secure its own devices, credentials, permissions and exported files.",
         ],
       },
       {
         title: "Sub-processors",
         paragraphs: [
-          "The Customer gives general written authorisation for sub-processors identified in [SUB-PROCESSOR LIST URL, INCLUDING PURPOSES AND PROCESSING LOCATIONS]. We will notify the Customer in advance of intended additions or replacements and allow a reasonable opportunity to object on data-protection grounds before the change. If an objection cannot be resolved, the parties will discuss an alternative or termination of the affected Service before the new processing begins.",
+          "The Customer gives general written authorisation for the following sub-processors: netcup GmbH for application-server hosting in Germany, including processing of application requests and server logs; Supabase Pte. Ltd. for the hosted database, with primary project data in Ireland; Plus Five Five, Inc., trading as Resend, for transactional email delivery, including recipients, message content and delivery information, with primary processing in the United States; and coolLabs Solutions Kft., providing Coolify Cloud for hosted deployment management and server access, which may include access to deployment configuration and application logs, with processing locations [CONFIRMED COOLIFY CLOUD PROCESSING LOCATIONS]. [CONFIRM ANY ADDITIONAL SUB-PROCESSORS, INCLUDING SUPPORT AND BACKUP SERVICES].",
+          "We will notify the Customer in advance of intended sub-processor additions or replacements and allow a reasonable opportunity to object on data-protection grounds before the change. If an objection cannot be resolved, the parties will discuss an alternative or termination of the affected Service before the new processing begins.",
           "We will impose equivalent applicable data-protection obligations on sub-processors and remain responsible to the Customer for their performance. A provider acting as an independent controller is not a sub-processor for that processing.",
         ],
       },
       {
         title: "International transfers",
         paragraphs: [
-          "We will make restricted international transfers only under documented instructions and applicable law, using an applicable adequacy regulation or appropriate safeguards where required. Processing locations and transfer safeguards: [INTERNATIONAL TRANSFER DETAILS OR URL].",
+          "Primary database processing takes place in Ireland, application hosting in Germany, and transactional email processing includes the United States. Hosted deployment management is provided through Coolify Cloud as identified in section 17.4. A primary hosting location does not mean that all provider support, administration or onward processing takes place in that country.",
+          "We will make restricted international transfers only under documented instructions and applicable law, using an applicable adequacy regulation or appropriate safeguards where required. Supabase's and Resend's published data-processing agreements include standard contractual clauses and a UK Addendum for applicable UK transfers. The safeguards and any additional processing locations applicable to our provider accounts are: [CONFIRMED PROVIDER AGREEMENTS AND TRANSFER ARRANGEMENTS].",
         ],
       },
       {
@@ -80,8 +84,8 @@ const dataTermsSections: ReadonlyArray<TermsSection> = [
       {
         title: "End of processing",
         paragraphs: [
-          "When processing services end, we will, at the Customer's choice, return or securely delete personal data processed on its behalf and delete existing copies unless UK law requires retention. Communicate this choice to [CONTACT EMAIL]. Data-return arrangements and post-termination retention: [DATA RETURN PROCESS AND RETENTION PERIOD].",
-          "If no return instruction is given within that period, we will delete the data. Residual backups will be put beyond operational use, protected and removed under [BACKUP DELETION PERIOD]. Legally required retention is limited to that legal purpose. Cancelling billing alone is not an instruction to delete an otherwise continuing account.",
+          `When processing services end, we will, at the Customer's choice, return or securely delete personal data processed on its behalf and delete existing copies unless UK law requires retention. The Customer has 30 days after account closure or the end of processing services to request data return by emailing ${legalBusinessDetails.contactEmail}. We will verify the requesting person's authority and arrange delivery in a commonly used electronic format through an appropriately secure method. The Customer may request earlier deletion.`,
+          "If no return instruction is given within that period, we will delete the data. Completion times for requested returns and deletion from live systems: [DATA RETURN AND LIVE-DATA DELETION TIMESCALE]. Residual backup copies, where held, will be protected, put beyond ordinary operational use and removed within [BACKUP DELETION PERIOD]. If a backup is restored, relevant deletion instructions must be reapplied before the data is returned to ordinary use. Legally required retention is limited to that legal purpose. Cancelling billing alone is not an instruction to delete an otherwise continuing account.",
         ],
       },
     ],

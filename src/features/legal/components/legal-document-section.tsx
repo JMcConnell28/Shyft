@@ -1,13 +1,15 @@
-import type { TermsSection } from "@/features/legal/types"
+import type { LegalDocumentSection } from "@/features/legal/types"
 
-function TermsSectionContent({
+function LegalDocumentSectionContent({
   section,
   number,
+  documentId,
 }: {
-  section: TermsSection
+  section: LegalDocumentSection
   number: number
+  documentId: string
 }) {
-  const headingId = `terms-${number}`
+  const headingId = `${documentId}-${number}`
 
   return (
     <section aria-labelledby={headingId}>
@@ -21,6 +23,7 @@ function TermsSectionContent({
         {section.paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
+        {section.links && <LegalDocumentLinks links={section.links} />}
         {section.subsections?.map((subsection, index) => (
           <section
             key={subsection.title}
@@ -37,6 +40,9 @@ function TermsSectionContent({
               {subsection.paragraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
+              {subsection.links && (
+                <LegalDocumentLinks links={subsection.links} />
+              )}
             </div>
           </section>
         ))}
@@ -45,4 +51,25 @@ function TermsSectionContent({
   )
 }
 
-export { TermsSectionContent }
+function LegalDocumentLinks({
+  links,
+}: {
+  links: NonNullable<LegalDocumentSection["links"]>
+}) {
+  return (
+    <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+      {links.map((link) => (
+        <li key={link.href}>
+          <a
+            href={link.href}
+            className="font-semibold text-[#1264e9] underline underline-offset-4"
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+export { LegalDocumentSectionContent }

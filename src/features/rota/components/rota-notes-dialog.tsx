@@ -77,6 +77,7 @@ function DemoRotaNotesDialog() {
       isSaving={false}
       metaNote={meta.note}
       onSave={saveDemoNote}
+      isDemo
     />
   )
 }
@@ -85,10 +86,12 @@ function RotaNotesDialogContent({
   isSaving,
   metaNote,
   onSave,
+  isDemo = false,
 }: {
   isSaving: boolean
   metaNote: string | null
   onSave: (note: string) => Promise<unknown>
+  isDemo?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
   const [showDiscardDialog, setShowDiscardDialog] = React.useState(false)
@@ -175,8 +178,9 @@ function RotaNotesDialogContent({
             <DialogHeader>
               <DialogTitle>Staff notes</DialogTitle>
               <DialogDescription>
-                Add one weekly note for staff. These notes appear on the
-                published rota view for employees.
+                {isDemo
+                  ? "Notes stay in this demo tab and reset on refresh."
+                  : "Add one weekly note for staff. These notes appear on the published rota view for employees."}
               </DialogDescription>
             </DialogHeader>
 
@@ -220,6 +224,7 @@ function RotaNotesDialogContent({
 
             <div className="space-y-2">
               <Textarea
+                aria-label="Staff notes"
                 value={draftNote}
                 onChange={(event) => setDraftNote(event.target.value)}
                 maxLength={MAX_NOTE_LENGTH}
@@ -263,7 +268,7 @@ function RotaNotesDialogContent({
                   className="animate-spin"
                 />
               ) : null}
-              Save notes
+              {isDemo ? "Apply notes" : "Save notes"}
             </Button>
           </DialogFooter>
         </DialogContent>

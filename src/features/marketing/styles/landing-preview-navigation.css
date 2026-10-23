@@ -1,0 +1,210 @@
+.preview-brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.055em;
+}
+.preview-brand img {
+  width: 48px;
+  height: auto;
+  object-fit: contain;
+}
+.landing-preview .preview-header {
+  display: flex;
+  align-items: center;
+  gap: 38px;
+  padding-block: 24px;
+}
+.landing-preview .preview-desktop-nav {
+  justify-content: flex-start;
+}
+.preview-nav-link {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.preview-nav-link:hover {
+  color: var(--preview-blue);
+}
+.preview-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+.landing-preview .preview-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: fit-content;
+  height: 40px;
+  gap: 10px;
+  padding-inline: 19px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+  transition:
+    background 0.18s,
+    box-shadow 0.18s,
+    transform 0.18s;
+}
+.landing-preview .preview-button-primary {
+  border-color: #3f63ff;
+  background: #325cff;
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 #ffffff47,
+    0 8px 20px #325cff26;
+}
+.landing-preview .preview-button-primary:hover {
+  background: #244be6;
+  box-shadow:
+    inset 0 1px 0 #ffffff47,
+    0 10px 24px #325cff36;
+  transform: translateY(-1px);
+}
+.preview-button-primary svg {
+  transition: transform 0.18s;
+}
+.preview-button-primary:hover svg {
+  transform: translateX(2px);
+}
+.landing-preview .preview-button-secondary {
+  border-color: #dce5f6;
+  background: #ffffffd9;
+  color: var(--preview-ink);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 5px 16px #19397504;
+}
+.landing-preview .preview-button-secondary:hover {
+  background: #fff;
+  border-color: #bfcef2;
+}
+.landing-preview .preview-header-actions .preview-button {
+  height: 36px;
+  padding-inline: 15px;
+  font-size: 12px;
+  border-radius: 13px;
+}
+.preview-menu-trigger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dce5f6;
+  border-radius: 13px;
+  background: white;
+}
+.preview-mobile-links {
+  display: grid;
+  gap: 4px;
+  padding-inline: 20px;
+}
+.preview-mobile-links a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 650;
+}
+.preview-mobile-links a:hover {
+  background: #edf3ff;
+}
+.preview-mobile-panel [data-slot="sheet-close"] {
+  min-width: 44px;
+  min-height: 44px;
+}
+.preview-skip-link {
+  position: absolute;
+  z-index: 100;
+  top: 12px;
+  left: 12px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: white;
+  transform: translateY(-180%);
+}
+.preview-skip-link:focus {
+  transform: none;
+}
+@media (max-width: 1100px) {
+  .landing-preview .preview-header {
+    gap: 24px;
+  }
+  .preview-brand {
+    font-size: 21px;
+    gap: 10px;
+  }
+  .preview-brand img {
+    width: 40px;
+  }
+  .landing-preview .preview-desktop-nav ul {
+    gap: 16px;
+  }
+}
+@media (max-width: 900px) {
+  .landing-preview .preview-desktop-nav {
+    display: none;
+  }
+  .preview-menu-trigger {
+    display: inline-flex;
+  }
+}
+@media (max-width: 640px) {
+  .landing-preview .preview-header {
+    padding-block: 16px;
+    gap: 12px;
+  }
+  .preview-brand {
+    font-size: 18px;
+    gap: 8px;
+  }
+  .preview-brand img {
+    width: 34px;
+  }
+  .preview-header-actions {
+    gap: 8px;
+  }
+  .landing-preview .preview-header-trial {
+    display: none;
+  }
+  .landing-preview .preview-button {
+    height: 44px;
+    padding-inline: 15px;
+    font-size: 12px;
+  }
+  .landing-preview .preview-header-actions .preview-login {
+    height: 44px;
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+}
+@media (pointer: coarse) {
+  .landing-preview .preview-button,
+  .landing-preview .preview-header-actions .preview-button {
+    min-height: 44px;
+  }
+}
+@media (max-width: 380px) {
+  .preview-auth-label {
+    display: none;
+  }
+  .landing-preview .preview-header-actions .preview-login {
+    width: 44px;
+    padding-inline: 0;
+  }
+}

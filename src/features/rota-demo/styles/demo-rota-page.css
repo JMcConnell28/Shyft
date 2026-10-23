@@ -1,0 +1,13 @@
+body:has([data-demo-screenshot="true"]) [data-testid="tanstack_devtools"] {
+  display: none;
+}
+
+.demo-screenshot-exit {
+  display: none;
+}
+
+@media (hover: none) {
+  .demo-screenshot-exit {
+    display: inline-flex;
+  }
+}

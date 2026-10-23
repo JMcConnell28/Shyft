@@ -1,10 +1,18 @@
-type TermsSubsection = {
+type LegalDocumentLink = {
+  label: string
+  href: string
+}
+
+type LegalDocumentSubsection = {
   title: string
   paragraphs: ReadonlyArray<string>
+  links?: ReadonlyArray<LegalDocumentLink>
 }
 
-type TermsSection = TermsSubsection & {
-  subsections?: ReadonlyArray<TermsSubsection>
+type LegalDocumentSection = LegalDocumentSubsection & {
+  subsections?: ReadonlyArray<LegalDocumentSubsection>
 }
 
-export type { TermsSection }
+type TermsSection = LegalDocumentSection
+
+export type { LegalDocumentSection, TermsSection }

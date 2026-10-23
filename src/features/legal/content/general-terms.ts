@@ -1,4 +1,5 @@
 import type { TermsSection } from "@/features/legal/types"
+import { legalBusinessDetails } from "@/features/legal/business-details"
 
 const generalTermsSections: ReadonlyArray<TermsSection> = [
   {
@@ -29,14 +30,14 @@ const generalTermsSections: ReadonlyArray<TermsSection> = [
   {
     title: "Termination",
     paragraphs: [
-      "Either party may terminate for a material breach not corrected within a reasonable period after written notice, where correction is possible. We may terminate or suspend immediately for serious fraud, unlawful activity, deliberate security abuse or where continued provision would be unlawful. The Customer may cancel under section 8 and request account closure through [CONTACT EMAIL].",
+      `Either party may terminate for a material breach not corrected within a reasonable period after written notice, where correction is possible. We may terminate or suspend immediately for serious fraud, unlawful activity, deliberate security abuse or where continued provision would be unlawful. The Customer may cancel under section 8 and request account closure through ${legalBusinessDetails.contactEmail}.`,
       "Termination does not affect accrued rights, fees or liabilities. Provisions intended to continue, including confidentiality, data return and deletion, intellectual property, payment, liability and dispute provisions, survive as applicable.",
     ],
   },
   {
     title: "Data following termination",
     paragraphs: [
-      "Download available exports and request any further required records before access ends. Available exports do not necessarily include every record held. We do not promise continued self-service export access after termination; return and deletion of personal data remain governed by section 17.10. We are not required to keep Customer Data indefinitely after processing ends.",
+      `Download available exports before access ends. For 30 days after account closure or the end of processing services, the Customer may request return of its Customer personal data by contacting ${legalBusinessDetails.contactEmail}, as described in section 17.10. Available self-service exports do not necessarily include every record held, and self-service access is not extended by this request window. Return and deletion remain governed by section 17.10. Cancelling renewal alone does not start the account-closure period.`,
     ],
   },
   {
@@ -76,7 +77,7 @@ const generalTermsSections: ReadonlyArray<TermsSection> = [
   {
     title: "Notices",
     paragraphs: [
-      "We may send contractual and operational notices to the Customer's registered email address or through the Service. The Customer must maintain current contact details and check these communications. Notices to RocketRota should be sent to [CONTACT EMAIL].",
+      `We may send contractual and operational notices to the Customer's registered email address or through the Service. The Customer must maintain current contact details and check these communications. Notices to RocketRota should be sent to ${legalBusinessDetails.contactEmail}.`,
     ],
   },
   {
@@ -119,7 +120,7 @@ const generalTermsSections: ReadonlyArray<TermsSection> = [
   {
     title: "Contact",
     paragraphs: [
-      "Send questions about these Terms, account closure or data return to [LEGAL BUSINESS NAME], trading as RocketRota. Email: [CONTACT EMAIL]. Address: [BUSINESS ADDRESS]. Website: rocketrota.com. The Help Centre provides product guidance but does not replace these contact details for legal notices.",
+      `Send questions about these Terms, account closure or data return to ${legalBusinessDetails.providerName}. Email: ${legalBusinessDetails.contactEmail}. Address: ${legalBusinessDetails.address}. Website: rocketrota.com. The Help Centre provides product guidance but does not replace these contact details for legal notices.`,
     ],
   },
 ]

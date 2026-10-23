@@ -34,7 +34,12 @@ function MarketingFooter() {
         />
         <FooterColumn
           title="Company"
-          items={["About us", "Careers", "Contact", "Privacy"]}
+          items={[
+            "About us",
+            "Careers",
+            "Contact",
+            { label: "Privacy", href: "/privacy" },
+          ]}
         />
 
         <div>
@@ -58,7 +63,9 @@ function MarketingFooter() {
       <div className="flex flex-col gap-3 border-t border-[#e2eaf9] px-2 pt-6 text-sm text-[#7a8dac] sm:flex-row sm:items-center sm:justify-between">
         <p>&copy; 2024 RocketRota. All rights reserved.</p>
         <div className="flex gap-6">
-          <button type="button">Privacy Policy</button>
+          <Link to="/privacy" className="hover:text-[#16346e]">
+            Privacy Policy
+          </Link>
           <Link to="/terms" className="hover:text-[#16346e]">
             Terms and Conditions
           </Link>

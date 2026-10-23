@@ -1,0 +1,116 @@
+.landing-preview {
+  --preview-ink: #182565;
+  --preview-muted: #627394;
+  --preview-blue: #325cff;
+  min-height: 100svh;
+  background: #f8fbff;
+  color: var(--preview-ink);
+  font-family: "Manrope Variable", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.landing-preview .preview-container {
+  width: min(100% - 96px, 1152px);
+  margin-inline: auto;
+}
+.landing-preview em {
+  color: var(--preview-blue);
+  font-style: normal;
+}
+.landing-preview a:focus-visible,
+.landing-preview button:focus-visible {
+  outline: 3px solid #325cff;
+  outline-offset: 5px;
+}
+.landing-preview .preview-hero {
+  padding-block: 76px 40px;
+}
+.preview-eyebrow {
+  margin-bottom: 24px;
+  color: #6475a5;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.preview-hero h1 {
+  font-size: clamp(48px, 6.8vw, 86px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.055em;
+}
+.preview-hero h1 span {
+  display: block;
+}
+.preview-hero-description {
+  margin-top: 26px;
+  color: var(--preview-muted);
+  font-size: clamp(17px, 2.1vw, 26px);
+  line-height: 1.5;
+  letter-spacing: -0.025em;
+}
+.preview-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 28px;
+}
+.preview-trial-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 16px;
+  color: var(--preview-muted);
+  font-size: 13px;
+}
+.preview-trial-note svg {
+  color: var(--preview-blue);
+}
+.preview-product {
+  width: min(100% - 40px, 1216px);
+  margin-inline: auto;
+  scroll-margin-top: 28px;
+  animation: preview-enter 0.7s 0.12s both;
+}
+.preview-product-frame {
+  overflow: hidden;
+  border: 1px solid #dce6fc;
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 20px 60px #294c8f08;
+}
+.preview-product img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.preview-product figcaption {
+  margin-top: 12px;
+  text-align: center;
+  color: var(--preview-muted);
+  font-size: 11px;
+}
+.preview-hero > * {
+  animation: preview-enter 0.6s both;
+}
+.preview-hero h1 {
+  animation-delay: 0.04s;
+}
+.preview-hero-description {
+  animation-delay: 0.08s;
+}
+.preview-hero-actions {
+  animation-delay: 0.12s;
+}
+.preview-trial-note {
+  animation-delay: 0.16s;
+}
+@keyframes preview-enter {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

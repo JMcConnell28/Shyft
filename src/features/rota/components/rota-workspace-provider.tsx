@@ -2,25 +2,31 @@
 
 import * as React from "react"
 
+import type {
+  WorkspaceBoardData,
+  WorkspaceEmployee,
+} from "@/features/rota/types/workspace"
 import { useRotaWorkspaceState } from "@/features/rota/hooks/use-rota-workspace-state"
-import type { WorkspaceBoardData } from "@/features/rota/types/workspace"
 
-const RotaWorkspaceContext = React.createContext<
-  ReturnType<typeof useRotaWorkspaceState> | null
->(null)
+const RotaWorkspaceContext = React.createContext<ReturnType<
+  typeof useRotaWorkspaceState
+> | null>(null)
 
 function RotaWorkspaceProvider({
   children,
   boardData,
   mode,
+  demoEmployees,
 }: {
   children: React.ReactNode
   boardData: WorkspaceBoardData
   mode?: "default" | "demo"
+  demoEmployees?: Array<WorkspaceEmployee>
 }) {
   const value = useRotaWorkspaceState({
     boardData,
     mode,
+    demoEmployees,
   })
 
   return (
@@ -34,7 +40,9 @@ function useRotaWorkspace() {
   const context = React.useContext(RotaWorkspaceContext)
 
   if (!context) {
-    throw new Error("useRotaWorkspace must be used within a RotaWorkspaceProvider.")
+    throw new Error(
+      "useRotaWorkspace must be used within a RotaWorkspaceProvider."
+    )
   }
 
   return context

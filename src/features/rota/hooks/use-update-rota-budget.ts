@@ -11,21 +11,28 @@ import { showErrorToast, showSuccessToast } from "@/lib/toast"
 function useUpdateRotaBudget() {
   const queryClient = useQueryClient()
   const updateRotaBudgetFn = useServerFn(updateRotaBudget)
-  const { meta, setBudgetPence } = useRotaWorkspace()
+  const { isDemo, meta, setBudgetPence } = useRotaWorkspace()
 
   const mutation = useMutation({
-    mutationFn: (budgetPence: number | null) =>
-      updateRotaBudgetFn({
+    mutationFn: async (budgetPence: number | null) => {
+      if (isDemo) return
+      await updateRotaBudgetFn({
         data: { rotaId: meta.rotaId, budgetPence },
-      }),
+      })
+    },
     onSuccess: async (_, budgetPence) => {
       setBudgetPence(budgetPence)
-      await queryClient.invalidateQueries({
-        queryKey: rotaQueryKeys.workspaces,
-        refetchType: "none",
-      })
+      if (!isDemo)
+        await queryClient.invalidateQueries({
+          queryKey: rotaQueryKeys.workspaces,
+          refetchType: "none",
+        })
       showSuccessToast(
-        budgetPence === null ? "Budget removed." : "Budget saved."
+        isDemo
+          ? "Demo budget updated."
+          : budgetPence === null
+            ? "Budget removed."
+            : "Budget saved."
       )
     },
     onError: (error) => {

@@ -12,6 +12,7 @@ const APP_ROUTE_PREFIXES = [
   "/billing/",
   "/clock/",
   "/dashboard",
+  "/demo",
   "/forgot-password",
   "/join/",
   "/join-status/",
