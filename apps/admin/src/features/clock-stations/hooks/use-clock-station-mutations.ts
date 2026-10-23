@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start"
 
 import { clockStationsQueryKeys } from "@/features/clock-stations/query-keys"
 import { generateClockStationTagServerFn } from "@/features/clock-stations/server-fns"
+import { customersQueryKeys } from "@/features/customers/query-keys"
 
 function useClockStationMutations() {
   const queryClient = useQueryClient()
@@ -17,6 +18,9 @@ function useClockStationMutations() {
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: clockStationsQueryKeys.all,
+        })
+        await queryClient.invalidateQueries({
+          queryKey: customersQueryKeys.all,
         })
       },
     }),

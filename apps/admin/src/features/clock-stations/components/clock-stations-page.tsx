@@ -3,11 +3,12 @@
 import * as React from "react"
 import { PlusIcon } from "lucide-react"
 
+import type { ClockStationTag } from "@/features/clock-stations/types"
 import { Button } from "@/components/ui/button"
 import { ClockStationLocationSection } from "@/features/clock-stations/components/clock-station-location"
 import { useClockStationMutations } from "@/features/clock-stations/hooks/use-clock-station-mutations"
 import { useClockStationsQuery } from "@/features/clock-stations/hooks/use-clock-stations-query"
-import type { ClockStationTag } from "@/features/clock-stations/types"
+import { StationQueue } from "@/features/customers/components/station-queue"
 
 function ClockStationsPage() {
   const [locationId, setLocationId] = React.useState("")
@@ -19,11 +20,11 @@ function ClockStationsPage() {
     setLocationId((current) =>
       data?.locations.some((location) => location.id === current)
         ? current
-        : (data?.locations[0]?.id ?? ""),
+        : (data?.locations[0]?.id ?? "")
     )
   }, [data?.locations])
 
-  const tagsByLocation = new Map<string, ClockStationTag[]>()
+  const tagsByLocation = new Map<string, Array<ClockStationTag>>()
   for (const tag of data?.tags ?? []) {
     const tags = tagsByLocation.get(tag.locationId) ?? []
     tags.push(tag)
@@ -33,16 +34,27 @@ function ClockStationsPage() {
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Clock stations</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Clock stations
+        </h1>
         <p className="text-sm text-slate-500">
           Generate NTAG setup data and monitor deployed station tags.
         </p>
       </header>
+      <StationQueue />
 
-      {query.isPending && <p className="text-sm text-slate-500">Loading clock stations…</p>}
+      {query.isPending && (
+        <p className="text-sm text-slate-500">Loading clock stations…</p>
+      )}
       {query.isError && (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          Could not load clock stations. <Button onClick={() => query.refetch()} variant="secondary">Try again</Button>
+        <div
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
+          Could not load clock stations.{" "}
+          <Button onClick={() => query.refetch()} variant="secondary">
+            Try again
+          </Button>
         </div>
       )}
 
@@ -58,7 +70,10 @@ function ClockStationsPage() {
               >
                 {data.locations.map((location) => (
                   <option key={location.id} value={location.id}>
-                    {location.name}{location.organizationName ? ` - ${location.organizationName}` : ""}
+                    {location.name}
+                    {location.organizationName
+                      ? ` - ${location.organizationName}`
+                      : ""}
                   </option>
                 ))}
               </select>
@@ -68,7 +83,9 @@ function ClockStationsPage() {
               onClick={() => generateTagMutation.mutate({ locationId })}
             >
               <PlusIcon className="size-4" />
-              {generateTagMutation.isPending ? "Generating…" : "Generate tag data"}
+              {generateTagMutation.isPending
+                ? "Generating…"
+                : "Generate tag data"}
             </Button>
           </section>
 
@@ -80,12 +97,18 @@ function ClockStationsPage() {
             </p>
           )}
           {!data.appBaseUrl && (
-            <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-              Set APP_BASE_URL to the main app URL in the admin deployment to show copyable setup URLs.
+            <p
+              role="status"
+              className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
+            >
+              Set APP_BASE_URL to the main app URL in the admin deployment to
+              show copyable setup URLs.
             </p>
           )}
           {data.locations.length === 0 ? (
-            <p className="text-sm text-slate-500">No locations are available yet.</p>
+            <p className="text-sm text-slate-500">
+              No locations are available yet.
+            </p>
           ) : (
             <div className="grid gap-4">
               {data.locations.map((location) => (

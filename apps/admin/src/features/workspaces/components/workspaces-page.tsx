@@ -1,4 +1,5 @@
 "use client"
+import { Link } from "@tanstack/react-router"
 
 import {
   DataTable,
@@ -41,7 +42,21 @@ function WorkspacesPage() {
                 <p className="text-xs text-slate-500">{workspace.locationId}</p>
               </TableCell>
               <TableCell label="Organization">
-                {workspace.organizationName ?? "Standalone"}
+                {workspace.organizationId || workspace.billingAccountId ? (
+                  <Link
+                    to="/customers/$customerId"
+                    params={{
+                      customerId: workspace.organizationId
+                        ? `org:${workspace.organizationId}`
+                        : `account:${workspace.billingAccountId}`,
+                    }}
+                    className="text-blue-700 hover:underline"
+                  >
+                    {workspace.organizationName ?? "Standalone"}
+                  </Link>
+                ) : (
+                  "Standalone"
+                )}
               </TableCell>
               <TableCell label="Billing">
                 <StatusBadge>

@@ -2,13 +2,13 @@ import "@tanstack/react-start/server-only"
 
 import { queryMany } from "@rocketrota/db"
 
-import { appBaseUrlSchema } from "@/features/clock-stations/schemas"
-import { getOptionalEnv } from "@/lib/env.server"
 import type {
   ClockStationLocation,
   ClockStationTag,
   ClockStationsPageData,
 } from "@/features/clock-stations/types"
+import { appBaseUrlSchema } from "@/features/clock-stations/schemas"
+import { getOptionalEnv } from "@/lib/env.server"
 
 type LocationRow = {
   id: string
@@ -35,7 +35,7 @@ async function getClockStationsPageData(): Promise<ClockStationsPageData> {
        from public.locations location
        left join public."organization" organization_row
          on organization_row.id = location.organization_id
-       order by organization_row.name nulls last, location.name`,
+       order by organization_row.name nulls last, location.name`
     ),
     queryMany<TagRow>(
       `select id,
@@ -48,7 +48,7 @@ async function getClockStationsPageData(): Promise<ClockStationsPageData> {
        from public.clock_tags
        where ntag_public_id is not null
          and ntag_aes_key_hex is not null
-       order by created_at desc`,
+       order by created_at desc`
     ),
   ])
 
@@ -68,6 +68,19 @@ function getAppBaseUrl(): string | null {
 
   const parsedUrl = appBaseUrlSchema.safeParse(configuredUrl)
   return parsedUrl.success ? new URL(parsedUrl.data).origin : null
+}
+
+async function getTagsForLocations(
+  locationIds: Array<string>
+): Promise<Array<ClockStationTag>> {
+  if (locationIds.length === 0) return []
+  const rows = await queryMany<TagRow>(
+    `select id, location_id, label, is_active, ntag_public_id, ntag_aes_key_hex, ntag_last_seen_counter
+     from public.clock_tags where location_id = any($1::uuid[]) and ntag_public_id is not null
+     order by created_at desc`,
+    [locationIds]
+  )
+  return rows.map(mapTag)
 }
 
 function mapLocation(row: LocationRow): ClockStationLocation {
@@ -90,4 +103,4 @@ function mapTag(row: TagRow): ClockStationTag {
   }
 }
 
-export { getClockStationsPageData }
+export { getClockStationsPageData, getTagsForLocations, getAppBaseUrl }

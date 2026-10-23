@@ -110,6 +110,7 @@ type OrganizationBillingLocationSummary = {
 }
 
 type BillingSettingsPageProps = {
+  canManageStations?: boolean
   billing: WorkspaceBillingState | null
   trial: WorkspaceTrial | null
   organizationId?: string | null

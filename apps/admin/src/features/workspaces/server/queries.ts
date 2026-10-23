@@ -2,11 +2,15 @@ import "@tanstack/react-start/server-only"
 
 import { queryMany } from "@rocketrota/db"
 
-import type { WorkspacesPageData, WorkspaceSummary } from "@/features/workspaces/types"
+import type {
+  WorkspaceSummary,
+  WorkspacesPageData,
+} from "@/features/workspaces/types"
 
 type WorkspaceRow = {
   active_employees: string | number
   billing_status: string | null
+  billing_account_id: string | null
   location_id: string
   location_name: string
   organization_id: string | null
@@ -21,6 +25,7 @@ async function listWorkspaces(): Promise<WorkspacesPageData> {
             organization_row.id as organization_id,
             organization_row.name as organization_name,
             billing_account.status as billing_status,
+            location.billing_account_id,
             entitlement.trial_ends_at,
             count(employee.id) filter (where employee.status = 'active') as active_employees
      from public.locations location
@@ -38,9 +43,10 @@ async function listWorkspaces(): Promise<WorkspacesPageData> {
               organization_row.id,
               organization_row.name,
               billing_account.status,
+              location.billing_account_id,
               entitlement.trial_ends_at
      order by organization_row.name nulls last, location.name
-     limit 250`,
+     limit 250`
   )
 
   return {
@@ -52,6 +58,7 @@ function mapWorkspace(row: WorkspaceRow): WorkspaceSummary {
   return {
     activeEmployees: Number(row.active_employees),
     billingStatus: row.billing_status,
+    billingAccountId: row.billing_account_id,
     locationId: row.location_id,
     locationName: row.location_name,
     organizationId: row.organization_id,

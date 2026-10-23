@@ -13,8 +13,11 @@ type AuditLogInput = {
   targetType: string
 }
 
-async function writeAdminAuditLog(input: AuditLogInput) {
-  await getDatabase().query(
+async function writeAdminAuditLog(
+  input: AuditLogInput,
+  database: Pick<ReturnType<typeof getDatabase>, "query"> = getDatabase()
+) {
+  await database.query(
     `insert into admin_private.admin_audit_logs (
        admin_user_id,
        action,
@@ -34,7 +37,7 @@ async function writeAdminAuditLog(input: AuditLogInput) {
       input.beforeState ? JSON.stringify(input.beforeState) : null,
       input.afterState ? JSON.stringify(input.afterState) : null,
       JSON.stringify(input.metadata ?? {}),
-    ],
+    ]
   )
 }
 

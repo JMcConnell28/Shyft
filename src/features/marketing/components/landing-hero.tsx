@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router"
 import { CheckIcon } from "lucide-react"
 
 import { PreviewTrialLink } from "./landing-preview/preview-trial-link"
-import { Badge } from "@/components/ui/badge"
 
 function LandingHero() {
   return (

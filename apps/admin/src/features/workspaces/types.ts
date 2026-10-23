@@ -1,6 +1,7 @@
 type WorkspaceSummary = {
   activeEmployees: number
   billingStatus: string | null
+  billingAccountId: string | null
   locationId: string
   locationName: string
   organizationId: string | null
@@ -9,7 +10,7 @@ type WorkspaceSummary = {
 }
 
 type WorkspacesPageData = {
-  workspaces: WorkspaceSummary[]
+  workspaces: Array<WorkspaceSummary>
 }
 
 export type { WorkspaceSummary, WorkspacesPageData }

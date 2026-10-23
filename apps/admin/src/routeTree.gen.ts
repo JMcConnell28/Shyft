@@ -21,6 +21,8 @@ import { Route as AdminFeatureFlagsRouteImport } from './routes/_admin/feature-f
 import { Route as AdminSupportRouteRouteImport } from './routes/_admin/support/route'
 import { Route as AdminUsersRouteImport } from './routes/_admin/users'
 import { Route as AdminWorkspacesRouteImport } from './routes/_admin/workspaces'
+import { Route as AdminCustomersIndexRouteImport } from './routes/_admin/customers/index'
+import { Route as AdminCustomersCustomerIdRouteImport } from './routes/_admin/customers/$customerId'
 import { Route as AdminSupportIndexRouteImport } from './routes/_admin/support/index'
 import { Route as AdminSupportThreadIdRouteImport } from './routes/_admin/support/$threadId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -84,6 +86,17 @@ const AdminWorkspacesRoute = AdminWorkspacesRouteImport.update({
   path: '/workspaces',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCustomersIndexRoute = AdminCustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCustomersCustomerIdRoute =
+  AdminCustomersCustomerIdRouteImport.update({
+    id: '/customers/$customerId',
+    path: '/customers/$customerId',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminSupportIndexRoute = AdminSupportIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -112,8 +125,10 @@ export interface FileRoutesByFullPath {
   '/feature-flags': typeof AdminFeatureFlagsRoute
   '/users': typeof AdminUsersRoute
   '/workspaces': typeof AdminWorkspacesRoute
+  '/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/support/$threadId': typeof AdminSupportThreadIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/customers/': typeof AdminCustomersIndexRoute
   '/support/': typeof AdminSupportIndexRoute
 }
 export interface FileRoutesByTo {
@@ -127,8 +142,10 @@ export interface FileRoutesByTo {
   '/feature-flags': typeof AdminFeatureFlagsRoute
   '/users': typeof AdminUsersRoute
   '/workspaces': typeof AdminWorkspacesRoute
+  '/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/support/$threadId': typeof AdminSupportThreadIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/customers': typeof AdminCustomersIndexRoute
   '/support': typeof AdminSupportIndexRoute
 }
 export interface FileRoutesById {
@@ -145,8 +162,10 @@ export interface FileRoutesById {
   '/_admin/feature-flags': typeof AdminFeatureFlagsRoute
   '/_admin/users': typeof AdminUsersRoute
   '/_admin/workspaces': typeof AdminWorkspacesRoute
+  '/_admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/_admin/support/$threadId': typeof AdminSupportThreadIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_admin/customers/': typeof AdminCustomersIndexRoute
   '/_admin/support/': typeof AdminSupportIndexRoute
 }
 export interface FileRouteTypes {
@@ -163,8 +182,10 @@ export interface FileRouteTypes {
     | '/feature-flags'
     | '/users'
     | '/workspaces'
+    | '/customers/$customerId'
     | '/support/$threadId'
     | '/api/auth/$'
+    | '/customers/'
     | '/support/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -178,8 +199,10 @@ export interface FileRouteTypes {
     | '/feature-flags'
     | '/users'
     | '/workspaces'
+    | '/customers/$customerId'
     | '/support/$threadId'
     | '/api/auth/$'
+    | '/customers'
     | '/support'
   id:
     | '__root__'
@@ -195,8 +218,10 @@ export interface FileRouteTypes {
     | '/_admin/feature-flags'
     | '/_admin/users'
     | '/_admin/workspaces'
+    | '/_admin/customers/$customerId'
     | '/_admin/support/$threadId'
     | '/api/auth/$'
+    | '/_admin/customers/'
     | '/_admin/support/'
   fileRoutesById: FileRoutesById
 }
@@ -293,6 +318,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWorkspacesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/customers/': {
+      id: '/_admin/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof AdminCustomersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/customers/$customerId': {
+      id: '/_admin/customers/$customerId'
+      path: '/customers/$customerId'
+      fullPath: '/customers/$customerId'
+      preLoaderRoute: typeof AdminCustomersCustomerIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/support/': {
       id: '/_admin/support/'
       path: '/'
@@ -340,6 +379,8 @@ interface AdminRouteChildren {
   AdminFeatureFlagsRoute: typeof AdminFeatureFlagsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminWorkspacesRoute: typeof AdminWorkspacesRoute
+  AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
+  AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -352,6 +393,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminFeatureFlagsRoute: AdminFeatureFlagsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminWorkspacesRoute: AdminWorkspacesRoute,
+  AdminCustomersCustomerIdRoute: AdminCustomersCustomerIdRoute,
+  AdminCustomersIndexRoute: AdminCustomersIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

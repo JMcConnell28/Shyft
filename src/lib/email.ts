@@ -1,7 +1,7 @@
 import "@tanstack/react-start/server-only"
 
-import type { ReactElement } from "react"
 import { Resend } from "resend"
+import type { ReactElement } from "react"
 
 import { getOptionalEnv, getRequiredEnv } from "@/lib/env.server"
 
@@ -10,6 +10,7 @@ type SendEmailOptions = {
   subject: string
   react: ReactElement
   text: string
+  idempotencyKey?: string
 }
 
 const resendDevelopmentRecipient = "delivered@resend.dev"
@@ -37,6 +38,7 @@ async function sendTransactionalEmail({
   subject,
   react,
   text,
+  idempotencyKey,
 }: SendEmailOptions) {
   const apiKey = getRequiredEnv("RESEND_API_KEY")
   const from =
@@ -46,17 +48,20 @@ async function sendTransactionalEmail({
 
   if (isDevelopmentEmailMode()) {
     console.info(
-      `Development email routed to ${recipient}. Original recipient: ${to}. Subject: ${subject}`,
+      `Development email routed to ${recipient}. Original recipient: ${to}. Subject: ${subject}`
     )
   }
 
-  const { error } = await resend.emails.send({
-    from,
-    to: [recipient],
-    subject,
-    react,
-    text,
-  })
+  const { error } = await resend.emails.send(
+    {
+      from,
+      to: [recipient],
+      subject,
+      react,
+      text,
+    },
+    idempotencyKey ? { idempotencyKey } : undefined
+  )
 
   if (error) {
     throw new Error(`Resend email delivery failed: ${error.message}`)

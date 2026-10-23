@@ -19,9 +19,11 @@ import { useEffect, useRef } from "react"
 
 import type { AdminMembership } from "@/features/auth/types"
 import { SupportInboxIndicator } from "@/features/support/components/support-inbox-indicator"
+import { StationNotification } from "@/features/customers/components/station-notification"
 
 const navItems = [
   { href: "/dashboard", icon: GaugeIcon, label: "Dashboard" },
+  { href: "/customers", icon: UsersIcon, label: "Customers" },
   { href: "/workspaces", icon: Building2Icon, label: "Workspaces" },
   { href: "/clock-stations", icon: Clock3Icon, label: "Clock stations" },
   { href: "/users", icon: UsersIcon, label: "Users" },
@@ -44,8 +46,10 @@ function AdminNavigation({
       {navItems
         .filter(
           (item) =>
-            item.href !== "/support" ||
-            roleHasAdminPermission(membership.role, "support.manage")
+            (item.href !== "/support" ||
+              roleHasAdminPermission(membership.role, "support.manage")) &&
+            (item.href !== "/clock-stations" ||
+              roleHasAdminPermission(membership.role, "clock_stations.manage"))
         )
         .map((item) => (
           <Link
@@ -143,6 +147,10 @@ function AdminShell({ membership }: { membership: AdminMembership }) {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+            {roleHasAdminPermission(
+              membership.role,
+              "clock_stations.manage"
+            ) && <StationNotification />}
             {roleHasAdminPermission(membership.role, "support.manage") ? (
               <SupportInboxIndicator />
             ) : null}

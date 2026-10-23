@@ -40,6 +40,14 @@ const config = defineConfig({
       alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
       experimental: { tasks: true },
       tasks: {
+        "billing:station-alerts": {
+          handler: fileURLToPath(
+            new URL(
+              "./src/features/billing/server/station-alert-task.ts",
+              import.meta.url
+            )
+          ),
+        },
         "time-clock:process": {
           handler: fileURLToPath(
             new URL(
@@ -51,7 +59,10 @@ const config = defineConfig({
       },
       scheduledTasks:
         process.env.NODE_ENV === "production"
-          ? { "* * * * *": ["time-clock:process"] }
+          ? {
+              "* * * * *": ["time-clock:process"],
+              "*/15 * * * *": ["billing:station-alerts"],
+            }
           : {},
       compressPublicAssets: {
         brotli: true,

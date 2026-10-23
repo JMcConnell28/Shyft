@@ -5,6 +5,8 @@ import {
   syncBillingSubscriptionQuantities,
 } from "@/features/billing/server/subscriptions"
 import { getDatabase } from "@/lib/db"
+import { reconcileStationPayments } from "@/features/billing/server/station-payments"
+import { sendPendingStationAlerts } from "@/features/billing/server/station-alerts"
 import { processDueAddonCancellations } from "@/features/billing/server/addons"
 import {
   finalizeEndedBillingPeriods,
@@ -130,6 +132,7 @@ async function reconcileBillingAccount(
       account.id
     )
     const syncedUsage = await submitEmployeeOverageMeter(account.id)
+    await reconcileStationPayments(account.stripe_customer_id)
 
     return {
       billingAccountId: account.id,
@@ -179,6 +182,7 @@ async function reconcileAllBillingAccounts(): Promise<BillingReconciliationResul
       accounts.map(reconcileBillingAccount)
     )
     const summary = summarizeReconciliationResults(accountResults)
+    await sendPendingStationAlerts()
 
     await updateBillingReconciliationRun({
       runId,

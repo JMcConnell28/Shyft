@@ -27,6 +27,7 @@ function WorkspaceBillingSettingsRoute() {
         billing={viewer.billing}
         trial={viewer.trial}
         organizationId={activeWorkspace.id}
+        canManageStations={viewer.activeRole === "owner"}
       />
     </SettingsLayout>
   )

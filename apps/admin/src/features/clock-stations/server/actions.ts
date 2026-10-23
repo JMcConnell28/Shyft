@@ -19,16 +19,19 @@ type ClockTagRow = {
   ntag_public_id: string | null
 }
 
-async function generateClockStationTag(input: {
-  adminUserId: string
-  locationId: string
-}) {
+async function generateClockStationTag(
+  input: {
+    adminUserId: string
+    locationId: string
+  },
+  database: Pick<ReturnType<typeof getDatabase>, "query"> = getDatabase()
+) {
   const location = await queryOne<LocationRow>(
     `select id, organization_id
      from public.locations
      where id = $1
      limit 1`,
-    [input.locationId],
+    [input.locationId]
   )
 
   if (!location) {
@@ -39,7 +42,7 @@ async function generateClockStationTag(input: {
   const aesKeyHex = randomBytes(16).toString("hex").toUpperCase()
   const legacyToken = randomBytes(24).toString("base64url")
 
-  const result = await getDatabase().query<ClockTagRow>(
+  const result = await database.query<ClockTagRow>(
     `insert into public.clock_tags (
        is_active,
        label,
@@ -61,7 +64,7 @@ async function generateClockStationTag(input: {
       publicId,
       location.organization_id,
       createHash("sha256").update(legacyToken).digest("hex"),
-    ],
+    ]
   )
   const tag = result.rows.at(0)
 
@@ -69,14 +72,21 @@ async function generateClockStationTag(input: {
     throw new Error("We could not generate tag setup data.")
   }
 
-  await writeAdminAuditLog({
-    action: "clock_station.tag_generated",
-    adminUserId: input.adminUserId,
-    afterState: tag,
-    permission: "clock_stations.manage",
-    targetId: tag.id,
-    targetType: "clock_tag",
-  })
+  await writeAdminAuditLog(
+    {
+      action: "clock_station.tag_generated",
+      adminUserId: input.adminUserId,
+      afterState: {
+        id: tag.id,
+        locationId: tag.location_id,
+        publicId: tag.ntag_public_id,
+      },
+      permission: "clock_stations.manage",
+      targetId: tag.id,
+      targetType: "clock_tag",
+    },
+    database
+  )
 
   return tag
 }
