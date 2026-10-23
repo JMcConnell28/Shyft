@@ -2909,6 +2909,7 @@ export type Database = {
       }
       subscription: {
         Row: {
+          billingInterval: string | null
           cancelAt: string | null
           cancelAtPeriodEnd: boolean | null
           canceledAt: string | null
@@ -2922,10 +2923,12 @@ export type Database = {
           status: string
           stripeCustomerId: string | null
           stripeSubscriptionId: string | null
+          stripeScheduleId: string | null
           trialEnd: string | null
           trialStart: string | null
         }
         Insert: {
+          billingInterval?: string | null
           cancelAt?: string | null
           cancelAtPeriodEnd?: boolean | null
           canceledAt?: string | null
@@ -2939,10 +2942,12 @@ export type Database = {
           status?: string
           stripeCustomerId?: string | null
           stripeSubscriptionId?: string | null
+          stripeScheduleId?: string | null
           trialEnd?: string | null
           trialStart?: string | null
         }
         Update: {
+          billingInterval?: string | null
           cancelAt?: string | null
           cancelAtPeriodEnd?: boolean | null
           canceledAt?: string | null
@@ -2956,6 +2961,7 @@ export type Database = {
           status?: string
           stripeCustomerId?: string | null
           stripeSubscriptionId?: string | null
+          stripeScheduleId?: string | null
           trialEnd?: string | null
           trialStart?: string | null
         }

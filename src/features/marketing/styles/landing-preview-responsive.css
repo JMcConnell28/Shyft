@@ -3,16 +3,16 @@
     width: calc(100% - 64px);
   }
   .landing-preview .preview-workflow {
-    gap: 36px;
+    gap: 30px;
   }
   .preview-workflow-step {
-    gap: 18px;
-    grid-template-columns: 52px 1fr;
+    gap: 16px;
+    grid-template-columns: 48px 1fr;
   }
   .preview-step-number {
-    width: 52px;
-    height: 52px;
-    font-size: 17px;
+    width: 48px;
+    height: 48px;
+    font-size: 16px;
   }
   .preview-workflow h3 {
     font-size: 18px;
@@ -31,39 +31,6 @@
   .landing-preview .preview-container {
     width: calc(100% - 40px);
   }
-  .landing-preview .preview-hero {
-    padding-block: 48px 32px;
-  }
-  .preview-eyebrow {
-    font-size: 9px;
-    margin-bottom: 20px;
-  }
-  .preview-hero h1 {
-    font-size: clamp(35px, 8.8vw, 56px);
-    letter-spacing: -0.055em;
-  }
-  .preview-hero-description {
-    max-width: 450px;
-    font-size: 17px;
-    margin-top: 22px;
-  }
-  .preview-hero-actions {
-    gap: 10px;
-    margin-top: 24px;
-  }
-  .preview-trial-note {
-    font-size: 11px;
-    gap: 6px;
-  }
-  .preview-product {
-    width: calc(100% - 24px);
-  }
-  .preview-product-frame {
-    border-radius: 12px;
-  }
-  .preview-product figcaption {
-    font-size: 9px;
-  }
   .landing-preview .preview-workflow {
     grid-template-columns: 1fr;
     gap: 30px;
@@ -73,15 +40,15 @@
     padding-top: 0;
   }
   .preview-workflow h2 {
-    font-size: 45px;
+    font-size: 40px;
   }
   .preview-workflow-intro > p {
     max-width: 450px;
     margin-top: 20px;
-    font-size: 17px;
+    font-size: 16px;
   }
   .preview-workflow-step {
-    padding-block: 22px;
+    padding-block: 20px;
   }
   .preview-workflow h3 svg {
     opacity: 1;

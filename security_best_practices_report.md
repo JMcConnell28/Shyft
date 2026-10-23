@@ -2,15 +2,17 @@
 
 Reviewed: 18 October 2026. Scope: the current repository, installed dependency lockfile, the connected Shyft Supabase project, and public HTTPS response headers for rocketrota.com.
 
-**Recommendation: hold the beta until the remaining blockers B01 and B04–B06 are resolved, the admin fixes for B02/B03 are deployed, and the deployment gates below have evidence.** This is security and operational preparation for the existing product.
+**Status — 23 October 2026:** B01–B05, B07 and B08 have code remediations. B04's database restriction and the supporting auth schema/search-path migrations are applied to the connected Shyft project. The application fixes still require deployment of both apps and an explicitly configured beta admission code. See [remediation and verification](docs/security-remediation.md). B06's remaining business/privacy details and the operational deployment gates still need completion; this is not an all-clear to launch.
 
 **Remediation update — 18 October 2026:** B02 and B03 are fixed in the local admin code. Protected profile fields are server-controlled, profile requests cannot change them, and current account status and permissions are checked when reading an admin session. Disabled accounts' sessions are revoked. Validation: all 25 admin tests pass, including 19 new authentication regressions; admin TypeScript, zero-warning lint and the production build pass. Deployment is still required.
 
-This was a targeted review, not a penetration test or a certification. No application code, production configuration or customer records were changed. Database checks inspected catalogues, grants and policy definitions; the REST check requested zero rows. The admin profile issue was reproduced against the installed library's input parser, without changing an admin account. The deployed app's exact revision, hosting controls and backup configuration were not established.
+The original 18 October review was targeted, not a penetration test or a certification. That review did not change application code, production configuration or customer records. Its database checks inspected catalogues, grants and policy definitions; the REST check requested zero rows. The admin profile issue was reproduced against the installed library's input parser, without changing an admin account. The deployed app's exact revision, hosting controls and backup configuration were not established. Later remediation changes and their verification are recorded separately above.
 
 ## Confirmed security findings
 
-### B01 — Critical: vulnerable framework versions in the installed dependency tree
+### B01 — Critical, fixed in code: vulnerable framework/auth dependencies
+
+- **23 October remediation:** the earlier TanStack upgrade is retained; Better Auth, passkeys and its Stripe plugin are now pinned together at 1.7.12, with the matching `auth` CLI. Vulnerable transitive dependencies and the Supabase CLI were updated within allowed ranges. The resulting install audit reports zero vulnerabilities. Both production builds and authentication/access/billing regressions pass. Deploy both apps to activate the package fixes.
 
 - **Rule:** dependency vulnerability management; CWE-79 and unsafe server-function deserialization.
 - **Evidence:** [package-lock.json](D:/Projects/Shyft/package-lock.json:6927) installs `@tanstack/react-start@1.167.2`; [server core](D:/Projects/Shyft/package-lock.json:7311) installs `@tanstack/start-server-core@1.167.1`.
@@ -36,7 +38,9 @@ This was a targeted review, not a penetration test or a certification. No applic
 - **Verification:** [session regression tests](D:/Projects/Shyft/apps/admin/src/lib/auth-session.server.test.ts:36) cover existing sessions after disablement, current database roles overriding old owner claims, sign-in denial, scoped session deletion, and failure paths that deny access. A read-only live catalogue query confirmed the existing session and disable column names used by the fix.
 - **Deployment and timing:** deploy the updated admin app. A direct database change to the disable flag is enforced and sessions revoked on the next checked request; an already-running operation is not retroactively cancelled. No schema migration is needed.
 
-### B04 — High: shared-workplace user access includes sensitive fields
+### B04 — High, fixed in hosted database: shared-workplace sensitive fields
+
+- **23 October remediation:** table and separate column privileges on `public.user` and `public.employees` are revoked from `PUBLIC`, `anon` and `authenticated`. All app directory/profile reads already use authorised server functions; there was no browser caller to migrate. Existing minimal server projections remain the shared directory. The server role and database owner retain access. Live catalog checks confirm browser roles cannot select any column; zero-row Data API checks reject sensitive reads while the server client still succeeds. No personal rows were fetched or modified.
 
 - **Rule:** least-privilege data exposure; CWE-200 / CWE-863.
 - **Evidence:** [user RLS policy](D:/Projects/Shyft/supabase/migrations/20260409_better_auth_rls_policies.sql:122) permits SELECT of a user's row by other members of the same organisation. [Auth fields](D:/Projects/Shyft/src/lib/auth-fields.ts:6) include `dateOfBirth`. Live catalogue checks confirmed that `anon` and `authenticated` have SELECT permission on that column and that the shared-organisation policy is active. The `employees` policy also permits organisation members to read rows containing `payroll_id`.
@@ -45,7 +49,9 @@ This was a targeted review, not a penetration test or a certification. No applic
 - **Fix:** remove broad direct SELECT access to sensitive base tables/columns. Provide a minimal team directory projection for genuinely shared fields, and keep birth dates, payroll identifiers and pay data behind self/admin-specific access. Choose a migration that preserves the app's server-only auth/database access. Test both legitimate use and direct API attempts as another employee and another workplace.
 - **Mitigation:** do not put real employee birth dates or payroll identifiers into the beta until the access boundary is corrected. Hiding controls or hiding the public API key does not fix it.
 
-### B05 — High: public telemetry endpoints permit untrusted database writes
+### B05 — High, fixed in code: public telemetry database writes
+
+- **23 October remediation:** these endpoints have no callers in the repository, so public ingestion is retired. Both POST handlers now return 410 without reading the request body or writing to the database; the unused ingestion schemas and writers are removed. Existing admin records/read views remain. Local production checks reject forged actor/source payloads, including an oversized payload. Deploy the main app to close the hosted endpoints.
 
 - **Rule:** authenticate sensitive writes, establish actor identity server-side and bound resource consumption; CWE-306 / CWE-400.
 - **Evidence:** [event endpoint](D:/Projects/Shyft/src/routes/api/admin-telemetry/event.ts:9) and [error endpoint](D:/Projects/Shyft/src/routes/api/admin-telemetry/error.ts:9) parse caller JSON and write it without an authentication or rate-limit check in these handlers. [Telemetry inserts](D:/Projects/Shyft/src/features/admin-observability/server/telemetry.ts:57) use caller-supplied user and organisation IDs. [Schemas](D:/Projects/Shyft/src/features/admin-observability/schemas/telemetry-schemas.ts:12) accept unrestricted metadata objects; error input also accepts a claimed `server` source.
@@ -62,13 +68,17 @@ This was a targeted review, not a penetration test or a certification. No applic
 - Replace them with accurate information about the service as actually operated. Provide a working privacy notice and contact route, explain retention/return/deletion, and establish who handles a data incident. Have the final terms and processing arrangements reviewed appropriately for the business.
 - The ICO explains that people must receive privacy information when their personal information is collected directly: [right to be informed](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-be-informed/). Calling the service a beta does not supply the missing information.
 
-### B07 — Medium: beta admission falls back to a code in source
+### B07 — Medium, fixed in code: beta admission source fallback
+
+- **23 October remediation:** the source fallback is removed in every environment. Missing/malformed `SIGNUP_ACCESS_CODE` returns 503 before signup, and an incorrect supplied code returns 403. Both environment examples document the required private six-digit code. Existing signup throttling remains. Configure the secret in Coolify before deploying; no production secret has been chosen or changed by this work.
 
 - **Evidence:** [signup access check](D:/Projects/Shyft/src/lib/auth/sign-up-access.server.ts:9) has a fixed default, used when `SIGNUP_ACCESS_CODE` is missing at line 14. The production example does not list that variable.
 - **Impact:** if beta signup is intended to be restricted, a missing deployment variable silently selects the source-defined code rather than refusing signup. This does not itself grant workplace membership.
 - **Fix:** explicitly configure the beta admission secret and fail closed when production configuration is missing. Keep the existing signup throttling. This finding does not require replacing the admission mechanism with a new feature.
 
-### B08 — Medium: verify and apply production response protections
+### B08 — Medium, fixed in code: production response protections
+
+- **23 October remediation:** shared Start middleware protects both apps with a per-response script nonce, CSP frame-ancestor protection, `X-Frame-Options`, `nosniff`, a referrer policy and private/no-store dynamic response headers. Static asset caching is preserved. The custom Start instances explicitly retain server-function CSRF middleware. Production previews verified HTML/auth JSON, nonce matching/rotation, successful demo hydration and admin login rendering, and rejection of cross-site/originless server-function requests. Hosted response headers still need verification after deployment.
 
 - A public HTTPS HEAD request to `https://rocketrota.com` returned HTTP 200 but did not include CSP, X-Frame-Options, X-Content-Type-Options or Referrer-Policy headers.
 - Configure clickjacking protection, MIME sniffing protection and an appropriate referrer policy at the app or proxy. Test a CSP compatible with TanStack's scripts and hydration before enforcing it; a policy that breaks sign-in or rendering is not ready to ship.

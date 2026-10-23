@@ -1,5 +1,6 @@
 import { createRouter as createTanStackRouter } from "@tanstack/react-router"
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query"
+import { getSecuritySsrOptions } from "@rocketrota/shared/security"
 
 import { routeTree } from "./routeTree.gen"
 import { createQueryClient } from "@/lib/query-client"
@@ -13,6 +14,7 @@ export function getRouter() {
   installQueryTiming(queryClient)
   const router = createTanStackRouter({
     routeTree,
+    ssr: getSecuritySsrOptions(),
     context: { queryClient },
 
     scrollRestoration: true,

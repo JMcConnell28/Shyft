@@ -2,16 +2,14 @@
 
 import * as React from "react"
 
-import { rotaPlanningScreenshotSrc } from "@/features/marketing/constants/feature-assets"
-import {
-  marketingFeaturePages,
-  type MarketingFeatureSlug,
-} from "@/features/marketing/content"
+import type { MarketingFeatureSlug } from "@/features/marketing/types"
+import { rotaScreenshot } from "@/features/marketing/constants/feature-assets"
+import { marketingFeaturePages } from "@/features/marketing/content"
 import { ProductScreenshotFrame } from "@/features/marketing/components/product-screenshot-frame"
 import { cn } from "@/lib/utils"
 
 const RotaPlanningFeaturePreview = React.lazy(
-  () => import("@/features/rota-demo/components/rota-planning-feature-preview"),
+  () => import("@/features/rota-demo/components/rota-planning-feature-preview")
 )
 
 type FeatureVisualProps = {
@@ -57,8 +55,8 @@ function FeatureVisual({ feature }: FeatureVisualProps) {
 function RotaPlanningScreenshotVisual() {
   return (
     <ProductScreenshotFrame
-      src={rotaPlanningScreenshotSrc}
-      alt="RocketRota rota planning workspace showing grouped team members and assigned shifts"
+      src={rotaScreenshot.src}
+      alt={rotaScreenshot.alt}
       fallback={
         <React.Suspense fallback={<div className="h-[540px] bg-[#f7faff]" />}>
           <RotaPlanningFeaturePreview />
@@ -73,7 +71,7 @@ function TimeTrackingVisual() {
   return (
     <div className="grid h-full gap-3 lg:grid-cols-[0.9fr_1.1fr]">
       <div className="rounded-2xl border border-[#e4ebf8] bg-white p-4 shadow-sm">
-        <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#8294b4]">
+        <p className="text-xs font-extrabold tracking-[0.16em] text-[#8294b4] uppercase">
           Clock status
         </p>
         <div className="mt-5 space-y-3">
@@ -90,12 +88,19 @@ function TimeTrackingVisual() {
         </div>
       </div>
       <div className="rounded-2xl border border-[#e4ebf8] bg-white p-4 shadow-sm">
-        <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#8294b4]">
+        <p className="text-xs font-extrabold tracking-[0.16em] text-[#8294b4] uppercase">
           Live activity
         </p>
         <div className="mt-4 space-y-3">
-          {["Ava clocked in", "Noah started bar shift", "Ruby missed clock-out"].map((item) => (
-            <div key={item} className="flex items-center justify-between rounded-xl bg-[#f6f9ff] px-3 py-3 text-sm">
+          {[
+            "Ava clocked in",
+            "Noah started bar shift",
+            "Ruby missed clock-out",
+          ].map((item) => (
+            <div
+              key={item}
+              className="flex items-center justify-between rounded-xl bg-[#f6f9ff] px-3 py-3 text-sm"
+            >
               <span className="font-semibold text-[#18316a]">{item}</span>
               <span className="text-xs text-[#7385a7]">Now</span>
             </div>
@@ -109,7 +114,7 @@ function TimeTrackingVisual() {
 function TimesheetsVisual() {
   return (
     <div className="rounded-2xl border border-[#e4ebf8] bg-white p-4 shadow-sm">
-      <div className="grid grid-cols-[1.1fr_0.7fr_0.7fr_0.8fr] border-b border-[#edf2ff] pb-3 text-xs font-extrabold uppercase tracking-[0.14em] text-[#8294b4]">
+      <div className="grid grid-cols-[1.1fr_0.7fr_0.7fr_0.8fr] border-b border-[#edf2ff] pb-3 text-xs font-extrabold tracking-[0.14em] text-[#8294b4] uppercase">
         <span>Staff</span>
         <span>Scheduled</span>
         <span>Actual</span>
@@ -123,7 +128,10 @@ function TimesheetsVisual() {
           ["Oscar Hughes", "40h", "39h 30m", "Ready"],
           ["Grace Walker", "24h", "24h", "Ready"],
         ].map(([name, scheduled, actual, status]) => (
-          <div key={name} className="grid grid-cols-[1.1fr_0.7fr_0.7fr_0.8fr] py-4 text-sm">
+          <div
+            key={name}
+            className="grid grid-cols-[1.1fr_0.7fr_0.7fr_0.8fr] py-4 text-sm"
+          >
             <span className="font-semibold text-[#18316a]">{name}</span>
             <span className="text-[#65799f]">{scheduled}</span>
             <span className="text-[#65799f]">{actual}</span>
@@ -132,7 +140,7 @@ function TimesheetsVisual() {
                 "w-fit rounded-full px-2.5 py-1 text-xs font-semibold",
                 status === "Review"
                   ? "bg-amber-50 text-amber-700"
-                  : "bg-emerald-50 text-emerald-700",
+                  : "bg-emerald-50 text-emerald-700"
               )}
             >
               {status}

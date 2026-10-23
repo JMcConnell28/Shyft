@@ -1,24 +1,24 @@
 .landing-preview .preview-workflow {
   display: grid;
   grid-template-columns: 0.86fr 1.14fr;
-  gap: 68px;
-  padding-block: 48px 50px;
+  gap: 56px;
+  padding-block: 40px 44px;
   scroll-margin-top: 30px;
 }
 .preview-workflow-intro {
-  padding-top: 26px;
+  padding-top: 22px;
 }
 .preview-workflow h2 {
-  font-size: clamp(42px, 6.3vw, 80px);
+  font-size: clamp(38px, 5.3vw, 68px);
   font-weight: 800;
   line-height: 1.04;
   letter-spacing: -0.055em;
 }
 .preview-workflow-intro > p {
-  max-width: 420px;
-  margin-top: 32px;
+  max-width: 360px;
+  margin-top: 24px;
   color: var(--preview-muted);
-  font-size: 23px;
+  font-size: 20px;
   line-height: 1.5;
   letter-spacing: -0.025em;
 }
@@ -30,20 +30,20 @@
 }
 .preview-workflow-step {
   display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 28px;
-  padding-block: 26px;
+  grid-template-columns: 68px 1fr;
+  gap: 24px;
+  padding-block: 22px;
   border-radius: 4px;
 }
 .preview-step-number {
   display: grid;
-  width: 80px;
-  height: 80px;
+  width: 68px;
+  height: 68px;
   place-items: center;
   border-radius: 50%;
   background: #ebf2ff;
   color: var(--preview-blue);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
 }
 .preview-workflow h3 {
@@ -51,7 +51,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  font-size: 26px;
+  font-size: 23px;
   font-weight: 800;
   letter-spacing: -0.035em;
 }
@@ -71,7 +71,7 @@
 .preview-workflow-step p {
   margin-top: 4px;
   color: var(--preview-muted);
-  font-size: 19px;
+  font-size: 17px;
   line-height: 1.5;
 }
 .preview-closing {

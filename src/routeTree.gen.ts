@@ -14,7 +14,6 @@ import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as ClockRouteImport } from './routes/clock'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as LandingRouteImport } from './routes/landing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -109,11 +108,6 @@ const DemoRoute = DemoRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LandingRoute = LandingRouteImport.update({
-  id: '/landing',
-  path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -526,7 +520,6 @@ export interface FileRoutesByFullPath {
   '/clock': typeof ClockRouteWithChildren
   '/demo': typeof DemoRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -603,7 +596,6 @@ export interface FileRoutesByTo {
   '/clock': typeof ClockRouteWithChildren
   '/demo': typeof DemoRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -674,7 +666,6 @@ export interface FileRoutesById {
   '/clock': typeof ClockRouteWithChildren
   '/demo': typeof DemoRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -754,7 +745,6 @@ export interface FileRouteTypes {
     | '/clock'
     | '/demo'
     | '/forgot-password'
-    | '/landing'
     | '/login'
     | '/pricing'
     | '/privacy'
@@ -831,7 +821,6 @@ export interface FileRouteTypes {
     | '/clock'
     | '/demo'
     | '/forgot-password'
-    | '/landing'
     | '/login'
     | '/pricing'
     | '/privacy'
@@ -901,7 +890,6 @@ export interface FileRouteTypes {
     | '/clock'
     | '/demo'
     | '/forgot-password'
-    | '/landing'
     | '/login'
     | '/pricing'
     | '/privacy'
@@ -981,7 +969,6 @@ export interface RootRouteChildren {
   ClockRoute: typeof ClockRouteWithChildren
   DemoRoute: typeof DemoRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-  LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -1040,13 +1027,6 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/landing': {
-      id: '/landing'
-      path: '/landing'
-      fullPath: '/landing'
-      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1815,7 +1795,6 @@ const rootRouteChildren: RootRouteChildren = {
   ClockRoute: ClockRouteWithChildren,
   DemoRoute: DemoRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
-  LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
@@ -1843,10 +1822,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

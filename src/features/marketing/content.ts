@@ -4,16 +4,13 @@ import {
   CalendarClockIcon,
   CalendarDaysIcon,
   CheckCircle2Icon,
-  Clock3Icon,
-  FileTextIcon,
   MapPinIcon,
-  PlaneTakeoffIcon,
   ShieldCheckIcon,
   TimerIcon,
   UsersIcon,
 } from "lucide-react"
 
-type MarketingFeatureSlug = "rota-planning" | "time-tracking" | "timesheets"
+import type { MarketingFeatureSlug } from "./types"
 
 type MarketingFeaturePageContent = {
   slug: MarketingFeatureSlug
@@ -201,67 +198,24 @@ const marketingFeaturePages = {
 const featurePageTrustItems = [
   {
     title: "Clear for managers",
-    description: "Every workflow is designed for quick decisions during a busy week.",
+    description:
+      "Every workflow is designed for quick decisions during a busy week.",
     icon: CheckCircle2Icon,
   },
   {
     title: "Location aware",
-    description: "Keep rota, clocking and review work tied to the right workplace.",
+    description:
+      "Keep rota, clocking and review work tied to the right workplace.",
     icon: MapPinIcon,
   },
   {
     title: "Controlled by default",
-    description: "Important actions stay intentional, traceable and easy to understand.",
+    description:
+      "Important actions stay intentional, traceable and easy to understand.",
     icon: ShieldCheckIcon,
   },
 ] as const
 
-const featureHighlights = [
-  {
-    title: "Smart scheduling",
-    description: "Create rotas in minutes with drag-and-drop simplicity.",
-    icon: CalendarDaysIcon,
-  },
-  {
-    title: "Fair and flexible",
-    description: "Balance workloads and availability with ease.",
-    icon: UsersIcon,
-  },
-  {
-    title: "Shift templates",
-    description: "Build once, reuse forever. Save time on repeat weeks.",
-    icon: FileTextIcon,
-  },
-  {
-    title: "Team availability",
-    description: "See who's available and avoid scheduling conflicts.",
-    icon: Clock3Icon,
-  },
-  {
-    title: "Leave management",
-    description: "Handle time off requests in one central place.",
-    icon: PlaneTakeoffIcon,
-  },
-  {
-    title: "Real-time updates",
-    description: "Instant notifications keep everyone in the loop.",
-    icon: BellRingIcon,
-  },
-] as const
-
-const adminBenefits = [
-  "Publish rotas when they're ready",
-  "Reuse templates for repeat weeks",
-  "Review recorded hours before payroll",
-  "Organise staff across locations",
-] as const
-
-export {
-  adminBenefits,
-  featureHighlights,
-  featurePageTrustItems,
-  marketingFeaturePages,
-  navigationFeatures,
-}
+export { featurePageTrustItems, marketingFeaturePages, navigationFeatures }
 
 export type { MarketingFeatureSlug }
