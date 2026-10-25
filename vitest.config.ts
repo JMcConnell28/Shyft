@@ -3,7 +3,7 @@ import { configDefaults, defineConfig } from "vitest/config"
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
-    exclude: [...configDefaults.exclude, "apps/admin/**"],
+    exclude: [...configDefaults.exclude, "apps/admin/**", ".performance/**"],
     maxWorkers: 2,
   },
 })

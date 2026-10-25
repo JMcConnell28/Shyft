@@ -12,6 +12,7 @@ import type {
 } from "@/features/time-clock/types"
 import type { PublishedShiftCandidate } from "@/features/time-clock/utils/shift-matching"
 import { getLocationFeatureFlags } from "@/features/feature-flags/server/evaluation"
+import { listAssignedClockEmployees } from "@/features/time-clock/server/manager-clock-employees"
 import {
   CLOCK_OUT_REMINDER_MINUTES,
   SCHEDULED_CLOCK_OUT_DELAY_MINUTES,
@@ -236,7 +237,7 @@ async function getManagerClockPageData(input: {
     entitlements,
   ] = await Promise.all([
     listClockSettingsForLocations(supabase, locationIds),
-    listAssignedEmployees(supabase, locationIds),
+    listAssignedClockEmployees(locationIds),
     listOpenEntriesForLocations(supabase, locationIds),
     listActivityEntries(supabase, locationIds, selectedDate),
     listFailedAttempts(supabase, locationIds),
@@ -691,54 +692,6 @@ async function listOpenEntriesForLocations(
 
   assertSupabaseSuccess(result.error, "We could not load open entries.")
   return result.data ?? []
-}
-
-async function listAssignedEmployees(
-  supabase: SupabaseServer,
-  locationIds: Array<string>
-) {
-  const assignmentResult = await supabase
-    .from("employee_location_assignments")
-    .select("employee_id, location_id")
-    .in("location_id", locationIds)
-    .eq("is_enabled", true)
-    .is("disabled_at", null)
-
-  assertSupabaseSuccess(
-    assignmentResult.error,
-    "We could not load team assignments."
-  )
-  const assignments = assignmentResult.data ?? []
-  const employeeIds = [...new Set(assignments.map((item) => item.employee_id))]
-
-  if (employeeIds.length === 0) {
-    return []
-  }
-
-  const employeeResult = await supabase
-    .from("employees")
-    .select("id, full_name, email, status")
-    .in("id", employeeIds)
-    .order("full_name", { ascending: true })
-
-  assertSupabaseSuccess(employeeResult.error, "We could not load employees.")
-  const employeeById = new Map(
-    (employeeResult.data ?? []).map((employee) => [employee.id, employee])
-  )
-
-  return assignments
-    .map((assignment) => {
-      const employee = employeeById.get(assignment.employee_id)
-      return employee
-        ? {
-            ...employee,
-            location_id: assignment.location_id,
-          }
-        : null
-    })
-    .filter((employee): employee is NonNullable<typeof employee> =>
-      Boolean(employee)
-    )
 }
 
 async function listActivityEntries(

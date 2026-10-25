@@ -4,12 +4,13 @@ import { vi } from "vitest"
 
 type WorkerRequest = Pick<Request, "url" | "mode" | "method" | "destination">
 type WorkerEvent = {
+  preloadResponse?: Promise<Response | undefined>
   request: WorkerRequest
   respondWith: (response: Promise<Response | undefined>) => void
   waitUntil: (work: Promise<unknown>) => void
 }
 
-export function createWorkerHarness() {
+export function createWorkerHarness(supportsNavigationPreload = true) {
   const listeners = new Map<string, (event: WorkerEvent) => void>()
   const cache = {
     match: vi
@@ -33,6 +34,7 @@ export function createWorkerHarness() {
       ]),
     delete: vi.fn().mockResolvedValue(true),
   }
+  const navigationPreload = { enable: vi.fn().mockResolvedValue(undefined) }
   runInNewContext(readFileSync("public/sw.js", "utf8"), {
     URL,
     Response,
@@ -40,6 +42,11 @@ export function createWorkerHarness() {
     caches,
     console,
     self: {
+      registration: {
+        navigationPreload: supportsNavigationPreload
+          ? navigationPreload
+          : undefined,
+      },
       location: { origin: "https://example.test" },
       addEventListener: (
         name: string,
@@ -53,11 +60,13 @@ export function createWorkerHarness() {
     name: string,
     path = "/",
     mode: RequestMode = "cors",
-    method = "GET"
+    method = "GET",
+    preloadResponse?: Promise<Response | undefined>
   ) {
     let response: Promise<Response | undefined> | undefined
     const work: Array<Promise<unknown>> = []
     listeners.get(name)?.({
+      preloadResponse,
       request: {
         url: new URL(path, "https://example.test").href,
         mode,
@@ -75,5 +84,5 @@ export function createWorkerHarness() {
     await Promise.all(work)
     return result
   }
-  return { cache, caches, fetch, dispatch }
+  return { cache, caches, fetch, dispatch, navigationPreload }
 }

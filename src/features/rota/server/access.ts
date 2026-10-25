@@ -1,5 +1,6 @@
 import type { AccessibleRotaLocation } from "@/features/rota/types"
 import type { OrganizationCapabilities } from "@/lib/auth/workspace-capabilities"
+import { listOrganizationLocationSummaries } from "@/features/locations/server/location-summaries"
 // eslint-disable-next-line no-duplicate-imports
 import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
 import { getLocationRole } from "@/lib/auth/has-location-permission"
@@ -210,17 +211,19 @@ async function listManagerAccessibleLocations(
   organizationId: string | null,
   userId: string
 ): Promise<Array<Omit<AccessibleRotaLocation, "hasUnreadPublished">>> {
+  if (organizationId) {
+    const locations = await listOrganizationLocationSummaries(organizationId)
+    return locations.map(({ id, name, slug }) => ({ id, name, slug }))
+  }
   const query = supabase
     .from("locations")
     .select("id, name, slug")
     .order("created_at", { ascending: true })
     .order("name", { ascending: true })
 
-  const result = organizationId
-    ? await query.eq("organization_id", organizationId)
-    : await query
-        .is("organization_id", null)
-        .in("id", await listLocationMembershipIds(userId))
+  const result = await query
+    .is("organization_id", null)
+    .in("id", await listLocationMembershipIds(userId))
 
   assertSupabaseSuccess(result.error, "We could not load locations.")
 

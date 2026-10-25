@@ -43,6 +43,55 @@ describe("public asset caching", () => {
     expect(worker.cache.put).not.toHaveBeenCalled()
   })
 
+  it("enables navigation preload on activation when supported", async () => {
+    const worker = createWorkerHarness()
+    await worker.dispatch("activate")
+    expect(worker.navigationPreload.enable).toHaveBeenCalledTimes(1)
+  })
+
+  it("still activates when navigation preload is unsupported", async () => {
+    const worker = createWorkerHarness(false)
+    await worker.dispatch("activate")
+    expect(worker.navigationPreload.enable).not.toHaveBeenCalled()
+  })
+
+  it("uses preloaded authenticated HTML without a duplicate fetch or cache write", async () => {
+    const worker = createWorkerHarness()
+    const response = await worker.dispatch(
+      "fetch",
+      "/app/tenant/dashboard",
+      "navigate",
+      "GET",
+      Promise.resolve(new Response("preloaded"))
+    )
+    expect(await response?.text()).toBe("preloaded")
+    expect(worker.fetch).not.toHaveBeenCalled()
+    expect(worker.cache.put).not.toHaveBeenCalled()
+  })
+
+  it("falls back to one ordinary fetch when navigation preload rejects", async () => {
+    const worker = createWorkerHarness()
+    const response = await worker.dispatch(
+      "fetch",
+      "/app/tenant/dashboard",
+      "navigate",
+      "GET",
+      Promise.reject(new Error("Preload unavailable"))
+    )
+    expect(await response?.text()).toBe("network")
+    expect(worker.fetch).toHaveBeenCalledTimes(1)
+    expect(worker.cache.put).not.toHaveBeenCalled()
+  })
+
+  it("retains the offline page when both preload and ordinary fetch fail", async () => {
+    const worker = createWorkerHarness()
+    worker.fetch.mockRejectedValue(new Error("Offline"))
+    worker.caches.match.mockResolvedValue(new Response("offline"))
+    const response = await worker.dispatch("fetch", "/dashboard", "navigate")
+    expect(await response?.text()).toBe("offline")
+    expect(worker.cache.put).not.toHaveBeenCalled()
+  })
+
   it("does not intercept mutations or cross-origin assets", async () => {
     const worker = createWorkerHarness()
     await worker.dispatch("fetch", "/assets/index-abcdefgh.js", "cors", "POST")

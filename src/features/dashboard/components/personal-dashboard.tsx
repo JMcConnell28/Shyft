@@ -2,12 +2,14 @@ import { ShiftOverviewCards } from "./shift-overview-cards"
 import type { ComponentProps } from "react"
 import type { ShiftOverviewInput } from "@/features/dashboard/types"
 import { useShiftOverviewQuery } from "@/features/dashboard/hooks/use-shift-overview-query"
+import { useContentReadyTiming } from "@/features/navigation/hooks/use-content-ready-timing"
 
 function PersonalDashboard({
   input,
   ...props
 }: ComponentProps<typeof ShiftOverviewCards> & { input: ShiftOverviewInput }) {
   const query = useShiftOverviewQuery(input, props.overview)
+  useContentReadyTiming(Boolean(query.data))
   return (
     <>
       {query.isError ? (

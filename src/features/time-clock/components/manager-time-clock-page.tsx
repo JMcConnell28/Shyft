@@ -8,13 +8,18 @@ import type {
 } from "@/features/time-clock/types"
 import { Button } from "@/components/ui/button"
 
-import { ManagerClockOverrideDialog } from "@/features/time-clock/components/manager-clock-override-dialog"
 import { TimeClockDashboard } from "@/features/time-clock/components/time-clock-dashboard"
 import { useLiveNow } from "@/features/time-clock/hooks/use-live-now"
 import { useManagerClockMutations } from "@/features/time-clock/hooks/use-time-clock-mutations"
 import { useManagerClockQuery } from "@/features/time-clock/hooks/use-time-clock-query"
 import { getManagerClockEmployeeKey } from "@/features/time-clock/utils/manager-clock-employees"
 import { getManagerClockStats } from "@/features/time-clock/utils/manager-clock-stats"
+
+const ManagerClockOverrideDialog = React.lazy(() =>
+  import("./manager-clock-override-dialog").then((module) => ({
+    default: module.ManagerClockOverrideDialog,
+  }))
+)
 
 type ManagerTimeClockPageProps = {
   date?: string
@@ -89,28 +94,32 @@ function ManagerTimeClockPage({
         stats={stats}
         workspaceSlug={workspaceSlug}
       />
-      <ManagerClockOverrideDialog
-        employees={data.employees.filter((employee) =>
-          data.writableLocationIds.includes(employee.locationId)
-        )}
-        initialAction={overrideRequest.action}
-        initialEmployeeKey={overrideRequest.employeeKey}
-        isPending={overrideMutation.isPending}
-        onOpenChange={setIsOverrideOpen}
-        onSubmit={({ action, employee, reason, occurredAt }) => {
-          overrideMutation.mutate(
-            {
-              action,
-              occurredAt,
-              employeeId: employee.id,
-              locationId: employee.locationId,
-              reason,
-            },
-            { onSuccess: () => setIsOverrideOpen(false) }
-          )
-        }}
-        open={isOverrideOpen}
-      />
+      {isOverrideOpen ? (
+        <React.Suspense fallback={null}>
+          <ManagerClockOverrideDialog
+            employees={data.employees.filter((employee) =>
+              data.writableLocationIds.includes(employee.locationId)
+            )}
+            initialAction={overrideRequest.action}
+            initialEmployeeKey={overrideRequest.employeeKey}
+            isPending={overrideMutation.isPending}
+            onOpenChange={setIsOverrideOpen}
+            onSubmit={({ action, employee, reason, occurredAt }) => {
+              overrideMutation.mutate(
+                {
+                  action,
+                  occurredAt,
+                  employeeId: employee.id,
+                  locationId: employee.locationId,
+                  reason,
+                },
+                { onSuccess: () => setIsOverrideOpen(false) }
+              )
+            }}
+            open={isOverrideOpen}
+          />
+        </React.Suspense>
+      ) : null}
     </>
   )
 }

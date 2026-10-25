@@ -1,38 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 
-import { OrglessWorkspacePage } from "@/components/app/orgless-workspace-page"
-import { getOrganizationAppRedirect } from "@/features/onboarding/utils/viewer-route-redirects"
-
-import { loadDefaultViewer } from "@/features/navigation/load-navigation-context"
-import { listOwnJoinRequests } from "@/features/join-approvals/server-fns"
+import { loadDashboardEntry } from "@/features/navigation/load-dashboard-entry"
 
 export const Route = createFileRoute("/_authed/_verified/dashboard")({
-  beforeLoad: async ({ context }) => {
-    const pendingRequests = await listOwnJoinRequests()
-    if (pendingRequests[0]) {
-      throw redirect({
-        to: "/join-status/$requestId",
-        params: { requestId: pendingRequests[0].id },
-      })
-    }
-    const viewer = await loadDefaultViewer(context)
-    if (!viewer.activeWorkspace && viewer.organizations.length === 0) {
-      throw redirect({
-        to:
-          viewer.onboardingIntent === "join"
-            ? "/onboarding/join"
-            : "/onboarding/setup",
-      })
-    }
-
-    const redirectTarget = getOrganizationAppRedirect(viewer, "dashboard")
-
-    if (!redirectTarget) {
-      return { viewer }
-    }
-
-    throw redirect({ href: redirectTarget })
-  },
+  beforeLoad: ({ context }) => loadDashboardEntry(context),
   head: () => ({
     meta: [
       { title: "Dashboard | RocketRota" },
@@ -42,11 +13,4 @@ export const Route = createFileRoute("/_authed/_verified/dashboard")({
       },
     ],
   }),
-  component: DashboardRoute,
 })
-
-function DashboardRoute() {
-  const { viewer } = Route.useRouteContext()
-
-  return <OrglessWorkspacePage organizations={viewer.organizations} />
-}

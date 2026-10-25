@@ -2,23 +2,18 @@ import "@tanstack/react-start/server-only"
 
 import { createHash } from "node:crypto"
 
+import { listManagedClockLocations } from "./managed-clock-locations"
+// eslint-disable-next-line no-duplicate-imports
+import type { ManagedLocation } from "./managed-clock-locations"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
 import { requireLocationPermission } from "@/lib/auth/has-location-permission"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 import { getAuthRequestHeaders } from "@/lib/auth-session.server"
-import { createSupabaseServerClient } from "@/lib/supabase.server"
-import { assertSupabaseSuccess } from "@/lib/supabase-errors"
 
 type ClockScope = {
   organizationId: string | null
   locationId: string | null
   userId: string
-}
-
-type ManagedLocation = {
-  id: string
-  name: string
-  organizationId: string | null
 }
 
 async function requireClockManagerScope(input: {
@@ -115,27 +110,6 @@ async function requireClockSettingsScope(input: {
     locationId: input.locationId,
     userId: session.user.id,
   }
-}
-
-async function listManagedClockLocations(scope: ClockScope) {
-  const supabase = createSupabaseServerClient()
-  const query = supabase
-    .from("locations")
-    .select("id, name, organization_id")
-    .order("created_at", { ascending: true })
-    .order("name", { ascending: true })
-
-  const result = scope.organizationId
-    ? await query.eq("organization_id", scope.organizationId)
-    : await query.eq("id", scope.locationId ?? "")
-
-  assertSupabaseSuccess(result.error, "We could not load your locations.")
-
-  return (result.data ?? []).map((location) => ({
-    id: location.id,
-    name: location.name,
-    organizationId: location.organization_id,
-  }))
 }
 
 async function ensureLocationInScope(

@@ -55,6 +55,7 @@ function installNavigationTiming(router: AnyRouter): void {
       "[navigation-timing]",
       JSON.stringify({
         destination: getNavigationLabel(toLocation.pathname),
+        documentElapsedMs: Math.round(performance.now()),
         loadMs: Math.round(loadedAt - startedAt),
         commitAfterLoadMs: Math.round(performance.now() - loadedAt),
         totalMs: Math.round(performance.now() - startedAt),

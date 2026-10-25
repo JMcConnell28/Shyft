@@ -17,6 +17,13 @@ self.addEventListener("install", (event) => {
 })
 
 self.addEventListener("activate", (event) => {
+  if (self.registration.navigationPreload) {
+    event.waitUntil(
+      self.registration.navigationPreload.enable().catch(() => {
+        console.warn("RocketRota could not enable navigation preload.")
+      })
+    )
+  }
   event.waitUntil(
     caches
       .keys()
@@ -42,7 +49,19 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).catch(() => caches.match("/offline.html")))
+    event.respondWith(
+      (async () => {
+        try {
+          const preloaded = await Promise.resolve(event.preloadResponse).catch(
+            () => undefined
+          )
+          // Reuse the browser's in-flight request instead of fetching twice.
+          return preloaded ?? (await fetch(request))
+        } catch {
+          return caches.match("/offline.html")
+        }
+      })()
+    )
     return
   }
 

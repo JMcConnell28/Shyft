@@ -18,4 +18,10 @@ const getWorkspaceViewer = createServerFn({ method: "GET" })
     return readWorkspaceViewer(data)
   })
 
-export { getNavigationSession, getWorkspaceViewer }
+const getDashboardEntry = createServerFn({ method: "GET" }).handler(async () => {
+  const { readDashboardEntry } =
+    await import("@/features/navigation/server/dashboard-entry")
+  return readDashboardEntry()
+})
+
+export { getDashboardEntry, getNavigationSession, getWorkspaceViewer }

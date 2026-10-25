@@ -1,0 +1,45 @@
+{
+  "baselineCommit": "a3a2502",
+  "environment": {
+    "runtime": "Node 22.14.0",
+    "app": "production builds with identical optional React profiling and content-ready probes",
+    "browser": "same signed-in desktop in-app browser, unthrottled",
+    "cache": "warmed assets, new document/router/query state per startup sample",
+    "server": "separate loopback ports, same configured database, scheduled jobs disabled",
+    "deviceReferenceOnly": "OnePlus Nord 4; physical-device after measurements not collected",
+    "liveDatasetFrozen": false,
+    "startupSamples": "six alternating samples per build; warm-up samples excluded",
+    "navigationSamples": "three first visits per page/build, following a new verified dashboard document",
+    "freshness": "wait for per-document content-ready DOM marker; filter console entries by origin and navigation start timestamp"
+  },
+  "startup": {
+    "baseline": [
+      { "readyMs": 1883, "responseStartMs": 882, "hydrationRecoveries": 0 },
+      { "readyMs": 806, "responseStartMs": 335, "hydrationRecoveries": 1 },
+      { "readyMs": 776, "responseStartMs": 327, "hydrationRecoveries": 1 },
+      { "readyMs": 742, "responseStartMs": 337, "hydrationRecoveries": 1 },
+      { "readyMs": 654, "responseStartMs": 277, "hydrationRecoveries": 1 },
+      { "readyMs": 692, "responseStartMs": 290, "hydrationRecoveries": 1 }
+    ],
+    "after": [
+      { "readyMs": 830, "responseStartMs": 473, "hydrationRecoveries": 0 },
+      { "readyMs": 578, "responseStartMs": 308, "hydrationRecoveries": 0 },
+      { "readyMs": 594, "responseStartMs": 305, "hydrationRecoveries": 0 },
+      { "readyMs": 612, "responseStartMs": 269, "hydrationRecoveries": 0 },
+      { "readyMs": 578, "responseStartMs": 270, "hydrationRecoveries": 0 },
+      { "readyMs": 554, "responseStartMs": 249, "hydrationRecoveries": 0 }
+    ]
+  },
+  "firstNavigationTotalMs": {
+    "timesheets": { "baseline": [410, 176, 172], "after": [320, 145, 121] },
+    "timeTracking": { "baseline": [505, 278, 204], "after": [274, 273, 193] }
+  },
+  "limitations": [
+    "Content-ready includes hydration and can occur after the first SSR paint.",
+    "Response-start includes same-origin redirects, unlike responseStart minus requestStart.",
+    "The samples are small and network variance remains; these are descriptive medians.",
+    "This is not an installed Android PWA launch, hosted dashboard Lighthouse result, or a fresh browser profile.",
+    "Time-tracking median improvement is too small to establish a meaningful speedup.",
+    "Navigation preload's real cold-worker benefit is not quantified by these warm desktop samples."
+  ]
+}

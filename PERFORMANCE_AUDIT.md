@@ -1,5 +1,11 @@
 # RocketRota performance audit
 
+The subsequent authenticated startup investigation is recorded in
+[`docs/engineering/pwa-startup-follow-up.md`](docs/engineering/pwa-startup-follow-up.md).
+That follow-up uses a new authenticated baseline at `a3a2502` and addresses the
+OnePlus Nord 4 recording. The original public-page measurements below remain
+separate from authenticated app and installed-PWA results.
+
 Investigated 25 October 2026 against baseline commit `2ff2e59`. Changes are local;
 no deployment, production migration, permission relaxation, or payment was made.
 

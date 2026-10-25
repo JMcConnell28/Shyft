@@ -101,6 +101,20 @@ React's profiling renderer is enabled only by `--profile`; compare normal
 release builds for headline performance numbers. React duration covers measured
 workspace commits, not all hydration CPU or the time a suspended query waits.
 
+The profiling dashboard also emits `[content-ready-timing]` when primary staffing
+or personal dashboard data is mounted. `documentElapsedMs` starts at document
+navigation (including redirects), rather than router installation, and includes
+hydration. It can be later than the first SSR paint. `documentTtfbMs` is navigation
+`responseStart`, including same-origin redirects; the browser harness's `ttfbMs`
+instead uses `responseStart - requestStart`. Compare each metric consistently.
+For installed-entry investigation, navigate through `/dashboard?source=pwa`, not
+only directly to a workspace URL. This still does not reproduce Android process
+or worker startup on a real phone.
+Automation should wait for `html[data-performance-content-ready="true"]` on each
+new document and accept only content-ready log entries from the measured origin
+whose timestamp is later than navigation start. Console logs can survive a
+navigation and must not be reused as a fresh measurement.
+
 `PERFORMANCE_PROFILE=1` opts the server into `Server-Timing` for request handling,
 auth reads, membership SQL, Supabase fetches, and dashboard day/attention SQL.
 `request` covers handling until a Response is produced, not full streamed-body

@@ -13,6 +13,7 @@ import {
 } from "./dashboard-state"
 import type { ManagerDayData } from "../types"
 import { getDateKeyInTimeZone } from "@/lib/time-zone"
+import { useContentReadyTiming } from "@/features/navigation/hooks/use-content-ready-timing"
 
 function ManagerDashboard({
   organizationId,
@@ -29,6 +30,7 @@ function ManagerDashboard({
 }) {
   const { access, location, day, attention, setAttentionPage } =
     useDashboardData(organizationId, userId, search)
+  useContentReadyTiming(Boolean(day.data))
   const filters = useTeamFilters(
     day.data?.team ?? [],
     `${location?.id}:${search.date ?? "today"}`
