@@ -199,6 +199,7 @@ async function createSubscriptionCheckoutSession(
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: stripeCustomerId,
+    customer_update: { address: "auto" },
     client_reference_id: billingAccount.id,
     payment_method_collection: "always",
     billing_address_collection: "required",
@@ -245,6 +246,8 @@ async function createPaymentMethodSetupCheckoutSession(input: {
   const session = await getStripe().checkout.sessions.create({
     mode: "setup",
     customer: input.stripeCustomerId,
+    customer_update: { address: "auto" },
+    billing_address_collection: "required",
     currency: getBillingCurrency(),
     client_reference_id: input.billingAccountId,
     setup_intent_data: {
