@@ -9,8 +9,13 @@ import type { ManagerDayData, TeamRow } from "../types"
 import type { useTeamFilters } from "../hooks/use-team-filters"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 const filterSchema = z.enum(teamFilterValues)
+const teamFilterSelectClass = cn(
+  dashboardSelectClass,
+  "h-9 w-full px-2 text-[11px] sm:h-10 sm:w-auto sm:px-3 sm:text-xs"
+)
 
 function ManagerTeamSection({
   data,
@@ -39,17 +44,20 @@ function ManagerTeamSection({
         </h2>
         <span className="text-xs text-[#7481a0]">{filters.total} records</span>
       </div>
-      <div className="flex flex-wrap gap-2 p-4">
+      <div className="grid grid-cols-2 gap-2 p-4 sm:flex sm:flex-wrap">
         <Input
           aria-label="Search employees"
           placeholder="Search employees…"
-          className="h-10 min-w-40 flex-1 rounded-lg text-xs"
+          className="col-span-2 h-9 min-w-0 flex-1 rounded-lg text-xs sm:h-10 sm:min-w-40"
           value={filters.search}
           onChange={(event) => filters.setSearch(event.target.value)}
         />
         <select
           aria-label="Filter by zone"
-          className={dashboardSelectClass}
+          className={cn(
+            teamFilterSelectClass,
+            !data.location.attendanceEnabled && "col-span-2"
+          )}
           value={filters.zone}
           onChange={(event) => filters.setZone(event.target.value)}
         >
@@ -61,7 +69,7 @@ function ManagerTeamSection({
         {data.location.attendanceEnabled ? (
           <select
             aria-label="Filter by status"
-            className={dashboardSelectClass}
+            className={teamFilterSelectClass}
             value={filters.status}
             onChange={(event) => {
               const parsed = filterSchema.safeParse(event.target.value)

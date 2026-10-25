@@ -22,14 +22,10 @@ Copy the webhook signing secret into `.env.local`:
 STRIPE_WEBHOOK_SECRET=replace-with-stripe-webhook-secret
 ```
 
-Required Stripe env vars:
-
-```txt
-STRIPE_SECRET_KEY=replace-with-stripe-secret-key
-STRIPE_LOCATION_PRICE_ID=price_...
-STRIPE_EXTRA_EMPLOYEE_PRICE_ID=price_...
-BETTER_AUTH_URL=http://localhost:3000
-```
+Configure the required server variables and Stripe prices using
+[Stripe environment configuration](stripe-environment.md). For local testing,
+set `BETTER_AUTH_URL=http://localhost:3000` and use the local listener's webhook
+signing secret. Use Stripe resources from the same test environment.
 
 Inspect local billing state:
 

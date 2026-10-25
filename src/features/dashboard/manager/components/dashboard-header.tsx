@@ -51,7 +51,7 @@ function ManagerDashboardHeader({
             />
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full items-center gap-1 sm:w-auto sm:gap-2">
           <DashboardCreateRotaButton
             key={locationId}
             access={access}
@@ -60,7 +60,7 @@ function ManagerDashboardHeader({
           <Button
             nativeButton={false}
             variant="outline"
-            className="h-9 rounded-lg"
+            className="h-9 rounded-lg px-1.5 text-[11px] sm:px-2 sm:text-xs"
             render={
               <Link
                 to="/app/$workspaceSlug/rota"
@@ -75,7 +75,7 @@ function ManagerDashboardHeader({
             <Button
               nativeButton={false}
               variant="outline"
-              className="h-9 rounded-lg"
+              className="h-9 rounded-lg px-1.5 text-[11px] sm:px-2 sm:text-xs"
               render={
                 <Link
                   to="/app/$workspaceSlug/time-clock"
@@ -89,7 +89,7 @@ function ManagerDashboardHeader({
           <Button
             aria-label="Refresh dashboard"
             variant="outline"
-            className="size-9 rounded-lg"
+            className="h-9 w-8 rounded-lg px-0 sm:w-9"
             disabled={refreshing}
             onClick={onRefresh}
           >

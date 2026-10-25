@@ -12,12 +12,13 @@ The reconciliation job:
 
 ## Required Environment
 
+Configure the billing variables and price/meter requirements in
+[Stripe environment configuration](stripe-environment.md). The HTTP reconciliation
+endpoint additionally requires:
+
 ```txt
 BETTER_AUTH_URL=http://localhost:3000
 BILLING_RECONCILIATION_SECRET=replace-with-a-long-random-secret
-STRIPE_SECRET_KEY=replace-with-stripe-secret-key
-STRIPE_LOCATION_PRICE_ID=price_...
-STRIPE_EXTRA_EMPLOYEE_PRICE_ID=price_...
 ```
 
 ## Local Run
