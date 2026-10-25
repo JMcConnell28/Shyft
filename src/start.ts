@@ -3,7 +3,12 @@ import {
   securityMiddleware,
   serverFunctionCsrfMiddleware,
 } from "@rocketrota/shared/security"
+import { performanceMiddleware } from "@/lib/performance-middleware"
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [securityMiddleware, serverFunctionCsrfMiddleware],
+  requestMiddleware: [
+    securityMiddleware,
+    serverFunctionCsrfMiddleware,
+    performanceMiddleware,
+  ],
 }))

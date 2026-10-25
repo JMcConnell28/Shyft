@@ -1,0 +1,272 @@
+{
+  "date": "2026-10-25",
+  "baselineCommit": "2ff2e59",
+  "scope": "Public-page local release-build A/B; authenticated after-only profiling; installed PWA not measured",
+  "baseline": {
+    "bundle": {
+      "bytes": 648918,
+      "gzipBytes": 210112,
+      "brotliBytes": 184962,
+      "chunks": 60,
+      "stage": "generateBundle"
+    },
+    "browser": {
+      "cold-browser": {
+        "samples": 3,
+        "ttfbMs": 8.099999904632568,
+        "fcpMs": 244,
+        "lcpMs": 244,
+        "cls": 0.005946837849087185,
+        "observedBlockingMs": 0,
+        "jsTransferBytes": 270137,
+        "jsDecodedBytes": 799789
+      },
+      "warm-browser": {
+        "samples": 3,
+        "ttfbMs": 8.099999904632568,
+        "fcpMs": 84,
+        "lcpMs": 84,
+        "cls": 0.005946837849087185,
+        "observedBlockingMs": 0,
+        "jsTransferBytes": 0,
+        "jsDecodedBytes": 799789
+      }
+    },
+    "mobile": {
+      "cold-browser": {
+        "samples": 3,
+        "ttfbMs": 7.299999952316284,
+        "fcpMs": 1400,
+        "lcpMs": 5600,
+        "cls": 0.004505429189387147,
+        "observedBlockingMs": 81,
+        "jsTransferBytes": 270137,
+        "jsDecodedBytes": 799789
+      },
+      "warm-browser": {
+        "samples": 3,
+        "ttfbMs": 6.700000047683716,
+        "fcpMs": 200,
+        "lcpMs": 200,
+        "cls": 0.004505429189387147,
+        "observedBlockingMs": 73,
+        "jsTransferBytes": 0,
+        "jsDecodedBytes": 799789
+      }
+    },
+    "lighthouse": {
+      "score": 76,
+      "fcpMs": 1672.7373,
+      "lcpMs": 6692.12888922962,
+      "tbtMs": 10,
+      "cls": 0.00475737888029547
+    },
+    "http": [
+      {
+        "routeIndex": 0,
+        "sample": 0,
+        "status": 200,
+        "headersMs": 1272.8,
+        "totalMs": 1275.5,
+        "decodedBytes": 33371,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      },
+      {
+        "routeIndex": 0,
+        "sample": 1,
+        "status": 200,
+        "headersMs": 12.6,
+        "totalMs": 13.1,
+        "decodedBytes": 33371,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      },
+      {
+        "routeIndex": 0,
+        "sample": 2,
+        "status": 200,
+        "headersMs": 9.5,
+        "totalMs": 10.1,
+        "decodedBytes": 33371,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      },
+      {
+        "routeIndex": 0,
+        "sample": 3,
+        "status": 200,
+        "headersMs": 7,
+        "totalMs": 7.6,
+        "decodedBytes": 33371,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      },
+      {
+        "routeIndex": 0,
+        "sample": 4,
+        "status": 200,
+        "headersMs": 7.9,
+        "totalMs": 8.3,
+        "decodedBytes": 33371,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      }
+    ]
+  },
+  "after": {
+    "bundle": {
+      "bytes": 589659,
+      "gzipBytes": 193342,
+      "brotliBytes": 170655,
+      "chunks": 59,
+      "stage": "generateBundle"
+    },
+    "browser": {
+      "cold-browser": {
+        "samples": 3,
+        "ttfbMs": 5.200000047683716,
+        "fcpMs": 128,
+        "lcpMs": 128,
+        "cls": 0.005946837849087185,
+        "observedBlockingMs": 0,
+        "jsTransferBytes": 255726,
+        "jsDecodedBytes": 740798
+      },
+      "warm-browser": {
+        "samples": 3,
+        "ttfbMs": 9.399999976158142,
+        "fcpMs": 100,
+        "lcpMs": 100,
+        "cls": 0.005946837849087185,
+        "observedBlockingMs": 0,
+        "jsTransferBytes": 0,
+        "jsDecodedBytes": 740798
+      }
+    },
+    "mobile": {
+      "cold-browser": {
+        "samples": 3,
+        "ttfbMs": 6.600000023841858,
+        "fcpMs": 1276,
+        "lcpMs": 1276,
+        "cls": 0.004505429189387147,
+        "observedBlockingMs": 67,
+        "jsTransferBytes": 255726,
+        "jsDecodedBytes": 740798
+      },
+      "warm-browser": {
+        "samples": 3,
+        "ttfbMs": 6.100000023841858,
+        "fcpMs": 204,
+        "lcpMs": 204,
+        "cls": 0.004505429189387147,
+        "observedBlockingMs": 48,
+        "jsTransferBytes": 0,
+        "jsDecodedBytes": 740798
+      }
+    },
+    "lighthouse": {
+      "score": 81,
+      "fcpMs": 1675.107193338389,
+      "lcpMs": 5042.053400000002,
+      "tbtMs": 24,
+      "cls": 0.00475737888029547
+    },
+    "http": [
+      {
+        "routeIndex": 0,
+        "sample": 0,
+        "status": 200,
+        "headersMs": 111.1,
+        "totalMs": 116.7,
+        "decodedBytes": 33650,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      },
+      {
+        "routeIndex": 0,
+        "sample": 1,
+        "status": 200,
+        "headersMs": 11.9,
+        "totalMs": 12.5,
+        "decodedBytes": 33650,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      },
+      {
+        "routeIndex": 0,
+        "sample": 2,
+        "status": 200,
+        "headersMs": 8.6,
+        "totalMs": 9.3,
+        "decodedBytes": 33650,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      },
+      {
+        "routeIndex": 0,
+        "sample": 3,
+        "status": 200,
+        "headersMs": 8.6,
+        "totalMs": 9.2,
+        "decodedBytes": 33650,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      },
+      {
+        "routeIndex": 0,
+        "sample": 4,
+        "status": 200,
+        "headersMs": 9.6,
+        "totalMs": 10.1,
+        "decodedBytes": 33650,
+        "encoding": null,
+        "cacheControl": "private, no-store",
+        "serverTiming": null
+      }
+    ]
+  },
+  "authenticatedAfter": {
+    "build": "profile",
+    "baselineAvailable": false,
+    "firstObserved": {
+      "timesheets": 1194,
+      "timeClock": 2076
+    },
+    "cycles": {
+      "dashboard": {
+        "totalMs": [518, 100, 85],
+        "reactRenderMs": [27.7, 21.8, 15.6],
+        "serverRequests": [3, 0, 0]
+      },
+      "timesheets": {
+        "totalMs": [98, 100, 90],
+        "reactRenderMs": [14.3, 11.3, 11.2],
+        "serverRequests": [0, 0, 0]
+      },
+      "timeClock": {
+        "totalMs": [64, 63, 67],
+        "reactRenderMs": [9.3, 8.2, 7],
+        "serverRequests": [0, 0, 0]
+      }
+    }
+  },
+  "finalRelease": {
+    "stage": "nitro-output",
+    "bytes": 607505,
+    "gzipBytes": 199726,
+    "brotliBytes": 175466,
+    "chunks": 59,
+    "profiling": false
+  }
+}

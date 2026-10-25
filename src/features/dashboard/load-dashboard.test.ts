@@ -88,6 +88,18 @@ describe("dashboard data loading by role and selected view", () => {
     expect(result.mode).toBe("employee")
     expect(mock.overview).toHaveBeenCalledTimes(1)
     expect(mock.manager).not.toHaveBeenCalled()
-    expect(result.welcome.shouldShow).toBe(false)
+  })
+
+  it("resolves useful content while the optional welcome request is still pending", async () => {
+    mock.welcome.mockReturnValue(new Promise(() => {}))
+    const result = await loadDashboard({
+      queryClient,
+      workspace: { id: "org", type: "organization" },
+      userId: "employee",
+      capabilities: getOrgCapabilitiesForRole("employee"),
+      search: {},
+    })
+    expect(result.mode).toBe("employee")
+    expect(mock.overview).toHaveBeenCalledTimes(1)
   })
 })

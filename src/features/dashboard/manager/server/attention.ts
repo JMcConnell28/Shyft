@@ -6,6 +6,7 @@ import { dashboardAttentionSql } from "./attention-sql"
 import { segmentSchema, timestampSchema } from "./record-schemas"
 import type { AttentionPage } from "../types"
 import { getDatabase } from "@/lib/db"
+import { timeServerOperation } from "@/lib/server-timing"
 
 const ATTENTION_PAGE_SIZE = 8
 const issueSchema = z.object({
@@ -37,15 +38,17 @@ async function getManagerDashboardAttention(input: {
     .filter((item) => item.attendanceEnabled)
     .map((item) => item.id)
   const now = new Date()
-  const result = await getDatabase().query(dashboardAttentionSql, [
-    input.organizationId,
-    attendanceIds,
-    access.locations.map((item) => item.id),
-    now.toISOString(),
-    ATTENTION_PAGE_SIZE,
-    input.page,
-    access.capabilities.canUpdateRota,
-  ])
+  const result = await timeServerOperation("database", () =>
+    getDatabase().query(dashboardAttentionSql, [
+      input.organizationId,
+      attendanceIds,
+      access.locations.map((item) => item.id),
+      now.toISOString(),
+      ATTENTION_PAGE_SIZE,
+      input.page,
+      access.capabilities.canUpdateRota,
+    ])
+  )
   const row = pageSchema.parse(result.rows[0])
   return {
     total: row.total,

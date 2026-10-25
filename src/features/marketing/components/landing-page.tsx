@@ -16,7 +16,7 @@ function LandingPage({
       <section className="relative overflow-hidden">
         <div
           className="absolute inset-0 bg-top bg-no-repeat opacity-95"
-          style={{ backgroundImage: "url('/brand/landing-background.png')" }}
+          style={{ backgroundImage: "url('/brand/landing-background.webp')" }}
         />
         <div className="absolute inset-x-0 top-0 h-80 bg-linear-to-b from-white/70 via-transparent to-transparent" />
 

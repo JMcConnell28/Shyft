@@ -31,7 +31,9 @@ function MarketingHeader({
     <header className="flex items-center justify-between gap-4 py-3 sm:py-4">
       <Link to="/" className="flex items-center gap-3">
         <img
-          src="/brand/rocketrota-logo.png"
+          src="/brand/rocketrota-logo-small.webp"
+          width="192"
+          height="131"
           alt="RocketRota"
           className="h-8 w-auto object-contain"
         />

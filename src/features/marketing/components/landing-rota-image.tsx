@@ -7,6 +7,9 @@ function LandingRotaImage() {
         <div className="overflow-hidden rounded-[30px] border border-[#dde8ff] bg-background shadow-[0_30px_80px_rgba(45,87,171,0.12)]">
           <img
             src={rotaScreenshot.src}
+            srcSet={rotaScreenshot.srcSet}
+            sizes="(max-width: 1280px) 100vw, 1280px"
+            fetchPriority="high"
             alt={rotaScreenshot.alt}
             width={rotaScreenshot.width}
             height={rotaScreenshot.height}

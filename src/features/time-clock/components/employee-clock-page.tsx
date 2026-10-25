@@ -42,8 +42,8 @@ function EmployeeClockPage({
   userId: string
 }) {
   const queryInput = { scanSessionId, userId }
-  const query = useEmployeeClockQuery(queryInput)
-  const data = query.data ?? initialData
+  const query = useEmployeeClockQuery(queryInput, initialData)
+  const data = query.data
   const flags = useLocationFeatureFlags(data.location.id)
   const mutation = useEmployeeClockMutation(queryInput)
   const liveNow = useLiveNow(Boolean(data.openEntry))

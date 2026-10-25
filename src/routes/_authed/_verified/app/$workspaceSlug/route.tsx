@@ -10,6 +10,7 @@ import { loadWorkspaceViewer } from "@/features/navigation/load-navigation-conte
 import { useWorkspaceNotifications } from "@/features/notifications/hooks/use-workspace-notifications"
 import { useRenderedPathname } from "@/features/navigation/hooks/use-rendered-pathname"
 import { recordWorkspaceRender } from "@/features/navigation/utils/render-timing"
+import { isPerformanceProfilingEnabled } from "@/features/navigation/utils/profiling-enabled"
 
 export const Route = createFileRoute("/_authed/_verified/app/$workspaceSlug")({
   beforeLoad: async ({ context, params, preload, location }) => {
@@ -101,7 +102,7 @@ function WorkspaceShellRoute({
       capabilities={capabilities}
       shiftSwapsEnabled={shiftSwapsEnabled}
     >
-      {import.meta.env.DEV ? (
+      {isPerformanceProfilingEnabled ? (
         <Profiler id="workspace" onRender={recordWorkspaceRender}>
           <Outlet />
         </Profiler>

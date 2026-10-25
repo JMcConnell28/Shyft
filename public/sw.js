@@ -1,18 +1,12 @@
-const CACHE_NAME = "rocketrota-pwa-v9"
+const CACHE_NAME = "rocketrota-pwa-v10"
+const CACHE_PREFIX = "rocketrota-pwa-"
 const APP_ASSETS = [
   "/manifest.json",
   "/offline.html",
-  "/brand/rocketrota-logo.png",
-  "/brand/rocketrota-app-splash.png",
-  "/pwa/icon-192.png",
-  "/pwa/icon-180.png",
-  "/pwa/icon-512.png",
-  "/pwa/icon-maskable-512.png",
-  "/pwa/icon-192-v5.png",
+  "/pwa/icon-192-v2.png",
+  "/pwa/icon-512-v3.png",
   "/pwa/icon-180-v5.png",
-  "/pwa/icon-512-v5.png",
-  "/favicon-v5.png",
-  "/pwa/splash-2048.png",
+  "/favicon-v6.png",
 ]
 
 self.addEventListener("install", (event) => {
@@ -29,7 +23,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== CACHE_NAME)
+            .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
             .map((key) => caches.delete(key))
         )
       )
@@ -52,23 +46,29 @@ self.addEventListener("fetch", (event) => {
     return
   }
 
-  if (!["font", "image", "style"].includes(request.destination)) {
+  const pathname = new URL(request.url).pathname
+  const isImmutableAsset =
+    /^\/assets\/.+-[\w-]{8,}\.(?:js|css|woff2?|png|svg|jpe?g|webp|avif|ico)$/.test(
+      pathname
+    )
+  if (!APP_ASSETS.includes(pathname) && !isImmutableAsset) {
     return
   }
 
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      const networkResponse = fetch(request).then((response) => {
-        if (response.ok) {
-          const responseCopy = response.clone()
-          void caches
-            .open(CACHE_NAME)
-            .then((cache) => cache.put(request, responseCopy))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const cachedResponse = await cache.match(request)
+      if (cachedResponse) return cachedResponse
+      return fetch(request).then(async (response) => {
+        if (response.ok && !response.redirected) {
+          event.waitUntil(
+            cache.put(request, response.clone()).catch(() => {
+              console.warn("RocketRota could not cache a public asset.")
+            })
+          )
         }
         return response
       })
-
-      return cachedResponse ?? networkResponse
     })
   )
 })

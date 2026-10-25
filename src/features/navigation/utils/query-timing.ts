@@ -1,7 +1,8 @@
+import { isPerformanceProfilingEnabled } from "./profiling-enabled"
 import type { QueryClient } from "@tanstack/react-query"
 
 function installQueryTiming(client: QueryClient): void {
-  if (!import.meta.env.DEV || typeof window === "undefined") return
+  if (!isPerformanceProfilingEnabled || typeof window === "undefined") return
   const starts = new WeakMap<object, number>()
   client.getQueryCache().subscribe((event) => {
     if (event.type !== "updated") return

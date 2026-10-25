@@ -20,7 +20,7 @@ async function loadDashboard({
   search: { view?: DashboardView; location?: string; date?: string }
 }) {
   const input = { organizationId: workspace.id, userId }
-  const welcomePromise = queryClient.ensureQueryData(
+  void queryClient.prefetchQuery(
     dashboardWelcomeQueryOptions(workspace, userId)
   )
 
@@ -29,16 +29,15 @@ async function loadDashboard({
       ({ loadDashboardAccess }) =>
         loadDashboardAccess(queryClient, workspace.id, userId, search)
     )
-    const [, welcome] = await Promise.all([accessPromise, welcomePromise])
-    return { mode: "manager" as const, welcome }
+    await accessPromise
+    return { mode: "manager" as const }
   }
 
-  const [announcements, overview, welcome] = await Promise.all([
+  const [announcements, overview] = await Promise.all([
     queryClient.ensureQueryData(dashboardAnnouncementsQueryOptions(input)),
     queryClient.ensureQueryData(shiftOverviewQueryOptions(input)),
-    welcomePromise,
   ])
-  return { mode: "employee" as const, announcements, overview, welcome }
+  return { mode: "employee" as const, announcements, overview }
 }
 
 export { loadDashboard }

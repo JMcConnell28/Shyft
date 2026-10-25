@@ -9,7 +9,7 @@ function BrandMark({ className }: { className?: string }) {
       )}
     >
       <img
-        src="/brand/rocketrota-logo.png"
+        src="/brand/rocketrota-logo-small.webp"
         alt=""
         className="h-full w-full object-contain"
       />

@@ -5,9 +5,9 @@ import type {
   DashboardShiftOverview,
   DashboardShiftSummary,
 } from "@/features/dashboard/types"
-import { listAccessibleLocations } from "@/features/rota/server/access"
+import { listPermittedRotaLocations } from "@/features/rota/server/access"
 import { getLocationRole } from "@/lib/auth/has-location-permission"
-import { getOrgCapabilitiesForRole } from "@/lib/auth/get-org-capabilities"
+import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
 import { getDatabase } from "@/lib/db"
 
 type ShiftOverviewInput = {
@@ -187,7 +187,7 @@ async function listDashboardLocationIds(input: ShiftOverviewInput) {
     return []
   }
 
-  const locations = await listAccessibleLocations(
+  const locations = await listPermittedRotaLocations(
     input.organizationId,
     input.userId
   )

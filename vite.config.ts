@@ -5,11 +5,20 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
 import { nitro } from "nitro/vite"
+import { bundleReport } from "./scripts/performance/bundle-report.ts"
 
 const config = defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: [
+      ...(process.env.VITE_PERFORMANCE_PROFILE === "true"
+        ? [
+            {
+              find: /^react-dom\/client$/,
+              replacement: "react-dom/profiling",
+            },
+          ]
+        : []),
       {
         find: "@noble/ciphers/utils.js",
         replacement: "/src/lib/shims/noble-ciphers-utils.ts",
@@ -34,6 +43,7 @@ const config = defineConfig({
     },
   },
   plugins: [
+    process.env.PERF_ANALYZE === "1" && bundleReport(),
     tanstackStart(),
     devtools(),
     nitro({

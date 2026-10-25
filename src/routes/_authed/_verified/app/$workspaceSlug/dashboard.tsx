@@ -22,10 +22,10 @@ const ManagerDashboard = lazy(() =>
     })
   )
 )
-const DashboardWelcomeModal = lazy(() =>
-  import("@/features/dashboard/components/dashboard-welcome-modal").then(
+const DashboardWelcome = lazy(() =>
+  import("@/features/dashboard/components/dashboard-welcome").then(
     (module) => ({
-      default: module.DashboardWelcomeModal,
+      default: module.DashboardWelcome,
     })
   )
 )
@@ -85,17 +85,14 @@ function DashboardWorkspaceRoute() {
 
   return (
     <div className="flex flex-1 flex-col">
-      {result.welcome.shouldShow ? (
-        <Suspense fallback={null}>
-          <DashboardWelcomeModal
-            capabilities={context.capabilities}
-            initiallyOpen={result.welcome.shouldShow}
-            userName={context.viewer.user.name}
-            userId={context.viewer.user.id}
-            workspace={activeWorkspace}
-          />
-        </Suspense>
-      ) : null}
+      <Suspense fallback={null}>
+        <DashboardWelcome
+          capabilities={context.capabilities}
+          userName={context.viewer.user.name}
+          userId={context.viewer.user.id}
+          workspace={activeWorkspace}
+        />
+      </Suspense>
 
       <DashboardViewTabs
         canManage={canViewManagerDashboard(context.capabilities)}

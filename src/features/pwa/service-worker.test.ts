@@ -1,0 +1,61 @@
+import { describe, expect, it } from "vitest"
+import { createWorkerHarness } from "./service-worker-test-harness"
+
+describe("public asset caching", () => {
+  it("serves cached versioned assets without a network revalidation", async () => {
+    const worker = createWorkerHarness()
+    worker.cache.match.mockResolvedValue(new Response("cached"))
+    const response = await worker.dispatch("fetch", "/assets/index-abcdefgh.js")
+    expect(await response?.text()).toBe("cached")
+    expect(worker.fetch).not.toHaveBeenCalled()
+  })
+
+  it("persists a missing hashed JavaScript chunk until its cache write finishes", async () => {
+    const worker = createWorkerHarness()
+    expect(
+      await (
+        await worker.dispatch("fetch", "/assets/route-abcdefgh.js")
+      )?.text()
+    ).toBe("network")
+    expect(worker.cache.put).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([
+    "/api/auth/avatar",
+    "/api/data",
+    "/_server/fn",
+    "/private/photo.png",
+    "/assets/unversioned.js",
+  ])(
+    "leaves sensitive or unversioned requests outside the worker cache: %s",
+    async (path) => {
+      const worker = createWorkerHarness()
+      expect(await worker.dispatch("fetch", path)).toBeUndefined()
+      expect(worker.caches.open).not.toHaveBeenCalled()
+      expect(worker.fetch).not.toHaveBeenCalled()
+    }
+  )
+
+  it("always fetches navigation and does not store authenticated HTML", async () => {
+    const worker = createWorkerHarness()
+    await worker.dispatch("fetch", "/app/tenant/dashboard", "navigate")
+    expect(worker.fetch).toHaveBeenCalledTimes(1)
+    expect(worker.cache.put).not.toHaveBeenCalled()
+  })
+
+  it("does not intercept mutations or cross-origin assets", async () => {
+    const worker = createWorkerHarness()
+    await worker.dispatch("fetch", "/assets/index-abcdefgh.js", "cors", "POST")
+    await worker.dispatch(
+      "fetch",
+      "https://other.test/assets/index-abcdefgh.js"
+    )
+    expect(worker.caches.open).not.toHaveBeenCalled()
+  })
+
+  it("only removes obsolete RocketRota caches during activation", async () => {
+    const worker = createWorkerHarness()
+    await worker.dispatch("activate")
+    expect(worker.caches.delete.mock.calls).toEqual([["rocketrota-pwa-v9"]])
+  })
+})

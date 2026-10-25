@@ -10,7 +10,7 @@ import { setInstallPrompt } from "@/features/pwa/install-prompt"
 const APP_ROUTE_PREFIXES = [
   "/accept-invitation/",
   "/billing/",
-  "/clock/",
+  "/clock",
   "/dashboard",
   "/demo",
   "/forgot-password",

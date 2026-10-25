@@ -55,11 +55,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       {
         rel: "icon",
         type: "image/png",
-        href: "/favicon-v5.png",
+        href: "/favicon-v6.png",
       },
       {
         rel: "shortcut icon",
-        href: "/favicon-v5.png",
+        href: "/favicon-v6.png",
       },
       {
         rel: "manifest",

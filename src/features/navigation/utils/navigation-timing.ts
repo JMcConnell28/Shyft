@@ -1,4 +1,5 @@
 import { getRenderTiming, resetRenderTiming } from "./render-timing"
+import { isPerformanceProfilingEnabled } from "./profiling-enabled"
 import type { AnyRouter } from "@tanstack/react-router"
 
 const navigationSections = [
@@ -27,7 +28,7 @@ function getNavigationLabel(pathname: string): NavigationLabel {
 // Development-only timings start inside the app, excluding browser automation.
 // Only section names and durations are recorded, never URLs or user data.
 function installNavigationTiming(router: AnyRouter): void {
-  if (!import.meta.env.DEV || typeof window === "undefined") return
+  if (!isPerformanceProfilingEnabled || typeof window === "undefined") return
   let startedAt = performance.now()
   let loadedAt = startedAt
   router.subscribe("onBeforeNavigate", () => {
@@ -60,6 +61,9 @@ function installNavigationTiming(router: AnyRouter): void {
         reactRenderMs: getRenderTiming(),
         resourceTimingAvailable,
         codeRequests: resourceTimingAvailable ? code.length : null,
+        codeTransferBytes: resourceTimingAvailable
+          ? code.reduce((total, entry) => total + entry.transferSize, 0)
+          : null,
         codeNetworkMs: resourceTimingAvailable
           ? Math.round(Math.max(0, ...code.map((entry) => entry.duration)))
           : null,

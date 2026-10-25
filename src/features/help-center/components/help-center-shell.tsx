@@ -22,7 +22,9 @@ function HelpCenterShell({ children, currentSlug = "" }: HelpCenterShellProps) {
           <div className="flex items-center justify-between gap-3 lg:block">
             <a href="/help" className="flex min-w-0 items-center gap-2.5">
               <img
-                src="/brand/rocketrota-logo.png"
+                src="/brand/rocketrota-logo-small.webp"
+                width="192"
+                height="131"
                 alt=""
                 className="h-7 w-auto object-contain"
               />
