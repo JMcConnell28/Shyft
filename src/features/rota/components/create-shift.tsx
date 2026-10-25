@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { LoaderCircle, Plus } from "lucide-react"
-import { toast } from "react-hot-toast"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { rotaToolbarPrimaryButtonClassName } from "@/features/rota/constants/rota-toolbar-styles"

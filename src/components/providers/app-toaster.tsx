@@ -1,30 +1,35 @@
 "use client"
 
-import { Toaster } from "react-hot-toast"
+import { CircleCheckIcon, CircleXIcon } from "lucide-react"
+import { Toaster } from "sonner"
 
 function AppToaster() {
   return (
     <Toaster
       position="top-right"
-      gutter={10}
-      containerStyle={{
-        inset: 16,
+      theme="system"
+      closeButton
+      expand
+      gap={10}
+      offset={16}
+      mobileOffset={{
+        top: "max(16px, env(safe-area-inset-top))",
+        right: 16,
+        left: 16,
+      }}
+      duration={6500}
+      swipeDirections={["left", "right"]}
+      icons={{
+        success: <CircleCheckIcon className="size-5 text-blue-600" />,
+        error: <CircleXIcon className="size-5 text-red-600" />,
       }}
       toastOptions={{
-        className:
-          "rounded-2xl border border-border bg-popover px-4 py-3 text-sm text-popover-foreground shadow-lg shadow-slate-950/10",
-        duration: 4000,
-        success: {
-          iconTheme: {
-            primary: "oklch(0.5 0.134 242.749)",
-            secondary: "oklch(0.977 0.013 236.62)",
-          },
-        },
-        error: {
-          iconTheme: {
-            primary: "oklch(0.577 0.245 27.325)",
-            secondary: "oklch(1 0 0)",
-          },
+        closeButtonAriaLabel: "Dismiss notification",
+        classNames: {
+          toast:
+            "!rounded-2xl !border-border !bg-popover !py-3 !pr-12 !pl-4 !font-sans !text-sm !text-popover-foreground !shadow-lg !shadow-slate-950/10",
+          closeButton:
+            "!top-1/2 !right-2 !left-auto !size-8 !translate-x-0 !-translate-y-1/2 !transform-none !border-0 !bg-transparent !text-muted-foreground hover:!bg-muted focus-visible:!outline-2 focus-visible:!outline-ring",
         },
       }}
     />

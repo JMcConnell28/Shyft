@@ -1,6 +1,8 @@
-import { toast, type ToastOptions } from "react-hot-toast"
+import { toast } from "sonner"
 
 import { getErrorMessage } from "@/lib/errors"
+
+type ToastOptions = NonNullable<Parameters<typeof toast.error>[1]>
 
 function showSuccessToast(message: string, options?: ToastOptions) {
   return toast.success(message, {
@@ -13,15 +15,14 @@ function showErrorToast(
   error: unknown,
   options?: ToastOptions & {
     fallbackMessage?: string
-  },
+  }
 ) {
-  return toast.error(
-    getErrorMessage(error, options?.fallbackMessage ?? "Something went wrong."),
-    {
-      duration: 4200,
-      ...options,
-    },
-  )
+  const { fallbackMessage = "Something went wrong.", ...toastOptions } =
+    options ?? {}
+  return toast.error(getErrorMessage(error, fallbackMessage), {
+    duration: 6500,
+    ...toastOptions,
+  })
 }
 
 export { showErrorToast, showSuccessToast }

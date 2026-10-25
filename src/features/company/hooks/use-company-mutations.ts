@@ -20,10 +20,10 @@ import {
   removeCompanyEmployee,
   updateCompanyEmployeeCompensation,
   updateCompanyEmployeeLocationActivity,
-  updateCompanyEmployeeRotaVisibility,
   updateCompanyEmployeePayrollId,
   updateCompanyEmployeeRole,
   updateCompanyEmployeeRotaNote,
+  updateCompanyEmployeeRotaVisibility,
 } from "@/features/company/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 import { navigationQueryKeys } from "@/features/navigation/query-keys"
@@ -113,6 +113,7 @@ function useCompanyMutations(input: {
   })
 
   const rotaVisibilityMutation = useMutation({
+    meta: { errorMessage: "We could not update rota visibility." },
     mutationFn: (variables: {
       employeeId: string
       showOnRota: boolean
@@ -121,11 +122,6 @@ function useCompanyMutations(input: {
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Rota visibility updated.")
-    },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not update rota visibility.",
-      })
     },
   })
 

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
-import { toast } from "react-hot-toast"
+import { toast } from "sonner"
 import {
   DndContext,
   DragOverlay,
