@@ -1,3 +1,5 @@
+import { getLocationFeatureFlags } from "@/features/feature-flags/server/evaluation"
+import { listPermittedRotaLocations } from "@/features/rota/server/access"
 import "@tanstack/react-start/server-only"
 
 import { requireVerifiedSessionOrThrow } from "@/features/rota/server/request-session"
@@ -37,7 +39,15 @@ async function getShiftSwapAvailability(input: {
     errorMessage: "You do not have permission to view shift swaps.",
   })
 
-  return isShiftSwappingEnabled(input.organizationId)
+  if (!(await isShiftSwappingEnabled(input.organizationId))) return false
+  const locations = await listPermittedRotaLocations(
+    input.organizationId,
+    input.userId
+  )
+  const flags = await Promise.all(
+    locations.map((location) => getLocationFeatureFlags(location.id))
+  )
+  return flags.some((flag) => flag.shift_swaps.enabled)
 }
 
 export { getShiftSwapAvailability, isShiftSwappingEnabled }

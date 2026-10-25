@@ -9,6 +9,7 @@ import type {
   EarlyClockInMode,
   EmployeeClockPageData,
 } from "@/features/time-clock/types"
+import { useLocationFeatureFlags } from "@/features/feature-flags/hooks/use-location-feature-flags"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent } from "@/components/ui/card"
 import { HoldToConfirmButton } from "@/features/time-clock/components/hold-to-confirm-button"
@@ -43,6 +44,7 @@ function EmployeeClockPage({
   const queryInput = { scanSessionId, userId }
   const query = useEmployeeClockQuery(queryInput)
   const data = query.data ?? initialData
+  const flags = useLocationFeatureFlags(data.location.id)
   const mutation = useEmployeeClockMutation(queryInput)
   const liveNow = useLiveNow(Boolean(data.openEntry))
   const [earlyClockInMode, setEarlyClockInMode] =
@@ -68,8 +70,13 @@ function EmployeeClockPage({
       data.reviewPrompt.kind === "unmatched" ||
       data.reviewPrompt.kind === "late" ||
       (data.reviewPrompt.kind === "early" && earlyClockInMode === "now"))
+  const clockInBlocked =
+    data.nextAction === "clock_in" && !flags["time_clock.clock_in"].enabled
   const canSubmit =
-    data.isClockingEnabled && !data.isWorkspaceReadOnly && !mutation.isPending
+    (data.nextAction === "clock_out" || flags["time_clock.clock_in"].enabled) &&
+    data.isClockingEnabled &&
+    !data.isWorkspaceReadOnly &&
+    !mutation.isPending
   const isSplitClockIn =
     data.nextAction === "clock_in" && data.matchedShift?.shiftType === "split"
   const splitSegmentStates =
@@ -119,6 +126,11 @@ function EmployeeClockPage({
 
   return (
     <ClockShell>
+      {clockInBlocked && (
+        <p role="status" className="px-4 text-sm text-amber-800">
+          New clock-ins are currently unavailable for this location.
+        </p>
+      )}
       {data.isWorkspaceReadOnly ? (
         <Alert className="border-red-200 bg-red-50 text-red-950">
           <AlertTitle>Clocking is temporarily unavailable</AlertTitle>

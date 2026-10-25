@@ -17,6 +17,10 @@ function CustomerRoute() {
   return (
     <CustomerPage
       id={customerId}
+      canManageFlags={roleHasAdminPermission(
+        membership.role,
+        "feature_flags.manage"
+      )}
       canManage={roleHasAdminPermission(
         membership.role,
         "clock_stations.manage"

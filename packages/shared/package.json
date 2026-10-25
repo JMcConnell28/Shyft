@@ -5,6 +5,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./admin": "./src/admin/index.ts",
-    "./security": "./src/security/index.ts"
+    "./security": "./src/security/index.ts",
+    "./feature-flags": "./src/feature-flags/index.ts",
+    "./feature-flags/types": "./src/feature-flags/types.ts"
   }
 }

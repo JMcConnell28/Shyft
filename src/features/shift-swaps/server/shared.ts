@@ -3,6 +3,7 @@ import type { PoolClient } from "pg"
 
 import type { ShiftSwapShift } from "@/features/shift-swaps/types"
 import type { ShiftSwapCandidateShift } from "@/features/shift-swaps/utils/shift-swap-rules"
+import { getLocationFeatureFlags } from "@/features/feature-flags/server/evaluation"
 import { listAccessibleLocations } from "@/features/rota/server/access"
 import { getLocationOrganizationId } from "@/features/rota/server/lookups"
 import { getMembershipRole } from "@/features/rota/server/membership"
@@ -177,14 +178,23 @@ async function getShiftSwapContext(input: ShiftSwapScopeInput) {
           input.locationId
         )
       : []
+  const availability = await Promise.all(
+    locations.map(async (location) => ({
+      location,
+      enabled: (await getLocationFeatureFlags(location.id)).shift_swaps.enabled,
+    }))
+  )
+  const enabledLocations = availability
+    .filter((item) => item.enabled)
+    .map((item) => item.location)
   const locationIds = input.locationId
-    ? locations
+    ? enabledLocations
         .filter((location) => location.id === input.locationId)
         .map((location) => location.id)
-    : locations.map((location) => location.id)
+    : enabledLocations.map((location) => location.id)
 
   if (locationIds.length === 0) {
-    throw new Error("Choose a valid location.")
+    throw new Error("Shift swaps are unavailable for your locations.")
   }
 
   return {

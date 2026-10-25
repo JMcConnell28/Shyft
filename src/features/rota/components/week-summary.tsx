@@ -5,6 +5,7 @@ import DayCosts from "./day-costs"
 import { Button } from "@/components/ui/button"
 import { BudgetManagerDialog } from "@/features/rota/components/budget-manager-dialog"
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
+import { useLocationFeatureFlags } from "@/features/feature-flags/hooks/use-location-feature-flags"
 
 function WeekSummary({ readOnly = false }: { readOnly?: boolean }) {
   const [budgetOpen, setBudgetOpen] = React.useState(false)
@@ -14,12 +15,23 @@ function WeekSummary({ readOnly = false }: { readOnly?: boolean }) {
     totalScheduledCost,
     totalScheduledMinutes,
     budgetInsights,
+    isDemo,
+    selectedLocation,
     meta,
   } = useRotaWorkspace()
-  const budget = meta.budgetPence === null ? null : meta.budgetPence / 100
+  const flags = useLocationFeatureFlags(
+    selectedLocation.id,
+    !isDemo && !readOnly
+  )
+  const budgetEnabled = !readOnly && flags["rota.budget_manager"].enabled
+  const budget =
+    !budgetEnabled || meta.budgetPence === null ? null : meta.budgetPence / 100
   const budgetVariance = budget === null ? null : budget - totalScheduledCost
   const isOverBudget = budgetVariance !== null && budgetVariance < 0
-  const suggestionCount = budgetInsights.suggestions.length
+  const suggestionCount = budgetEnabled ? budgetInsights.suggestions.length : 0
+  React.useEffect(() => {
+    if (!budgetEnabled) setBudgetOpen(false)
+  }, [budgetEnabled])
 
   return (
     <div className="flex h-20 w-full shrink-0 gap-2">
@@ -53,17 +65,19 @@ function WeekSummary({ readOnly = false }: { readOnly?: boolean }) {
                   : `${formatCurrency(budgetVariance)} remaining`}
               {suggestionCount > 0 ? ` | ${suggestionCount} ideas` : ""}
             </span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              aria-label={
-                budget === null ? "Set weekly budget" : "Edit weekly budget"
-              }
-              onClick={() => setBudgetOpen(true)}
-            >
-              <PencilIcon />
-            </Button>
+            {budgetEnabled && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label={
+                  budget === null ? "Set weekly budget" : "Edit weekly budget"
+                }
+                onClick={() => setBudgetOpen(true)}
+              >
+                <PencilIcon />
+              </Button>
+            )}
           </div>
         ) : null}
         {readOnly ? (
@@ -72,8 +86,8 @@ function WeekSummary({ readOnly = false }: { readOnly?: boolean }) {
           </span>
         ) : null}
       </div>
-      <DayCosts readOnly={readOnly} />
-      {!readOnly ? (
+      <DayCosts readOnly={readOnly} budgetEnabled={budgetEnabled} />
+      {budgetEnabled ? (
         <BudgetManagerDialog open={budgetOpen} onOpenChange={setBudgetOpen} />
       ) : null}
     </div>

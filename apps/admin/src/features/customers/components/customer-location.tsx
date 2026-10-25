@@ -1,6 +1,7 @@
 import { StationRequestCard } from "./station-request"
 import type { ClockStationTag } from "@/features/clock-stations/types"
 import type { CustomerLocation } from "../types"
+import { LocationFeatureFlags } from "@/features/feature-flags/components/location-feature-flags"
 import { ClockStationLocationSection } from "@/features/clock-stations/components/clock-station-location"
 import { formatDateTime } from "@/lib/utils"
 
@@ -8,6 +9,7 @@ function CustomerLocationSection({
   location,
   customerName,
   canManage,
+  canManageFlags = false,
   tags,
   appBaseUrl,
   tagError,
@@ -15,6 +17,7 @@ function CustomerLocationSection({
 }: {
   location: CustomerLocation
   customerName: string
+  canManageFlags?: boolean
   canManage: boolean
   tags: Array<ClockStationTag>
   appBaseUrl: string | null
@@ -50,6 +53,7 @@ function CustomerLocationSection({
           )}
         </div>
       </div>
+      {canManageFlags && <LocationFeatureFlags locationId={location.id} />}
       {location.requests.map((request) => (
         <StationRequestCard
           key={request.id}

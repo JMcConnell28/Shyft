@@ -15,6 +15,7 @@ import {
 import { ensureLocationInScope, requireClockManagerScope } from "./shared"
 import type { managerClockOverrideInputSchema } from "@/features/time-clock/schemas/time-clock-schemas"
 import type { z } from "zod"
+import { requireLocationFeature } from "@/features/feature-flags/server/evaluation"
 import { requireTimeAttendanceAccess } from "@/features/billing/server/entitlements"
 import {
   getPayableClockIn,
@@ -36,6 +37,7 @@ async function managerClockOverride(
   })
 
   if (input.action === "clock_in") {
+    await requireLocationFeature("time_clock.clock_in", location.id)
     const openEntries = await listOpenEntries({
       employeeId: employee.id,
       locationId: input.locationId,

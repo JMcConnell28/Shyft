@@ -15,6 +15,7 @@ import type {
   ClockPayRuleSettings,
   ScheduledClockWindow,
 } from "@/features/time-clock/utils/pay-rules"
+import { requireLocationFeature } from "@/features/feature-flags/server/evaluation"
 // eslint-disable-next-line no-duplicate-imports
 import {
   getPayableClockIn,
@@ -83,6 +84,7 @@ async function submitEmployeeClock(input: {
   const now = new Date()
 
   if (input.action === "clock_in") {
+    await requireLocationFeature("time_clock.clock_in", page.location.id)
     const shiftSegment = getClockInShiftSegment({
       matchedShift: page.matchedShift,
       requestedSegment: input.shiftSegment,

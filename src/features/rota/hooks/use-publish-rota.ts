@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start"
 
 import type { RotaListPageData } from "@/features/rota/types"
 import type { WorkspaceBoardData } from "@/features/rota/types/workspace"
+import { useLocationFeatureFlags } from "@/features/feature-flags/hooks/use-location-feature-flags"
 
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
 import { rotaQueryKeys } from "@/features/rota/query-keys"
@@ -27,6 +28,7 @@ function usePublishRota() {
     markChangesSaved,
     markPublished,
     meta,
+    selectedLocation: location,
     shiftsById,
   } = useRotaWorkspace()
 
@@ -90,13 +92,16 @@ function usePublishRota() {
     },
   })
 
+  const flags = useLocationFeatureFlags(location.id)
   const canPublish =
+    flags["rota.publishing"].enabled &&
     meta.canEdit &&
     !mutation.isPending &&
     (meta.status === "draft" || meta.hasUnpublishedChanges || hasUnsavedChanges)
 
   async function publishWithBudgetGuardrail() {
     if (
+      flags["rota.budget_manager"].enabled &&
       budgetInsights.weeklyBudget !== null &&
       budgetInsights.isOverBudget &&
       typeof window !== "undefined"
@@ -119,17 +124,19 @@ function usePublishRota() {
     canPublish,
     isPublishing: mutation.isPending,
     publish: publishWithBudgetGuardrail,
-    publishBlockedReason: mutation.isPending
-      ? "Publishing is already in progress."
-      : !meta.canEdit
-        ? meta.status === "published" && !meta.settings.allowEditAfterPublish
-          ? "Published rotas are locked in the rota settings."
-          : "Past rotas are locked and can no longer be edited."
-        : meta.status === "published" &&
-            !meta.hasUnpublishedChanges &&
-            !hasUnsavedChanges
-          ? "No unpublished changes to publish yet."
-          : null,
+    publishBlockedReason: !flags["rota.publishing"].enabled
+      ? "Publishing is currently unavailable for this location."
+      : mutation.isPending
+        ? "Publishing is already in progress."
+        : !meta.canEdit
+          ? meta.status === "published" && !meta.settings.allowEditAfterPublish
+            ? "Published rotas are locked in the rota settings."
+            : "Past rotas are locked and can no longer be edited."
+          : meta.status === "published" &&
+              !meta.hasUnpublishedChanges &&
+              !hasUnsavedChanges
+            ? "No unpublished changes to publish yet."
+            : null,
   }
 }
 

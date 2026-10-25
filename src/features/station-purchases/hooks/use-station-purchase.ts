@@ -9,7 +9,7 @@ function useStationPurchase(locationId: string) {
   const options = useQuery({
     queryKey: ["station-purchases", locationId],
     queryFn: () => getStationPurchaseOptions({ data: { locationId } }),
-    refetchInterval: 60000,
+    refetchInterval: 20000,
   })
   const checkout = useMutation({
     mutationFn: async (deliveryAddress: TimeAttendanceDeliveryAddress) => {

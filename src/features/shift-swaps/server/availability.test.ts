@@ -9,10 +9,18 @@ import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 const state = vi.hoisted(() => ({
   activeOrganizationId: "org-a",
   query: vi.fn(),
+  locations: vi.fn(),
+  flags: vi.fn(),
   userId: "user-a",
 }))
 
 vi.mock("@tanstack/react-start/server-only", () => ({}))
+vi.mock("@/features/rota/server/access", () => ({
+  listPermittedRotaLocations: state.locations,
+}))
+vi.mock("@/features/feature-flags/server/evaluation", () => ({
+  getLocationFeatureFlags: state.flags,
+}))
 vi.mock("@/features/rota/server/request-session", () => ({
   requireVerifiedSessionOrThrow: () =>
     Promise.resolve({
@@ -33,9 +41,26 @@ beforeEach(() => {
   vi.resetAllMocks()
   state.userId = "user-a"
   state.activeOrganizationId = "org-a"
+  state.locations.mockResolvedValue([{ id: "location-a" }])
+  state.flags.mockResolvedValue({ shift_swaps: { enabled: true } })
 })
 
 describe("shift swap availability", () => {
+  it("requires at least one permitted location with the feature enabled", async () => {
+    state.query.mockResolvedValue({ rows: [{ shift_swaps_enabled: true }] })
+    state.locations.mockResolvedValue([
+      { id: "location-a" },
+      { id: "location-b" },
+    ])
+    state.flags.mockResolvedValue({ shift_swaps: { enabled: false } })
+    const input = { organizationId: "org-a", userId: "user-a" }
+    expect(await getShiftSwapAvailability(input)).toBe(false)
+    state.flags.mockImplementation((locationId: string) =>
+      Promise.resolve({ shift_swaps: { enabled: locationId === "location-b" } })
+    )
+    expect(await getShiftSwapAvailability(input)).toBe(true)
+    expect(state.locations).toHaveBeenCalledWith("org-a", "user-a")
+  })
   it("reads the persisted workspace setting", async () => {
     state.query.mockResolvedValue({ rows: [{ shift_swaps_enabled: false }] })
 
@@ -55,7 +80,10 @@ describe("shift swap availability", () => {
     state.query.mockResolvedValue({ rows: [{ shift_swaps_enabled: false }] })
 
     expect(
-      await getShiftSwapAvailability({ organizationId: "org-a", userId: "user-a" })
+      await getShiftSwapAvailability({
+        organizationId: "org-a",
+        userId: "user-a",
+      })
     ).toBe(false)
   })
 

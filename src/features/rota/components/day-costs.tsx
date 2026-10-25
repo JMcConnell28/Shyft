@@ -1,6 +1,12 @@
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
 
-function DayCosts({ readOnly = false }: { readOnly?: boolean }) {
+function DayCosts({
+  readOnly = false,
+  budgetEnabled = true,
+}: {
+  readOnly?: boolean
+  budgetEnabled?: boolean
+}) {
   const {
     budgetInsights,
     daySummaries,
@@ -16,7 +22,7 @@ function DayCosts({ readOnly = false }: { readOnly?: boolean }) {
     <div className="grid h-full flex-1 grid-cols-7 rounded-lg border border-border/70 bg-card px-2 py-2 shadow-sm">
       {daySummaries.map((day) => {
         const budgetDay = dayBudgetById.get(day.dayId)
-        const showBudgetState = zones.length === 1 && !readOnly
+        const showBudgetState = budgetEnabled && zones.length === 1 && !readOnly
         const isOverBudget =
           showBudgetState &&
           budgetDay !== undefined &&

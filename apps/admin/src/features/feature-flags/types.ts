@@ -1,31 +1,46 @@
-type FeatureFlagValue = boolean | number | string
-
-type FeatureFlagTarget = {
-  id: string
-  label: string
-  targetId: string
-  targetType: "organization" | "location"
-  value: FeatureFlagValue
-}
+import type {
+  FeatureFlagKey,
+  FeatureFlagMode,
+  FeatureFlagOverride,
+  FeatureFlagResolution,
+} from "@rocketrota/shared/feature-flags/types"
 
 type FeatureFlag = {
-  defaultValue: FeatureFlagValue
-  description: string | null
-  id: string
-  isEnabled: boolean
-  key: string
+  key: FeatureFlagKey
   name: string
-  targets: FeatureFlagTarget[]
-  updatedAt: string
+  description: string
+  mode: FeatureFlagMode
+  revision: number
+  overrideCount: number
+  updatedAt: string | null
 }
-
-type FeatureFlagsPageData = {
-  flags: FeatureFlag[]
+type LocationFlagSetting = {
+  flag: FeatureFlag
+  override: FeatureFlagOverride
+  effective: FeatureFlagResolution
 }
-
+type FlagLocation = {
+  id: string
+  name: string
+  organizationName: string | null
+  override: FeatureFlagOverride
+  effective: FeatureFlagResolution
+}
+type FlagHistoryEntry = {
+  id: string
+  actor: string
+  createdAt: string
+  before: string
+  after: string
+  locationName: string | null
+  locationId: string | null
+  reason: string | null
+}
+type FeatureFlagsPageData = { flags: Array<FeatureFlag> }
 export type {
   FeatureFlag,
-  FeatureFlagTarget,
-  FeatureFlagValue,
+  LocationFlagSetting,
+  FlagLocation,
+  FlagHistoryEntry,
   FeatureFlagsPageData,
 }

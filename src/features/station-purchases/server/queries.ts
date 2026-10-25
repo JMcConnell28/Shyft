@@ -1,11 +1,14 @@
 import "@tanstack/react-start/server-only"
 import { getStationPrice } from "./price"
 import type { StationPurchaseOptions } from "../types"
+import { getLocationFeatureFlags } from "@/features/feature-flags/server/evaluation"
 import { getDatabase } from "@/lib/db"
 
 async function getPurchaseEligibility(
   locationId: string
 ): Promise<string | null> {
+  if (!(await getLocationFeatureFlags(locationId)).station_purchases.enabled)
+    return "Extra station purchases are currently unavailable for this location."
   const { rows } = await getDatabase().query<{ eligible: boolean }>(
     `select coalesce(subscription_status = 'active' and paid_at is not null and trial_ends_at <= now()
       and addon_status in ('active','trialing','canceling') and exists(

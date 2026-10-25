@@ -5,6 +5,7 @@ import type {
   ClockAction,
   ManagerClockEmployee,
 } from "@/features/time-clock/types"
+import { useLocationFeatureFlags } from "@/features/feature-flags/hooks/use-location-feature-flags"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -53,6 +54,9 @@ function ManagerClockOverrideDialog({
     open,
   })
   const { action, employee, employeeKey, reason, isValid } = form
+  const flags = useLocationFeatureFlags(employee?.locationId ?? "")
+  const clockInBlocked =
+    action === "clock_in" && !flags["time_clock.clock_in"].enabled
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
@@ -138,6 +142,12 @@ function ManagerClockOverrideDialog({
             />
           </label>
 
+          {clockInBlocked && (
+            <p role="status" className="text-sm text-amber-800">
+              New clock-ins are unavailable at this location. Clock-out remains
+              available.
+            </p>
+          )}
           <Button
             className={cn(
               "h-11 w-full rounded-xl text-sm font-semibold",
@@ -145,9 +155,9 @@ function ManagerClockOverrideDialog({
                 ? "bg-emerald-600 hover:bg-emerald-700"
                 : "bg-rose-600 hover:bg-rose-700"
             )}
-            disabled={!isValid || isPending}
+            disabled={!isValid || isPending || clockInBlocked}
             onClick={() => {
-              if (employee && form.occurredAt && isValid)
+              if (employee && form.occurredAt && isValid && !clockInBlocked)
                 onSubmit({
                   action,
                   employee,

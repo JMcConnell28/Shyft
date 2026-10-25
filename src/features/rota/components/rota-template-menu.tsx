@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
 import type { RotaTemplateSummary } from "@/features/rota/types"
+import { useLocationFeatureFlags } from "@/features/feature-flags/hooks/use-location-feature-flags"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,7 +64,7 @@ type SaveCurrentRota = (options?: {
   bypassRateLimit?: boolean
 }) => Promise<void>
 
-function RotaTemplateMenu({
+function TemplateMenuContents({
   isSaving,
   saveCurrentRota,
 }: {
@@ -391,4 +392,14 @@ function ApplyTemplateDialog({
   )
 }
 
+function RotaTemplateMenu(props: {
+  isSaving: boolean
+  saveCurrentRota: SaveCurrentRota
+}) {
+  const { selectedLocation: location } = useRotaWorkspace()
+  const flags = useLocationFeatureFlags(location.id)
+  return flags["rota.templates"].enabled ? (
+    <TemplateMenuContents {...props} />
+  ) : null
+}
 export { RotaTemplateMenu }

@@ -1,5 +1,10 @@
 import { createServerFn } from "@tanstack/react-start"
 import type { PoolClient } from "pg"
+import type {
+  ApplyRotaTemplateResult,
+  RotaTemplateMutationResult,
+} from "@/features/rota/types"
+import { requireLocationFeature } from "@/features/feature-flags/server/evaluation"
 
 import {
   applyRotaTemplateToRotaInputSchema,
@@ -7,15 +12,11 @@ import {
   overrideRotaTemplateFromRotaInputSchema,
 } from "@/features/rota/schemas/rota-server-schemas"
 import { requireRotaWriteAccess } from "@/features/rota/server/write-access"
-import type {
-  ApplyRotaTemplateResult,
-  RotaTemplateMutationResult,
-} from "@/features/rota/types"
 import { getDatabase } from "@/lib/db"
 
 const createRotaTemplateFromRota = createServerFn({ method: "POST" })
   .validator((input: unknown) =>
-    createRotaTemplateFromRotaInputSchema.parse(input),
+    createRotaTemplateFromRotaInputSchema.parse(input)
   )
   .handler(async ({ data }): Promise<RotaTemplateMutationResult> => {
     const context = await requireRotaWriteAccess({
@@ -23,6 +24,7 @@ const createRotaTemplateFromRota = createServerFn({ method: "POST" })
       permission: "update",
       errorMessage: "You do not have permission to create templates.",
     })
+    await requireLocationFeature("rota.templates", context.location.id)
     const name = data.name.trim()
     const database = getDatabase()
     const client = await database.connect()
@@ -43,7 +45,7 @@ const createRotaTemplateFromRota = createServerFn({ method: "POST" })
            created_by
          ) values ($1, $2, $3, null, $4)
          returning id`,
-        [context.organizationId, context.location.id, name, context.userId],
+        [context.organizationId, context.location.id, name, context.userId]
       )
       const templateId = templateResult.rows[0]?.id
 
@@ -72,7 +74,7 @@ const createRotaTemplateFromRota = createServerFn({ method: "POST" })
 
 const overrideRotaTemplateFromRota = createServerFn({ method: "POST" })
   .validator((input: unknown) =>
-    overrideRotaTemplateFromRotaInputSchema.parse(input),
+    overrideRotaTemplateFromRotaInputSchema.parse(input)
   )
   .handler(async ({ data }): Promise<RotaTemplateMutationResult> => {
     const context = await requireRotaWriteAccess({
@@ -80,6 +82,7 @@ const overrideRotaTemplateFromRota = createServerFn({ method: "POST" })
       permission: "update",
       errorMessage: "You do not have permission to update templates.",
     })
+    await requireLocationFeature("rota.templates", context.location.id)
     const database = getDatabase()
     const client = await database.connect()
 
@@ -93,7 +96,7 @@ const overrideRotaTemplateFromRota = createServerFn({ method: "POST" })
       await client.query(
         `delete from public.rota_template_shifts
          where template_id = $1`,
-        [data.templateId],
+        [data.templateId]
       )
       const shiftCount = await copyRotaShiftsIntoTemplate(client, {
         rotaId: context.rota.id,
@@ -107,7 +110,7 @@ const overrideRotaTemplateFromRota = createServerFn({ method: "POST" })
         `update public.rota_templates
          set updated_at = timezone('utc', now())
          where id = $1`,
-        [data.templateId],
+        [data.templateId]
       )
       await client.query("COMMIT")
 
@@ -122,7 +125,7 @@ const overrideRotaTemplateFromRota = createServerFn({ method: "POST" })
 
 const applyRotaTemplateToRota = createServerFn({ method: "POST" })
   .validator((input: unknown) =>
-    applyRotaTemplateToRotaInputSchema.parse(input),
+    applyRotaTemplateToRotaInputSchema.parse(input)
   )
   .handler(async ({ data }): Promise<ApplyRotaTemplateResult> => {
     const context = await requireRotaWriteAccess({
@@ -130,6 +133,7 @@ const applyRotaTemplateToRota = createServerFn({ method: "POST" })
       permission: "update",
       errorMessage: "You do not have permission to apply templates.",
     })
+    await requireLocationFeature("rota.templates", context.location.id)
     const database = getDatabase()
     const client = await database.connect()
 
@@ -157,7 +161,7 @@ const applyRotaTemplateToRota = createServerFn({ method: "POST" })
              end,
              updated_at = timezone('utc', now())
          where id = $1`,
-        [context.rota.id, shiftCount],
+        [context.rota.id, shiftCount]
       )
       await client.query("COMMIT")
 
@@ -179,7 +183,7 @@ async function assertTemplateNameAvailable(
     locationId: string
     name: string
     excludeTemplateId?: string
-  },
+  }
 ) {
   const result = await client.query<{ id: string }>(
     `select id
@@ -188,11 +192,13 @@ async function assertTemplateNameAvailable(
        and lower(name) = lower($2)
        and ($3::uuid is null or id <> $3::uuid)
      limit 1`,
-    [input.locationId, input.name, input.excludeTemplateId ?? null],
+    [input.locationId, input.name, input.excludeTemplateId ?? null]
   )
 
   if (result.rows[0]) {
-    throw new Error("A template with that name already exists for this location.")
+    throw new Error(
+      "A template with that name already exists for this location."
+    )
   }
 }
 
@@ -202,7 +208,7 @@ async function getTemplateForLocationOrThrow(
     organizationId: string | null
     locationId: string
     templateId: string
-  },
+  }
 ) {
   const result = await client.query<{
     id: string
@@ -224,9 +230,9 @@ async function getTemplateForLocationOrThrow(
        )
      group by template.id, template.name
      limit 1`,
-    [input.templateId, input.locationId, input.organizationId],
+    [input.templateId, input.locationId, input.organizationId]
   )
-  const template = result.rows[0]
+  const template = result.rows.at(0)
 
   if (!template) {
     throw new Error("Choose a valid template.")
@@ -244,7 +250,7 @@ async function copyRotaShiftsIntoTemplate(
   input: {
     rotaId: string
     templateId: string
-  },
+  }
 ) {
   const result = await client.query<{ id: string }>(
     `insert into public.rota_template_shifts (
@@ -282,7 +288,7 @@ async function copyRotaShiftsIntoTemplate(
      where shift.rota_id = $1
        and (shift.day_date::date - rota.week_start::date) between 0 and 6
      returning id`,
-    [input.rotaId, input.templateId],
+    [input.rotaId, input.templateId]
   )
 
   return result.rows.length
@@ -295,14 +301,14 @@ async function replaceRotaShiftsFromTemplate(
     rotaId: string
     templateId: string
     weekStart: string
-  },
+  }
 ) {
   await client.query(
     `delete from public.rota_shift_assignments
      where rota_shift_id in (
        select id from public.rota_shifts where rota_id = $1
      )`,
-    [input.rotaId],
+    [input.rotaId]
   )
   await client.query(`delete from public.rota_shifts where rota_id = $1`, [
     input.rotaId,
@@ -340,7 +346,7 @@ async function replaceRotaShiftsFromTemplate(
      where template_shift.template_id = $4
      order by template_shift.day_offset asc, template_shift.sort_order asc
      returning id`,
-    [input.rotaId, input.organizationId, input.weekStart, input.templateId],
+    [input.rotaId, input.organizationId, input.weekStart, input.templateId]
   )
 
   return result.rows.length

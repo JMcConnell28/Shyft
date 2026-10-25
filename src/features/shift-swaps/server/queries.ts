@@ -6,16 +6,22 @@ import type {
   ShiftSwapRotaOption,
   ShiftSwapShift,
 } from "@/features/shift-swaps/types"
+import type {
+  PublishedShiftRow,
+  RequestRow,
+  ShiftSwapScopeInput,
+} from "@/features/shift-swaps/server/shared"
+// eslint-disable-next-line no-duplicate-imports
 import {
   getShiftSwapContext,
   listPublishedShiftRows,
   listUserEmployees,
   mapShiftRow,
-  type PublishedShiftRow,
-  type RequestRow,
-  type ShiftSwapScopeInput,
 } from "@/features/shift-swaps/server/shared"
-import { getShiftSwapCutoffAt, isPastShiftSwapCutoff } from "@/features/shift-swaps/utils/shift-swap-rules"
+import {
+  getShiftSwapCutoffAt,
+  isPastShiftSwapCutoff,
+} from "@/features/shift-swaps/utils/shift-swap-rules"
 import { buildWeekLabel } from "@/features/rota/utils/week-utils"
 import { getDatabase } from "@/lib/db"
 
@@ -30,7 +36,9 @@ async function listShiftSwapPageData(
   ])
   const userEmployeeIds = new Set(userEmployees.map((employee) => employee.id))
   const shifts = shiftRows.map(mapShiftRow)
-  const ownShifts = shifts.filter((shift) => userEmployeeIds.has(shift.employeeId))
+  const ownShifts = shifts.filter((shift) =>
+    userEmployeeIds.has(shift.employeeId)
+  )
   const swapTargetShifts = shifts.filter(
     (shift) => !userEmployeeIds.has(shift.employeeId) && !shift.isPastCutoff
   )
@@ -53,14 +61,16 @@ async function listShiftSwapPageData(
         request.status === "open" &&
         isEligibleOpenCoverRequest(request, userEmployees)
     ),
-    myRequests: requests.filter((request) => userEmployeeIds.has(request.requester.id)),
+    myRequests: requests.filter((request) =>
+      userEmployeeIds.has(request.requester.id)
+    ),
     managerRequests: context.canManage
       ? requests.filter((request) => request.status === "pending_manager")
       : [],
   }
 }
 
-async function listRequestRows(locationIds: string[]) {
+async function listRequestRows(locationIds: Array<string>) {
   if (locationIds.length === 0) {
     return []
   }
@@ -164,6 +174,7 @@ async function listRequestRows(locationIds: string[]) {
      left join public.staff_groups responder_group
        on responder_group.id = responder_location_assignment.staff_group_id
      where request.location_id = any($1::uuid[])
+       and (target_rota.location_id is null or target_rota.location_id = any($1::uuid[]))
        and request.created_at >= timezone('utc', now()) - interval '90 days'
      order by request.created_at desc`,
     [locationIds]
@@ -172,7 +183,7 @@ async function listRequestRows(locationIds: string[]) {
   return result.rows
 }
 
-function buildRotaOptions(shifts: ShiftSwapShift[]) {
+function buildRotaOptions(shifts: Array<ShiftSwapShift>) {
   const rotaById = new Map<string, ShiftSwapRotaOption>()
 
   for (const shift of shifts) {
@@ -221,7 +232,9 @@ function mapRequestRow(row: RequestRow): ShiftSwapRequestSummary {
           staffGroupName: row.target_staff_group_name ?? "Team members",
         }
       : null,
-    targetShift: row.target_published_shift_id ? mapRequestShift(row, "target") : null,
+    targetShift: row.target_published_shift_id
+      ? mapRequestShift(row, "target")
+      : null,
     responder: row.responder_employee_id
       ? {
           id: row.responder_employee_id,
@@ -237,30 +250,47 @@ function mapRequestRow(row: RequestRow): ShiftSwapRequestSummary {
   }
 }
 
-function mapRequestShift(row: RequestRow, kind: "source" | "target"): ShiftSwapShift {
-  const startsAtText = kind === "source" ? row.source_starts_at : row.target_starts_at
+function mapRequestShift(
+  row: RequestRow,
+  kind: "source" | "target"
+): ShiftSwapShift {
+  const startsAtText =
+    kind === "source" ? row.source_starts_at : row.target_starts_at
   const startsAt = new Date(startsAtText ?? row.source_starts_at)
   const cutoffAt = getShiftSwapCutoffAt(startsAt)
-  const date = kind === "source" ? row.source_date : (row.target_date ?? row.source_date)
+  const date =
+    kind === "source" ? row.source_date : (row.target_date ?? row.source_date)
   const weekStart =
-    kind === "source" ? row.source_week_start : (row.target_week_start ?? row.source_week_start)
+    kind === "source"
+      ? row.source_week_start
+      : (row.target_week_start ?? row.source_week_start)
 
   return {
     assignmentId:
-      kind === "source" ? row.source_assignment_id : (row.target_assignment_id ?? ""),
+      kind === "source"
+        ? row.source_assignment_id
+        : (row.target_assignment_id ?? ""),
     publishedShiftId:
       kind === "source"
         ? row.source_published_shift_id
         : (row.target_published_shift_id ?? ""),
     workingShiftId:
-      kind === "source" ? row.source_working_shift_id : row.target_working_shift_id,
+      kind === "source"
+        ? row.source_working_shift_id
+        : row.target_working_shift_id,
     rotaId: kind === "source" ? row.source_rota_id : (row.target_rota_id ?? ""),
     locationId:
-      kind === "source" ? row.source_location_id : (row.target_location_id ?? ""),
+      kind === "source"
+        ? row.source_location_id
+        : (row.target_location_id ?? ""),
     locationName:
-      kind === "source" ? row.source_location_name : (row.target_location_name ?? ""),
+      kind === "source"
+        ? row.source_location_name
+        : (row.target_location_name ?? ""),
     employeeId:
-      kind === "source" ? row.source_employee_id : (row.target_employee_id ?? ""),
+      kind === "source"
+        ? row.source_employee_id
+        : (row.target_employee_id ?? ""),
     employeeName:
       kind === "source"
         ? row.source_employee_name
@@ -295,14 +325,26 @@ function mapRequestShift(row: RequestRow, kind: "source" | "target"): ShiftSwapS
             splitSecondStartTime: row.target_split_second_start_time,
             splitSecondEndTime: row.target_split_second_end_time,
           }),
-    zoneName: kind === "source" ? row.source_zone_name : (row.target_zone_name ?? ""),
+    zoneName:
+      kind === "source" ? row.source_zone_name : (row.target_zone_name ?? ""),
     startsAt: startsAt.toISOString(),
     cutoffAt: cutoffAt.toISOString(),
     isPastCutoff: isPastShiftSwapCutoff(cutoffAt),
   }
 }
 
-function getRequestShiftTimeLabel(shift: Pick<PublishedShiftRow, "date" | "shiftType" | "startTime" | "endTime" | "endKind" | "splitSecondStartTime" | "splitSecondEndTime">) {
+function getRequestShiftTimeLabel(
+  shift: Pick<
+    PublishedShiftRow,
+    | "date"
+    | "shiftType"
+    | "startTime"
+    | "endTime"
+    | "endKind"
+    | "splitSecondStartTime"
+    | "splitSecondEndTime"
+  >
+) {
   const startTime = formatTime(shift.startTime)
 
   if (shift.shiftType === "closing") {
@@ -324,7 +366,11 @@ function formatTime(value: string | null) {
 
 function isEligibleOpenCoverRequest(
   request: ShiftSwapRequestSummary,
-  userEmployees: Array<{ id: string; staff_group_id: string | null; location_id: string }>
+  userEmployees: Array<{
+    id: string
+    staff_group_id: string | null
+    location_id: string
+  }>
 ) {
   return userEmployees.some(
     (employee) =>

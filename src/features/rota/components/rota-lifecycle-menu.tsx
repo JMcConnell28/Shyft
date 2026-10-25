@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useNavigate, useParams } from "@tanstack/react-router"
 import { ArchiveXIcon, Settings, TriangleAlertIcon } from "lucide-react"
+import { useLocationFeatureFlags } from "@/features/feature-flags/hooks/use-location-feature-flags"
 
 import { useRotaWorkspace } from "@/features/rota/components/rota-workspace-provider"
 import { rotaToolbarIconButtonClassName } from "@/features/rota/constants/rota-toolbar-styles"
@@ -30,7 +31,8 @@ import {
 function RotaLifecycleMenu() {
   const navigate = useNavigate()
   const params = useParams({ strict: false })
-  const { meta } = useRotaWorkspace()
+  const { selectedLocation: location, meta } = useRotaWorkspace()
+  const flags = useLocationFeatureFlags(location.id)
   const deleteDraftMutation = useDeleteDraftRota()
   const unpublishMutation = useUnpublishRota()
   const [pendingAction, setPendingAction] = React.useState<
@@ -58,7 +60,9 @@ function RotaLifecycleMenu() {
           {meta.status === "published" ? (
             <DropdownMenuItem
               className="text-amber-700 focus:text-amber-700"
-              disabled={unpublishMutation.isPending}
+              disabled={
+                unpublishMutation.isPending || !flags["rota.publishing"].enabled
+              }
               onClick={() => setPendingAction("unpublish")}
             >
               <ArchiveXIcon className="size-4" />

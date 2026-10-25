@@ -2,6 +2,7 @@ import type {
   CreateDraftRotaRecordInput,
   CreateDraftRotaRecordResult,
 } from "@/features/rota/types"
+import { requireLocationFeature } from "@/features/feature-flags/server/evaluation"
 import { assertTrialRotaCreationAllowed } from "@/features/billing/server/trial-rota-limits"
 import { getDatabase } from "@/lib/db"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
@@ -90,6 +91,7 @@ async function createDraftRotaRecord({
   }
 
   if (sourceType === "template") {
+    await requireLocationFeature("rota.templates", locationId)
     if (!templateId) {
       throw new Error("Choose a valid template.")
     }

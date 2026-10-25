@@ -13,6 +13,7 @@ import type {
   ShiftSwapRequestStatus,
 } from "@/features/shift-swaps/types"
 import type { ShiftSwapScopeInput } from "@/features/shift-swaps/hooks/use-shift-swap-page-query"
+import { useShiftSwapFlag } from "@/features/feature-flags/hooks/use-shift-swap-flag"
 import { Button } from "@/components/ui/button"
 import { ManagerApprovalSection } from "@/features/shift-swaps/components/shift-swap-approvals"
 import { ShiftSwapComposer } from "@/features/shift-swaps/components/shift-swap-composer"
@@ -29,7 +30,18 @@ type ShiftSwapPageProps = ShiftSwapScopeInput & {
   initialData: ShiftSwapPageData
 }
 
-function ShiftSwapPage({ initialData, ...scope }: ShiftSwapPageProps) {
+function ShiftSwapPage(props: ShiftSwapPageProps) {
+  const enabled = useShiftSwapFlag(props.organizationId, props.userId, true)
+  return enabled ? (
+    <ConnectedShiftSwapPage {...props} />
+  ) : (
+    <p role="status" className="p-6 text-sm text-muted-foreground">
+      Shift swaps are currently unavailable for your locations.
+    </p>
+  )
+}
+
+function ConnectedShiftSwapPage({ initialData, ...scope }: ShiftSwapPageProps) {
   const query = useShiftSwapPageQuery(scope, initialData)
   const data = query.data ?? initialData
   const mutations = useShiftSwapMutations(scope)

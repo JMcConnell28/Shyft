@@ -7,6 +7,7 @@ import type {
   RotaTemplateSummary,
 } from "@/features/rota/types"
 import type { RotaStatus } from "@/features/rota/schemas/rota-schemas"
+import { getLocationFeatureFlags } from "@/features/feature-flags/server/evaluation"
 import { getDatabase } from "@/lib/db"
 import { createSupabaseServerClient } from "@/lib/supabase.server"
 import { assertSupabaseSuccess } from "@/lib/supabase-errors"
@@ -48,6 +49,8 @@ async function getTemplatesForLocation(
   organizationId: string | null,
   locationId: string
 ): Promise<Array<RotaTemplateSummary>> {
+  if (!(await getLocationFeatureFlags(locationId))["rota.templates"].enabled)
+    return []
   const result = await getDatabase().query<{
     id: string
     name: string

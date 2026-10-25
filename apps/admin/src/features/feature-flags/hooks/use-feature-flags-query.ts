@@ -10,6 +10,7 @@ function useFeatureFlagsQuery() {
   const getFeatureFlagsFn = useServerFn(getFeatureFlags)
 
   return useQuery({
+    refetchInterval: 15000,
     queryKey: featureFlagsQueryKeys.all,
     queryFn: () => getFeatureFlagsFn(),
   })

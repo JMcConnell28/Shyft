@@ -11,6 +11,7 @@ import type {
   ManagerClockPageData,
 } from "@/features/time-clock/types"
 import type { PublishedShiftCandidate } from "@/features/time-clock/utils/shift-matching"
+import { getLocationFeatureFlags } from "@/features/feature-flags/server/evaluation"
 import {
   CLOCK_OUT_REMINDER_MINUTES,
   SCHEDULED_CLOCK_OUT_DELAY_MINUTES,
@@ -152,7 +153,11 @@ async function buildEmployeeClockPageData(
         rotaPublishedShiftId: matchedShift.id,
       })
     : []
-  const isClockingEnabled = settings.isEnabled || Boolean(openEntries[0])
+  const clockInEnabled = (await getLocationFeatureFlags(location.id))[
+    "time_clock.clock_in"
+  ].enabled
+  const isClockingEnabled =
+    (settings.isEnabled && clockInEnabled) || Boolean(openEntries[0])
 
   return {
     clockLabel: tag.label,

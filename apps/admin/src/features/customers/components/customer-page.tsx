@@ -5,7 +5,15 @@ import { CustomerLocationSection } from "./customer-location"
 import { formatDateTime } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
-function CustomerPage({ id, canManage }: { id: string; canManage: boolean }) {
+function CustomerPage({
+  id,
+  canManage,
+  canManageFlags = false,
+}: {
+  id: string
+  canManage: boolean
+  canManageFlags?: boolean
+}) {
   const query = useCustomer(id)
   const tagQuery = useCustomerTags(id, canManage)
   const data = query.data
@@ -56,6 +64,7 @@ function CustomerPage({ id, canManage }: { id: string; canManage: boolean }) {
               location={location}
               customerName={data.customer.name}
               canManage={canManage}
+              canManageFlags={canManageFlags}
               appBaseUrl={tagQuery.data?.appBaseUrl ?? null}
               tags={
                 tagQuery.data?.tags.filter(

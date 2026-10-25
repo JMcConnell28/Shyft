@@ -1,14 +1,18 @@
+import { getRequestShiftsOrThrow } from "./request-shifts"
 import type { PoolClient } from "pg"
 
+import type {
+  PublishedShiftRow,
+  ShiftSwapScopeInput,
+} from "@/features/shift-swaps/server/shared"
 import { requireRotaWriteAccess } from "@/features/rota/server/write-access"
+// eslint-disable-next-line no-duplicate-imports
 import {
   getShiftSwapContext,
   hasShiftOverlap,
   hasTimeEntryForShift,
   listPublishedShiftRows,
   listUserEmployees,
-  type PublishedShiftRow,
-  type ShiftSwapScopeInput,
 } from "@/features/shift-swaps/server/shared"
 import {
   getShiftSwapCutoffAt,
@@ -170,6 +174,7 @@ async function respondToSwapRequest(
 ) {
   const context = await getShiftSwapContext(input)
   const request = await getRequestForAction(input.requestId)
+  const { source, target } = await getRequestShiftsOrThrow(context, request)
   const response = await getPendingResponseForUser(
     input.requestId,
     context.userId
@@ -204,14 +209,8 @@ async function respondToSwapRequest(
     return { success: true }
   }
 
-  const source = await getShiftByAssignmentOrThrow(
-    context,
-    request.source_assignment_id
-  )
-  const target = await getShiftByAssignmentOrThrow(
-    context,
-    request.target_assignment_id ?? ""
-  )
+  if (!target)
+    throw new Error("Choose a valid current or future published shift.")
   await assertSwapAvailability(context, source, target)
 
   await runShiftSwapTransaction(async (client) => {
@@ -323,6 +322,7 @@ async function cancelShiftSwapRequest(
 ) {
   const context = await getShiftSwapContext(input)
   const request = await getRequestForAction(input.requestId)
+  await getRequestShiftsOrThrow(context, request)
 
   if (request.requester_user_id !== context.userId) {
     throw new Error("Only the requester can cancel this request.")
@@ -467,6 +467,7 @@ async function denyShiftSwapRequest(
 ) {
   const request = await getRequestForAction(input.requestId)
   const context = await getShiftSwapContext(input)
+  await getRequestShiftsOrThrow(context, request)
   await requireRotaWriteAccess({
     rotaId: request.rota_id,
     permission: "update",
@@ -640,7 +641,7 @@ async function getRequestForAction(requestId: string) {
      limit 1`,
     [requestId]
   )
-  const request = result.rows[0]
+  const request = result.rows.at(0)
 
   if (!request) {
     throw new Error("That shift swap request could not be found.")
@@ -661,7 +662,7 @@ async function getPendingResponseForUser(requestId: string, userId: string) {
      limit 1`,
     [requestId, userId]
   )
-  const response = result.rows[0]
+  const response = result.rows.at(0)
 
   if (!response) {
     throw new Error("That swap request is not waiting for your response.")
@@ -682,7 +683,7 @@ async function getAcceptedResponse(responseId: string) {
      limit 1`,
     [responseId]
   )
-  const response = result.rows[0]
+  const response = result.rows.at(0)
 
   if (!response) {
     throw new Error("That accepted response could not be found.")

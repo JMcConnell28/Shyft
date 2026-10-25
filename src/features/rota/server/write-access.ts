@@ -1,4 +1,5 @@
 import type { OrganizationPermissionRequest } from "@/lib/auth/has-org-permission"
+import { requireLocationFeature } from "@/features/feature-flags/server/evaluation"
 
 import { ensureLocationAccessOrThrow } from "@/features/rota/server/access"
 import { isRotaWeekBeforeCurrentWeek } from "@/features/rota/utils/week-utils"
@@ -98,6 +99,8 @@ async function requireRotaWriteAccess({
     }
   }
 
+  if (permission === "publish")
+    await requireLocationFeature("rota.publishing", rota.location_id)
   await requireLocationPaidWriteAccess(rota.location_id)
 
   return {

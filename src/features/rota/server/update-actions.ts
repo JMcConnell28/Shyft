@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 
 import type { PublishRotaVersionResult } from "@/features/rota/types"
+import { requireLocationFeature } from "@/features/feature-flags/server/evaluation"
 import { getDatabase } from "@/lib/db"
 import {
   publishRotaSchema,
@@ -222,6 +223,7 @@ const updateRotaBudget = createServerFn({ method: "POST" })
       permission: "update",
       errorMessage: "You do not have permission to update rota budgets.",
     })
+    await requireLocationFeature("rota.budget_manager", context.location.id)
     if (data.budgetPence === null) {
       await getDatabase().query(
         `delete from public.rota_budgets where rota_id = $1::uuid`,

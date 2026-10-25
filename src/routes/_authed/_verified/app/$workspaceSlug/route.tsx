@@ -2,6 +2,7 @@ import { Outlet, createFileRoute } from "@tanstack/react-router"
 import { Profiler } from "react"
 
 import type { WorkspaceSummary } from "@/features/onboarding/types"
+import { useShiftSwapFlag } from "@/features/feature-flags/hooks/use-shift-swap-flag"
 import { DashboardShell } from "@/components/app/dashboard-shell"
 import { getWorkspaceShellConfig } from "@/features/navigation/utils/workspace-shell"
 import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
@@ -68,6 +69,11 @@ function WorkspaceShellRoute({
     canUseSupport: capabilities.canUseSupport,
   })
 
+  const shiftSwapsEnabled = useShiftSwapFlag(
+    activeWorkspace.id,
+    viewer.user.id,
+    viewer.shiftSwapsEnabled
+  )
   const shellConfig = getWorkspaceShellConfig(pathname, activeWorkspace)
 
   return (
@@ -93,7 +99,7 @@ function WorkspaceShellRoute({
       trial={viewer.trial}
       billing={viewer.billing}
       capabilities={capabilities}
-      shiftSwapsEnabled={viewer.shiftSwapsEnabled}
+      shiftSwapsEnabled={shiftSwapsEnabled}
     >
       {import.meta.env.DEV ? (
         <Profiler id="workspace" onRender={recordWorkspaceRender}>
