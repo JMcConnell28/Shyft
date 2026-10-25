@@ -68,13 +68,19 @@ beforeEach(() => {
       ) {
         throw new Error("Checkout cannot save the customer's billing address.")
       }
+      if (
+        request.tax_id_collection?.enabled &&
+        request.customer_update?.name !== "auto"
+      ) {
+        throw new Error("Tax ID collection requires saving the business name.")
+      }
       return Promise.resolve({ url: "https://checkout.stripe.com/test-session" })
     }
   )
 })
 
 describe("Checkout for an existing customer without an address", () => {
-  it("can restore an expired trial with automatic tax enabled", async () => {
+  it("can restore an expired trial with automatic tax and tax ID collection", async () => {
     mocks.ensureTrial.mockResolvedValue({
       status: "expired",
       trialEndsAt: "2020-01-01T00:00:00Z",
@@ -88,6 +94,7 @@ describe("Checkout for an existing customer without an address", () => {
         mode: "subscription",
         customer: "cus_without_address",
         automatic_tax: { enabled: true },
+        tax_id_collection: { enabled: true },
       })
     )
   })
