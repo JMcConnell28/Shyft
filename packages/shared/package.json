@@ -7,6 +7,8 @@
     "./admin": "./src/admin/index.ts",
     "./security": "./src/security/index.ts",
     "./feature-flags": "./src/feature-flags/index.ts",
-    "./feature-flags/types": "./src/feature-flags/types.ts"
+    "./feature-flags/types": "./src/feature-flags/types.ts",
+    "./privacy": "./src/privacy/index.ts",
+    "./privacy/types": "./src/privacy/types.ts"
   }
 }

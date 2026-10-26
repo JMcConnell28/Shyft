@@ -10,7 +10,7 @@ function AccountLayout({ workspaceSlug }: { workspaceSlug: string }) {
         </p>
         <nav
           aria-label="Account settings"
-          className="mt-4 flex gap-2 border-b border-[#dfe4ef] pb-3 text-xs font-semibold"
+          className="mt-4 flex flex-wrap gap-2 border-b border-[#dfe4ef] pb-3 text-xs font-semibold"
         >
           <Link
             to="/app/$workspaceSlug/account"
@@ -28,6 +28,14 @@ function AccountLayout({ workspaceSlug }: { workspaceSlug: string }) {
             activeProps={{ className: "bg-blue-50 text-blue-600" }}
           >
             Preferences
+          </Link>
+          <Link
+            to="/app/$workspaceSlug/account/privacy"
+            params={{ workspaceSlug }}
+            className="rounded-lg px-3 py-2"
+            activeProps={{ className: "bg-blue-50 text-blue-600" }}
+          >
+            Privacy & data
           </Link>
         </nav>
       </header>

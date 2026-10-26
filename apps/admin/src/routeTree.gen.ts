@@ -23,6 +23,8 @@ import { Route as AdminUsersRouteImport } from './routes/_admin/users'
 import { Route as AdminWorkspacesRouteImport } from './routes/_admin/workspaces'
 import { Route as AdminCustomersIndexRouteImport } from './routes/_admin/customers/index'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/_admin/customers/$customerId'
+import { Route as AdminPrivacyIndexRouteImport } from './routes/_admin/privacy/index'
+import { Route as AdminPrivacyIdRouteImport } from './routes/_admin/privacy/$id'
 import { Route as AdminSupportIndexRouteImport } from './routes/_admin/support/index'
 import { Route as AdminSupportThreadIdRouteImport } from './routes/_admin/support/$threadId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -97,6 +99,16 @@ const AdminCustomersCustomerIdRoute =
     path: '/customers/$customerId',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminPrivacyIndexRoute = AdminPrivacyIndexRouteImport.update({
+  id: '/privacy/',
+  path: '/privacy/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPrivacyIdRoute = AdminPrivacyIdRouteImport.update({
+  id: '/privacy/$id',
+  path: '/privacy/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSupportIndexRoute = AdminSupportIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -126,9 +138,11 @@ export interface FileRoutesByFullPath {
   '/users': typeof AdminUsersRoute
   '/workspaces': typeof AdminWorkspacesRoute
   '/customers/$customerId': typeof AdminCustomersCustomerIdRoute
+  '/privacy/$id': typeof AdminPrivacyIdRoute
   '/support/$threadId': typeof AdminSupportThreadIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/customers/': typeof AdminCustomersIndexRoute
+  '/privacy/': typeof AdminPrivacyIndexRoute
   '/support/': typeof AdminSupportIndexRoute
 }
 export interface FileRoutesByTo {
@@ -143,9 +157,11 @@ export interface FileRoutesByTo {
   '/users': typeof AdminUsersRoute
   '/workspaces': typeof AdminWorkspacesRoute
   '/customers/$customerId': typeof AdminCustomersCustomerIdRoute
+  '/privacy/$id': typeof AdminPrivacyIdRoute
   '/support/$threadId': typeof AdminSupportThreadIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/customers': typeof AdminCustomersIndexRoute
+  '/privacy': typeof AdminPrivacyIndexRoute
   '/support': typeof AdminSupportIndexRoute
 }
 export interface FileRoutesById {
@@ -163,9 +179,11 @@ export interface FileRoutesById {
   '/_admin/users': typeof AdminUsersRoute
   '/_admin/workspaces': typeof AdminWorkspacesRoute
   '/_admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
+  '/_admin/privacy/$id': typeof AdminPrivacyIdRoute
   '/_admin/support/$threadId': typeof AdminSupportThreadIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_admin/customers/': typeof AdminCustomersIndexRoute
+  '/_admin/privacy/': typeof AdminPrivacyIndexRoute
   '/_admin/support/': typeof AdminSupportIndexRoute
 }
 export interface FileRouteTypes {
@@ -183,9 +201,11 @@ export interface FileRouteTypes {
     | '/users'
     | '/workspaces'
     | '/customers/$customerId'
+    | '/privacy/$id'
     | '/support/$threadId'
     | '/api/auth/$'
     | '/customers/'
+    | '/privacy/'
     | '/support/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -200,9 +220,11 @@ export interface FileRouteTypes {
     | '/users'
     | '/workspaces'
     | '/customers/$customerId'
+    | '/privacy/$id'
     | '/support/$threadId'
     | '/api/auth/$'
     | '/customers'
+    | '/privacy'
     | '/support'
   id:
     | '__root__'
@@ -219,9 +241,11 @@ export interface FileRouteTypes {
     | '/_admin/users'
     | '/_admin/workspaces'
     | '/_admin/customers/$customerId'
+    | '/_admin/privacy/$id'
     | '/_admin/support/$threadId'
     | '/api/auth/$'
     | '/_admin/customers/'
+    | '/_admin/privacy/'
     | '/_admin/support/'
   fileRoutesById: FileRoutesById
 }
@@ -332,6 +356,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersCustomerIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/privacy/': {
+      id: '/_admin/privacy/'
+      path: '/privacy'
+      fullPath: '/privacy/'
+      preLoaderRoute: typeof AdminPrivacyIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/privacy/$id': {
+      id: '/_admin/privacy/$id'
+      path: '/privacy/$id'
+      fullPath: '/privacy/$id'
+      preLoaderRoute: typeof AdminPrivacyIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/support/': {
       id: '/_admin/support/'
       path: '/'
@@ -380,7 +418,9 @@ interface AdminRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   AdminWorkspacesRoute: typeof AdminWorkspacesRoute
   AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
+  AdminPrivacyIdRoute: typeof AdminPrivacyIdRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
+  AdminPrivacyIndexRoute: typeof AdminPrivacyIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -394,7 +434,9 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   AdminWorkspacesRoute: AdminWorkspacesRoute,
   AdminCustomersCustomerIdRoute: AdminCustomersCustomerIdRoute,
+  AdminPrivacyIdRoute: AdminPrivacyIdRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
+  AdminPrivacyIndexRoute: AdminPrivacyIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

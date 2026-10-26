@@ -37,7 +37,9 @@ import { Route as ApiAdminTelemetryErrorRouteImport } from './routes/api/admin-t
 import { Route as ApiAdminTelemetryEventRouteImport } from './routes/api/admin-telemetry/event'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiBillingReconcileRouteImport } from './routes/api/billing/reconcile'
+import { Route as ApiPersonalDataIdRouteImport } from './routes/api/personal-data/$id'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
+import { Route as AuthedVerifiedAccountPrivacyRouteImport } from './routes/_authed/_verified/account_.privacy'
 import { Route as AuthedVerifiedAppWorkspaceSlugRouteRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/route'
 import { Route as AuthedVerifiedBillingExpiredRouteImport } from './routes/_authed/_verified/billing/expired'
 import { Route as AuthedVerifiedBillingSuccessRouteImport } from './routes/_authed/_verified/billing/success'
@@ -60,6 +62,7 @@ import { Route as AuthedVerifiedAppWorkspaceSlugTimeClockRouteImport } from './r
 import { Route as AuthedVerifiedAppWorkspaceSlugTimesheetsRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/timesheets'
 import { Route as AuthedVerifiedAppWorkspaceSlugAccountIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/account.index'
 import { Route as AuthedVerifiedAppWorkspaceSlugAccountPreferencesRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/account.preferences'
+import { Route as AuthedVerifiedAppWorkspaceSlugAccountPrivacyRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/account.privacy'
 import { Route as AuthedVerifiedAppWorkspaceSlugRotaIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/rota/index'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/index'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsBillingRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/billing'
@@ -225,11 +228,22 @@ const ApiBillingReconcileRoute = ApiBillingReconcileRouteImport.update({
   path: '/api/billing/reconcile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPersonalDataIdRoute = ApiPersonalDataIdRouteImport.update({
+  id: '/api/personal-data/$id',
+  path: '/api/personal-data/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   id: '/api/stripe/webhook',
   path: '/api/stripe/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedVerifiedAccountPrivacyRoute =
+  AuthedVerifiedAccountPrivacyRouteImport.update({
+    id: '/account_/privacy',
+    path: '/account/privacy',
+    getParentRoute: () => AuthedVerifiedRouteRoute,
+  } as any)
 const AuthedVerifiedAppWorkspaceSlugRouteRoute =
   AuthedVerifiedAppWorkspaceSlugRouteRouteImport.update({
     id: '/app/$workspaceSlug',
@@ -357,6 +371,12 @@ const AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute =
   AuthedVerifiedAppWorkspaceSlugAccountPreferencesRouteImport.update({
     id: '/preferences',
     path: '/preferences',
+    getParentRoute: () => AuthedVerifiedAppWorkspaceSlugAccountRoute,
+  } as any)
+const AuthedVerifiedAppWorkspaceSlugAccountPrivacyRoute =
+  AuthedVerifiedAppWorkspaceSlugAccountPrivacyRouteImport.update({
+    id: '/privacy',
+    path: '/privacy',
     getParentRoute: () => AuthedVerifiedAppWorkspaceSlugAccountRoute,
   } as any)
 const AuthedVerifiedAppWorkspaceSlugRotaIndexRoute =
@@ -542,8 +562,10 @@ export interface FileRoutesByFullPath {
   '/api/admin-telemetry/event': typeof ApiAdminTelemetryEventRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/billing/reconcile': typeof ApiBillingReconcileRoute
+  '/api/personal-data/$id': typeof ApiPersonalDataIdRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/app/$workspaceSlug': typeof AuthedVerifiedAppWorkspaceSlugRouteRouteWithChildren
+  '/account/privacy': typeof AuthedVerifiedAccountPrivacyRoute
   '/billing/expired': typeof AuthedVerifiedBillingExpiredRoute
   '/billing/success': typeof AuthedVerifiedBillingSuccessRoute
   '/join-status/$requestId': typeof AuthedVerifiedJoinStatusRequestIdRoute
@@ -564,6 +586,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/timesheets': typeof AuthedVerifiedAppWorkspaceSlugTimesheetsRoute
   '/app/$workspaceSlug/': typeof AuthedVerifiedAppWorkspaceSlugIndexRoute
   '/app/$workspaceSlug/account/preferences': typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute
+  '/app/$workspaceSlug/account/privacy': typeof AuthedVerifiedAppWorkspaceSlugAccountPrivacyRoute
   '/app/$workspaceSlug/settings/billing': typeof AuthedVerifiedAppWorkspaceSlugSettingsBillingRoute
   '/app/$workspaceSlug/settings/clocking': typeof AuthedVerifiedAppWorkspaceSlugSettingsClockingRoute
   '/app/$workspaceSlug/settings/company': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyRouteWithChildren
@@ -618,7 +641,9 @@ export interface FileRoutesByTo {
   '/api/admin-telemetry/event': typeof ApiAdminTelemetryEventRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/billing/reconcile': typeof ApiBillingReconcileRoute
+  '/api/personal-data/$id': typeof ApiPersonalDataIdRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/account/privacy': typeof AuthedVerifiedAccountPrivacyRoute
   '/billing/expired': typeof AuthedVerifiedBillingExpiredRoute
   '/billing/success': typeof AuthedVerifiedBillingSuccessRoute
   '/join-status/$requestId': typeof AuthedVerifiedJoinStatusRequestIdRoute
@@ -637,6 +662,7 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/timesheets': typeof AuthedVerifiedAppWorkspaceSlugTimesheetsRoute
   '/app/$workspaceSlug': typeof AuthedVerifiedAppWorkspaceSlugIndexRoute
   '/app/$workspaceSlug/account/preferences': typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute
+  '/app/$workspaceSlug/account/privacy': typeof AuthedVerifiedAppWorkspaceSlugAccountPrivacyRoute
   '/app/$workspaceSlug/settings/billing': typeof AuthedVerifiedAppWorkspaceSlugSettingsBillingRoute
   '/app/$workspaceSlug/settings/clocking': typeof AuthedVerifiedAppWorkspaceSlugSettingsClockingRoute
   '/app/$workspaceSlug/settings/connections': typeof AuthedVerifiedAppWorkspaceSlugSettingsConnectionsRoute
@@ -689,8 +715,10 @@ export interface FileRoutesById {
   '/api/admin-telemetry/event': typeof ApiAdminTelemetryEventRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/billing/reconcile': typeof ApiBillingReconcileRoute
+  '/api/personal-data/$id': typeof ApiPersonalDataIdRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/_authed/_verified/app/$workspaceSlug': typeof AuthedVerifiedAppWorkspaceSlugRouteRouteWithChildren
+  '/_authed/_verified/account_/privacy': typeof AuthedVerifiedAccountPrivacyRoute
   '/_authed/_verified/billing/expired': typeof AuthedVerifiedBillingExpiredRoute
   '/_authed/_verified/billing/success': typeof AuthedVerifiedBillingSuccessRoute
   '/_authed/_verified/join-status/$requestId': typeof AuthedVerifiedJoinStatusRequestIdRoute
@@ -711,6 +739,7 @@ export interface FileRoutesById {
   '/_authed/_verified/app/$workspaceSlug/timesheets': typeof AuthedVerifiedAppWorkspaceSlugTimesheetsRoute
   '/_authed/_verified/app/$workspaceSlug/': typeof AuthedVerifiedAppWorkspaceSlugIndexRoute
   '/_authed/_verified/app/$workspaceSlug/account/preferences': typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute
+  '/_authed/_verified/app/$workspaceSlug/account/privacy': typeof AuthedVerifiedAppWorkspaceSlugAccountPrivacyRoute
   '/_authed/_verified/app/$workspaceSlug/settings/billing': typeof AuthedVerifiedAppWorkspaceSlugSettingsBillingRoute
   '/_authed/_verified/app/$workspaceSlug/settings/clocking': typeof AuthedVerifiedAppWorkspaceSlugSettingsClockingRoute
   '/_authed/_verified/app/$workspaceSlug/settings/company': typeof AuthedVerifiedAppWorkspaceSlugSettingsCompanyRouteWithChildren
@@ -767,8 +796,10 @@ export interface FileRouteTypes {
     | '/api/admin-telemetry/event'
     | '/api/auth/$'
     | '/api/billing/reconcile'
+    | '/api/personal-data/$id'
     | '/api/stripe/webhook'
     | '/app/$workspaceSlug'
+    | '/account/privacy'
     | '/billing/expired'
     | '/billing/success'
     | '/join-status/$requestId'
@@ -789,6 +820,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/timesheets'
     | '/app/$workspaceSlug/'
     | '/app/$workspaceSlug/account/preferences'
+    | '/app/$workspaceSlug/account/privacy'
     | '/app/$workspaceSlug/settings/billing'
     | '/app/$workspaceSlug/settings/clocking'
     | '/app/$workspaceSlug/settings/company'
@@ -843,7 +875,9 @@ export interface FileRouteTypes {
     | '/api/admin-telemetry/event'
     | '/api/auth/$'
     | '/api/billing/reconcile'
+    | '/api/personal-data/$id'
     | '/api/stripe/webhook'
+    | '/account/privacy'
     | '/billing/expired'
     | '/billing/success'
     | '/join-status/$requestId'
@@ -862,6 +896,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/timesheets'
     | '/app/$workspaceSlug'
     | '/app/$workspaceSlug/account/preferences'
+    | '/app/$workspaceSlug/account/privacy'
     | '/app/$workspaceSlug/settings/billing'
     | '/app/$workspaceSlug/settings/clocking'
     | '/app/$workspaceSlug/settings/connections'
@@ -913,8 +948,10 @@ export interface FileRouteTypes {
     | '/api/admin-telemetry/event'
     | '/api/auth/$'
     | '/api/billing/reconcile'
+    | '/api/personal-data/$id'
     | '/api/stripe/webhook'
     | '/_authed/_verified/app/$workspaceSlug'
+    | '/_authed/_verified/account_/privacy'
     | '/_authed/_verified/billing/expired'
     | '/_authed/_verified/billing/success'
     | '/_authed/_verified/join-status/$requestId'
@@ -935,6 +972,7 @@ export interface FileRouteTypes {
     | '/_authed/_verified/app/$workspaceSlug/timesheets'
     | '/_authed/_verified/app/$workspaceSlug/'
     | '/_authed/_verified/app/$workspaceSlug/account/preferences'
+    | '/_authed/_verified/app/$workspaceSlug/account/privacy'
     | '/_authed/_verified/app/$workspaceSlug/settings/billing'
     | '/_authed/_verified/app/$workspaceSlug/settings/clocking'
     | '/_authed/_verified/app/$workspaceSlug/settings/company'
@@ -988,6 +1026,7 @@ export interface RootRouteChildren {
   ApiAdminTelemetryEventRoute: typeof ApiAdminTelemetryEventRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiBillingReconcileRoute: typeof ApiBillingReconcileRoute
+  ApiPersonalDataIdRoute: typeof ApiPersonalDataIdRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   ApiAuthStripeWebhookRoute: typeof ApiAuthStripeWebhookRoute
 }
@@ -1190,12 +1229,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBillingReconcileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/personal-data/$id': {
+      id: '/api/personal-data/$id'
+      path: '/api/personal-data/$id'
+      fullPath: '/api/personal-data/$id'
+      preLoaderRoute: typeof ApiPersonalDataIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
       path: '/api/stripe/webhook'
       fullPath: '/api/stripe/webhook'
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/_verified/account_/privacy': {
+      id: '/_authed/_verified/account_/privacy'
+      path: '/account/privacy'
+      fullPath: '/account/privacy'
+      preLoaderRoute: typeof AuthedVerifiedAccountPrivacyRouteImport
+      parentRoute: typeof AuthedVerifiedRouteRoute
     }
     '/_authed/_verified/app/$workspaceSlug': {
       id: '/_authed/_verified/app/$workspaceSlug'
@@ -1349,6 +1402,13 @@ declare module '@tanstack/react-router' {
       path: '/preferences'
       fullPath: '/app/$workspaceSlug/account/preferences'
       preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRouteImport
+      parentRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountRoute
+    }
+    '/_authed/_verified/app/$workspaceSlug/account/privacy': {
+      id: '/_authed/_verified/app/$workspaceSlug/account/privacy'
+      path: '/privacy'
+      fullPath: '/app/$workspaceSlug/account/privacy'
+      preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountPrivacyRouteImport
       parentRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountRoute
     }
     '/_authed/_verified/app/$workspaceSlug/rota/': {
@@ -1531,6 +1591,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthedVerifiedAppWorkspaceSlugAccountRouteChildren {
   AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute
+  AuthedVerifiedAppWorkspaceSlugAccountPrivacyRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountPrivacyRoute
   AuthedVerifiedAppWorkspaceSlugAccountIndexRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountIndexRoute
 }
 
@@ -1538,6 +1599,8 @@ const AuthedVerifiedAppWorkspaceSlugAccountRouteChildren: AuthedVerifiedAppWorks
   {
     AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute:
       AuthedVerifiedAppWorkspaceSlugAccountPreferencesRoute,
+    AuthedVerifiedAppWorkspaceSlugAccountPrivacyRoute:
+      AuthedVerifiedAppWorkspaceSlugAccountPrivacyRoute,
     AuthedVerifiedAppWorkspaceSlugAccountIndexRoute:
       AuthedVerifiedAppWorkspaceSlugAccountIndexRoute,
   }
@@ -1731,6 +1794,7 @@ interface AuthedVerifiedRouteRouteChildren {
   AuthedVerifiedAccountRoute: typeof AuthedVerifiedAccountRoute
   AuthedVerifiedDashboardRoute: typeof AuthedVerifiedDashboardRoute
   AuthedVerifiedAppWorkspaceSlugRouteRoute: typeof AuthedVerifiedAppWorkspaceSlugRouteRouteWithChildren
+  AuthedVerifiedAccountPrivacyRoute: typeof AuthedVerifiedAccountPrivacyRoute
   AuthedVerifiedBillingExpiredRoute: typeof AuthedVerifiedBillingExpiredRoute
   AuthedVerifiedBillingSuccessRoute: typeof AuthedVerifiedBillingSuccessRoute
   AuthedVerifiedJoinStatusRequestIdRoute: typeof AuthedVerifiedJoinStatusRequestIdRoute
@@ -1749,6 +1813,7 @@ const AuthedVerifiedRouteRouteChildren: AuthedVerifiedRouteRouteChildren = {
   AuthedVerifiedDashboardRoute: AuthedVerifiedDashboardRoute,
   AuthedVerifiedAppWorkspaceSlugRouteRoute:
     AuthedVerifiedAppWorkspaceSlugRouteRouteWithChildren,
+  AuthedVerifiedAccountPrivacyRoute: AuthedVerifiedAccountPrivacyRoute,
   AuthedVerifiedBillingExpiredRoute: AuthedVerifiedBillingExpiredRoute,
   AuthedVerifiedBillingSuccessRoute: AuthedVerifiedBillingSuccessRoute,
   AuthedVerifiedJoinStatusRequestIdRoute:
@@ -1814,6 +1879,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminTelemetryEventRoute: ApiAdminTelemetryEventRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiBillingReconcileRoute: ApiBillingReconcileRoute,
+  ApiPersonalDataIdRoute: ApiPersonalDataIdRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   ApiAuthStripeWebhookRoute: ApiAuthStripeWebhookRoute,
 }

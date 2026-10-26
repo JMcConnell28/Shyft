@@ -12,6 +12,7 @@ import {
   LifeBuoyIcon,
   MenuIcon,
   ReceiptTextIcon,
+  ShieldCheckIcon,
   UsersIcon,
   XIcon,
 } from "lucide-react"
@@ -32,6 +33,7 @@ const navItems = [
   { href: "/errors", icon: AlertTriangleIcon, label: "Errors" },
   { href: "/events", icon: ActivityIcon, label: "Events" },
   { href: "/support", icon: LifeBuoyIcon, label: "Support" },
+  { href: "/privacy", icon: ShieldCheckIcon, label: "Personal data requests" },
 ] as const
 
 function AdminNavigation({
@@ -46,6 +48,8 @@ function AdminNavigation({
       {navItems
         .filter(
           (item) =>
+            (item.href !== "/privacy" ||
+              roleHasAdminPermission(membership.role, "privacy.manage")) &&
             (item.href !== "/support" ||
               roleHasAdminPermission(membership.role, "support.manage")) &&
             (item.href !== "/clock-stations" ||

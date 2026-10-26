@@ -50,6 +50,14 @@ const config = defineConfig({
       alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
       experimental: { tasks: true },
       tasks: {
+        "privacy:process": {
+          handler: fileURLToPath(
+            new URL(
+              "./src/features/personal-data/server/task.ts",
+              import.meta.url
+            )
+          ),
+        },
         "billing:station-alerts": {
           handler: fileURLToPath(
             new URL(
@@ -71,6 +79,7 @@ const config = defineConfig({
         process.env.NODE_ENV === "production"
           ? {
               "* * * * *": ["time-clock:process"],
+              "*/5 * * * *": ["privacy:process"],
               "*/15 * * * *": ["billing:station-alerts"],
             }
           : {},

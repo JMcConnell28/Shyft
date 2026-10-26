@@ -6,6 +6,7 @@ const adminPermissions = [
   "clock_stations.manage",
   "errors.manage",
   "feature_flags.manage",
+  "privacy.manage",
   "support.manage",
   "users.impersonate",
   "users.manage",
@@ -29,13 +30,10 @@ const adminRolePermissions = {
 type AdminRole = (typeof adminRoles)[number]
 type AdminPermission = (typeof adminPermissions)[number]
 
-function roleHasAdminPermission(
-  role: AdminRole,
-  permission: AdminPermission,
-) {
-  return (adminRolePermissions[role] as ReadonlyArray<AdminPermission>).includes(
-    permission,
-  )
+function roleHasAdminPermission(role: AdminRole, permission: AdminPermission) {
+  return (
+    adminRolePermissions[role] as ReadonlyArray<AdminPermission>
+  ).includes(permission)
 }
 
 export {

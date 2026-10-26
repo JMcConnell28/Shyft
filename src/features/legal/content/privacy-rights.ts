@@ -1,12 +1,12 @@
-import { legalBusinessDetails } from "@/features/legal/business-details"
 import type { LegalDocumentSection } from "@/features/legal/types"
+import { legalBusinessDetails } from "@/features/legal/business-details"
 
 const privacyRightsSections: ReadonlyArray<LegalDocumentSection> = [
   {
     title: "How long information is kept",
     paragraphs: [
       "We determine retention for information we control by its purpose: whether an account or customer relationship remains active, whether a support issue is resolved, the need to investigate security incidents, applicable legal record-keeping duties and the period reasonably needed to establish or defend claims. We should not keep information simply because it might be useful later. Final operational retention and deletion schedules are being confirmed before launch.",
-      "Your workplace determines retention instructions for its workforce records, subject to applicable law and our processing agreement. Ending a subscription or deactivating an employee does not automatically erase historical records. Account closure and deletion are separate from cancellation of renewal. Return and deletion of workplace information are covered by the processing terms; this notice does not promise a self-service download or export feature.",
+      "Your workplace determines retention instructions for its workforce records, subject to applicable law and our processing agreement. Ending a subscription or deactivating an employee does not automatically erase historical records. Account closure and deletion are separate from cancellation of renewal. Return and deletion of workplace information are covered by the processing terms. Personal data requests can be submitted and tracked through Account → Privacy & data; reviewed downloads are time-limited and do not delete the underlying records.",
       "Any backup copies must remain protected and beyond ordinary use until they expire or are deleted under the applicable retention arrangements. The actual backup arrangements and deletion period have not yet been confirmed; we do not claim automatic daily backups or a fixed backup-deletion deadline in this draft.",
     ],
   },
@@ -30,8 +30,14 @@ const privacyRightsSections: ReadonlyArray<LegalDocumentSection> = [
     title: "Your data-protection rights",
     paragraphs: [
       "Depending on the information, purpose and lawful basis, you can request access to your personal information, correction, erasure, restriction of processing and, in applicable cases, a portable copy. You can object to processing based on legitimate interests and to direct marketing. Where we rely on consent, you can withdraw it without affecting the lawfulness of earlier processing. These rights have legal conditions and exceptions.",
-      `For information RocketRota controls, contact ${legalBusinessDetails.contactEmail} once the mailbox is active, or use in-app support. For employer-controlled records, contact your workplace first; we will help it handle requests under our processing obligations. We may need proportionate information to verify identity or authority and protect other people's information. A privacy-rights request does not depend on a self-service export feature.`,
+      `You can request a copy of your personal information and track the response in Account → Privacy & data, including without an active workplace membership. You can also contact ${legalBusinessDetails.contactEmail} or use in-app support. For employer-controlled records, your workplace is responsible for responding; we will help coordinate its response under our processing obligations. We may need proportionate information to verify identity or authority and protect other people's information. You do not have to use the account page to make a valid request.`,
       "We handle requests without undue delay and within the applicable legal time limit, normally one month. We will explain any lawful extension, verification requirement or refusal that applies. Requests are normally free; any fee or refusal must be permitted by law. Access and portability rights are not limited by a commercial account-closure request window.",
+    ],
+    links: [
+      {
+        label: "Request a copy of your personal data",
+        href: "/account/privacy",
+      },
     ],
   },
   {
