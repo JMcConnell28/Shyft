@@ -6,6 +6,10 @@ import type {
 } from "@/features/company/types"
 import type { EmployeeCompensationInput } from "@/features/staff-groups/types"
 import { requireCompanyAdminContext } from "@/features/company/server/shared"
+import {
+  assertEmployeesInScope,
+  getEmployeeAccount,
+} from "@/features/company/server/employee-access"
 import { createEmployeeMemberId } from "@/features/onboarding/utils/invite-utils"
 import { setEmployeeCompensation } from "@/features/staff-groups/server/actions"
 import { removeEmployeeFromScope } from "@/features/staff-groups/server/employee-lifecycle"
@@ -14,14 +18,6 @@ import { syncWorkspaceBillingSubscriptionQuantities } from "@/features/billing/s
 import { getDatabase } from "@/lib/db"
 
 type CompanyActionScope = Awaited<ReturnType<typeof requireCompanyAdminContext>>
-
-type EmployeeAccountRow = {
-  email: string | null
-  full_name: string
-  id: string
-  offboarded_at: string | null
-  user_id: string | null
-}
 
 type EmployeeRotaNoteInput = {
   body: string
@@ -502,47 +498,6 @@ async function updateCompanyEmployeePayrollIds(input: {
   }
 
   return updates
-}
-
-async function getEmployeeAccount(
-  context: CompanyActionScope,
-  employeeId: string
-): Promise<EmployeeAccountRow> {
-  const result = await getDatabase().query<EmployeeAccountRow>(
-    `select id, full_name, email, user_id, offboarded_at
-     from public.employees
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
-       and (($2::uuid is null and location_id is null) or location_id = $2::uuid)
-       and id = $3::uuid
-     limit 1`,
-    [context.organizationId, context.locationId, employeeId]
-  )
-  const employee = result.rows.at(0)
-
-  if (!employee) {
-    throw new Error("That employee could not be found.")
-  }
-
-  return employee
-}
-
-async function assertEmployeesInScope(
-  context: CompanyActionScope,
-  employeeIds: Array<string>
-) {
-  const result = await getDatabase().query<{ id: string }>(
-    `select id
-     from public.employees
-     where (($1::text is null and organization_id is null) or organization_id = $1::text)
-       and (($2::uuid is null and location_id is null) or location_id = $2::uuid)
-       and id = any($3::uuid[])`,
-    [context.organizationId, context.locationId, employeeIds]
-  )
-  const foundIds = new Set(result.rows.map((row) => row.id))
-
-  if (employeeIds.some((employeeId) => !foundIds.has(employeeId))) {
-    throw new Error("One or more employees could not be found.")
-  }
 }
 
 async function updateOrganizationRole(
