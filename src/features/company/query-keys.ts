@@ -1,5 +1,10 @@
 const companyQueryKeys = {
   all: ["company"] as const,
+  sageImportAccess: (input: {
+    organizationId?: string
+    locationId?: string
+    userId: string
+  }) => [...companyQueryKeys.all, "sage-import-access", input] as const,
   employees: (input: {
     organizationId?: string
     locationId?: string

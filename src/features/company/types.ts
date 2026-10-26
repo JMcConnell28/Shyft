@@ -2,6 +2,11 @@ import type { AssignableOrganizationRole } from "@/lib/auth/permissions"
 import type { EmployeeCompensationInput } from "@/features/staff-groups/types"
 
 type CompanyRole = AssignableOrganizationRole | "owner" | "member"
+type CompanyScopeInput = {
+  organizationId?: string
+  locationId?: string
+  userId: string
+}
 
 type CompanyEmployeeListItem = {
   id: string
@@ -81,6 +86,12 @@ type CompanyEmployeesPageData = {
   employees: Array<CompanyEmployeeListItem>
   workspaceName: string
 }
+type SageEmployeeImportDialogProps = {
+  employees: Array<CompanyEmployeeListItem>
+  locationId?: string
+  organizationId?: string
+  userId: string
+}
 
 type CompanyEmployeePageData = {
   employee: CompanyEmployeeDetail
@@ -93,6 +104,8 @@ type CompanyEmployeePayrollUpdate = {
 }
 
 export type {
+  CompanyScopeInput,
+  SageEmployeeImportDialogProps,
   CompanyEmployeeDetail,
   CompanyEmployeeListItem,
   CompanyEmployeeLocation,

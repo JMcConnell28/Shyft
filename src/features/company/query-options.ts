@@ -1,16 +1,12 @@
 import { queryOptions } from "@tanstack/react-query"
 
+import type { CompanyScopeInput } from "@/features/company/types"
 import { companyQueryKeys } from "@/features/company/query-keys"
 import {
   getCompanyEmployeePageData,
   getCompanyEmployeesPageData,
+  getSageEmployeeImportAvailability,
 } from "@/features/company/server-fns"
-
-type CompanyScopeInput = {
-  organizationId?: string
-  locationId?: string
-  userId: string
-}
 
 function companyEmployeesQueryOptions(
   input: CompanyScopeInput,
@@ -43,4 +39,21 @@ function companyEmployeeQueryOptions(
 }
 
 export { companyEmployeeQueryOptions, companyEmployeesQueryOptions }
+function sageEmployeeImportQueryOptions(
+  input: CompanyScopeInput,
+  fetcher: (options: {
+    data: CompanyScopeInput
+  }) => ReturnType<
+    typeof getSageEmployeeImportAvailability
+  > = getSageEmployeeImportAvailability
+) {
+  return queryOptions({
+    queryKey: companyQueryKeys.sageImportAccess(input),
+    queryFn: () => fetcher({ data: input }),
+    staleTime: 0,
+    refetchInterval: 20000,
+    refetchOnWindowFocus: "always",
+  })
+}
+export { sageEmployeeImportQueryOptions }
 export type { CompanyScopeInput }

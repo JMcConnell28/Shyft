@@ -20,6 +20,7 @@ the admin audit log. Revision checks prevent overwriting another admin's changes
 
 | Key | Controlled behavior |
 | --- | --- |
+| `company.sage_employee_import` | Sage employee-reference imports; existing payroll IDs, manual ID editing and Sage timesheet exports remain available |
 | `rota.budget_manager` | Weekly budget editing, budget suggestions, variance indicators and publish warnings; saved budgets and labour cost totals are retained |
 | `rota.templates` | Create, update and apply saved templates, including template-based draft creation |
 | `rota.publishing` | Publish, republish and unpublish rotas |
@@ -33,6 +34,20 @@ permissions; enabling a flag does not grant those permissions or paid access.
 Published rota viewing, clock-out, time history and existing hardware orders remain
 available. Disabling station purchases does not cancel checkout sessions already
 created or interrupt payment processing and fulfilment.
+
+Sage imports from the company page update organization-wide payroll references.
+They require the flag to be enabled at every location in that organization; a
+disabled location cannot be bypassed with a company-wide import. A legacy
+location-scoped import checks that location only. The import control stays hidden
+until its scope is confirmed and an open import dialog is removed when disabled.
+The server rechecks access before importing, including direct requests. The flag
+defaults to enabled to preserve existing behavior and can be set to **Off everywhere**
+in the admin Feature flags page.
+
+Migration `20261026214603_sage_employee_import_feature_flag.sql` registers the Sage
+import flag without changing any existing flag configuration. It has been applied
+to the connected Shyft database. Deploy both apps to expose the new control and
+enforce it in the customer app.
 
 ## Evaluation and availability
 

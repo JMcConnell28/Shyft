@@ -4,7 +4,7 @@ import * as React from "react"
 import { IdCardIcon, UserRoundCheckIcon, UsersIcon } from "lucide-react"
 
 import { CompanyEmployeeListRow } from "@/features/company/components/company-employee-list-row"
-import { SageEmployeeImportDialog } from "@/features/company/components/sage-employee-import-dialog"
+import { SageEmployeeImportAction } from "@/features/company/components/sage-employee-import-action"
 import { useCompanyEmployeesQuery } from "@/features/company/hooks/use-company-query"
 import { getCompanyRoleLabel } from "@/features/company/utils/roles"
 import {
@@ -73,7 +73,7 @@ function CompanyEmployeeListPage({
         title="Employees"
         description={`Manage account access, pay and location activity for ${companyQuery.data.workspaceName}.`}
         action={
-          <SageEmployeeImportDialog
+          <SageEmployeeImportAction
             employees={currentEmployees}
             locationId={locationId}
             organizationId={organizationId}

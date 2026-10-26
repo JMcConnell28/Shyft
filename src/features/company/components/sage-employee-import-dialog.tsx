@@ -3,7 +3,7 @@
 import * as React from "react"
 import { FileUpIcon, LoaderCircleIcon } from "lucide-react"
 
-import type { CompanyEmployeeListItem } from "@/features/company/types"
+import type { SageEmployeeImportDialogProps } from "@/features/company/types"
 import type { SageEmployeeImportPreview } from "@/features/company/utils/sage-employee-import"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,13 +21,6 @@ import { useCompanyMutations } from "@/features/company/hooks/use-company-mutati
 import { buildSageEmployeeImportPreview } from "@/features/company/utils/sage-employee-import"
 import { SageEmployeeImportPreviewTable } from "@/features/company/components/sage-employee-import-preview"
 import { getErrorMessage } from "@/lib/errors"
-
-type SageEmployeeImportDialogProps = {
-  employees: Array<CompanyEmployeeListItem>
-  locationId?: string
-  organizationId?: string
-  userId: string
-}
 
 function SageEmployeeImportDialog({
   employees,

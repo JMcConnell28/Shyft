@@ -11,10 +11,10 @@ import {
   removeCompanyEmployeeInputSchema,
   updateCompanyEmployeeCompensationInputSchema,
   updateCompanyEmployeeLocationInputSchema,
-  updateCompanyEmployeeRotaVisibilityInputSchema,
   updateCompanyEmployeePayrollIdInputSchema,
   updateCompanyEmployeeRoleInputSchema,
   updateCompanyEmployeeRotaNoteInputSchema,
+  updateCompanyEmployeeRotaVisibilityInputSchema,
 } from "@/features/company/schemas/company-schemas"
 
 const getCompanyEmployeesPageData = createServerFn({ method: "POST" })
@@ -22,6 +22,16 @@ const getCompanyEmployeesPageData = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const module = await import("@/features/company/server/queries")
     return module.getCompanyEmployeesPageData(data)
+  })
+
+const getSageEmployeeImportAvailability = createServerFn({ method: "POST" })
+  .validator((input: unknown) => companyWorkspaceInputSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { requireCompanyAdminContext } = await import("./server/shared")
+    const context = await requireCompanyAdminContext(data)
+    const { canImportSageEmployees } =
+      await import("./server/sage-import-access")
+    return canImportSageEmployees(context)
   })
 
 const getCompanyEmployeePageData = createServerFn({ method: "POST" })
@@ -62,9 +72,7 @@ const updateCompanyEmployeeRotaVisibility = createServerFn({ method: "POST" })
   })
 
 const removeCompanyEmployee = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    removeCompanyEmployeeInputSchema.parse(input)
-  )
+  .validator((input: unknown) => removeCompanyEmployeeInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
@@ -72,9 +80,7 @@ const removeCompanyEmployee = createServerFn({ method: "POST" })
   })
 
 const rehireCompanyEmployee = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    rehireCompanyEmployeeInputSchema.parse(input)
-  )
+  .validator((input: unknown) => rehireCompanyEmployeeInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/company/server/actions")
@@ -147,6 +153,7 @@ export {
   createCompanyEmployeeRotaNote,
   getCompanyEmployeePageData,
   getCompanyEmployeesPageData,
+  getSageEmployeeImportAvailability,
   rehireCompanyEmployee,
   removeCompanyEmployee,
   updateCompanyEmployeeCompensation,

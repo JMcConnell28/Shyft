@@ -8,6 +8,13 @@ import type {
 
 const featureFlagDefinitions = [
   {
+    key: "company.sage_employee_import",
+    name: "Sage employee imports",
+    description:
+      "Import Sage employee payroll references. Company-wide imports require access at every location. Existing references, manual edits and Sage timesheet exports remain available.",
+    defaultEnabled: true,
+  },
+  {
     key: "rota.budget_manager",
     name: "Budget manager",
     description:
@@ -75,6 +82,7 @@ function defaultFor(key: FeatureFlagKey): FeatureFlagResolution {
 }
 function getDefaultFeatureFlags(): LocationFeatureFlags {
   return {
+    "company.sage_employee_import": defaultFor("company.sage_employee_import"),
     "rota.budget_manager": defaultFor("rota.budget_manager"),
     "rota.templates": defaultFor("rota.templates"),
     "rota.publishing": defaultFor("rota.publishing"),

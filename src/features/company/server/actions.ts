@@ -1,15 +1,11 @@
 import type { AssignableOrganizationRole } from "@/lib/auth/permissions"
 import type {
-  CompanyEmployeePayrollUpdate,
   CompanyEmployeeRotaNoteCategory,
   CompanyEmployeeRotaNotePriority,
 } from "@/features/company/types"
 import type { EmployeeCompensationInput } from "@/features/staff-groups/types"
 import { requireCompanyAdminContext } from "@/features/company/server/shared"
-import {
-  assertEmployeesInScope,
-  getEmployeeAccount,
-} from "@/features/company/server/employee-access"
+import { getEmployeeAccount } from "@/features/company/server/employee-access"
 import { createEmployeeMemberId } from "@/features/onboarding/utils/invite-utils"
 import { setEmployeeCompensation } from "@/features/staff-groups/server/actions"
 import { removeEmployeeFromScope } from "@/features/staff-groups/server/employee-lifecycle"
@@ -315,26 +311,6 @@ async function updateCompanyEmployeeCompensation(input: {
   }
 }
 
-async function updateCompanyEmployeePayrollId(input: {
-  employeeId: string
-  locationId?: string
-  organizationId?: string
-  payrollId: string | null
-  userId: string
-}) {
-  const [result] = await updateCompanyEmployeePayrollIds({
-    ...input,
-    updates: [
-      {
-        employeeId: input.employeeId,
-        payrollId: input.payrollId,
-      },
-    ],
-  })
-
-  return result
-}
-
 async function createCompanyEmployeeRotaNote(input: {
   employeeId: string
   locationId?: string
@@ -462,42 +438,6 @@ async function archiveCompanyEmployeeRotaNote(input: {
     employeeId: employee.id,
     noteId: input.noteId,
   }
-}
-
-async function bulkUpdateCompanyEmployeePayrollIds(input: {
-  locationId?: string
-  organizationId?: string
-  updates: Array<CompanyEmployeePayrollUpdate>
-  userId: string
-}) {
-  return updateCompanyEmployeePayrollIds(input)
-}
-
-async function updateCompanyEmployeePayrollIds(input: {
-  locationId?: string
-  organizationId?: string
-  updates: Array<CompanyEmployeePayrollUpdate>
-  userId: string
-}) {
-  const context = await requireCompanyAdminContext(input)
-  const updates = normalizePayrollUpdates(input.updates)
-
-  await assertEmployeesInScope(
-    context,
-    updates.map((update) => update.employeeId)
-  )
-
-  for (const update of updates) {
-    await getDatabase().query(
-      `update public.employees
-       set payroll_id = nullif(trim($2::text), ''),
-           updated_at = timezone('utc', now())
-       where id = $1::uuid`,
-      [update.employeeId, update.payrollId]
-    )
-  }
-
-  return updates
 }
 
 async function updateOrganizationRole(
@@ -786,44 +726,18 @@ function normalizePrimaryRole(role: string | null) {
   return role?.split(",")[0]?.trim() ?? null
 }
 
-function normalizePayrollUpdates(updates: Array<CompanyEmployeePayrollUpdate>) {
-  const employeeIds = new Set<string>()
-  const payrollIds = new Set<string>()
-
-  return updates.map((update) => {
-    if (employeeIds.has(update.employeeId)) {
-      throw new Error("Each employee can only appear once in an import.")
-    }
-    employeeIds.add(update.employeeId)
-
-    const payrollId = update.payrollId?.trim() || null
-    const normalizedPayrollId = payrollId?.toLowerCase() ?? null
-
-    if (normalizedPayrollId && payrollIds.has(normalizedPayrollId)) {
-      throw new Error("Each payroll ID can only be assigned once.")
-    }
-
-    if (normalizedPayrollId) {
-      payrollIds.add(normalizedPayrollId)
-    }
-
-    return {
-      employeeId: update.employeeId,
-      payrollId,
-    }
-  })
-}
-
 export {
   archiveCompanyEmployeeRotaNote,
-  bulkUpdateCompanyEmployeePayrollIds,
   createCompanyEmployeeRotaNote,
   rehireCompanyEmployee,
   removeCompanyEmployee,
   updateCompanyEmployeeCompensation,
   updateCompanyEmployeeLocationActivity,
   updateCompanyEmployeeRotaVisibility,
-  updateCompanyEmployeePayrollId,
   updateCompanyEmployeeRotaNote,
   updateCompanyEmployeeRole,
 }
+export {
+  bulkUpdateCompanyEmployeePayrollIds,
+  updateCompanyEmployeePayrollId,
+} from "./employee-payroll"
