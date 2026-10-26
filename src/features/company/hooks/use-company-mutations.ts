@@ -25,7 +25,7 @@ import {
   updateCompanyEmployeeRotaNote,
   updateCompanyEmployeeRotaVisibility,
 } from "@/features/company/server-fns"
-import { showErrorToast, showSuccessToast } from "@/lib/toast"
+import { showSuccessToast } from "@/lib/toast"
 import { navigationQueryKeys } from "@/features/navigation/query-keys"
 
 type RotaNoteMutationInput = {
@@ -74,6 +74,7 @@ function useCompanyMutations(input: {
   }
 
   const roleMutation = useMutation({
+    meta: { errorMessage: "We could not update that role." },
     mutationFn: (variables: {
       employeeId: string
       role: AssignableOrganizationRole
@@ -85,14 +86,10 @@ function useCompanyMutations(input: {
         queryKey: navigationQueryKeys.viewers,
       })
     },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not update that role.",
-      })
-    },
   })
 
   const locationActivityMutation = useMutation({
+    meta: { errorMessage: "We could not update that location." },
     mutationFn: (variables: {
       employeeId: string
       isActive: boolean
@@ -103,11 +100,6 @@ function useCompanyMutations(input: {
       showSuccessToast("Location activity updated.")
       await queryClient.invalidateQueries({
         queryKey: navigationQueryKeys.viewers,
-      })
-    },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not update that location.",
       })
     },
   })
@@ -126,6 +118,7 @@ function useCompanyMutations(input: {
   })
 
   const removeEmployeeMutation = useMutation({
+    meta: { errorMessage: "We could not remove that employee." },
     mutationFn: (variables: { employeeId: string }) =>
       removeEmployeeFn({ data: { ...input, ...variables } }),
     onSuccess: async () => {
@@ -135,14 +128,10 @@ function useCompanyMutations(input: {
         queryKey: navigationQueryKeys.viewers,
       })
     },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not remove that employee.",
-      })
-    },
   })
 
   const rehireEmployeeMutation = useMutation({
+    meta: { errorMessage: "We could not rehire that employee." },
     mutationFn: (variables: {
       employeeId: string
       locationIds: Array<string>
@@ -154,14 +143,10 @@ function useCompanyMutations(input: {
         queryKey: navigationQueryKeys.viewers,
       })
     },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not rehire that employee.",
-      })
-    },
   })
 
   const compensationMutation = useMutation({
+    meta: { errorMessage: "We could not update that pay rate." },
     mutationFn: (variables: {
       compensation: EmployeeCompensationInput
       employeeId: string
@@ -170,28 +155,20 @@ function useCompanyMutations(input: {
       await invalidate()
       showSuccessToast("Pay rate updated.")
     },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not update that pay rate.",
-      })
-    },
   })
 
   const payrollIdMutation = useMutation({
+    meta: { errorMessage: "We could not update that payroll ID." },
     mutationFn: (variables: { employeeId: string; payrollId: string | null }) =>
       updatePayrollIdFn({ data: { ...input, ...variables } }),
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Payroll ID updated.")
     },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not update that payroll ID.",
-      })
-    },
   })
 
   const payrollImportMutation = useMutation({
+    meta: { errorMessage: "We could not import those payroll IDs." },
     mutationFn: (variables: {
       updates: Array<{ employeeId: string; payrollId: string | null }>
     }) => bulkUpdatePayrollIdsFn({ data: { ...input, ...variables } }),
@@ -199,52 +176,35 @@ function useCompanyMutations(input: {
       await invalidate()
       showSuccessToast(`${updates.length} payroll IDs updated.`)
     },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not import those payroll IDs.",
-      })
-    },
   })
 
   const createRotaNoteMutation = useMutation({
+    meta: { errorMessage: "We could not add that note." },
     mutationFn: (variables: RotaNoteMutationInput) =>
       createRotaNoteFn({ data: { ...input, ...variables } }),
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Note added.")
     },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not add that note.",
-      })
-    },
   })
 
   const updateRotaNoteMutation = useMutation({
+    meta: { errorMessage: "We could not update that note." },
     mutationFn: (variables: RotaNoteMutationInput & { noteId: string }) =>
       updateRotaNoteFn({ data: { ...input, ...variables } }),
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Note updated.")
     },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not update that note.",
-      })
-    },
   })
 
   const archiveRotaNoteMutation = useMutation({
+    meta: { errorMessage: "We could not archive that note." },
     mutationFn: (variables: { employeeId: string; noteId: string }) =>
       archiveRotaNoteFn({ data: { ...input, ...variables } }),
     onSuccess: async () => {
       await invalidate()
       showSuccessToast("Note archived.")
-    },
-    onError: (error) => {
-      showErrorToast(error, {
-        fallbackMessage: "We could not archive that note.",
-      })
     },
   })
 
