@@ -2,29 +2,24 @@ import { fileURLToPath } from "node:url"
 import { defineConfig } from "vite"
 import { devtools } from "@tanstack/devtools-vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
+import { redact } from "@tanstack/redact/vite"
 import viteReact from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
 import { nitro } from "nitro/vite"
 import { bundleReport } from "./scripts/performance/bundle-report.ts"
+import { reactCompiler } from "./scripts/vite/react-compiler.ts"
 
 const config = defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: [
-      ...(process.env.VITE_PERFORMANCE_PROFILE === "true"
-        ? [
-            {
-              find: /^react-dom\/client$/,
-              replacement: "react-dom/profiling",
-            },
-          ]
-        : []),
       {
         find: "@noble/ciphers/utils.js",
         replacement: "/src/lib/shims/noble-ciphers-utils.ts",
       },
     ],
   },
+  ssr: { noExternal: true },
   server: {
     host: true,
     port: 3000,
@@ -109,6 +104,8 @@ const config = defineConfig({
     }),
     tailwindcss(),
     viteReact(),
+    reactCompiler(),
+    redact(),
   ],
 })
 

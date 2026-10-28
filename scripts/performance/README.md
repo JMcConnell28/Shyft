@@ -96,10 +96,11 @@ for the app's `onResolved` event, not automation command completion. Verify that
 the seeded account can access those pages and has dismissed modal guides.
 Settings and the rota editor can be investigated interactively with the same
 console timings. Query timings, destination section, transferred code and
-workspace React Profiler durations are logged without tenant IDs or URLs.
-React's profiling renderer is enabled only by `--profile`; compare normal
-release builds for headline performance numbers. React duration covers measured
-workspace commits, not all hydration CPU or the time a suspended query waits.
+workspace timing events are logged without tenant IDs or URLs. Redact's
+`<Profiler>` callback is a no-op, so React commit-duration samples are unavailable
+with this runtime. Profiling builds keep the same Redact renderer; use navigation,
+content-ready, browser, and Web Vitals measurements. Compare normal release builds
+for headline performance numbers.
 
 The profiling dashboard also emits `[content-ready-timing]` when primary staffing
 or personal dashboard data is mounted. `documentElapsedMs` starts at document
