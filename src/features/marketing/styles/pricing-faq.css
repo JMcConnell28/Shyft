@@ -1,0 +1,66 @@
+.pricing-section-intro h2,
+.pricing-faq h2 {
+  margin-top: 16px;
+  font-size: clamp(36px, 4vw, 52px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+}
+.pricing-faq {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 64px;
+  padding-block: 15px 80px;
+}
+.pricing-faq > div:first-child > p:last-child {
+  max-width: 280px;
+  margin-top: 20px;
+  color: var(--preview-muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+.pricing-faq-list {
+  align-self: start;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.pricing-faq-list [data-slot="accordion-item"] {
+  border-top: 1px solid #dfe7f7;
+  border-bottom: 0;
+  background: transparent;
+}
+.pricing-faq-list [data-slot="accordion-trigger"] {
+  padding: 23px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 750;
+  text-decoration: none;
+}
+.pricing-faq-list [data-slot="accordion-content"] {
+  padding-inline: 0;
+}
+.pricing-faq-list [data-slot="accordion-content"] > div {
+  padding-bottom: 24px;
+  color: var(--preview-muted);
+  font-size: 13px;
+  line-height: 1.9;
+}
+@media (max-width: 900px) {
+  .pricing-faq {
+    gap: 32px;
+  }
+}
+@media (max-width: 640px) {
+  .pricing-faq {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-bottom: 54px;
+  }
+  .pricing-faq h2 br {
+    display: none;
+  }
+  .pricing-faq > div:first-child > p:last-child {
+    max-width: none;
+  }
+}

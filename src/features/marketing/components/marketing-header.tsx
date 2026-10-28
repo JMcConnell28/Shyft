@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowRightIcon, LayoutDashboardIcon, LogInIcon } from "lucide-react"
 
-import { navigationFeatures } from "@/features/marketing/content"
+import { navigationFeatures } from "@/features/marketing/constants/navigation-features"
+import { MarketingMobileNavigation } from "./marketing-mobile-navigation"
 import {
   marketingLoginButtonClassName,
   marketingPrimaryButtonClassName,
@@ -28,7 +29,7 @@ function MarketingHeader({
   const AuthButtonIcon = isAuthenticated ? LayoutDashboardIcon : LogInIcon
 
   return (
-    <header className="flex items-center justify-between gap-4 py-3 sm:py-4">
+    <header className="flex items-center justify-between gap-2 py-3 sm:gap-4 sm:py-4">
       <Link to="/" className="flex items-center gap-3">
         <img
           src="/brand/rocketrota-logo-small.webp"
@@ -37,7 +38,7 @@ function MarketingHeader({
           alt="RocketRota"
           className="h-8 w-auto object-contain"
         />
-        <span className="text-xl font-extrabold tracking-tight text-[#16346e]">
+        <span className="text-xl font-extrabold tracking-tight text-[#16346e] max-[359px]:sr-only">
           RocketRota
         </span>
       </Link>
@@ -58,7 +59,7 @@ function MarketingHeader({
                 {navigationFeatures.map((feature) => (
                   <NavigationMenuLink
                     key={feature.title}
-                    href={feature.href ?? undefined}
+                    href={feature.href}
                     className="flex gap-3 rounded-xl p-3 hover:bg-[#f4f8ff]"
                   >
                     <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#edf4ff] text-[#2c69ff]">
@@ -109,21 +110,11 @@ function MarketingHeader({
               </div>
             </NavigationMenuContent>
           </NavigationMenuItem>
-          {/* <NavigationMenuItem>
-            <button
-              type="button"
-              className={cn(
-                navigationMenuTriggerStyle(),
-                "bg-transparent text-sm font-semibold text-[#19356f] hover:bg-white/50 hover:text-[#16346e]",
-              )}
-            >
-              About
-            </button>
-          </NavigationMenuItem> */}
         </NavigationMenuList>
       </NavigationMenu>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <MarketingMobileNavigation />
         <Link
           to={isAuthenticated ? "/dashboard" : "/login"}
           search={isAuthenticated ? undefined : { redirect: "/dashboard" }}

@@ -25,7 +25,10 @@ import { Route as AuthedVerifiedRouteRouteImport } from './routes/_authed/_verif
 import { Route as AcceptInvitationInvitationIdRouteImport } from './routes/accept-invitation/$invitationId'
 import { Route as AdminClockTagsRouteImport } from './routes/admin/clock-tags'
 import { Route as ClockTokenRouteImport } from './routes/clock/$token'
+import { Route as FeaturesManagerDashboardRouteImport } from './routes/features/manager-dashboard'
 import { Route as FeaturesRotaPlanningRouteImport } from './routes/features/rota-planning'
+import { Route as FeaturesStaffUpdatesRouteImport } from './routes/features/staff-updates'
+import { Route as FeaturesTeamManagementRouteImport } from './routes/features/team-management'
 import { Route as FeaturesTimeTrackingRouteImport } from './routes/features/time-tracking'
 import { Route as FeaturesTimesheetsRouteImport } from './routes/features/timesheets'
 import { Route as HelpIndexRouteImport } from './routes/help/index'
@@ -168,9 +171,25 @@ const ClockTokenRoute = ClockTokenRouteImport.update({
   path: '/$token',
   getParentRoute: () => ClockRoute,
 } as any)
+const FeaturesManagerDashboardRoute =
+  FeaturesManagerDashboardRouteImport.update({
+    id: '/features/manager-dashboard',
+    path: '/features/manager-dashboard',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const FeaturesRotaPlanningRoute = FeaturesRotaPlanningRouteImport.update({
   id: '/features/rota-planning',
   path: '/features/rota-planning',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesStaffUpdatesRoute = FeaturesStaffUpdatesRouteImport.update({
+  id: '/features/staff-updates',
+  path: '/features/staff-updates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesTeamManagementRoute = FeaturesTeamManagementRouteImport.update({
+  id: '/features/team-management',
+  path: '/features/team-management',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeaturesTimeTrackingRoute = FeaturesTimeTrackingRouteImport.update({
@@ -550,7 +569,10 @@ export interface FileRoutesByFullPath {
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
   '/admin/clock-tags': typeof AdminClockTagsRoute
   '/clock/$token': typeof ClockTokenRoute
+  '/features/manager-dashboard': typeof FeaturesManagerDashboardRoute
   '/features/rota-planning': typeof FeaturesRotaPlanningRoute
+  '/features/staff-updates': typeof FeaturesStaffUpdatesRoute
+  '/features/team-management': typeof FeaturesTeamManagementRoute
   '/features/time-tracking': typeof FeaturesTimeTrackingRoute
   '/features/timesheets': typeof FeaturesTimesheetsRoute
   '/help/$': typeof HelpSplatRoute
@@ -629,7 +651,10 @@ export interface FileRoutesByTo {
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
   '/admin/clock-tags': typeof AdminClockTagsRoute
   '/clock/$token': typeof ClockTokenRoute
+  '/features/manager-dashboard': typeof FeaturesManagerDashboardRoute
   '/features/rota-planning': typeof FeaturesRotaPlanningRoute
+  '/features/staff-updates': typeof FeaturesStaffUpdatesRoute
+  '/features/team-management': typeof FeaturesTeamManagementRoute
   '/features/time-tracking': typeof FeaturesTimeTrackingRoute
   '/features/timesheets': typeof FeaturesTimesheetsRoute
   '/help/$': typeof HelpSplatRoute
@@ -703,7 +728,10 @@ export interface FileRoutesById {
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
   '/admin/clock-tags': typeof AdminClockTagsRoute
   '/clock/$token': typeof ClockTokenRoute
+  '/features/manager-dashboard': typeof FeaturesManagerDashboardRoute
   '/features/rota-planning': typeof FeaturesRotaPlanningRoute
+  '/features/staff-updates': typeof FeaturesStaffUpdatesRoute
+  '/features/team-management': typeof FeaturesTeamManagementRoute
   '/features/time-tracking': typeof FeaturesTimeTrackingRoute
   '/features/timesheets': typeof FeaturesTimesheetsRoute
   '/help/$': typeof HelpSplatRoute
@@ -784,7 +812,10 @@ export interface FileRouteTypes {
     | '/accept-invitation/$invitationId'
     | '/admin/clock-tags'
     | '/clock/$token'
+    | '/features/manager-dashboard'
     | '/features/rota-planning'
+    | '/features/staff-updates'
+    | '/features/team-management'
     | '/features/time-tracking'
     | '/features/timesheets'
     | '/help/$'
@@ -863,7 +894,10 @@ export interface FileRouteTypes {
     | '/accept-invitation/$invitationId'
     | '/admin/clock-tags'
     | '/clock/$token'
+    | '/features/manager-dashboard'
     | '/features/rota-planning'
+    | '/features/staff-updates'
+    | '/features/team-management'
     | '/features/time-tracking'
     | '/features/timesheets'
     | '/help/$'
@@ -936,7 +970,10 @@ export interface FileRouteTypes {
     | '/accept-invitation/$invitationId'
     | '/admin/clock-tags'
     | '/clock/$token'
+    | '/features/manager-dashboard'
     | '/features/rota-planning'
+    | '/features/staff-updates'
+    | '/features/team-management'
     | '/features/time-tracking'
     | '/features/timesheets'
     | '/help/$'
@@ -1016,7 +1053,10 @@ export interface RootRouteChildren {
   VerifyEmailRoute: typeof VerifyEmailRoute
   AcceptInvitationInvitationIdRoute: typeof AcceptInvitationInvitationIdRoute
   AdminClockTagsRoute: typeof AdminClockTagsRoute
+  FeaturesManagerDashboardRoute: typeof FeaturesManagerDashboardRoute
   FeaturesRotaPlanningRoute: typeof FeaturesRotaPlanningRoute
+  FeaturesStaffUpdatesRoute: typeof FeaturesStaffUpdatesRoute
+  FeaturesTeamManagementRoute: typeof FeaturesTeamManagementRoute
   FeaturesTimeTrackingRoute: typeof FeaturesTimeTrackingRoute
   FeaturesTimesheetsRoute: typeof FeaturesTimesheetsRoute
   HelpSplatRoute: typeof HelpSplatRoute
@@ -1145,11 +1185,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClockTokenRouteImport
       parentRoute: typeof ClockRoute
     }
+    '/features/manager-dashboard': {
+      id: '/features/manager-dashboard'
+      path: '/features/manager-dashboard'
+      fullPath: '/features/manager-dashboard'
+      preLoaderRoute: typeof FeaturesManagerDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/features/rota-planning': {
       id: '/features/rota-planning'
       path: '/features/rota-planning'
       fullPath: '/features/rota-planning'
       preLoaderRoute: typeof FeaturesRotaPlanningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features/staff-updates': {
+      id: '/features/staff-updates'
+      path: '/features/staff-updates'
+      fullPath: '/features/staff-updates'
+      preLoaderRoute: typeof FeaturesStaffUpdatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features/team-management': {
+      id: '/features/team-management'
+      path: '/features/team-management'
+      fullPath: '/features/team-management'
+      preLoaderRoute: typeof FeaturesTeamManagementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/features/time-tracking': {
@@ -1869,7 +1930,10 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyEmailRoute: VerifyEmailRoute,
   AcceptInvitationInvitationIdRoute: AcceptInvitationInvitationIdRoute,
   AdminClockTagsRoute: AdminClockTagsRoute,
+  FeaturesManagerDashboardRoute: FeaturesManagerDashboardRoute,
   FeaturesRotaPlanningRoute: FeaturesRotaPlanningRoute,
+  FeaturesStaffUpdatesRoute: FeaturesStaffUpdatesRoute,
+  FeaturesTeamManagementRoute: FeaturesTeamManagementRoute,
   FeaturesTimeTrackingRoute: FeaturesTimeTrackingRoute,
   FeaturesTimesheetsRoute: FeaturesTimesheetsRoute,
   HelpSplatRoute: HelpSplatRoute,

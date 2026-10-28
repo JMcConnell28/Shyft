@@ -1,0 +1,112 @@
+.marketing-eyebrow {
+  color: var(--preview-blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.marketing-visual-caption {
+  margin-top: 14px;
+  text-align: center;
+  color: var(--preview-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.marketing-capabilities {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px 30px;
+  padding: 28px 20px 34px;
+  list-style: none;
+  color: var(--preview-muted);
+  font-size: 13px;
+}
+.marketing-capabilities li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.marketing-capabilities svg {
+  color: var(--preview-blue);
+}
+.landing-preview .marketing-workflow {
+  padding-block: 62px 64px;
+}
+.marketing-workflow .preview-workflow-intro > .marketing-eyebrow {
+  margin: 0 0 18px;
+  color: var(--preview-blue);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.marketing-workflow h2 {
+  font-size: clamp(36px, 4vw, 52px);
+}
+.marketing-workflow .preview-workflow-intro > p:last-child {
+  font-size: 17px;
+}
+.marketing-related {
+  padding-block: 20px 64px;
+}
+.marketing-related h2 {
+  max-width: 500px;
+  margin-top: 14px;
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.marketing-feature-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 32px;
+  margin-top: 30px;
+}
+.marketing-feature-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 20px;
+  border-top: 1px solid #dfe7f7;
+  font-size: 14px;
+  font-weight: 700;
+  transition: color 0.18s;
+}
+.marketing-feature-links a > svg:first-child {
+  color: var(--preview-blue);
+}
+.marketing-feature-links a > svg:last-child {
+  margin-left: auto;
+  color: var(--preview-blue);
+  transition: transform 0.18s;
+}
+.marketing-feature-links a:hover {
+  color: var(--preview-blue);
+}
+.marketing-feature-links a:hover > svg:last-child {
+  transform: translate(2px, -2px);
+}
+@media (max-width: 900px) {
+  .marketing-feature-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .marketing-capabilities {
+    gap: 12px 18px;
+    font-size: 11px;
+    padding-top: 18px;
+  }
+  .landing-preview .marketing-workflow {
+    padding-block: 28px 44px;
+  }
+  .marketing-feature-links {
+    grid-template-columns: 1fr;
+  }
+  .marketing-related {
+    padding-bottom: 44px;
+  }
+  .marketing-related h2 {
+    font-size: 30px;
+  }
+}

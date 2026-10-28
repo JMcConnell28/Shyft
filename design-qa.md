@@ -1,79 +1,124 @@
-# RocketRota landing redesign QA
+# Marketing redesign QA
 
-final result: passed
+Scope: pricing and all six pages under Features. The existing landing page is the
+visual reference. This is a shared design-language redesign, with page-specific
+content and product examples, rather than a pixel clone of the landing page.
 
-## Scope and visual truth
+## Findings
 
-- Route: `http://localhost:3000/landing`. Original `/` is preserved.
-- Selected direction: the second displayed concept, Editorial Week, refined with the original headline and smaller CTAs.
-- Source visual: `C:/Users/jackm/.codex/generated_images/01a167f9-3f3f-7ca3-adef-eca8a468161c/exec-0d20b27a-ab44-42f8-9619-c05a3320296b.png` (946 × 1663 pixels).
-- Evidence folder: `C:/Users/jackm/.codex/visualizations/2026/10/23/01a167f9-3f3f-7ca3-adef-eca8a468161c/landing-design-qa/`.
-- Final browser implementation: `desktop-approved.png` (1264 × 2239 pixels); `desktop-hero-approved.png` is the viewport capture.
-- Desktop viewport: 1280 × 720 CSS pixels, reported DPR 1.25. The browser capture API returns approximately CSS-resolution images, excluding the scrollbar; these are not raw DPR-multiplied captures.
-- Comparison normalization: resize the 1264-pixel-wide implementation to 946 pixels wide, preserving aspect ratio (946 × 1676). Compare content without browser chrome. Full-page heights differ because the real screenshot retains its native aspect ratio and the requested compact CTAs reduce vertical space.
-- Auth state: the local browser is signed in, so Dashboard replaces the reference's Log in. No session or account data was modified for testing.
-- Theme: the product's light marketing theme; existing Manrope font, blue CTA treatment and RR logo.
+No remaining visual P0/P1/P2 findings in the final desktop/mobile comparison.
+Keyboard focus restoration after closing the mobile menu awaits the final build
+and browser check before this report can pass.
 
-## Comparison evidence
+## Reference, implementation and normalization
 
-All comparisons were opened and visually inspected as combined images containing both the source and implementation.
+All evidence is saved under `D:/Projects/Shyft/.performance/marketing-redesign/`.
 
-- Full composition: `comparison-approved-full.png`.
-- Focused typography, header and CTA comparison: `comparison-approved-hero.png`.
-- Focused workflow typography, spacing, closing CTA and footer: `comparison-approved-lower.png`.
-- Mobile: `mobile-approved.png`, viewport 390 × 844 CSS pixels, capture 375 × 1824 pixels.
-- Narrow phone: `mobile-320-final.png`, viewport 320 × 740 CSS pixels, capture 304 × 2091 pixels.
-- Tablet: `tablet-final.png`, viewport 768 × 1024 CSS pixels, capture 752 × 1736 pixels.
-- Mobile drawer: `mobile-menu-approved.png`.
-- Original homepage: `original-homepage.png`.
+- Source visual truth: `landing-reference-desktop.png` and
+  `landing-reference-mobile.png`, captured from `/`.
+- Implementation: `pricing`, `rota-planning`, `time-tracking`, `timesheets`,
+  `team-management`, `manager-dashboard` and `staff-updates`, each with
+  `-desktop.png`, `-mobile.png` and corresponding `-full.png` captures.
+- Local implementation: `http://127.0.0.1:3200/pricing` and `/features/<slug>`.
+- Requested CSS viewport: 1280 × 900 desktop; 390 × 844 mobile. Browser content
+  widths are 1265 and 375 CSS pixels after the scrollbar. Default device density
+  is 1; matching source/implementation viewport captures are 1265 × 889 desktop
+  and 375 × 811 mobile, with no additional scaling or density normalization.
+- Full-page captures use the same API and retain native width (1264 desktop,
+  375 mobile) with page-specific heights. They are not compared for equal height.
+- State: signed out, light theme, settled entrance animation, default example
+  data and default £25 calculator. No real workspace data was changed.
+- Combined comparisons opened: `comparison-desktop-final.png` (landing/pricing)
+  and `comparison-mobile-final.png` (landing/staff updates). These preserve source
+  pixels side by side. `gallery-desktop.png` and `gallery-mobile.png` include the
+  landing reference followed by all seven implementations; those overview tiles
+  are uniformly reduced and are not used to assess small text.
+- Focused evidence opened: `focused-hero-comparison.png` uses equal 780 × 400
+  native crops from the landing and pricing captures. `focused-controls.png`
+  retains native calculator, estimate and mobile update-reader details.
+  Pricing desktop and staff-updates mobile full-page captures were also opened
+  to inspect section rhythm, footer, related links and the reading pane.
 
-The reference is a desktop mock; phone and tablet captures verify responsive adaptation rather than a pixel match to a nonexistent mobile reference. All retain the same content order and CTA hierarchy.
+## Fidelity surfaces
 
-## Findings and comparison history
+- Fonts and typography: reuses the landing page's Manrope Variable, smooth
+  rendering, navy heavy headings, blue emphasis and muted body copy. Hero crops
+  confirm matching family, weight, tracking and button treatment. Feature titles
+  intentionally differ in length; mobile headings retain readable line breaks.
+- Spacing and layout: centered hero, generous section gaps, restrained surfaces,
+  shared header/footer and numbered workflow rows match the source hierarchy.
+  Pricing uses a single three-column plan panel that stacks on phones. Product
+  tables scroll within their previews; the page itself does not overflow.
+- Colors and tokens: shared landing ink/muted/blue variables, existing background
+  and pale surfaces preserve the source palette. Green/amber are confined to
+  meaningful attendance/review states. Focus outlines remain visible.
+- Image and icon quality: reuses the original RocketRota logo, landing background
+  and actual rota screenshot. No replacement illustration or generated asset.
+  Existing Lucide icons stay consistent. Other previews are intentionally native
+  interactive examples, clearly labelled with fictional staff/business details.
+- Copy and content: each page explains its own feature with concise supporting
+  steps. Pricing retains the existing calculation and clearly explains used
+  employees, organisation/location scope, optional clocking and VAT exclusion.
+  Three formerly missing links now have real public routes and metadata.
 
-1. Initial comparison (`comparison-initial-full.png`, `comparison-initial-hero.png`, `comparison-initial-lower.png`): blocked.
-   - [P2, fixed] Workflow typography was too small relative to the hero and reference. Increased the workflow heading from 64px to 80px maximum, intro copy from 20px to 23px, and hero description maximum from 23px to 26px.
-   - [P2, fixed] The signed-in header overflowed at 320px. Evidence: document width 336px at a 320px viewport, `mobile-320-initial.png`. Below 380px the auth control now uses its icon with an explicit accessible name, retaining a 44px target. Post-fix document width 305px within the 320px viewport; `mobile-320-final.png`.
-2. Second comparison (`comparison-final-full.png`, `comparison-final-lower.png`): blocked.
-   - [P2, fixed] Workflow rows still appeared too dense next to the restored heading. Increased desktop number markers to 80px, row headings to 26px and supporting copy to 19px. Tablet and phone retain smaller responsive values. Post-fix evidence: `comparison-approved-lower.png`.
-   - [P2, fixed] Runtime console inspection found Base UI warnings where drawer links were rendered through a button primitive. Replaced these with ordinary navigation anchors. Verified navigation to the time-tracking page and no new Base UI warnings after opening the corrected drawer.
-3. Final comparison (`comparison-approved-full.png`, `comparison-approved-hero.png`, `comparison-approved-lower.png`): passed. No actionable P0/P1/P2 findings remain in the new route.
+## Comparison history and fixes
 
-## Required fidelity surfaces
+1. First comparison: `comparison-desktop-r1.png`, `comparison-mobile-r1.png`.
+   - P1: mobile menu opened the error boundary (`mobile-navigation-error-r1.png`).
+     Wrapped Base UI's group label and feature items in a DropdownMenuGroup.
+   - P2: mobile Staff Updates kept two narrow columns. Moved its responsive
+     override after its own base layout so the list sits above the reading pane.
+   - P2: Staff Updates title wrapped across four phone lines. Tightened the title
+     to "Every update. Everyone in the loop." (three lines at the target width).
+   - P2: hidden mobile FAQ line break dropped a word boundary. Added an explicit
+     text space; browser DOM confirms "A little more clarity.".
+   - P2: small menu/filter/search targets. Increased the trigger and interactive
+     preview controls to 44px; menu links also have 44px minimum height.
+2. Post-fix comparison: all final desktop/mobile captures and combined galleries
+   listed above. Visual findings are resolved. `mobile-menu-fixed.png` records
+   the working menu; `pricing-small-phone.png` records the compact phone layout.
+3. Keyboard iteration: Escape closed the menu but focus returned to the body.
+   Added a typed trigger ref and explicit Base UI finalFocus target. Final
+   verification and a post-fix screenshot remain pending.
 
-- Fonts and typography: the existing Manrope Variable font loads successfully (`document.fonts.check` passed). Headline uses 800 weight, 86px desktop maximum, 1.04 line height and the reference's three-line composition. Original wording is preserved exactly. Workflow uses comparable bold editorial hierarchy; mobile wraps naturally without clipped text.
-- Spacing and layout: left-aligned hero, wide product preview, two-column workflow with flat numbered rows, pale closing band and compact footer follow the selected composition. At 640px and below the workflow and closing CTA stack. Desktop hero/closing buttons are 40px tall with label-width sizing; header buttons are 36px; mobile/coarse-pointer targets are at least 44px. These smaller controls are an intentional user-requested difference from the mock.
-- Colors and tokens: retained RocketRota's blue `#325cff`, navy `#182565`, pale background `#f8fbff` and light CTA band `#edf3ff`. Supporting text is slightly darker for readability. Computed contrast: white/blue 5.11:1; muted copy/background 4.60:1; navy/background 13.57:1. The solid pale background is a restrained adaptation of the mock's atmospheric background, without introducing decorative assets or CSS artwork.
-- Image quality and asset fidelity: reused the supplied RR logo and actual 1530 × 792 fictional-data rota screenshot. Both load successfully, remain sharp and keep their native aspect ratios. The screenshot's June dates, density and shorter proportions intentionally differ from the generated October example. No fabricated UI, stretched raster, custom SVG art or placeholder image was substituted. The screenshot is illustrative rather than an interactive rota board.
-- Copy and content: original headline and supporting copy retained. Workflow titles and descriptions match the selected concept. Closing text reads “Make scheduling simpler with RocketRota” instead of an unsupported social-proof claim. Legal links include Terms and Privacy.
+## Functional and responsive checks
 
-## Interaction and accessibility checks
+- All seven routes render on desktop and mobile. Header controls stay within the
+  viewport; document scrollWidth equals clientWidth in every captured route.
+- Additional pricing checks at 320 × 740 and 768 × 1024: no horizontal overflow.
+- Calculator: 10 employees → £25; 11 → £27.50; clocking at 11 → £28.50;
+  adding a 10-person second location → £53.50. Removing the first location leaves
+  a correctly relabelled 10-person location, unchecked clocking and a £25 total.
+- FAQ expansion works. Slider and checkbox have location-specific labels.
+- Team search: Ava returns one row; an unmatched search shows its empty state.
+- Attendance filters: Clocked in returns three rows; Needs review returns one.
+- Timesheets: review filter returns one entry; Mark reviewed updates the status
+  and shows the caught-up empty state (`timesheets-reviewed-mobile.png`).
+- Staff Updates: selecting messages changes the reader; marking read reduces
+  unread count from three to two and disables the completed action. Re-selecting
+  that message preserves its read state.
+- Mobile navigation opens with all six feature links, pricing and help; Staff
+  Updates navigation succeeds. Keyboard Enter opens and Escape closes it.
+- Browser console checked after these interactions: no warning or error entries.
+- Reduced motion uses the shared landing page's reduced-motion override.
+- TypeScript check passed; six pricing tests passed; production build passed
+  before the final menu focus refinement. Final rebuild is in progress.
 
-- Desktop Features menu opens and exposes the three existing product pages; Escape closes it.
-- Explore the product updates `#product` and scrolls the preview to 28px from the viewport top.
-- Pricing navigates to the existing pricing page.
-- Start free trial uses the existing sign-up route with `/dashboard` redirect. In the signed-in test session it correctly redirected to the existing dashboard; no account was created or billing action performed.
-- Privacy opens the existing Privacy Policy route. Other footer destinations and feature URLs were checked against the registered routes.
-- Mobile drawer opens with focus on its first link, closes via Escape and restores focus to the trigger. Time tracking navigates to the existing feature page. Links retain link semantics; the drawer close control has a 44px minimum target.
-- Tab from the brand reaches Features with a visible outline. Skip link, semantic headings, nav labels, footer landmark, informative image alt text and button names are present.
-- No horizontal overflow at tested desktop, tablet, 390px phone and 320px phone widths.
-- Reduced-motion stylesheet disables entrance animations and transitions; this rule was reviewed in code, not emulated in the browser.
-- Console checked. The new drawer warning was fixed. An existing development-tool hydration warning about `data-tsd-source` attributes in `src/routes/__root.tsx` also reproduces on the unchanged original homepage. It is recorded as an environment issue outside this route's scope. The floating TanStack development control in some captures is also existing development UI.
+## Open questions and test limits
 
-## Validation and limitations
-
-- `npm run typecheck`: passed after the mobile navigation correction.
-- Focused ESLint check of the new route, components and workflow content: passed after fixing import order.
-- New route is assembled from focused components; no new runtime dependency, database change, global button change or authentication behavior was added.
-- Original homepage route, page, header and button constants have no task diff. Existing legal/privacy edits are preserved.
-- Signed-out trial submission, account creation and payment processing were not exercised; this change reuses those existing flows.
-- Follow-up polish (P3): investigate the existing devtools-only hydration warning separately if it becomes distracting during local review.
+No design decision is waiting on user input. Examples are local demonstrations;
+this task did not alter authenticated product workflows or billing behavior.
+Automated accessibility auditing and every browser/assistive-technology pairing
+were outside this pass; semantic labels, keyboard controls and phone layouts
+were checked directly.
 
 ## Implementation checklist
 
-- [x] Original headline restored.
-- [x] CTA sizes reduced while retaining their styling.
-- [x] Original homepage preserved beside `/landing`.
-- [x] Responsive layouts, navigation and image loading verified.
-- [x] Source and rendered implementation compared together after fixes.
-- [x] Local preview kept running for review.
+- [x] Pricing and all six feature routes use the landing visual language.
+- [x] Missing Team Management, Manager Dashboard and Staff Updates routes exist.
+- [x] Reusable hero, workflow and preview components keep route files focused.
+- [x] Resolve visual findings and inspect recaptured comparisons.
+- [ ] Verify explicit menu focus return in the final production build.
+- [ ] Leave the final local preview open for review.
+
+final result: blocked

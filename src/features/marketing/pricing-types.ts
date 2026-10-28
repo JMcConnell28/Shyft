@@ -3,6 +3,16 @@ type LocationPricingInput = {
   timeAttendanceEnabled: boolean
 }
 
+type PricingCalculatorLocation = LocationPricingInput & { id: number }
+
+type PricingEstimate = {
+  locations: Array<PricingCalculatorLocation>
+  pricing: PricingBreakdown
+  addLocation: () => void
+  removeLocation: (id: number) => void
+  updateLocation: (id: number, update: Partial<LocationPricingInput>) => void
+}
+
 type LocationPricingBreakdown = LocationPricingInput & {
   extraEmployees: number
   timeAttendanceEmployees: number
@@ -20,4 +30,9 @@ type PricingBreakdown = {
   locations: Array<LocationPricingBreakdown>
 }
 
-export type { LocationPricingInput, PricingBreakdown }
+export type {
+  LocationPricingInput,
+  PricingBreakdown,
+  PricingCalculatorLocation,
+  PricingEstimate,
+}

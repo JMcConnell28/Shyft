@@ -1,0 +1,119 @@
+.marketing-page-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-bottom: 32px;
+}
+.marketing-page-background {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: url("/brand/landing-background.webp") center top / auto 1000px
+    no-repeat;
+}
+.marketing-header-container {
+  width: min(100% - 64px, 1216px);
+  margin-inline: auto;
+  padding-top: 20px;
+}
+.marketing-hero-copy {
+  max-width: 800px;
+  margin: 68px auto 0;
+  padding-inline: 24px;
+  text-align: center;
+}
+.marketing-hero-copy h1 {
+  margin-top: 17px;
+  color: #18316a;
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.marketing-hero-description {
+  max-width: 600px;
+  margin: 24px auto 0;
+  color: var(--preview-muted);
+  font-size: 18px;
+  line-height: 1.8;
+  text-wrap: pretty;
+}
+.marketing-hero-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+.marketing-trial-notes {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-top: 24px;
+  list-style: none;
+  color: var(--preview-muted);
+  font-size: 12px;
+}
+.marketing-trial-notes li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.marketing-trial-notes svg {
+  color: var(--preview-blue);
+}
+.marketing-hero-visual {
+  width: min(100% - 64px, 1120px);
+  margin: 42px auto 0;
+}
+.marketing-hero-copy > :not(.marketing-trial-notes) {
+  animation: marketing-rise 0.55s both;
+}
+.marketing-hero-copy h1 {
+  animation-delay: 0.04s;
+}
+.marketing-hero-copy .marketing-hero-description {
+  animation-delay: 0.08s;
+}
+.marketing-hero-copy .marketing-hero-actions {
+  animation-delay: 0.12s;
+}
+@keyframes marketing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 640px) {
+  .marketing-header-container {
+    width: calc(100% - 40px);
+    padding-top: 16px;
+  }
+  .marketing-hero-copy {
+    margin-top: 55px;
+    padding-inline: 20px;
+  }
+  .marketing-hero-copy h1 {
+    font-size: 39px;
+    letter-spacing: -0.045em;
+  }
+  .marketing-hero-description {
+    margin-top: 22px;
+    font-size: 16px;
+    line-height: 1.8;
+  }
+  .marketing-trial-notes {
+    gap: 10px 14px;
+    font-size: 11px;
+  }
+  .marketing-hero-visual {
+    width: calc(100% - 32px);
+    margin-top: 32px;
+  }
+}
