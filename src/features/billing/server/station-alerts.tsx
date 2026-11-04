@@ -48,7 +48,7 @@ async function sendPendingStationAlerts(): Promise<void> {
       const text = `A paid Time & Attendance customer needs a ${row.source === "additional" ? "purchased extra" : "included"} clock-in station: ${row.customer_name}, ${row.location_name}. Open the customer record in RocketRota Admin to prepare the NFC tag and arrange dispatch. Request: ${row.request_id}.${url ? ` ${url}` : ""}`
       await sendTransactionalEmail({
         to:
-          getOptionalEnv("STATION_ALERT_EMAIL") ?? "jackmcconnell99@gmail.com",
+          getOptionalEnv("STATION_ALERT_EMAIL") ?? "rocketrota.team@gmail.com",
         subject: `Clock-in station needed: ${row.customer_name} — ${row.location_name}`,
         text,
         react: (

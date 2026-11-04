@@ -51,7 +51,11 @@ function NextShiftCard({ shift }: { shift: DashboardShiftSummary | null }) {
   )
 }
 
-function ThisWeekShiftsCard({ shifts }: { shifts: DashboardShiftSummary[] }) {
+function ThisWeekShiftsCard({
+  shifts,
+}: {
+  shifts: Array<DashboardShiftSummary>
+}) {
   return (
     <DashboardPanel className="h-fit">
       <DashboardPanelHeader

@@ -1,0 +1,374 @@
+[
+  {
+    "schema": "admin_private",
+    "name": "clock_in_feature_enabled",
+    "args": "p_location_id uuid",
+    "definer": false,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "anon_execute": false,
+    "auth_execute": false,
+    "definition": "CREATE OR REPLACE FUNCTION admin_private.clock_in_feature_enabled(p_location_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE\n SET search_path TO ''\nAS $function$\n select coalesce((select case when not f.is_enabled then false\n   when jsonb_typeof(t.value) = 'boolean' then t.value = 'true'::jsonb\n   when jsonb_typeof(f.default_value) = 'boolean' then f.default_value = 'true'::jsonb\n   else true end\n from admin_private.feature_flags f\n left join admin_private.feature_flag_targets t on t.feature_flag_id = f.id\n   and t.target_type = 'location' and t.location_id = p_location_id\n where f.key = 'time_clock.clock_in'), true)\n$function$\n"
+  },
+  {
+    "schema": "admin_private",
+    "name": "enforce_new_clock_in_flag",
+    "args": "",
+    "definer": false,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "anon_execute": false,
+    "auth_execute": false,
+    "definition": "CREATE OR REPLACE FUNCTION admin_private.enforce_new_clock_in_flag()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\nbegin\n if not admin_private.clock_in_feature_enabled(new.location_id) then\n   raise exception 'New clock-ins are currently unavailable for this location.';\n end if;\n return new;\nend $function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "capture_assignment_usage_trigger",
+    "args": "",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.capture_assignment_usage_trigger()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\nbegin\n  if old.location_id is not null then\n    perform billing_private.capture_location_usage(old.location_id, 'location_assignment');\n  end if;\n  if new.location_id is not null and new.location_id is distinct from old.location_id then\n    perform billing_private.capture_location_usage(new.location_id, 'location_assignment');\n  end if;\n  return coalesce(new, old);\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "capture_employee_usage_trigger",
+    "args": "",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.capture_employee_usage_trigger()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\ndeclare\n  affected_location_id uuid;\n  affected_employee_id uuid := coalesce(new.id, old.id);\nbegin\n  for affected_location_id in\n    select location_id from (\n      select old.location_id\n      union\n      select new.location_id\n      union\n      select assignment.location_id\n      from public.employee_location_assignments assignment\n      where assignment.employee_id = affected_employee_id\n    ) locations\n    where location_id is not null\n  loop\n    perform billing_private.capture_location_usage(affected_location_id, 'status_change');\n  end loop;\n  return coalesce(new, old);\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "capture_location_usage",
+    "args": "target_location_id uuid, usage_source text, observed_at timestamp with time zone",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.capture_location_usage(target_location_id uuid, usage_source text, observed_at timestamp with time zone DEFAULT timezone('utc'::text, now()))\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\ndeclare\n  billing_period billing_private.location_billing_periods%rowtype;\n  observed_count integer;\n  next_high_water integer;\nbegin\n  for billing_period in\n    select *\n    from billing_private.location_billing_periods\n    where location_id = target_location_id\n      and finalized_at is null\n      and period_start <= observed_at\n      and observed_at < period_end\n    for update\n  loop\n    observed_count := billing_private.qualifying_employee_count(\n      target_location_id,\n      billing_period.period_start,\n      billing_period.period_end\n    );\n    next_high_water := greatest(billing_period.high_water_employee_count, observed_count);\n\n    update billing_private.location_billing_periods\n    set high_water_employee_count = next_high_water,\n        last_observed_at = observed_at,\n        updated_at = timezone('utc', now())\n    where id = billing_period.id;\n\n    insert into billing_private.location_billing_usage_snapshots (\n      location_billing_period_id,\n      observed_employee_count,\n      high_water_employee_count,\n      source,\n      observed_at\n    ) values (\n      billing_period.id,\n      observed_count,\n      next_high_water,\n      usage_source,\n      observed_at\n    );\n  end loop;\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "capture_organization_employee_usage",
+    "args": "target_organization_id text, target_location_id uuid, target_employee_id uuid, target_usage_source text, target_source_record_id uuid, target_usage_at timestamp with time zone",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.capture_organization_employee_usage(target_organization_id text, target_location_id uuid, target_employee_id uuid, target_usage_source text, target_source_record_id uuid, target_usage_at timestamp with time zone)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\ndeclare\n  billing_period record;\n  previous_period_id uuid;\nbegin\n  if target_organization_id is null\n    or target_location_id is null\n    or target_employee_id is null\n    or target_source_record_id is null\n    or target_usage_at is null then\n    return;\n  end if;\n\n  for billing_period in\n    select period.*\n    from billing_private.organization_billing_periods period\n    where period.organization_id = target_organization_id\n      and period.period_start <= target_usage_at\n      and target_usage_at < period.period_end\n      and period.finalized_at is null\n    for update\n  loop\n    select organization_billing_period_id into previous_period_id\n    from billing_private.organization_employee_usage_events\n    where usage_source = target_usage_source\n      and source_record_id = target_source_record_id;\n\n    insert into billing_private.organization_employee_usage_events (\n      organization_billing_period_id,\n      organization_id,\n      billing_account_id,\n      location_id,\n      employee_id,\n      usage_source,\n      source_record_id,\n      usage_at,\n      time_attendance_billable\n    ) values (\n      billing_period.id,\n      billing_period.organization_id,\n      billing_period.billing_account_id,\n      target_location_id,\n      target_employee_id,\n      target_usage_source,\n      target_source_record_id,\n      target_usage_at,\n      billing_private.is_time_attendance_billable_usage(\n        target_location_id,\n        target_usage_at\n      )\n    )\n    on conflict (usage_source, source_record_id)\n    do update set organization_billing_period_id = excluded.organization_billing_period_id,\n                  organization_id = excluded.organization_id,\n                  billing_account_id = excluded.billing_account_id,\n                  location_id = excluded.location_id,\n                  employee_id = excluded.employee_id,\n                  usage_at = excluded.usage_at,\n                  time_attendance_billable = excluded.time_attendance_billable;\n\n    perform billing_private.refresh_organization_billing_period_counts(billing_period.id);\n\n    if previous_period_id is not null\n      and previous_period_id <> billing_period.id then\n      perform billing_private.refresh_organization_billing_period_counts(previous_period_id);\n    end if;\n  end loop;\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "capture_organization_period_usage",
+    "args": "target_period_id uuid",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.capture_organization_period_usage(target_period_id uuid)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\ndeclare\n  target_period billing_private.organization_billing_periods%rowtype;\nbegin\n  select * into target_period\n  from billing_private.organization_billing_periods\n  where id = target_period_id;\n\n  if not found then\n    return;\n  end if;\n\n  insert into billing_private.organization_employee_usage_events (\n    organization_billing_period_id,\n    organization_id,\n    billing_account_id,\n    location_id,\n    employee_id,\n    usage_source,\n    source_record_id,\n    usage_at,\n    time_attendance_billable\n  )\n  select\n    target_period.id,\n    target_period.organization_id,\n    target_period.billing_account_id,\n    rota.location_id,\n    assignment.employee_id,\n    'published_rota_assignment',\n    assignment.id,\n    (shift.day_date::timestamp at time zone 'Europe/London'),\n    billing_private.is_time_attendance_billable_usage(\n      rota.location_id,\n      (shift.day_date::timestamp at time zone 'Europe/London')\n    )\n  from public.rota_published_shift_assignments assignment\n  join public.rota_published_shifts shift\n    on shift.id = assignment.rota_published_shift_id\n  join public.rotas rota on rota.id = shift.rota_id\n  where rota.organization_id = target_period.organization_id\n    and shift.day_date >= target_period.period_start::date\n    and shift.day_date < target_period.period_end::date\n  on conflict (usage_source, source_record_id)\n  do update set organization_billing_period_id = excluded.organization_billing_period_id,\n                organization_id = excluded.organization_id,\n                billing_account_id = excluded.billing_account_id,\n                location_id = excluded.location_id,\n                employee_id = excluded.employee_id,\n                usage_at = excluded.usage_at,\n                time_attendance_billable = excluded.time_attendance_billable;\n\n  insert into billing_private.organization_employee_usage_events (\n    organization_billing_period_id,\n    organization_id,\n    billing_account_id,\n    location_id,\n    employee_id,\n    usage_source,\n    source_record_id,\n    usage_at,\n    time_attendance_billable\n  )\n  select\n    target_period.id,\n    target_period.organization_id,\n    target_period.billing_account_id,\n    entry.location_id,\n    entry.employee_id,\n    'time_entry',\n    entry.id,\n    coalesce(entry.scheduled_start_at, entry.clocked_in_at, entry.payable_start_at, entry.created_at),\n    billing_private.is_time_attendance_billable_usage(\n      entry.location_id,\n      coalesce(entry.scheduled_start_at, entry.clocked_in_at, entry.payable_start_at, entry.created_at)\n    )\n  from public.time_entries entry\n  where entry.organization_id = target_period.organization_id\n    and coalesce(entry.scheduled_start_at, entry.clocked_in_at, entry.payable_start_at, entry.created_at) >= target_period.period_start\n    and coalesce(entry.scheduled_start_at, entry.clocked_in_at, entry.payable_start_at, entry.created_at) < target_period.period_end\n  on conflict (usage_source, source_record_id)\n  do update set organization_billing_period_id = excluded.organization_billing_period_id,\n                organization_id = excluded.organization_id,\n                billing_account_id = excluded.billing_account_id,\n                location_id = excluded.location_id,\n                employee_id = excluded.employee_id,\n                usage_at = excluded.usage_at,\n                time_attendance_billable = excluded.time_attendance_billable;\n\n  perform billing_private.refresh_organization_billing_period_counts(target_period.id);\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "capture_published_assignment_organization_usage_trigger",
+    "args": "",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.capture_published_assignment_organization_usage_trigger()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\ndeclare\n  target_shift_id uuid := coalesce(new.rota_published_shift_id, old.rota_published_shift_id);\n  target_employee_id uuid := coalesce(new.employee_id, old.employee_id);\n  target_source_record_id uuid := coalesce(new.id, old.id);\n  target_organization_id text;\n  target_location_id uuid;\n  target_usage_at timestamptz;\nbegin\n  select\n    rota.organization_id,\n    rota.location_id,\n    (shift.day_date::timestamp at time zone 'Europe/London')\n  into target_organization_id, target_location_id, target_usage_at\n  from public.rota_published_shifts shift\n  join public.rotas rota on rota.id = shift.rota_id\n  where shift.id = target_shift_id;\n\n  perform billing_private.capture_organization_employee_usage(\n    target_organization_id,\n    target_location_id,\n    target_employee_id,\n    'published_rota_assignment',\n    target_source_record_id,\n    target_usage_at\n  );\n\n  return coalesce(new, old);\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "capture_published_assignment_usage_trigger",
+    "args": "",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.capture_published_assignment_usage_trigger()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\ndeclare\n  target_shift_id uuid := coalesce(new.rota_published_shift_id, old.rota_published_shift_id);\n  target_location_id uuid;\nbegin\n  select rota.location_id into target_location_id\n  from public.rota_published_shifts shift\n  join public.rotas rota on rota.id = shift.rota_id\n  where shift.id = target_shift_id;\n\n  if target_location_id is not null then\n    perform billing_private.capture_location_usage(target_location_id, 'published_rota');\n  end if;\n  return coalesce(new, old);\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "capture_time_entry_organization_usage_trigger",
+    "args": "",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.capture_time_entry_organization_usage_trigger()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\nbegin\n  perform billing_private.capture_organization_employee_usage(\n    new.organization_id,\n    new.location_id,\n    new.employee_id,\n    'time_entry',\n    new.id,\n    coalesce(new.scheduled_start_at, new.clocked_in_at, new.payable_start_at, new.created_at)\n  );\n\n  return new;\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "initialize_location_billing_records",
+    "args": "",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.initialize_location_billing_records()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\ndeclare\n  inherited_trial public.workspace_trials%rowtype;\nbegin\n  if new.organization_id is not null then\n    select * into inherited_trial\n    from public.workspace_trials\n    where organization_id = new.organization_id\n    limit 1;\n  end if;\n\n  insert into billing_private.location_entitlements (\n    location_id,\n    trial_started_at,\n    trial_ends_at,\n    trial_consumed_at\n  ) values (\n    new.id,\n    coalesce(inherited_trial.trial_started_at, new.created_at),\n    coalesce(inherited_trial.trial_ends_at, new.created_at + interval '14 days'),\n    coalesce(inherited_trial.trial_started_at, new.created_at)\n  ) on conflict (location_id) do nothing;\n\n  insert into billing_private.location_hardware_entitlements (location_id)\n  values (new.id)\n  on conflict (location_id) do nothing;\n\n  return new;\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "is_time_attendance_billable_usage",
+    "args": "target_location_id uuid, target_usage_at timestamp with time zone",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.is_time_attendance_billable_usage(target_location_id uuid, target_usage_at timestamp with time zone)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\n  select exists (\n    select 1\n    from billing_private.location_addons addon\n    where addon.location_id = target_location_id\n      and addon.addon_type = 'time_attendance'\n      and addon.status in ('trialing', 'active', 'canceling')\n      and coalesce(addon.activated_at, addon.billing_starts_at, '-infinity'::timestamptz) <= target_usage_at\n      and (\n        addon.canceled_at is null\n        or target_usage_at < addon.canceled_at\n      )\n  )\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "qualifying_employee_count",
+    "args": "target_location_id uuid, target_period_start timestamp with time zone, target_period_end timestamp with time zone",
+    "definer": true,
+    "proconfig": [
+      "search_path=public, billing_private"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.qualifying_employee_count(target_location_id uuid, target_period_start timestamp with time zone, target_period_end timestamp with time zone)\n RETURNS integer\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'billing_private'\nAS $function$\n  with qualifying_employees as (\n    select employee.id\n    from public.employees employee\n    where employee.location_id = target_location_id\n      and employee.status = 'active'\n\n    union\n\n    select assignment.employee_id\n    from public.employee_location_assignments assignment\n    join public.employees employee on employee.id = assignment.employee_id\n    where assignment.location_id = target_location_id\n      and assignment.is_enabled = true\n      and assignment.disabled_at is null\n      and employee.status = 'active'\n\n    union\n\n    select assignment.employee_id\n    from public.rota_published_shift_assignments assignment\n    join public.rota_published_shifts shift\n      on shift.id = assignment.rota_published_shift_id\n    join public.rotas rota on rota.id = shift.rota_id\n    where rota.location_id = target_location_id\n      and shift.day_date >= target_period_start::date\n      and shift.day_date < target_period_end::date\n  )\n  select count(*)::integer from qualifying_employees\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "refresh_organization_billing_period_counts",
+    "args": "target_period_id uuid",
+    "definer": true,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.refresh_organization_billing_period_counts(target_period_id uuid)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  used_count integer;\n  ta_count integer;\nbegin\n  select count(distinct employee_id)::integer\n  into used_count\n  from billing_private.organization_employee_usage_events\n  where organization_billing_period_id = target_period_id;\n\n  select count(*)::integer into ta_count\n  from billing_private.time_attendance_overage_employee_ids(target_period_id);\n\n  update billing_private.organization_billing_periods period\n  set used_employee_count = coalesce(used_count, 0),\n      extra_employee_count = greatest(coalesce(used_count, 0) - period.included_employee_count, 0),\n      time_attendance_employee_count = coalesce(ta_count, 0),\n      last_observed_at = timezone('utc', now()),\n      updated_at = timezone('utc', now())\n  where period.id = target_period_id;\nend;\n$function$\n"
+  },
+  {
+    "schema": "billing_private",
+    "name": "time_attendance_overage_employee_ids",
+    "args": "target_period_id uuid",
+    "definer": false,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "anon_execute": false,
+    "auth_execute": false,
+    "definition": "CREATE OR REPLACE FUNCTION billing_private.time_attendance_overage_employee_ids(target_period_id uuid)\n RETURNS TABLE(employee_id uuid)\n LANGUAGE sql\n STABLE\n SET search_path TO ''\nAS $function$\n  with location_employees as (\n    select usage.location_id, usage.employee_id, min(usage.usage_at) as first_usage_at\n    from billing_private.organization_employee_usage_events usage\n    where usage.organization_billing_period_id = target_period_id\n      and usage.time_attendance_billable\n    group by usage.location_id, usage.employee_id\n  ), ranked_employees as (\n    select employee_id,\n           row_number() over (partition by location_id order by first_usage_at, employee_id) as allowance_position\n    from location_employees\n  )\n  select distinct ranked.employee_id\n  from ranked_employees ranked\n  join billing_private.organization_billing_periods period on period.id = target_period_id\n  where ranked.allowance_position > period.included_employee_count\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "approve_time_entry_as_recorded",
+    "args": "p_entry_id uuid, p_user_id text",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": false,
+    "auth_execute": false,
+    "definition": "CREATE OR REPLACE FUNCTION public.approve_time_entry_as_recorded(p_entry_id uuid, p_user_id text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare\n  v_entry record;\n  v_has_permission boolean;\n  v_next_status text;\nbegin\n  select *\n    into v_entry\n    from public.time_entries\n   where id = p_entry_id\n   for update;\n\n  if v_entry.id is null then\n    raise exception 'time_entry_not_found';\n  end if;\n\n  select exists (\n    select 1\n      from public.location_memberships membership\n     where membership.location_id = v_entry.location_id\n       and membership.user_id = p_user_id\n       and membership.role = any(array['owner', 'admin', 'manager', 'supervisor'])\n    union\n    select 1\n      from public.member member\n     where member.\"organizationId\" = v_entry.organization_id\n       and member.\"userId\" = p_user_id\n       and member.role = any(array['owner', 'admin', 'manager', 'supervisor'])\n  ) into v_has_permission;\n\n  if not v_has_permission then\n    raise exception 'time_entry_approval_forbidden';\n  end if;\n\n  if v_entry.status <> 'requires_review' then\n    raise exception 'time_entry_not_in_review';\n  end if;\n\n  v_next_status := case when v_entry.clocked_out_at is null then 'open' else 'closed' end;\n\n  update public.time_entries\n     set status = v_next_status,\n         notes = case\n           when notes is null or notes = '' then 'Manager approved as recorded.'\n           else notes || E'\\nManager approved as recorded.'\n         end,\n         updated_by = p_user_id,\n         updated_at = timezone('utc', now())\n   where id = v_entry.id\n   returning * into v_entry;\n\n  insert into public.clock_events (\n    time_entry_id,\n    organization_id,\n    location_id,\n    employee_id,\n    performed_by_user_id,\n    event_type,\n    reason\n  )\n  values (\n    v_entry.id,\n    v_entry.organization_id,\n    v_entry.location_id,\n    v_entry.employee_id,\n    p_user_id,\n    'manager_adjustment',\n    'Manager approved as recorded.'\n  );\n\n  return jsonb_build_object(\n    'id', v_entry.id,\n    'status', v_entry.status\n  );\nend;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "can_read_location_rota",
+    "args": "target_location_id uuid, rota_status text",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.can_read_location_rota(target_location_id uuid, rota_status text)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select\n    public.has_location_role(target_location_id, array['owner', 'admin', 'manager', 'supervisor'])\n    or (\n      public.has_location_role(target_location_id, array['employee'])\n      and rota_status = 'published'\n    )\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "can_read_org_rota",
+    "args": "target_organization_id text, rota_status text",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.can_read_org_rota(target_organization_id text, rota_status text)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select\n    public.has_org_role(target_organization_id, array['owner', 'admin', 'manager', 'supervisor'])\n    or (\n      public.has_org_role(target_organization_id, array['employee', 'member'])\n      and rota_status = 'published'\n    )\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "claim_clock_scan_session",
+    "args": "p_tag_public_id text, p_user_id text, p_picc_counter integer, p_encrypted_picc_hex text, p_cmac_hex text",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": false,
+    "auth_execute": false,
+    "definition": "CREATE OR REPLACE FUNCTION public.claim_clock_scan_session(p_tag_public_id text, p_user_id text, p_picc_counter integer, p_encrypted_picc_hex text, p_cmac_hex text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare\n  v_tag record;\n  v_employee record;\n  v_claim_id uuid;\n  v_open_count integer;\n  v_action text;\n  v_session record;\nbegin\n  select tag.id,\n         tag.organization_id,\n         tag.location_id\n    into v_tag\n    from public.clock_tags tag\n   where tag.ntag_public_id = p_tag_public_id\n     and tag.is_active = true\n     and tag.disabled_at is null\n     and tag.ntag_aes_key_hex is not null\n   limit 1;\n\n  if v_tag.id is null then\n    raise exception 'clock_tag_inactive';\n  end if;\n\n  select employee.id,\n         employee.full_name\n    into v_employee\n    from public.employees employee\n    join public.employee_location_assignments assignment\n      on assignment.employee_id = employee.id\n   where employee.user_id = p_user_id\n     and employee.status = 'active'\n     and assignment.location_id = v_tag.location_id\n     and assignment.is_enabled = true\n     and assignment.disabled_at is null\n   limit 1;\n\n  if v_employee.id is null then\n    raise exception 'employee_not_assigned';\n  end if;\n\n  insert into public.clock_tag_counter_claims (\n    clock_tag_id,\n    picc_counter,\n    encrypted_picc_hex,\n    cmac_hex\n  )\n  values (\n    v_tag.id,\n    p_picc_counter,\n    p_encrypted_picc_hex,\n    p_cmac_hex\n  )\n  on conflict (clock_tag_id, picc_counter) do nothing\n  returning id into v_claim_id;\n\n  if v_claim_id is null then\n    raise exception 'counter_already_used';\n  end if;\n\n  update public.clock_tags\n     set ntag_last_seen_counter = greatest(ntag_last_seen_counter, p_picc_counter),\n         updated_at = timezone('utc', now())\n   where id = v_tag.id;\n\n  select count(*)::integer\n    into v_open_count\n    from public.time_entries entry\n   where entry.employee_id = v_employee.id\n     and entry.location_id = v_tag.location_id\n     and entry.clocked_out_at is null;\n\n  if v_open_count > 1 then\n    raise exception 'multiple_open_entries';\n  end if;\n\n  v_action := case when v_open_count = 1 then 'clock_out' else 'clock_in' end;\n\n  insert into public.clock_scan_sessions (\n    user_id,\n    employee_id,\n    organization_id,\n    location_id,\n    clock_tag_id,\n    picc_counter,\n    action,\n    encrypted_picc_hex,\n    cmac_hex,\n    expires_at\n  )\n  values (\n    p_user_id,\n    v_employee.id,\n    v_tag.organization_id,\n    v_tag.location_id,\n    v_tag.id,\n    p_picc_counter,\n    v_action,\n    p_encrypted_picc_hex,\n    p_cmac_hex,\n    timezone('utc', now()) + interval '2 minutes'\n  )\n  returning * into v_session;\n\n  return jsonb_build_object(\n    'id', v_session.id,\n    'userId', v_session.user_id,\n    'employeeId', v_session.employee_id,\n    'organizationId', v_session.organization_id,\n    'locationId', v_session.location_id,\n    'clockTagId', v_session.clock_tag_id,\n    'piccCounter', v_session.picc_counter,\n    'action', v_session.action,\n    'expiresAt', v_session.expires_at\n  );\nend;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "current_better_auth_email",
+    "args": "",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.current_better_auth_email()\n RETURNS text\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select u.email\n  from public.\"user\" u\n  where u.id = public.current_better_auth_user_id()\n  limit 1\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "current_better_auth_session_token",
+    "args": "",
+    "definer": false,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.current_better_auth_session_token()\n RETURNS text\n LANGUAGE sql\n STABLE\n SET search_path TO ''\nAS $function$\n  select coalesce(\n    nullif(public.request_header('x-shyft-session-token'), ''),\n    nullif(regexp_replace(public.request_header('authorization'), '^Bearer\\s+', '', 'i'), ''),\n    public.request_cookie('__Secure-better-auth.session_token'),\n    public.request_cookie('better-auth.session_token')\n  )\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "current_better_auth_user_id",
+    "args": "",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.current_better_auth_user_id()\n RETURNS text\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select s.\"userId\"\n  from public.\"session\" s\n  where s.token = public.current_better_auth_session_token()\n    and s.\"expiresAt\" > timezone('utc', now())\n  order by s.\"expiresAt\" desc\n  limit 1\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "ensure_location_billing_account",
+    "args": "",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.ensure_location_billing_account()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare\n  created_billing_account_id uuid;\nbegin\n  if new.billing_account_id is not null then\n    return new;\n  end if;\n\n  if new.organization_id is null then\n    raise exception 'Locations must belong to an organization.';\n  end if;\n\n  select id into created_billing_account_id\n  from public.billing_accounts\n  where scope = 'organization'\n    and organization_id = new.organization_id\n  limit 1;\n\n  if created_billing_account_id is null then\n    insert into public.billing_accounts (\n      scope,\n      organization_id\n    ) values (\n      'organization',\n      new.organization_id\n    )\n    returning id into created_billing_account_id;\n  end if;\n\n  new.billing_account_id := created_billing_account_id;\n\n  return new;\nend;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "has_location_role",
+    "args": "target_location_id uuid, allowed_roles text[]",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.has_location_role(target_location_id uuid, allowed_roles text[])\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select exists (\n    select 1\n    from public.location_memberships lm\n    where lm.location_id = target_location_id\n      and lm.user_id = public.current_better_auth_user_id()\n      and lm.role = any(allowed_roles)\n  )\n  or exists (\n    select 1\n    from public.locations l\n    where l.id = target_location_id\n      and l.organization_id is not null\n      and public.has_org_role(l.organization_id, allowed_roles)\n  )\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "has_org_role",
+    "args": "target_organization_id text, allowed_roles text[]",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.has_org_role(target_organization_id text, allowed_roles text[])\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select exists (\n    select 1\n    from public.member m\n    where m.\"organizationId\" = target_organization_id\n      and m.\"userId\" = public.current_better_auth_user_id()\n      and m.role = any(allowed_roles)\n  )\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "is_location_member",
+    "args": "target_location_id uuid",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.is_location_member(target_location_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select exists (\n    select 1\n    from public.location_memberships lm\n    where lm.location_id = target_location_id\n      and lm.user_id = public.current_better_auth_user_id()\n  )\n  or exists (\n    select 1\n    from public.locations l\n    where l.id = target_location_id\n      and l.organization_id is not null\n      and public.is_org_member(l.organization_id)\n  )\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "is_org_member",
+    "args": "target_organization_id text",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.is_org_member(target_organization_id text)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select exists (\n    select 1\n    from public.member m\n    where m.\"organizationId\" = target_organization_id\n      and m.\"userId\" = public.current_better_auth_user_id()\n  )\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "record_employee_clock_from_scan",
+    "args": "p_scan_session_id uuid, p_user_id text, p_action text, p_shift_segment text, p_rota_published_shift_id uuid, p_clocked_in_at timestamp with time zone, p_clocked_out_at timestamp with time zone, p_payable_start_at timestamp with time zone, p_payable_end_at timestamp with time zone, p_scheduled_start_at timestamp with time zone, p_scheduled_end_at timestamp with time zone, p_status text, p_notes text, p_gps_latitude double precision, p_gps_longitude double precision, p_gps_accuracy_meters double precision, p_gps_distance_meters double precision, p_ip_hash text, p_user_agent text",
+    "definer": true,
+    "proconfig": [
+      "search_path=public"
+    ],
+    "anon_execute": false,
+    "auth_execute": false,
+    "definition": "CREATE OR REPLACE FUNCTION public.record_employee_clock_from_scan(p_scan_session_id uuid, p_user_id text, p_action text, p_shift_segment text, p_rota_published_shift_id uuid, p_clocked_in_at timestamp with time zone, p_clocked_out_at timestamp with time zone, p_payable_start_at timestamp with time zone, p_payable_end_at timestamp with time zone, p_scheduled_start_at timestamp with time zone, p_scheduled_end_at timestamp with time zone, p_status text, p_notes text, p_gps_latitude double precision, p_gps_longitude double precision, p_gps_accuracy_meters double precision, p_gps_distance_meters double precision, p_ip_hash text, p_user_agent text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare\n  v_session record;\n  v_existing record;\n  v_open_count integer;\n  v_entry record;\nbegin\n  select *\n    into v_session\n    from public.clock_scan_sessions\n   where id = p_scan_session_id\n     and user_id = p_user_id\n   for update;\n\n  if v_session.id is null then\n    raise exception 'scan_session_not_found';\n  end if;\n\n  if v_session.consumed_at is not null then\n    raise exception 'scan_session_consumed';\n  end if;\n\n  if v_session.expires_at < timezone('utc', now()) then\n    raise exception 'scan_session_expired';\n  end if;\n\n  if v_session.action <> p_action then\n    raise exception 'scan_session_action_mismatch';\n  end if;\n\n  if p_action = 'clock_in' then\n    select count(*)::integer\n      into v_open_count\n      from public.time_entries\n     where employee_id = v_session.employee_id\n       and location_id = v_session.location_id\n       and clocked_out_at is null;\n\n    if v_open_count > 0 then\n      raise exception 'already_clocked_in';\n    end if;\n\n    insert into public.time_entries (\n      organization_id,\n      location_id,\n      employee_id,\n      user_id,\n      rota_published_shift_id,\n      shift_segment,\n      scheduled_start_at,\n      scheduled_end_at,\n      clocked_in_at,\n      payable_start_at,\n      status,\n      source,\n      notes,\n      created_by,\n      updated_by\n    )\n    values (\n      v_session.organization_id,\n      v_session.location_id,\n      v_session.employee_id,\n      p_user_id,\n      p_rota_published_shift_id,\n      p_shift_segment,\n      p_scheduled_start_at,\n      p_scheduled_end_at,\n      p_clocked_in_at,\n      p_payable_start_at,\n      p_status,\n      'employee_nfc',\n      p_notes,\n      p_user_id,\n      p_user_id\n    )\n    returning * into v_entry;\n\n    insert into public.clock_events (\n      time_entry_id,\n      organization_id,\n      location_id,\n      employee_id,\n      performed_by_user_id,\n      event_type,\n      reason\n    )\n    values (\n      v_entry.id,\n      v_entry.organization_id,\n      v_entry.location_id,\n      v_entry.employee_id,\n      p_user_id,\n      'clock_in',\n      p_notes\n    );\n  else\n    select count(*)::integer\n      into v_open_count\n      from public.time_entries\n     where employee_id = v_session.employee_id\n       and location_id = v_session.location_id\n       and clocked_out_at is null;\n\n    if v_open_count <> 1 then\n      raise exception 'open_entry_mismatch';\n    end if;\n\n    select *\n      into v_existing\n      from public.time_entries\n     where employee_id = v_session.employee_id\n       and location_id = v_session.location_id\n       and clocked_out_at is null\n     for update;\n\n    update public.time_entries\n       set clocked_out_at = p_clocked_out_at,\n           payable_end_at = p_payable_end_at,\n           status = case\n             when v_existing.status = 'requires_review' or p_status = 'requires_review'\n             then 'requires_review'\n             else 'closed'\n           end,\n           notes = case\n             when p_notes is null or p_notes = '' then notes\n             when notes is null or notes = '' then p_notes\n             else notes || E'\\n' || p_notes\n           end,\n           updated_by = p_user_id,\n           updated_at = timezone('utc', now())\n     where id = v_existing.id\n     returning * into v_entry;\n\n    insert into public.clock_events (\n      time_entry_id,\n      organization_id,\n      location_id,\n      employee_id,\n      performed_by_user_id,\n      event_type,\n      reason\n    )\n    values (\n      v_entry.id,\n      v_entry.organization_id,\n      v_entry.location_id,\n      v_entry.employee_id,\n      p_user_id,\n      'clock_out',\n      p_notes\n    );\n  end if;\n\n  update public.clock_scan_sessions\n     set consumed_at = timezone('utc', now())\n   where id = v_session.id;\n\n  insert into public.clock_attempts (\n    organization_id,\n    location_id,\n    clock_tag_id,\n    employee_id,\n    performed_by_user_id,\n    action,\n    success,\n    failure_reason,\n    gps_latitude,\n    gps_longitude,\n    gps_accuracy_meters,\n    gps_distance_meters,\n    ip_hash,\n    user_agent\n  )\n  values (\n    v_session.organization_id,\n    v_session.location_id,\n    v_session.clock_tag_id,\n    v_session.employee_id,\n    p_user_id,\n    p_action,\n    true,\n    null,\n    p_gps_latitude,\n    p_gps_longitude,\n    p_gps_accuracy_meters,\n    p_gps_distance_meters,\n    p_ip_hash,\n    p_user_agent\n  );\n\n  return jsonb_build_object(\n    'id', v_entry.id,\n    'action', p_action,\n    'status', v_entry.status,\n    'clockedInAt', v_entry.clocked_in_at,\n    'clockedOutAt', v_entry.clocked_out_at\n  );\nend;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "request_cookie",
+    "args": "cookie_name text",
+    "definer": false,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.request_cookie(cookie_name text)\n RETURNS text\n LANGUAGE sql\n STABLE\n SET search_path TO ''\nAS $function$\n  select (\n    regexp_match(\n      coalesce(public.request_header('cookie'), ''),\n      '(?:^|;\\s*)' ||\n        regexp_replace(cookie_name, '([.[\\]()*+?^$|\\\\-])', '\\\\\\1', 'g') ||\n        '=([^;]+)'\n    )\n  )[1]\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "request_header",
+    "args": "header_name text",
+    "definer": false,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.request_header(header_name text)\n RETURNS text\n LANGUAGE sql\n STABLE\n SET search_path TO ''\nAS $function$\n  select coalesce(\n    nullif(current_setting('request.headers', true), '')::jsonb ->> lower(header_name),\n    nullif(current_setting('request.headers', true), '')::jsonb ->> header_name\n  )\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "name": "set_user_onboarding_preferences_updated_at",
+    "args": "",
+    "definer": false,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "anon_execute": true,
+    "auth_execute": true,
+    "definition": "CREATE OR REPLACE FUNCTION public.set_user_onboarding_preferences_updated_at()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\nbegin\n  new.updated_at = now();\n  return new;\nend;\n$function$\n"
+  }
+]

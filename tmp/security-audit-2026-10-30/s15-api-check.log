@@ -1,0 +1,5 @@
+{"table":"user","status":401}
+{"table":"employees","status":401}
+{"table":"clock_tags","status":401}
+{"table":"billing_accounts","status":401}
+{"rpc":"current_better_auth_user_id","status":401}

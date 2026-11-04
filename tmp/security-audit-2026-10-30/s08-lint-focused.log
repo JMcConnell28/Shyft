@@ -1,0 +1,11 @@
+
+D:\Projects\Shyft\src\features\account\server\password-recovery-guard.ts
+  9:3  error  Member 'RecoveryOperation' of the import declaration should be sorted alphabetically  sort-imports
+  9:3  error  Prefer using a top-level type-only import instead of inline type specifiers           import/consistent-type-specifier-style
+
+D:\Projects\Shyft\src\lib\auth.ts
+  120:48  warning  'organization' is already declared in the upper scope on line 8 column 10  no-shadow
+
+✖ 3 problems (2 errors, 1 warning)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+

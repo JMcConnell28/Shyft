@@ -2,6 +2,8 @@ type DashboardSummary = {
   activeFeatureFlags: number
   failedClockAttemptsToday: number
   openErrors: number
+  openPaymentReviews: number
+  billingReconciliationNeedsAttention: boolean
   openSupportThreads: number
   trialExpiringSoon: number
 }
@@ -14,7 +16,7 @@ type DashboardActivity = {
 }
 
 type DashboardData = {
-  activity: DashboardActivity[]
+  activity: Array<DashboardActivity>
   summary: DashboardSummary
 }
 

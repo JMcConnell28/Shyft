@@ -13,6 +13,7 @@ import type {
 import type { PublishedShiftCandidate } from "@/features/time-clock/utils/shift-matching"
 import { getLocationFeatureFlags } from "@/features/feature-flags/server/evaluation"
 import { listAssignedClockEmployees } from "@/features/time-clock/server/manager-clock-employees"
+import { listClockTagSummariesByLocation } from "@/features/time-clock/server/clock-tag-summaries"
 import {
   CLOCK_OUT_REMINDER_MINUTES,
   SCHEDULED_CLOCK_OUT_DELAY_MINUTES,
@@ -370,17 +371,16 @@ async function getClockSettingsPageData(input: {
   }
 
   const supabase = createSupabaseServerClient()
-  const [settings, tags, stationBillingStates, stationHealth] =
+  const [settings, tagsByLocationId, stationBillingStates, stationHealth] =
     await Promise.all([
       listClockSettingsForLocations(supabase, locationIds),
-      listClockTagSetups(supabase, locationIds),
+      listClockTagSummariesByLocation(locationIds),
       listClockStationBillingStates(locationIds),
       listClockStationHealth(locationIds),
     ])
   const settingsByLocationId = new Map(
     settings.map((setting) => [setting.locationId, setting])
   )
-  const tagsByLocationId = groupClockTagSetups(tags)
   const stationBillingStateByLocationId = new Map(
     stationBillingStates.map((state) => [state.locationId, state])
   )
@@ -636,26 +636,6 @@ async function listClockStationHealth(locationIds: Array<string>) {
     locationId: row.location_id,
     registeredStations: row.registered_stations,
   }))
-}
-
-async function listClockTagSetups(
-  supabase: SupabaseServer,
-  locationIds: Array<string>
-) {
-  const result = await supabase
-    .from("clock_tags")
-    .select(
-      "id, location_id, label, ntag_public_id, ntag_aes_key_hex, ntag_last_seen_counter"
-    )
-    .in("location_id", locationIds)
-    .eq("is_active", true)
-    .is("disabled_at", null)
-    .not("ntag_public_id", "is", null)
-    .not("ntag_aes_key_hex", "is", null)
-    .order("created_at", { ascending: false })
-
-  assertSupabaseSuccess(result.error, "We could not load clock tags.")
-  return result.data ?? []
 }
 
 async function listOpenEntries(input: {
@@ -945,30 +925,6 @@ function getClockSetupMessage(input: {
   }
 
   return null
-}
-
-function groupClockTagSetups(
-  rows: Awaited<ReturnType<typeof listClockTagSetups>>
-) {
-  const tagsByLocationId = new Map<
-    string,
-    ClockSettingsPageData["locations"][number]["ntagTags"]
-  >()
-
-  for (const row of rows) {
-    const tags = tagsByLocationId.get(row.location_id) ?? []
-
-    tags.push({
-      id: row.id,
-      aesKeyHex: row.ntag_aes_key_hex ?? "",
-      label: row.label,
-      lastSeenCounter: row.ntag_last_seen_counter,
-      publicId: row.ntag_public_id ?? "",
-    })
-    tagsByLocationId.set(row.location_id, tags)
-  }
-
-  return tagsByLocationId
 }
 
 function emptyReviewPrompt(): ClockInReviewPrompt {

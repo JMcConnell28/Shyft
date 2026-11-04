@@ -1,21 +1,14 @@
-import { z } from "zod"
-import {
-  dashboardSelectClass,
-  teamFilterLabels,
-  teamFilterValues,
-} from "../constants"
+import { dashboardTeamColumns } from "../constants"
+import { ManagerTeamFilters } from "./team-filters"
 import { DashboardTeamRow } from "./team-row"
 import type { ManagerDayData, TeamRow } from "../types"
 import type { useTeamFilters } from "../hooks/use-team-filters"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-
-const filterSchema = z.enum(teamFilterValues)
-const teamFilterSelectClass = cn(
-  dashboardSelectClass,
-  "h-9 w-full px-2 text-[11px] sm:h-10 sm:w-auto sm:px-3 sm:text-xs"
-)
+import {
+  DashboardPanel,
+  DashboardPanelHeader,
+} from "@/features/dashboard/components/dashboard-layout"
 
 function ManagerTeamSection({
   data,
@@ -33,81 +26,69 @@ function ManagerTeamSection({
   onReview: (row: TeamRow) => void
 }) {
   return (
-    <section
+    <DashboardPanel
       id="dashboard-team"
       aria-labelledby="team-heading"
-      className="min-w-0 scroll-mt-4 overflow-hidden rounded-xl border border-[#e0e6f1] bg-white"
+      tabIndex={-1}
+      className="@container/team scroll-mt-4"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
-        <h2 id="team-heading" className="text-sm font-bold">
-          {data.isToday ? "Today’s team" : "Team for selected day"}
-        </h2>
-        <span className="text-xs text-[#7481a0]">{filters.total} records</span>
-      </div>
-      <div className="grid grid-cols-2 gap-2 p-4 sm:flex sm:flex-wrap">
-        <Input
-          aria-label="Search employees"
-          placeholder="Search employees…"
-          className="col-span-2 h-9 min-w-0 flex-1 rounded-lg text-xs sm:h-10 sm:min-w-40"
-          value={filters.search}
-          onChange={(event) => filters.setSearch(event.target.value)}
-        />
-        <select
-          aria-label="Filter by zone"
-          className={cn(
-            teamFilterSelectClass,
-            !data.location.attendanceEnabled && "col-span-2"
-          )}
-          value={filters.zone}
-          onChange={(event) => filters.setZone(event.target.value)}
-        >
-          <option value="">All zones</option>
-          {filters.zones.map((zone) => (
-            <option key={zone}>{zone}</option>
-          ))}
-        </select>
-        {data.location.attendanceEnabled ? (
-          <select
-            aria-label="Filter by status"
-            className={teamFilterSelectClass}
-            value={filters.status}
-            onChange={(event) => {
-              const parsed = filterSchema.safeParse(event.target.value)
-              if (parsed.success) filters.setStatus(parsed.data)
-            }}
-          >
-            {teamFilterValues.map((value) => (
-              <option key={value} value={value}>
-                {teamFilterLabels[value]}
-              </option>
-            ))}
-          </select>
-        ) : null}
-      </div>
+      <DashboardPanelHeader
+        headingId="team-heading"
+        title={data.isToday ? "Today’s team" : "Team"}
+      />
+      <ManagerTeamFilters
+        filters={filters}
+        attendanceEnabled={data.location.attendanceEnabled}
+      />
       {filters.rows.length ? (
-        filters.rows.map((row) => (
-          <DashboardTeamRow
-            key={row.key}
-            row={row}
-            location={data.location}
-            isToday={data.isToday}
-            workspaceSlug={workspaceSlug}
-            canManageRota={canManageRota}
-            isClockedIn={Boolean(
-              data.clockEmployees.find(
-                (employee) => employee.id === row.employeeId
-              )?.openEntry
+        <div role="table" aria-labelledby="team-heading">
+          <div
+            role="row"
+            className={cn(
+              "sr-only @2xl/team:not-sr-only @2xl/team:grid @2xl/team:items-center @2xl/team:gap-3 @2xl/team:border-t @2xl/team:bg-muted/40 @2xl/team:px-4 @2xl/team:py-2 @2xl/team:text-xs @2xl/team:font-medium @2xl/team:text-muted-foreground",
+              data.location.attendanceEnabled
+                ? dashboardTeamColumns.attendance
+                : dashboardTeamColumns.published
             )}
-            onClock={onClock}
-            onReview={onReview}
-          />
-        ))
+          >
+            <span role="columnheader">Employee</span>
+            <span role="columnheader">Scheduled</span>
+            {data.location.attendanceEnabled ? (
+              <span role="columnheader">Attendance</span>
+            ) : null}
+            <span role="columnheader">Status</span>
+            <span role="columnheader" className="sr-only">
+              Actions
+            </span>
+          </div>
+          <div role="rowgroup">
+            {filters.rows.map((row) => (
+              <DashboardTeamRow
+                key={row.key}
+                row={row}
+                location={data.location}
+                isToday={data.isToday}
+                workspaceSlug={workspaceSlug}
+                canManageRota={canManageRota}
+                isClockedIn={Boolean(
+                  data.clockEmployees.find(
+                    (employee) => employee.id === row.employeeId
+                  )?.openEntry
+                )}
+                onClock={onClock}
+                onReview={onReview}
+              />
+            ))}
+          </div>
+        </div>
       ) : (
-        <div className="border-t border-[#edf0f6] px-4 py-10 text-center text-xs text-[#7481a0]">
-          <p>
+        <div className="flex flex-wrap items-center gap-x-2 border-t px-4 py-3">
+          <p role="status" className="text-sm text-muted-foreground">
             {data.team.length
               ? "No employees match these filters."
-              : "No published staffing or attendance records for this day."}
+              : data.isToday
+                ? "No team members today"
+                : "No team members for this day"}
           </p>
           {data.team.length ? (
             <Button variant="link" onClick={filters.reset}>
@@ -137,7 +118,7 @@ function ManagerTeamSection({
           </Button>
         </div>
       ) : null}
-    </section>
+    </DashboardPanel>
   )
 }
 export { ManagerTeamSection }

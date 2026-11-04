@@ -31,6 +31,7 @@ const membershipRow = {
   email: "operator@example.test",
   name: "Operator",
   role: "readonly",
+  two_factor_enabled: true,
   disabled_at: null,
 }
 
@@ -49,6 +50,12 @@ describe("admin session authorisation", () => {
       session,
     })
     expect(query).not.toHaveBeenCalled()
+  })
+
+  it("denies private tools to password-only sessions pending MFA enrollment", async () => {
+    queryOne.mockResolvedValue({ ...membershipRow, two_factor_enabled: false })
+    await expect(readAdminSession()).resolves.toBeNull()
+    await expect(requireAdminSession()).rejects.toThrow("multi-factor")
   })
 
   it("denies a permission even when an older session still claims owner", async () => {

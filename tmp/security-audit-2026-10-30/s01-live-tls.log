@@ -1,0 +1,16 @@
+
+> db:verify-tls
+> node scripts/verify-database-tls.mjs .env.local
+
+{
+  "client": {
+    "encrypted": true,
+    "certificateVerified": true,
+    "protocol": "TLSv1.3"
+  },
+  "databaseBackend": {
+    "encrypted": false,
+    "protocol": null
+  }
+}
+The database backend hop is not encrypted. Complete the Supabase SSL-enforcement rollout.

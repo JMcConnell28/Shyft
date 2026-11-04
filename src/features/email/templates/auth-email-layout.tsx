@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import {
   Body,
   Container,
@@ -7,8 +8,7 @@ import {
   Preview,
   Section,
   Text,
-} from "@react-email/components"
-import type { ReactNode } from "react"
+} from "@/features/email/components/primitives"
 
 import { appName } from "@/features/email/templates/email-styles"
 

@@ -6,10 +6,10 @@ function ManagerDashboardLoading() {
     <div
       role="status"
       aria-label="Loading manager dashboard"
-      className="space-y-3 p-4"
+      className="space-y-2 rounded-xl border border-border bg-card p-4"
     >
-      <div className="h-16 animate-pulse rounded-xl bg-blue-50" />
-      <div className="h-64 animate-pulse rounded-xl bg-slate-50" />
+      <div className="h-5 w-32 rounded-md bg-muted motion-safe:animate-pulse" />
+      <div className="h-28 rounded-lg bg-muted/60 motion-safe:animate-pulse" />
       <span className="sr-only">Loading staffing…</span>
     </div>
   )
@@ -24,11 +24,11 @@ function ManagerDashboardError({
   return (
     <div
       role="alert"
-      className="rounded-xl border border-[#e0e6f1] bg-white p-6 text-sm text-[#46577d]"
+      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm text-muted-foreground"
     >
       <p>{message}</p>
-      <Button variant="outline" className="mt-3 h-9" onClick={onRetry}>
-        Try again
+      <Button variant="outline" className="h-11 md:h-9" onClick={onRetry}>
+        Retry
       </Button>
     </div>
   )

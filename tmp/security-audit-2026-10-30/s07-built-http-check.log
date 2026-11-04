@@ -1,0 +1,4 @@
+Fresh server/client artifacts contain no legacy admin route, allowlist or RPC registrations.
+GET /admin/clock-tags: 404
+Retired RPC 020bb31270a3: 500; registration absent from build
+Retired RPC e6ef59b4a2fb: 500; registration absent from build

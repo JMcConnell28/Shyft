@@ -1,5 +1,5 @@
-import { render, toPlainText } from "@react-email/components"
 import { describe, expect, it } from "vitest"
+import { render, toPlainText } from "@/features/email/testing/render"
 
 import { ResetPasswordEmail } from "@/features/email/templates/reset-password"
 
@@ -14,7 +14,7 @@ describe("ResetPasswordEmail", () => {
     )
     const content = toPlainText(html)
 
-    expect(content).toContain("RESET YOUR PASSWORD")
+    expect(content).toContain("Reset your password")
     expect(content).toContain("This link will expire in 1 hour")
     expect(content).toContain("If you didn't request a password reset")
     expect(content).toContain("Help Centre")

@@ -23,7 +23,6 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as AuthedVerifiedRouteRouteImport } from './routes/_authed/_verified/route'
 import { Route as AcceptInvitationInvitationIdRouteImport } from './routes/accept-invitation/$invitationId'
-import { Route as AdminClockTagsRouteImport } from './routes/admin/clock-tags'
 import { Route as ClockTokenRouteImport } from './routes/clock/$token'
 import { Route as FeaturesManagerDashboardRouteImport } from './routes/features/manager-dashboard'
 import { Route as FeaturesRotaPlanningRouteImport } from './routes/features/rota-planning'
@@ -161,11 +160,6 @@ const AcceptInvitationInvitationIdRoute =
     path: '/accept-invitation/$invitationId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AdminClockTagsRoute = AdminClockTagsRouteImport.update({
-  id: '/admin/clock-tags',
-  path: '/admin/clock-tags',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ClockTokenRoute = ClockTokenRouteImport.update({
   id: '/$token',
   path: '/$token',
@@ -567,7 +561,6 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
-  '/admin/clock-tags': typeof AdminClockTagsRoute
   '/clock/$token': typeof ClockTokenRoute
   '/features/manager-dashboard': typeof FeaturesManagerDashboardRoute
   '/features/rota-planning': typeof FeaturesRotaPlanningRoute
@@ -649,7 +642,6 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
-  '/admin/clock-tags': typeof AdminClockTagsRoute
   '/clock/$token': typeof ClockTokenRoute
   '/features/manager-dashboard': typeof FeaturesManagerDashboardRoute
   '/features/rota-planning': typeof FeaturesRotaPlanningRoute
@@ -726,7 +718,6 @@ export interface FileRoutesById {
   '/verify-email': typeof VerifyEmailRoute
   '/_authed/_verified': typeof AuthedVerifiedRouteRouteWithChildren
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
-  '/admin/clock-tags': typeof AdminClockTagsRoute
   '/clock/$token': typeof ClockTokenRoute
   '/features/manager-dashboard': typeof FeaturesManagerDashboardRoute
   '/features/rota-planning': typeof FeaturesRotaPlanningRoute
@@ -810,7 +801,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/accept-invitation/$invitationId'
-    | '/admin/clock-tags'
     | '/clock/$token'
     | '/features/manager-dashboard'
     | '/features/rota-planning'
@@ -892,7 +882,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/accept-invitation/$invitationId'
-    | '/admin/clock-tags'
     | '/clock/$token'
     | '/features/manager-dashboard'
     | '/features/rota-planning'
@@ -968,7 +957,6 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/_authed/_verified'
     | '/accept-invitation/$invitationId'
-    | '/admin/clock-tags'
     | '/clock/$token'
     | '/features/manager-dashboard'
     | '/features/rota-planning'
@@ -1052,7 +1040,6 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   AcceptInvitationInvitationIdRoute: typeof AcceptInvitationInvitationIdRoute
-  AdminClockTagsRoute: typeof AdminClockTagsRoute
   FeaturesManagerDashboardRoute: typeof FeaturesManagerDashboardRoute
   FeaturesRotaPlanningRoute: typeof FeaturesRotaPlanningRoute
   FeaturesStaffUpdatesRoute: typeof FeaturesStaffUpdatesRoute
@@ -1169,13 +1156,6 @@ declare module '@tanstack/react-router' {
       path: '/accept-invitation/$invitationId'
       fullPath: '/accept-invitation/$invitationId'
       preLoaderRoute: typeof AcceptInvitationInvitationIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/clock-tags': {
-      id: '/admin/clock-tags'
-      path: '/admin/clock-tags'
-      fullPath: '/admin/clock-tags'
-      preLoaderRoute: typeof AdminClockTagsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clock/$token': {
@@ -1929,7 +1909,6 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   AcceptInvitationInvitationIdRoute: AcceptInvitationInvitationIdRoute,
-  AdminClockTagsRoute: AdminClockTagsRoute,
   FeaturesManagerDashboardRoute: FeaturesManagerDashboardRoute,
   FeaturesRotaPlanningRoute: FeaturesRotaPlanningRoute,
   FeaturesStaffUpdatesRoute: FeaturesStaffUpdatesRoute,

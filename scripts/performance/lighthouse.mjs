@@ -9,6 +9,14 @@ const url = new URL(
   process.env.PERF_ORIGIN ?? "http://localhost:3100"
 )
 const label = process.env.PERF_LABEL ?? "latest"
+if (
+  !["http:", "https:"].includes(url.protocol) ||
+  !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
+  url.username ||
+  url.password
+) {
+  throw new Error("Performance tooling only accepts a local application URL")
+}
 if (!/^[a-z0-9-]+$/.test(label)) throw new Error("Invalid PERF_LABEL")
 const directory = resolve(".performance", label)
 await mkdir(directory, { recursive: true })

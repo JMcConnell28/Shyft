@@ -2,6 +2,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { dashboardSelectClass } from "../constants"
 import { moveDashboardDate } from "../utils/date"
 import { DashboardMobileDatePicker } from "./mobile-date-picker"
+import { DashboardSelect } from "./dashboard-select"
 import type { DashboardLocation } from "../types"
 import { isoDateSchema } from "@/features/rota/schemas/rota-schemas"
 import { Button } from "@/components/ui/button"
@@ -22,21 +23,20 @@ function ManagerDashboardFilters({
   onDate: (date?: string) => void
 }) {
   return (
-    <div className="flex items-center gap-2 sm:flex-wrap">
-      <label className="min-w-0 flex-1 sm:max-w-64 sm:min-w-40">
-        <span className="sr-only">Location</span>
-        <select
-          className={`${dashboardSelectClass} h-11 w-full truncate sm:h-10`}
-          value={locationId}
-          onChange={(event) => onLocation(event.target.value)}
-        >
-          {locations.map((location) => (
-            <option key={location.id} value={location.id}>
-              {location.name}
-            </option>
-          ))}
-        </select>
-      </label>
+    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+      <DashboardSelect
+        label="Location"
+        containerClassName="sm:min-w-48 sm:max-w-72 sm:flex-1"
+        className="truncate"
+        value={locationId}
+        onChange={(event) => onLocation(event.target.value)}
+      >
+        {locations.map((location) => (
+          <option key={location.id} value={location.id}>
+            {location.name}
+          </option>
+        ))}
+      </DashboardSelect>
       <DashboardMobileDatePicker
         date={date}
         isToday={isToday}
@@ -46,7 +46,7 @@ function ManagerDashboardFilters({
         <Button
           aria-label="Previous day"
           variant="outline"
-          className="size-10 rounded-lg"
+          className="size-11 rounded-lg shadow-none md:size-9"
           onClick={() => onDate(moveDashboardDate(date, -1))}
         >
           <ChevronLeftIcon />
@@ -66,7 +66,7 @@ function ManagerDashboardFilters({
         <Button
           aria-label="Next day"
           variant="outline"
-          className="size-10 rounded-lg"
+          className="size-11 rounded-lg shadow-none md:size-9"
           onClick={() => onDate(moveDashboardDate(date, 1))}
         >
           <ChevronRightIcon />
@@ -74,7 +74,7 @@ function ManagerDashboardFilters({
       </div>
       <Button
         variant={isToday ? "secondary" : "outline"}
-        className="hidden h-10 rounded-lg sm:inline-flex"
+        className="hidden h-11 rounded-lg shadow-none sm:inline-flex md:h-9"
         onClick={() => onDate(undefined)}
       >
         Today

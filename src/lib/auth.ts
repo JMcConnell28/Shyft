@@ -10,6 +10,7 @@ import { tanstackStartCookies } from "better-auth/tanstack-start"
 import Stripe from "stripe"
 
 import { passwordResetExpiryHours } from "@/features/email/constants/password-reset"
+import { guardPasswordRecovery } from "@/features/account/server/password-recovery-guard"
 import { requireTermsAcceptance } from "@/features/legal/server/require-terms-acceptance"
 import { ac, roles } from "@/lib/auth/permissions"
 import { requireSignUpAccessCode } from "@/lib/auth/sign-up-access.server"
@@ -59,9 +60,8 @@ const auth = betterAuth({
   database: getDatabase(),
   session: {
     cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60,
-      strategy: "compact",
+      // Revoked sessions must fail on the next request, including after recovery.
+      enabled: false,
     },
   },
   user: {
@@ -82,6 +82,7 @@ const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
+    revokeSessionsOnPasswordReset: true,
     resetPasswordTokenExpiresIn: passwordResetExpiryHours * 60 * 60,
     sendResetPassword: async ({ user, url }) => {
       await sendPasswordResetEmail({
@@ -92,6 +93,10 @@ const auth = betterAuth({
   },
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
+      const recoveryBody = await guardPasswordRecovery(ctx, (origin) =>
+        ctx.context.isTrustedOrigin(origin, { allowRelativePaths: false })
+      )
+      if (recoveryBody) return { context: { body: recoveryBody } }
       if (ctx.path === "/update-user") {
         requireAllowedProfileUpdate(ctx.body)
       }

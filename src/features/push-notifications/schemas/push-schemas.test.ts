@@ -10,7 +10,7 @@ describe("push subscription validation", () => {
     expect(
       savePushSubscriptionSchema.safeParse({
         subscription: {
-          endpoint: "https://push.example.test/subscriptions/device-123",
+          endpoint: "https://fcm.googleapis.com/fcm/send/device-123",
           keys: { auth: "abcdefgh", p256dh: "abcdefghijklmnopqrstuvwxyz" },
         },
       }).success
@@ -21,7 +21,7 @@ describe("push subscription validation", () => {
     expect(
       savePushSubscriptionSchema.safeParse({
         subscription: {
-          endpoint: "https://push.example.test/device",
+          endpoint: "https://fcm.googleapis.com/fcm/send/device",
           keys: { auth: "x", p256dh: "y" },
         },
       }).success

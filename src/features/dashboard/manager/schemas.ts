@@ -1,9 +1,11 @@
 import { z } from "zod"
+import { teamFilterValues } from "./constants"
 import { isoDateSchema } from "@/features/rota/schemas/rota-schemas"
 
 const managerScopeSchema = z.object({
   organizationId: z.string().trim().min(1),
 })
+const teamFilterSchema = z.enum(teamFilterValues)
 const managerDayInputSchema = managerScopeSchema.extend({
   locationId: z.uuid(),
   date: isoDateSchema.optional(),
@@ -24,6 +26,7 @@ const managerDashboardSearchSchema = z.object({
 })
 
 export {
+  teamFilterSchema,
   managerScopeSchema,
   managerDayInputSchema,
   attentionInputSchema,

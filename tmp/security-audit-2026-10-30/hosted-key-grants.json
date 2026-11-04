@@ -1,0 +1,12 @@
+[
+  {
+    "evidence": {
+      "clock_key_anon_column_select": true,
+      "clock_key_auth_column_select": true,
+      "clock_policy": "has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'supervisor'::text])",
+      "clock_rpc_anon": false,
+      "clock_rpc_auth": false,
+      "public_non_rls": 0
+    }
+  }
+]

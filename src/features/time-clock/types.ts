@@ -1,4 +1,5 @@
 import type { ClockAutomationSettings } from "@/features/time-clock/schemas/clock-automation-settings-schema"
+import type { ClockTagSummary } from "@/features/time-clock/types/clock-tag"
 
 type ClockAction = "clock_in" | "clock_out"
 
@@ -17,24 +18,6 @@ type ClockReason =
   | "other"
 
 type EarlyClockInMode = "scheduled" | "now"
-
-type ClockTagSetupData = {
-  id: string
-  aesKeyHex: string
-  label: string
-  lastSeenCounter: number
-  publicId: string
-}
-
-type AdminClockTagsPageData = {
-  locations: Array<{
-    id: string
-    name: string
-    organizationId: string | null
-    organizationName: string | null
-  }>
-  tags: Array<ClockTagSetupData & { locationId: string }>
-}
 
 type GpsCoordinates = {
   latitude: number
@@ -212,7 +195,7 @@ type ClockSettingsLocation = ClockSettingsValues & {
     | "delivered"
     | "failed"
     | null
-  ntagTags: Array<ClockTagSetupData>
+  ntagTags: Array<ClockTagSummary>
   stationHealth: ClockStationHealth
 }
 
@@ -221,7 +204,6 @@ type ClockSettingsPageData = {
 }
 
 export type {
-  AdminClockTagsPageData,
   ClockAction,
   ClockAttemptSummary,
   ClockEntryStatus,
@@ -235,7 +217,6 @@ export type {
   ClockShiftSummary,
   ClockShiftSegment,
   ClockSource,
-  ClockTagSetupData,
   EarlyClockInMode,
   EmployeeClockPageData,
   GpsCoordinates,

@@ -5,7 +5,7 @@ import {
   Link,
   Section,
   Text,
-} from "@react-email/components"
+} from "@/features/email/components/primitives"
 
 import { passwordResetExpiryHours } from "@/features/email/constants/password-reset"
 import { BrandedEmailLayout } from "@/features/email/templates/branded-email-layout"

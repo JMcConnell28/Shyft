@@ -4,6 +4,11 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./privacy": "./src/privacy/index.ts"
+    "./privacy": "./src/privacy/index.ts",
+    "./billing-reconciliation": "./src/billing-reconciliation.ts",
+    "./connection-config": {
+      "types": "./src/connection-config.d.mts",
+      "default": "./src/connection-config.mjs"
+    }
   }
 }

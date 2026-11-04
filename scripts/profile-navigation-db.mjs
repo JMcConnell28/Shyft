@@ -1,9 +1,10 @@
 import { Pool } from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 
 // Read-only, local diagnostic. Never print connection strings, parameters or rows.
 process.loadEnvFile(".env.local")
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  ...getDatabaseConnectionConfig(process.env.DATABASE_URL),
   connectionTimeoutMillis: 5000,
   max: 1,
 })

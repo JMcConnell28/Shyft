@@ -4,10 +4,11 @@ import {
   createMiddleware,
   getGlobalStartContext,
 } from "@tanstack/react-start"
-import { setResponseHeader } from "@tanstack/react-start/server"
+import { setResponseHeaders } from "@tanstack/react-start/server"
 import { z } from "zod"
 
 import { createSecurityHeaders } from "./http-security"
+import { composeResponseSecurityHeaders } from "./response-headers"
 
 // Defining a Start instance replaces its default middleware list.
 const serverFunctionCsrfMiddleware = createCsrfMiddleware({
@@ -22,12 +23,22 @@ const securityMiddleware = createMiddleware().server(async ({ next }) => {
     nonce,
     production: import.meta.env.PROD,
   })
-  headers.forEach((value, name) => setResponseHeader(name, value))
-
-  const result = await next({ context: { nonce } })
-  // Explicit route Responses (including auth) must receive the same protections.
-  headers.forEach((value, name) => result.response.headers.set(name, value))
-  return result
+  try {
+    const result = await next({ context: { nonce } })
+    // Start applies header helper writes when adopting the handler's Response.
+    // Wait for that response so its CSP is still available for composition.
+    setResponseHeaders(
+      composeResponseSecurityHeaders(result.response.headers, headers)
+    )
+    return result
+  } catch (error) {
+    setResponseHeaders(
+      error instanceof Response
+        ? composeResponseSecurityHeaders(error.headers, headers)
+        : headers
+    )
+    throw error
+  }
 })
 
 const getSecuritySsrOptions = createIsomorphicFn().server(() => {

@@ -26,7 +26,7 @@ function readEnvFile(filePath) {
 
         return [key, value]
       })
-      .filter(Boolean),
+      .filter(Boolean)
   )
 }
 
@@ -54,11 +54,15 @@ async function main() {
   const env = loadEnv()
   const baseUrl = env.BETTER_AUTH_URL ?? "http://localhost:3000"
   const secret = getRequiredValue(env, "BILLING_RECONCILIATION_SECRET")
-  const response = await fetch(new URL("/api/billing/reconcile", baseUrl), {
+  const endpoint = new URL("/api/billing/reconcile", baseUrl)
+  if (process.argv.includes("--dry-run"))
+    endpoint.searchParams.set("dryRun", "1")
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       authorization: `Bearer ${secret}`,
     },
+    signal: AbortSignal.timeout(60_000),
   })
   const body = await response.json()
 

@@ -15,7 +15,6 @@ import { timeClockQueryKeys } from "@/features/time-clock/query-keys"
 import { managerDashboardKeys } from "@/features/dashboard/manager/query-options"
 import {
   approveTimeEntryAsRecorded,
-  generateAdminClockTagSetup,
   managerClockOverride,
   submitEmployeeClock,
   updateClockSettings,
@@ -125,34 +124,6 @@ function useManagerClockMutations(input: {
   }
 }
 
-function useAdminClockTagMutations(input: { userId: string }) {
-  const queryClient = useQueryClient()
-  const generateAdminClockTagSetupFn = useServerFn(generateAdminClockTagSetup)
-
-  return {
-    generateMutation: useMutation({
-      mutationFn: (variables: { locationId: string }) =>
-        generateAdminClockTagSetupFn({
-          data: {
-            ...input,
-            ...variables,
-          },
-        }),
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: timeClockQueryKeys.adminTags(input),
-        })
-        showSuccessToast("Tag setup generated.")
-      },
-      onError: (error) => {
-        showErrorToast(error, {
-          fallbackMessage: "We could not generate tag setup data.",
-        })
-      },
-    }),
-  }
-}
-
 function useClockSettingsMutations(input: {
   organizationId?: string
   locationId?: string
@@ -216,7 +187,6 @@ function useClockSettingsMutations(input: {
 }
 
 export {
-  useAdminClockTagMutations,
   useClockSettingsMutations,
   useEmployeeClockMutation,
   useManagerClockMutations,

@@ -22,7 +22,17 @@ async function readAdminSessionContext(): Promise<AdminSessionContext | null> {
 
 async function readAdminSession(): Promise<AdminSession | null> {
   const context = await readAdminSessionContext()
-  return context?.session ?? null
+  return context?.membership.twoFactorEnabled ? context.session : null
+}
+
+async function readAdminAuthStatus() {
+  const context = await readAdminSessionContext()
+  return {
+    authenticated: Boolean(context),
+    needsTwoFactorSetup: Boolean(
+      context && !context.membership.twoFactorEnabled
+    ),
+  }
 }
 
 async function requireAdminSession(): Promise<AdminSessionContext> {
@@ -30,8 +40,10 @@ async function requireAdminSession(): Promise<AdminSessionContext> {
   if (!context) {
     throw new Error("Unauthorized")
   }
+  if (!context.membership.twoFactorEnabled)
+    throw new Error("Admin multi-factor authentication is required.")
   return context
 }
 
-export { readAdminSession, requireAdminSession }
+export { readAdminSession, requireAdminSession, readAdminAuthStatus }
 export type { AdminSession }

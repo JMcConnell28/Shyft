@@ -1,6 +1,7 @@
 import "@tanstack/react-start/server-only"
 
 import { Pool } from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 
 import { getRequiredEnv } from "@/lib/env.server"
 
@@ -11,7 +12,7 @@ const globalForDatabase = globalThis as typeof globalThis & {
 function getDatabase() {
   if (!globalForDatabase.shyftDatabasePool) {
     globalForDatabase.shyftDatabasePool = new Pool({
-      connectionString: getRequiredEnv("DATABASE_URL"),
+      ...getDatabaseConnectionConfig(getRequiredEnv("DATABASE_URL")),
     })
   }
 

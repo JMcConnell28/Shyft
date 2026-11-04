@@ -1,0 +1,37 @@
+
+ RUN  v4.1.12 D:/Projects/Shyft
+
+ ❯ src/features/push-notifications/utils/push-endpoint.test.ts (34 tests | 2 failed) 23ms
+     × rejects the unsafe endpoint  https://fcm.googleapis.com/token 9ms
+     × rejects the unsafe endpoint https://fcm.googlea
+pis.com/token 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/push-notifications/utils/push-endpoint.test.ts > push provider endpoint policy > rejects the unsafe endpoint  https://fcm.googleapis.com/token
+ FAIL  src/features/push-notifications/utils/push-endpoint.test.ts > push provider endpoint policy > rejects the unsafe endpoint https://fcm.googlea
+pis.com/token
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/features/push-notifications/utils/push-endpoint.test.ts:48:60
+     46|     "https://fcm.googleapis.com\\@evil.example/token",
+     47|   ])("rejects the unsafe endpoint %s", (endpoint) => {
+     48|     expect(pushEndpointSchema.safeParse(endpoint).success).toBe(false)
+       |                                                            ^
+     49|   })
+     50|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  2 failed | 82 passed (84)
+   Start at  19:59:46
+   Duration  2.53s (transform 552ms, setup 0ms, import 1.92s, tests 92ms, environment 1ms)
+

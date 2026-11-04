@@ -1,0 +1,102 @@
+{
+  "environment": [
+    {
+      "file": ".env.local",
+      "variables": [
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "VITE_SUPABASE_URL",
+        "VITE_SUPABASE_KEY",
+        "VITE_SUPABASE_PUBLISHABLE_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "VITE_DEV_BYPASS_EMAIL_VERIFICATION",
+        "DEV_BYPASS_EMAIL_VERIFICATION",
+        "SUPABASE_SECRET_KEY",
+        "RESEND_API_KEY",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_CORE_BASE_PRICE_ID",
+        "STRIPE_CORE_EMPLOYEE_PRICE_ID",
+        "STRIPE_TIME_ATTENDANCE_EMPLOYEE_PRICE_ID",
+        "ADMIN_EMAILS",
+        "ADMIN_BETTER_AUTH_SECRET",
+        "ADMIN_BETTER_AUTH_URL",
+        "ADMIN_BOOTSTRAP_EMAILS",
+        "APP_BASE_URL",
+        "VITE_VAPID_PUBLIC_KEY",
+        "VAPID_PUBLIC_KEY",
+        "VAPID_PRIVATE_KEY",
+        "VAPID_SUBJECT",
+        "PUSH_TESTING_ENABLED",
+        "STRIPE_CORE_EXTRA_EMPLOYEE_PRICE_ID",
+        "STRIPE_CORE_EXTRA_EMPLOYEE_METER_EVENT_NAME",
+        "STRIPE_TIME_ATTENDANCE_EMPLOYEE_METER_EVENT_NAME",
+        "STRIPE_EXTRA_CLOCK_STATION_PRICE_ID"
+      ],
+      "publicVariables": [
+        "VITE_SUPABASE_URL",
+        "VITE_SUPABASE_KEY",
+        "VITE_SUPABASE_PUBLISHABLE_KEY",
+        "VITE_DEV_BYPASS_EMAIL_VERIFICATION",
+        "VITE_VAPID_PUBLIC_KEY"
+      ],
+      "db": {
+        "role": "postgres",
+        "host": "aws-1-eu-west-1.pooler.supabase.com",
+        "sslmode": null,
+        "sslrejectunauthorized": null
+      },
+      "flags": {
+        "DEV_BYPASS_EMAIL_VERIFICATION": false,
+        "VITE_DEV_BYPASS_EMAIL_VERIFICATION": true,
+        "PUSH_TESTING_ENABLED": false
+      },
+      "authSecretsDistinct": true,
+      "testRecipientSet": false,
+      "signupCodeConfigured": false,
+      "adminBootstrapConfigured": true,
+      "stripeKeyClass": "secret"
+    },
+    {
+      "file": ".env.hosted.local",
+      "variables": [
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "VITE_SUPABASE_URL",
+        "VITE_SUPABASE_KEY",
+        "VITE_SUPABASE_PUBLISHABLE_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "VITE_DEV_BYPASS_EMAIL_VERIFICATION",
+        "DEV_BYPASS_EMAIL_VERIFICATION",
+        "SUPABASE_SECRET_KEY"
+      ],
+      "publicVariables": [
+        "VITE_SUPABASE_URL",
+        "VITE_SUPABASE_KEY",
+        "VITE_SUPABASE_PUBLISHABLE_KEY",
+        "VITE_DEV_BYPASS_EMAIL_VERIFICATION"
+      ],
+      "db": {
+        "role": "postgres",
+        "host": "db.txcleqsbnblbkuihndyc.supabase.co",
+        "sslmode": null,
+        "sslrejectunauthorized": null
+      },
+      "flags": {
+        "DEV_BYPASS_EMAIL_VERIFICATION": false,
+        "VITE_DEV_BYPASS_EMAIL_VERIFICATION": false
+      },
+      "authSecretsDistinct": null,
+      "testRecipientSet": false,
+      "signupCodeConfigured": false,
+      "adminBootstrapConfigured": false,
+      "stripeKeyClass": "missing"
+    }
+  ],
+  "trackedFiles": 1686,
+  "trackedSecretMatches": [],
+  "bundleFiles": 384,
+  "bundleSecretMatches": [],
+  "sourceMaps": 0
+}

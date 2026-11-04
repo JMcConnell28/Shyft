@@ -1,0 +1,24 @@
+apps/admin/src/lib/auth.ts 504ms
+apps/admin/src/lib/auth.test.ts 37ms
+apps/admin/src/lib/admin-mfa.security.test.ts 47ms
+apps/admin/src/lib/testing/admin-auth-fixture.ts 47ms
+apps/admin/src/lib/auth-client.ts 14ms
+apps/admin/src/lib/auth-session.server.ts 35ms
+apps/admin/src/lib/auth-session.server.test.ts 51ms
+apps/admin/src/features/auth/components/admin-auth-shell.tsx 51ms
+apps/admin/src/features/auth/components/admin-login-form.tsx 34ms
+apps/admin/src/features/auth/components/admin-mfa-setup.tsx 246ms
+apps/admin/src/features/auth/hooks/use-admin-login.ts 46ms
+apps/admin/src/features/auth/hooks/use-admin-mfa-setup.ts 48ms
+apps/admin/src/features/auth/schemas/admin-profile-update-schema.ts 29ms
+apps/admin/src/features/auth/schemas/mfa-schemas.ts 58ms (unchanged)
+apps/admin/src/features/auth/server-fns.ts 37ms
+apps/admin/src/features/auth/server/admin-session.ts 72ms
+apps/admin/src/features/auth/server/admin-user-fields.ts 41ms
+apps/admin/src/features/auth/server/require-admin-profile-update.ts 44ms
+apps/admin/src/features/auth/types.ts 26ms
+apps/admin/src/routes/login.tsx 26ms
+apps/admin/src/routes/security-setup.tsx 25ms (unchanged)
+scripts/admin/account-input.mjs 40ms
+scripts/admin/accounts.mjs 17ms
+scripts/admin/provision.mjs 16ms

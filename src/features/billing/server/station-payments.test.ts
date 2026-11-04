@@ -24,6 +24,7 @@ function invoice(overrides: Partial<Stripe.Invoice> = {}): Stripe.Invoice {
 }
 const subscription = {
   id: "sub_paid",
+  status: "active",
   items: { data: [{ price: { id: "price_ta" } }] },
 } as Stripe.Subscription
 
@@ -54,5 +55,12 @@ describe("station payment evidence", () => {
       items: { ...subscription.items, data: [] },
     })
     expect(query.mock.calls[0]?.[1].at(-1)).toBe(false)
+  })
+  it("does not release hardware from an old paid invoice after cancellation", async () => {
+    await recordStationPayment(invoice(), {
+      ...subscription,
+      status: "canceled",
+    })
+    expect(query).not.toHaveBeenCalled()
   })
 })

@@ -1,0 +1,19 @@
+
+D:\Projects\Shyft\apps\admin\src\features\auth\components\admin-login-form.tsx
+  2:1  error  `./admin-auth-shell` import should occur before import of `@/components/ui/button`  import/order
+
+D:\Projects\Shyft\apps\admin\src\features\auth\components\admin-mfa-setup.tsx
+  2:1  error  `./admin-auth-shell` import should occur before import of `@/components/ui/button`  import/order
+
+D:\Projects\Shyft\apps\admin\src\features\auth\hooks\use-admin-login.ts
+  39:9  error  Unnecessary conditional, value is always truthy  @typescript-eslint/no-unnecessary-condition
+
+D:\Projects\Shyft\apps\admin\src\features\auth\hooks\use-admin-mfa-setup.ts
+  6:1  error  `zod` type import should occur before import of `@/lib/auth-client`  import/order
+
+D:\Projects\Shyft\apps\admin\src\lib\testing\admin-auth-fixture.ts
+  8:15  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+✖ 5 problems (5 errors, 0 warnings)
+  4 errors and 0 warnings potentially fixable with the `--fix` option.
+

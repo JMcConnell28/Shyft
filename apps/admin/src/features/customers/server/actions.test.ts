@@ -26,7 +26,7 @@ beforeEach(() => {
   query.mockResolvedValue({ rows: [] })
   audit.mockResolvedValue(undefined)
 })
-function station(status: string, paid = true) {
+function station(status: string, paid = true, paymentRisk = false) {
   query
     .mockResolvedValueOnce({ rows: [] })
     .mockResolvedValueOnce({ rows: [] })
@@ -37,6 +37,7 @@ function station(status: string, paid = true) {
           needs_station: paid,
           has_tag: true,
           has_delivery_address: true,
+          has_payment_risk: paymentRisk,
         },
       ],
     })
@@ -61,6 +62,14 @@ describe("station dispatch mutations", () => {
       "confirmed payment"
     )
     expect(audit).not.toHaveBeenCalled()
+  })
+  it("holds dispatch until payment risks are reviewed", async () => {
+    station("ready", true, true)
+    await expect(updateFulfillment(input, "admin")).rejects.toThrow(
+      "payment risk"
+    )
+    expect(audit).not.toHaveBeenCalled()
+    expect(query).toHaveBeenLastCalledWith("rollback")
   })
   it("commits dispatch and its audit record together", async () => {
     station("ready")

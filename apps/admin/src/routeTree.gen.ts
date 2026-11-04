@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as SecuritySetupRouteImport } from './routes/security-setup'
 import { Route as AdminBillingRouteImport } from './routes/_admin/billing'
 import { Route as AdminClockStationsRouteImport } from './routes/_admin/clock-stations'
 import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
@@ -41,6 +42,11 @@ const AdminRoute = AdminRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecuritySetupRoute = SecuritySetupRouteImport.update({
+  id: '/security-setup',
+  path: '/security-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminBillingRoute = AdminBillingRouteImport.update({
@@ -128,6 +134,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/security-setup': typeof SecuritySetupRoute
   '/support': typeof AdminSupportRouteRouteWithChildren
   '/billing': typeof AdminBillingRoute
   '/clock-stations': typeof AdminClockStationsRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/security-setup': typeof SecuritySetupRoute
   '/billing': typeof AdminBillingRoute
   '/clock-stations': typeof AdminClockStationsRoute
   '/dashboard': typeof AdminDashboardRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/security-setup': typeof SecuritySetupRoute
   '/_admin/support': typeof AdminSupportRouteRouteWithChildren
   '/_admin/billing': typeof AdminBillingRoute
   '/_admin/clock-stations': typeof AdminClockStationsRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/security-setup'
     | '/support'
     | '/billing'
     | '/clock-stations'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/security-setup'
     | '/billing'
     | '/clock-stations'
     | '/dashboard'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_admin'
     | '/login'
+    | '/security-setup'
     | '/_admin/support'
     | '/_admin/billing'
     | '/_admin/clock-stations'
@@ -253,6 +265,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SecuritySetupRoute: typeof SecuritySetupRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -277,6 +290,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security-setup': {
+      id: '/security-setup'
+      path: '/security-setup'
+      fullPath: '/security-setup'
+      preLoaderRoute: typeof SecuritySetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_admin/billing': {
@@ -445,6 +465,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
+  SecuritySetupRoute: SecuritySetupRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

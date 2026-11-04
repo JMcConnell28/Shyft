@@ -25,8 +25,9 @@ component immediately starts its import even when its dialog is closed.
   the location's configured timezone. Repeated local times use the same earlier
   instant as the application's timezone helper.
 - The attention query has no selected-day input or historical lookback limit.
-  It counts all supported unresolved items before paging, prioritising clock
-  issues, then unrecorded arrivals, then swap/cover requests. Arrival monitoring
+  It counts all supported unresolved items before paging and shows one item at a
+  time, newest first across all issue types. Older items remain available through
+  compact pagination. Arrival monitoring
   starts at the clock configuration's creation time and uses its grace period;
   it does not classify an employee as absent.
 - Arrival acknowledgements require a reason and retain the authenticated actor

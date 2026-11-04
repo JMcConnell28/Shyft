@@ -1,0 +1,17 @@
+
+D:\Projects\Shyft\src\features\push-notifications\server\push-agent.test.ts
+  3:1  error  `./push-agent` import should occur before type import of `node:dns`  import/order
+
+D:\Projects\Shyft\src\features\push-notifications\server\push-transport.test.ts
+  3:1  error  `node:https` type import should occur after import of `./push-transport`  import/order
+
+D:\Projects\Shyft\src\features\push-notifications\server\save-subscription.integration.test.ts
+  3:1  error  'pg' import is duplicated                                            no-duplicate-imports
+  3:1  error  `pg` type import should occur after import of `./save-subscription`  import/order
+
+D:\Projects\Shyft\src\features\push-notifications\utils\push-endpoint.ts
+  3:7  error  Unexpected control character(s) in regular expression: \x00  no-control-regex
+
+✖ 5 problems (5 errors, 0 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+

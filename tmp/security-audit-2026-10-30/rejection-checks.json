@@ -1,0 +1,18 @@
+[
+  {
+    "url": "https://rocketrota.com/api/auth/update-user",
+    "status": 401
+  },
+  {
+    "url": "https://admin.rocketrota.com/api/auth/update-user",
+    "status": 401
+  },
+  {
+    "url": "https://rocketrota.com/api/stripe/webhook",
+    "status": 400
+  },
+  {
+    "url": "https://rocketrota.com/api/billing/reconcile",
+    "status": 500
+  }
+]

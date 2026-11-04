@@ -1,8 +1,18 @@
 import { z } from "zod"
 
 import { PUSH_BODY_MAX_LENGTH } from "@/features/push-notifications/constants/push-limits"
+import { isSupportedPushEndpoint } from "@/features/push-notifications/utils/push-endpoint"
 
-const pushEndpointSchema = z.string().url().max(4096)
+// Removal/status must still accept historical endpoints so users can disable them.
+const storedPushEndpointSchema = z.string().url().max(4096)
+// Check the raw value: URL normalization must not erase control characters first.
+const pushEndpointSchema = z
+  .string()
+  .max(4096)
+  .refine(
+    isSupportedPushEndpoint,
+    "This browser's notification service is not supported."
+  )
 
 const pushSubscriptionSchema = z.object({
   endpoint: pushEndpointSchema,
@@ -19,9 +29,9 @@ const savePushSubscriptionSchema = z.object({
   subscription: pushSubscriptionSchema,
 })
 
-const pushEndpointInputSchema = z.object({ endpoint: pushEndpointSchema })
+const pushEndpointInputSchema = z.object({ endpoint: storedPushEndpointSchema })
 const pushStatusInputSchema = z.object({
-  endpoint: pushEndpointSchema.optional(),
+  endpoint: storedPushEndpointSchema.optional(),
 })
 
 const pushPayloadSchema = z.object({
@@ -46,6 +56,7 @@ const pushPayloadSchema = z.object({
 })
 
 export {
+  pushEndpointSchema,
   pushEndpointInputSchema,
   pushPayloadSchema,
   pushStatusInputSchema,

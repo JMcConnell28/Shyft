@@ -120,7 +120,7 @@ const generalTermsSections: ReadonlyArray<TermsSection> = [
   {
     title: "Contact",
     paragraphs: [
-      `Send questions about these Terms, account closure or data return to ${legalBusinessDetails.providerName}. Email: ${legalBusinessDetails.contactEmail}. Address: ${legalBusinessDetails.address}. Website: rocketrota.com. The Help Centre provides product guidance but does not replace these contact details for legal notices.`,
+      `Send questions about these Terms, account closure or data return to ${legalBusinessDetails.providerName}. Email: ${legalBusinessDetails.contactEmail}. Website: rocketrota.com. The Help Centre provides product guidance but does not replace these contact details for legal notices.`,
     ],
   },
 ]

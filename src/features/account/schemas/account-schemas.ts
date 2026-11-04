@@ -1,6 +1,10 @@
 import { z } from "zod"
 
-import { emailSchema, passwordSchema } from "@/lib/onboarding-schemas"
+import { passwordSchema } from "@/lib/onboarding-schemas"
+import {
+  recoveryRequestBodySchema,
+  recoveryResetBodySchema,
+} from "@/features/account/schemas/password-recovery-schemas"
 
 const changeAccountPasswordSchema = z
   .object({
@@ -14,14 +18,13 @@ const changeAccountPasswordSchema = z
   })
 
 const requestPasswordResetSchema = z.object({
-  email: emailSchema,
-  redirectTo: z.string().optional(),
+  email: recoveryRequestBodySchema.shape.email,
+  redirectTo: z.literal("/reset-password").optional(),
 })
 
 const resetPasswordSchema = z
   .object({
-    token: z.string().trim().min(1, "Reset link is missing a token."),
-    newPassword: passwordSchema,
+    ...recoveryResetBodySchema.shape,
     confirmPassword: z.string().min(1, "Confirm your new password."),
   })
   .refine((value) => value.newPassword === value.confirmPassword, {

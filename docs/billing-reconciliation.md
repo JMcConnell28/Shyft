@@ -18,7 +18,7 @@ endpoint additionally requires:
 
 ```txt
 BETTER_AUTH_URL=http://localhost:3000
-BILLING_RECONCILIATION_SECRET=replace-with-a-long-random-secret
+BILLING_RECONCILIATION_SECRET=<random-secret-at-least-32-characters>
 ```
 
 ## Local Run
@@ -33,6 +33,12 @@ Run reconciliation:
 
 ```powershell
 npm.cmd run billing:reconcile
+```
+
+To check authorization and read the latest job health without running the job:
+
+```powershell
+npm.cmd run billing:reconcile -- --dry-run
 ```
 
 The script calls:
@@ -57,6 +63,12 @@ Recommended schedule:
 - immediately after any known Stripe outage or webhook incident
 
 Use a long random `BILLING_RECONCILIATION_SECRET` and store it only in server/cron secrets.
+
+Configure the scheduler to report non-success responses. Missing or invalid
+authorization returns 401. Unavailable configuration or a failed run returns
+503. Admin Billing shows a warning when the last run failed, a run is still
+marked running after one hour, or there has been no successful run within 26 hours
+for a deployment with Stripe customers.
 
 ## Expected Result Shape
 

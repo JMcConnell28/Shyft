@@ -1,0 +1,129 @@
+{
+  "checkedAt": "2026-10-30T14:19:28.697Z",
+  "http": [
+    {
+      "target": "https://rocketrota.com/",
+      "status": 200,
+      "finalUrl": "https://rocketrota.com/",
+      "headers": {
+        "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; default-src 'self'; script-src 'self' 'nonce-3k3SIYzNXw2/RUCy7DwDog=='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "cache-control": "private, no-store",
+        "cdn-cache-control": "no-store",
+        "server": null
+      },
+      "htmlNonceCount": 117,
+      "possibleEnvBody": false
+    },
+    {
+      "target": "https://rocketrota.com/login",
+      "status": 200,
+      "finalUrl": "https://rocketrota.com/login?redirect=%2Fdashboard",
+      "headers": {
+        "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; default-src 'self'; script-src 'self' 'nonce-Kb0TxIE/H/gF4tEtChXaPg=='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "cache-control": "private, no-store",
+        "cdn-cache-control": "no-store",
+        "server": null
+      },
+      "htmlNonceCount": 101,
+      "possibleEnvBody": false
+    },
+    {
+      "target": "https://rocketrota.com/api/auth/get-session",
+      "status": 200,
+      "finalUrl": "https://rocketrota.com/api/auth/get-session",
+      "headers": {
+        "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; default-src 'self'; script-src 'self' 'nonce-aFPcqI1UJS8DIVNASeAnmQ=='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "cache-control": "private, no-store",
+        "cdn-cache-control": "no-store",
+        "server": null
+      },
+      "htmlNonceCount": 0,
+      "possibleEnvBody": false
+    },
+    {
+      "target": "https://rocketrota.com/.env",
+      "status": 404,
+      "finalUrl": "https://rocketrota.com/.env",
+      "headers": {
+        "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; default-src 'self'; script-src 'self' 'nonce-FOt29ikk3bKdN7zEtdsFBA=='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "cache-control": "private, no-store",
+        "cdn-cache-control": "no-store",
+        "server": null
+      },
+      "htmlNonceCount": 79,
+      "possibleEnvBody": false
+    },
+    {
+      "target": "https://admin.rocketrota.com/",
+      "status": 200,
+      "finalUrl": "https://admin.rocketrota.com/login?redirect=%2Fdashboard",
+      "headers": {
+        "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; default-src 'self'; script-src 'self' 'nonce-Z7QMUYfzLVTthVl5F70WWA=='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "cache-control": "private, no-store",
+        "cdn-cache-control": "no-store",
+        "server": null
+      },
+      "htmlNonceCount": 26,
+      "possibleEnvBody": false
+    }
+  ],
+  "dataApi": [
+    {
+      "table": "user",
+      "status": 401
+    },
+    {
+      "table": "employees",
+      "status": 401
+    },
+    {
+      "table": "account",
+      "status": 200
+    },
+    {
+      "table": "clock_tags",
+      "status": 200
+    },
+    {
+      "table": "time_entries",
+      "status": 401
+    }
+  ],
+  "syntheticSession": {
+    "status": 200,
+    "returnsNull": true
+  },
+  "localHostedConnection": [
+    {
+      "current_user": "postgres",
+      "current_database": "postgres",
+      "ssl": false,
+      "tls_version": null
+    }
+  ],
+  "VITE_SUPABASE_KEY": {
+    "modernPublishable": true,
+    "jwtRole": null,
+    "secretPrefix": false
+  },
+  "VITE_SUPABASE_PUBLISHABLE_KEY": {
+    "modernPublishable": true,
+    "jwtRole": null,
+    "secretPrefix": false
+  }
+}

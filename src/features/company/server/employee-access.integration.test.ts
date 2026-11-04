@@ -1,4 +1,5 @@
 import * as pg from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { assertEmployeesInScope, getEmployeeAccount } from "./employee-access"
 import type { CompanyScope } from "./shared"
@@ -31,7 +32,9 @@ describe.skipIf(!process.env.DATABASE_URL)(
   "company employee scope in Postgres",
   () => {
     const pool = new pg.Pool({
-      connectionString: process.env.DATABASE_URL,
+      ...(process.env.DATABASE_URL
+        ? getDatabaseConnectionConfig(process.env.DATABASE_URL)
+        : {}),
       max: 1,
       connectionTimeoutMillis: 15000,
     })

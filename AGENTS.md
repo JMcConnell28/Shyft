@@ -38,6 +38,12 @@ All code must follow best practices for these tools.
 
 ---
 
+## RocketRota UI work
+
+Use `$rocketrota-ui` by default for RocketRota UI implementation, redesign, and UX polish. Read [the project skill](.agents/skills/rocketrota-ui/SKILL.md) before planning or editing the affected interface.
+
+---
+
 ## Core Principles
 
 ### 1. Keep files small and focused

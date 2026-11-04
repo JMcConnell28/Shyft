@@ -6,7 +6,7 @@ const privacyOverviewSections: ReadonlyArray<LegalDocumentSection> = [
     title: "Who we are and how to contact us",
     paragraphs: [
       `RocketRota is provided by ${legalBusinessDetails.providerName}, a sole trader. This notice explains how personal information is handled when you visit our website, create an account, use a workplace or contact us. It covers our website and progressive web app.`,
-      `Our intended privacy contact is ${legalBusinessDetails.contactEmail}. Our business postal address and activation of this mailbox are being finalised before launch. Until then, existing users can raise a privacy enquiry through in-app support. Please do not send identity documents or sensitive workforce records in an initial email or support message.`,
+      `For privacy enquiries, contact ${legalBusinessDetails.contactEmail}. Existing users can also raise a privacy enquiry through in-app support. Please do not send identity documents or sensitive workforce records in an initial email or support message.`,
     ],
   },
   {

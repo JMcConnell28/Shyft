@@ -1,8 +1,10 @@
 import "@tanstack/react-start/server-only"
 
 import { queryMany } from "@rocketrota/db"
+import { getBillingReconciliationHealth } from "@rocketrota/db/billing-reconciliation"
 
 import type { BillingLocation, BillingPageData } from "@/features/billing/types"
+import { listPaymentRisks } from "@/features/billing/server/payment-risks"
 
 type BillingLocationRow = {
   billing_status: string | null
@@ -27,11 +29,13 @@ async function listBillingLocations(): Promise<BillingPageData> {
      left join public.billing_accounts billing_account
        on billing_account.id = location.billing_account_id
      order by entitlement.trial_ends_at asc
-     limit 250`,
+     limit 250`
   )
 
   return {
     locations: rows.map(mapBillingLocation),
+    risks: await listPaymentRisks(),
+    reconciliation: await getBillingReconciliationHealth(),
   }
 }
 

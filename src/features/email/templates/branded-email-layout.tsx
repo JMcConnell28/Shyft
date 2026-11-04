@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import {
   Body,
   Column,
@@ -10,8 +11,7 @@ import {
   Row,
   Section,
   Text,
-} from "@react-email/components"
-import type { ReactNode } from "react"
+} from "@/features/email/components/primitives"
 
 import {
   card,

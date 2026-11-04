@@ -29,7 +29,8 @@ type BillingEmailRecipient = {
 }
 
 async function sendPaymentFailedNotification(
-  subscription: Stripe.Subscription
+  subscription: Stripe.Subscription,
+  eventId?: string
 ) {
   const billingAccountId = subscription.metadata.billingAccountId
 
@@ -48,6 +49,7 @@ async function sendPaymentFailedNotification(
     billingUrl: recipient.billingUrl,
     userName: recipient.userName,
     workspaceName: recipient.workspaceName,
+    idempotencyKey: eventId ? `invoice-payment-failed/${eventId}` : undefined,
   })
 
   return { sent: true }

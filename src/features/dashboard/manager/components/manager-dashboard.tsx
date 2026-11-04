@@ -14,6 +14,7 @@ import {
 import type { ManagerDayData } from "../types"
 import { getDateKeyInTimeZone } from "@/lib/time-zone"
 import { useContentReadyTiming } from "@/features/navigation/hooks/use-content-ready-timing"
+import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout"
 
 function ManagerDashboard({
   organizationId,
@@ -36,10 +37,17 @@ function ManagerDashboard({
     `${location?.id}:${search.date ?? "today"}`
   )
   const actions = useDashboardActions(organizationId, userId)
-  const scrollTo = (id: string) =>
-    document
-      .getElementById(id)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" })
+  const scrollTo = (id: string) => {
+    const section = document.getElementById(id)
+    if (!section) return
+    section.focus({ preventScroll: true })
+    section.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    })
+  }
   const selectTeam = (status: "all" | "scheduled" | "working") => {
     filters.reset()
     filters.setStatus(status)
@@ -79,88 +87,79 @@ function ManagerDashboard({
   }
   const data = day.data ?? placeholder
   return (
-    <main className="flex flex-1 flex-col bg-[#f6f8fc] p-4 text-[#10204b] sm:p-6 lg:p-7">
-      <div className="mx-auto flex w-full max-w-[90rem] flex-col gap-4">
-        <ManagerDashboardHeader
-          access={access.data}
-          data={data}
-          locationId={location.id}
-          workspaceSlug={workspaceSlug}
-          refreshing={day.isFetching || attention.isFetching}
-          staffingStatus={day.status}
-          onLocation={(id) => {
-            filters.reset()
-            onSearch({ location: id, date: search.date })
-          }}
-          onDate={(date) => {
-            filters.reset()
-            onSearch({ location: location.id, date })
-          }}
-          onRefresh={() => {
-            void access.refetch()
-            void day.refetch()
-            void attention.refetch()
-          }}
+    <DashboardLayout>
+      <ManagerDashboardHeader
+        access={access.data}
+        data={data}
+        locationId={location.id}
+        workspaceSlug={workspaceSlug}
+        onLocation={(id) => {
+          filters.reset()
+          onSearch({ location: id, date: search.date })
+        }}
+        onDate={(date) => {
+          filters.reset()
+          onSearch({ location: location.id, date })
+        }}
+      />
+      {day.data ? (
+        <ManagerDashboardSummary
+          data={day.data}
+          attentionTotal={attention.data?.total}
+          onScheduled={() => selectTeam("scheduled")}
+          onWorking={() => selectTeam("working")}
+          onAll={() => selectTeam("all")}
+          onAttention={() => scrollTo("dashboard-attention")}
         />
-        {day.data ? (
-          <ManagerDashboardSummary
-            data={day.data}
-            attentionTotal={attention.data?.total}
-            onScheduled={() => selectTeam("scheduled")}
-            onWorking={() => selectTeam("working")}
-            onAll={() => selectTeam("all")}
-            onAttention={() => scrollTo("dashboard-attention")}
-          />
-        ) : null}
-        {day.isError ? (
-          <ManagerDashboardError
-            message={
-              day.data
-                ? "Could not refresh staffing. The last recorded data is shown below."
-                : undefined
-            }
-            onRetry={() => void day.refetch()}
-          />
-        ) : null}
-        <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="min-w-0 space-y-4">
-            {day.isPending ? (
-              <ManagerDashboardLoading />
-            ) : day.data ? (
-              <>
-                <ManagerTeamSection
-                  data={day.data}
-                  filters={filters}
-                  workspaceSlug={workspaceSlug}
-                  canManageRota={access.data.capabilities.canManageRota}
-                  onClock={(row, action) =>
-                    actions.openClock(row, action, day.data)
-                  }
-                  onReview={(row) => actions.reviewTeam(row, day.data)}
-                />
-                <ManagerComingUp
-                  data={day.data}
-                  access={access.data}
-                  workspaceSlug={workspaceSlug}
-                />
-              </>
-            ) : null}
-          </div>
-          <ManagerAttentionSection
-            data={attention.data}
-            error={attention.isError}
-            pending={attention.isFetching}
-            workspaceSlug={workspaceSlug}
-            onPage={setAttentionPage}
-            onReview={(item) =>
-              actions.setRequest({
-                kind: item.kind === "arrival" ? "arrival" : "review",
-                item,
-              })
-            }
-            onRetry={() => void attention.refetch()}
-          />
+      ) : null}
+      {day.isError ? (
+        <ManagerDashboardError
+          message={
+            day.data
+              ? "Could not refresh staffing. The last recorded data is shown below."
+              : undefined
+          }
+          onRetry={() => void day.refetch()}
+        />
+      ) : null}
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(17rem,0.42fr)] xl:grid-rows-[auto_1fr]">
+        <ManagerAttentionSection
+          data={attention.data}
+          error={attention.isError}
+          pending={attention.isFetching}
+          workspaceSlug={workspaceSlug}
+          onPage={setAttentionPage}
+          onReview={(item) =>
+            actions.setRequest({
+              kind: item.kind === "arrival" ? "arrival" : "review",
+              item,
+            })
+          }
+          onRetry={() => void attention.refetch()}
+        />
+        <div className="min-w-0 xl:col-start-1 xl:row-span-2 xl:row-start-1">
+          {day.isPending ? (
+            <ManagerDashboardLoading />
+          ) : day.data ? (
+            <ManagerTeamSection
+              data={day.data}
+              filters={filters}
+              workspaceSlug={workspaceSlug}
+              canManageRota={access.data.capabilities.canManageRota}
+              onClock={(row, action) =>
+                actions.openClock(row, action, day.data)
+              }
+              onReview={(row) => actions.reviewTeam(row, day.data)}
+            />
+          ) : null}
         </div>
+        {day.data ? (
+          <ManagerComingUp
+            data={day.data}
+            access={access.data}
+            workspaceSlug={workspaceSlug}
+          />
+        ) : null}
       </div>
       <ManagerDashboardDialogs
         actions={actions}
@@ -168,7 +167,7 @@ function ManagerDashboard({
         organizationId={organizationId}
         workspaceSlug={workspaceSlug}
       />
-    </main>
+    </DashboardLayout>
   )
 }
 export { ManagerDashboard }

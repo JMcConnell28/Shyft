@@ -9,7 +9,7 @@ import { nitro } from "nitro/vite"
 import { bundleReport } from "./scripts/performance/bundle-report.ts"
 import { reactCompiler } from "./scripts/vite/react-compiler.ts"
 
-const config = defineConfig({
+const config = defineConfig(({ command }) => ({
   resolve: {
     tsconfigPaths: true,
     alias: [
@@ -19,7 +19,8 @@ const config = defineConfig({
       },
     ],
   },
-  ssr: { noExternal: true },
+  // Bundle release dependencies; let Node load CommonJS normally in development.
+  ssr: { noExternal: command === "build" ? true : [] },
   server: {
     host: true,
     port: 3000,
@@ -107,6 +108,6 @@ const config = defineConfig({
     reactCompiler(),
     redact(),
   ],
-})
+}))
 
 export default config

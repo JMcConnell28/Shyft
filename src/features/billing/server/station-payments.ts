@@ -13,6 +13,7 @@ async function recordStationPayment(
 ): Promise<void> {
   const paidAt = invoice.status_transitions.paid_at
   if (
+    subscription.status !== "active" ||
     !invoice.livemode ||
     invoice.status !== "paid" ||
     invoice.amount_paid <= 0 ||

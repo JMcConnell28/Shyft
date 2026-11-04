@@ -4,11 +4,11 @@ import "reflect-metadata"
 import { betterAuth } from "better-auth"
 import { APIError, createAuthMiddleware } from "better-auth/api"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
+import { twoFactor } from "better-auth/plugins"
 
 import { getAdminAuthDatabase } from "@/lib/admin-auth-database"
 import { getOptionalEnv, getRequiredEnv } from "@/lib/env.server"
 import {
-  ensureAdminMembershipForUser,
   requireAdminMembership,
   revokeAdminSessionsForUser,
 } from "@/features/auth/server/admin-session"
@@ -29,6 +29,7 @@ const auth = betterAuth({
   },
   session: {
     modelName: "admin_session",
+    cookieCache: { enabled: false },
     expiresIn: 60 * 60 * 8,
     updateAge: 60 * 30,
   },
@@ -40,6 +41,8 @@ const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    disableSignUp: true,
+    minPasswordLength: 12,
     requireEmailVerification: false,
   },
   hooks: {
@@ -47,35 +50,34 @@ const auth = betterAuth({
       if (ctx.path === "/update-user") {
         requireAllowedAdminProfileUpdate(ctx.body)
       }
+      if (ctx.path === "/two-factor/disable") {
+        throw new APIError("FORBIDDEN", {
+          message: "Admin MFA can only be reset by an authorized operator.",
+        })
+      }
+      if (ctx.path.startsWith("/two-factor/") && ctx.body?.trustDevice) {
+        throw new APIError("FORBIDDEN", {
+          message: "Admin sign-in requires a second factor on every device.",
+        })
+      }
       return Promise.resolve()
     }),
   },
   databaseHooks: {
     user: {
       create: {
-        before: (user) => {
-          if (!isBootstrapAdminEmail(String(user.email))) {
-            throw new APIError("FORBIDDEN", {
-              message: "Admin accounts must be provisioned before sign in.",
-            })
-          }
-
-          return Promise.resolve({
-            data: {
-              role: "owner",
-            },
-          })
-        },
-        after: async (user) => {
-          await ensureAdminMembershipForUser({
-            email: user.email,
-            userId: user.id,
+        before: () => {
+          throw new APIError("FORBIDDEN", {
+            message:
+              "Admin accounts must be provisioned by an authorized operator.",
           })
         },
       },
       update: {
-        after: async (user) => {
-          if (user.disabledAt) {
+        after: async (user, context) => {
+          // Enrollment creates its replacement session after this update. Retire
+          // every older password-only session before that replacement is issued.
+          if (user.disabledAt || context?.path === "/two-factor/verify-totp") {
             await revokeAdminSessionsForUser(user.id)
           }
         },
@@ -97,16 +99,18 @@ const auth = betterAuth({
       secure: adminAuthBaseUrl.startsWith("https://"),
     },
   },
-  plugins: [tanstackStartCookies()],
+  rateLimit: {
+    enabled: true,
+    customRules: { "/sign-in/email": { window: 300, max: 10 } },
+  },
+  plugins: [
+    twoFactor({
+      issuer: "RocketRota Admin",
+      twoFactorTable: "admin_two_factor",
+      trustDeviceMaxAge: 0,
+    }),
+    tanstackStartCookies(),
+  ],
 })
-
-function isBootstrapAdminEmail(email: string) {
-  const allowedEmails = (getOptionalEnv("ADMIN_BOOTSTRAP_EMAILS") ?? "")
-    .split(",")
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean)
-
-  return allowedEmails.includes(email.toLowerCase())
-}
 
 export { auth }

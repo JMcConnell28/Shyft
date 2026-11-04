@@ -1,0 +1,72 @@
+
+D:\Projects\Shyft\apps\admin\src\features\billing\components\billing-page.tsx
+  61:13  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  61:23  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+
+D:\Projects\Shyft\apps\admin\src\features\billing\components\payment-risk-reviews.tsx
+  3:1  error  `@/features/billing/schemas/payment-risk-schemas` type import should occur before import of `@/components/ui/button`  import/order
+
+D:\Projects\Shyft\apps\admin\src\features\billing\hooks\use-payment-risk-review.ts
+  6:1  error  `@/features/billing/schemas/payment-risk-schemas` type import should occur before import of `@/features/billing/query-keys`  import/order
+
+D:\Projects\Shyft\apps\admin\src\features\billing\server\payment-risks.ts
+  6:1  error  `@/features/billing/schemas/payment-risk-schemas` type import should occur before import of `@/features/billing/schemas/payment-risk-schemas`  import/order
+
+D:\Projects\Shyft\apps\admin\src\features\billing\types.ts
+  13:14  error  Array type using 'BillingLocation[]' is forbidden. Use 'Array<BillingLocation>' instead  @typescript-eslint/array-type
+
+D:\Projects\Shyft\apps\admin\src\features\dashboard\components\dashboard-page.tsx
+  5:1  error  `@tanstack/react-router` import should occur before import of `@/lib/utils`  import/order
+
+D:\Projects\Shyft\apps\admin\src\features\dashboard\types.ts
+  19:13  error  Array type using 'DashboardActivity[]' is forbidden. Use 'Array<DashboardActivity>' instead  @typescript-eslint/array-type
+
+D:\Projects\Shyft\packages\db\src\billing-reconciliation.integration.test.ts
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+The file was not found in any of the provided project(s): packages\db\src\billing-reconciliation.integration.test.ts
+
+D:\Projects\Shyft\packages\db\src\billing-reconciliation.ts
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+The file was not found in any of the provided project(s): packages\db\src\billing-reconciliation.ts
+
+D:\Projects\Shyft\src\features\email\server\organization-welcome-email.test.tsx
+  2:1  error  `vitest` import should occur before import of `@/features/email/testing/render`  import/order
+
+D:\Projects\Shyft\src\features\email\templates\auth-email-layout.tsx
+  11:1  error  `react` type import should occur before import of `@/features/email/components/primitives`  import/order
+
+D:\Projects\Shyft\src\features\email\templates\branded-email-layout.tsx
+  14:1  error  `react` type import should occur before import of `@/features/email/components/primitives`  import/order
+
+D:\Projects\Shyft\src\features\email\templates\organization-welcome.test.tsx
+  2:1  error  `vitest` import should occur before import of `@/features/email/testing/render`  import/order
+
+D:\Projects\Shyft\src\features\email\templates\reset-password.test.tsx
+  2:1  error  `vitest` import should occur before import of `@/features/email/testing/render`  import/order
+
+D:\Projects\Shyft\src\features\email\templates\rota-published.test.tsx
+  2:1  error  `vitest` import should occur before import of `@/features/email/testing/render`  import/order
+
+D:\Projects\Shyft\src\features\email\templates\rota-published.tsx
+  10:1  error  `@/features/email/types/rota-published` type import should occur before import of `@/features/email/components/primitives`  import/order
+
+D:\Projects\Shyft\src\features\email\templates\verify-email.test.tsx
+  2:1  error  `vitest` import should occur before import of `@/features/email/testing/render`  import/order
+
+D:\Projects\Shyft\src\features\email\testing\render.ts
+  15:16  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+D:\Projects\Shyft\src\features\payroll\adapters\sage-csv.ts
+  5:3  error  Member 'PayrollExportColumnKey' of the import declaration should be sorted alphabetically  sort-imports
+
+D:\Projects\Shyft\src\features\timesheets\utils\csv.ts
+  10:29  error  Array type using 'CsvCell[][]' is forbidden. Use 'Array<CsvCell[]>' instead  @typescript-eslint/array-type
+  10:29  error  Array type using 'CsvCell[]' is forbidden. Use 'Array<CsvCell>' instead      @typescript-eslint/array-type
+
+D:\Projects\Shyft\supabase\tests\application_api_grants.integration.test.ts
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+The file was not found in any of the provided project(s): supabase\tests\application_api_grants.integration.test.ts
+
+✖ 23 problems (23 errors, 0 warnings)
+  17 errors and 0 warnings potentially fixable with the `--fix` option.
+

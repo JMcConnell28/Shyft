@@ -8,7 +8,7 @@ import type { AttentionPage } from "../types"
 import { getDatabase } from "@/lib/db"
 import { timeServerOperation } from "@/lib/server-timing"
 
-const ATTENTION_PAGE_SIZE = 8
+const ATTENTION_PAGE_SIZE = 1
 const issueSchema = z.object({
   id: z.string(),
   kind: z.enum(["review", "missing_clock_out", "arrival", "swap", "cover"]),

@@ -1,3 +1,4 @@
+import type { RotaPublishedShift } from "@/features/email/types/rota-published"
 import {
   Button,
   Heading,
@@ -5,9 +6,8 @@ import {
   Link,
   Section,
   Text,
-} from "@react-email/components"
+} from "@/features/email/components/primitives"
 
-import type { RotaPublishedShift } from "@/features/email/types/rota-published"
 import { BrandedEmailLayout } from "@/features/email/templates/branded-email-layout"
 import {
   button,

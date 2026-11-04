@@ -14,7 +14,7 @@ type StripeWebhookReference = {
 
 function getStringMetadataValue(
   metadata: Stripe.Metadata | null | undefined,
-  key: string,
+  key: string
 ) {
   const value = metadata?.[key]
 
@@ -22,7 +22,7 @@ function getStringMetadataValue(
 }
 
 function getCustomerId(
-  customer: string | Stripe.Customer | Stripe.DeletedCustomer | null,
+  customer: string | Stripe.Customer | Stripe.DeletedCustomer | null
 ) {
   if (!customer) {
     return null
@@ -32,11 +32,7 @@ function getCustomerId(
 }
 
 function getSubscriptionId(
-  subscription:
-    | string
-    | Stripe.Subscription
-    | null
-    | undefined,
+  subscription: string | Stripe.Subscription | null | undefined
 ) {
   if (!subscription) {
     return null
@@ -76,7 +72,7 @@ function getWebhookReference(event: Stripe.Event): StripeWebhookReference {
     return {
       billingAccountId: getStringMetadataValue(
         subscription.metadata,
-        "billingAccountId",
+        "billingAccountId"
       ),
       stripeCustomerId: getCustomerId(subscription.customer),
       stripeSubscriptionId: subscription.id,
@@ -126,7 +122,7 @@ async function recordStripeWebhookReceived(event: Stripe.Event) {
       reference.billingAccountId,
       reference.stripeCustomerId,
       reference.stripeSubscriptionId,
-    ],
+    ]
   )
   const status = result.rows.at(0)?.processing_status
 
@@ -157,7 +153,7 @@ async function recordStripeWebhookProcessed(event: Stripe.Event) {
       reference.billingAccountId,
       reference.stripeCustomerId,
       reference.stripeSubscriptionId,
-    ],
+    ]
   )
 }
 
@@ -171,7 +167,7 @@ async function recordStripeWebhookFailed(event: Stripe.Event, error: unknown) {
          error_message = left($2, 1000),
          updated_at = timezone('utc', now())
      where stripe_event_id = $1`,
-    [event.id, message],
+    [event.id, message]
   )
 }
 

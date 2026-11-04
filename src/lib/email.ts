@@ -1,9 +1,10 @@
 import "@tanstack/react-start/server-only"
 
-import { Resend } from "resend"
 import type { ReactElement } from "react"
 
 import { getOptionalEnv, getRequiredEnv } from "@/lib/env.server"
+import { deliverEmail } from "@/features/email/server/delivery"
+import { renderEmailHtml } from "@/features/email/server/render"
 
 type SendEmailOptions = {
   to: string
@@ -43,7 +44,6 @@ async function sendTransactionalEmail({
   const apiKey = getRequiredEnv("RESEND_API_KEY")
   const from =
     getOptionalEnv("RESEND_FROM_EMAIL") ?? "RocketRota <onboarding@resend.dev>"
-  const resend = new Resend(apiKey)
   const recipient = getRecipient(to)
 
   if (isDevelopmentEmailMode()) {
@@ -52,20 +52,15 @@ async function sendTransactionalEmail({
     )
   }
 
-  const { error } = await resend.emails.send(
-    {
-      from,
-      to: [recipient],
-      subject,
-      react,
-      text,
-    },
-    idempotencyKey ? { idempotencyKey } : undefined
-  )
-
-  if (error) {
-    throw new Error(`Resend email delivery failed: ${error.message}`)
-  }
+  await deliverEmail({
+    apiKey,
+    from,
+    to: recipient,
+    subject,
+    html: renderEmailHtml(react),
+    text,
+    idempotencyKey,
+  })
 }
 
 export { sendTransactionalEmail }

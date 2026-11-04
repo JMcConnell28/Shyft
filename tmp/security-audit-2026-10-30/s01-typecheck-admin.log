@@ -1,0 +1,8 @@
+
+> typecheck:admin
+> npm run typecheck --workspace @rocketrota/admin
+
+
+> typecheck
+> tsc --noEmit
+

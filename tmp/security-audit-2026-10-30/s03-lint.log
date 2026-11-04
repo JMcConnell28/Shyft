@@ -1,0 +1,7 @@
+
+D:\Projects\Shyft\src\lib\auth.ts
+   94:46  warning  Async arrow function has no 'await' expression                             @typescript-eslint/require-await
+  115:48  warning  'organization' is already declared in the upper scope on line 8 column 10  no-shadow
+
+✖ 2 problems (0 errors, 2 warnings)
+

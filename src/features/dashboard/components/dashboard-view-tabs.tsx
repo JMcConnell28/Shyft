@@ -2,6 +2,9 @@ import type { ReactNode } from "react"
 import type { DashboardView } from "@/features/dashboard/schemas/dashboard-search"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+const dashboardTabClassName =
+  "h-11 rounded-none px-3 text-sm font-medium text-muted-foreground after:bottom-0 after:bg-primary data-active:text-foreground md:h-10"
+
 function DashboardViewTabs({
   canManage,
   view,
@@ -21,14 +24,18 @@ function DashboardViewTabs({
       onValueChange={(value) => {
         if (value === "personal" || value === "manager") onViewChange(value)
       }}
-      className="flex-1 gap-0"
+      className="min-w-0 flex-1 gap-0"
     >
-      <div className="border-b px-4 py-3 sm:px-6 lg:px-7">
-        <TabsList aria-label="Dashboard view" className="w-full sm:w-fit">
-          <TabsTrigger value="personal" className="px-3">
+      <div className="border-b border-border px-4 sm:px-6">
+        <TabsList
+          aria-label="Dashboard view"
+          variant="line"
+          className="max-w-full justify-start gap-2 p-0 group-data-horizontal/tabs:h-11 md:group-data-horizontal/tabs:h-10"
+        >
+          <TabsTrigger value="personal" className={dashboardTabClassName}>
             My dashboard
           </TabsTrigger>
-          <TabsTrigger value="manager" className="px-3">
+          <TabsTrigger value="manager" className={dashboardTabClassName}>
             Manager dashboard
           </TabsTrigger>
         </TabsList>

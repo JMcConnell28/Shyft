@@ -1,7 +1,18 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import {
+  Button,
+  Heading,
+  Link,
+  Text,
+} from "@/features/email/components/primitives"
 
 import { AuthEmailLayout } from "@/features/email/templates/auth-email-layout"
-import { appName, button, heading, link, text } from "@/features/email/templates/email-styles"
+import {
+  appName,
+  button,
+  heading,
+  link,
+  text,
+} from "@/features/email/templates/email-styles"
 
 type OrganizationInvitationEmailProps = {
   invitationUrl: string

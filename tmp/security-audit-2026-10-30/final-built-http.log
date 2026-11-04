@@ -1,0 +1,6 @@
+Inspected 800 production files for retired paths and excluded tooling.
+The login page's SSR script nonce matches the response CSP.
+Retired route returned 404 and both retired server functions rejected requests.
+html privacy request returned 404 with sandbox CSP and the global nonce policy.
+json privacy request returned 404 with sandbox CSP and the global nonce policy.
+Reconciliation returned 401 without a valid token and 200 for the authorized read-only dry run.

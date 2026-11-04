@@ -18,14 +18,10 @@ import { emailSchema, passwordSchema } from "@/lib/onboarding-schemas"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { invalidateNavigationCache } from "@/features/navigation/invalidate-navigation-cache"
+import { authenticationSearchSchema } from "@/features/account/schemas/authentication-search-schemas"
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (search) => ({
-    redirect:
-      typeof search.redirect === "string" && search.redirect.length > 0
-        ? search.redirect
-        : "/dashboard",
-  }),
+  validateSearch: (search) => authenticationSearchSchema.parse(search),
   beforeLoad: async ({ context }) => {
     await invalidateNavigationCache(context.queryClient)
     const session = await getSession()

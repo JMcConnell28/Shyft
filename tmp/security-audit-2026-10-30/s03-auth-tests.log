@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 D:/Projects/Shyft
+
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  15:46:10
+   Duration  46.20s (transform 2.17s, setup 0ms, import 71.16s, tests 16.87s, environment 0ms)
+

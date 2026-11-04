@@ -5,6 +5,7 @@ import { TrialEndingEmail } from "@/features/email/templates/trial-ending"
 import { sendTransactionalEmail } from "@/lib/email"
 
 type BillingEmailInput = {
+  idempotencyKey?: string
   billingUrl: string
   to: string
   userName: string
@@ -18,6 +19,7 @@ type SendTrialEndingEmailInput = BillingEmailInput & {
 async function sendPaymentFailedEmail(input: BillingEmailInput) {
   await sendTransactionalEmail({
     to: input.to,
+    idempotencyKey: input.idempotencyKey,
     subject: `Payment failed for ${input.workspaceName}`,
     react: (
       <PaymentFailedEmail

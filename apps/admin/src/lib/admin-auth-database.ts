@@ -1,6 +1,7 @@
 import "@tanstack/react-start/server-only"
 
 import { Pool } from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 
 import { getRequiredEnv } from "@/lib/env.server"
 
@@ -11,7 +12,7 @@ const globalForAdminAuthDatabase = globalThis as typeof globalThis & {
 function getAdminAuthDatabase() {
   if (!globalForAdminAuthDatabase.rocketrotaAdminAuthDatabasePool) {
     globalForAdminAuthDatabase.rocketrotaAdminAuthDatabasePool = new Pool({
-      connectionString: getRequiredEnv("DATABASE_URL"),
+      ...getDatabaseConnectionConfig(getRequiredEnv("DATABASE_URL")),
       options: "-c search_path=admin_private,public",
     })
   }

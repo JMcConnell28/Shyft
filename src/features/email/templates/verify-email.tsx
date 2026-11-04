@@ -6,7 +6,7 @@ import {
   Link,
   Section,
   Text,
-} from "@react-email/components"
+} from "@/features/email/components/primitives"
 
 import { BrandedEmailLayout } from "@/features/email/templates/branded-email-layout"
 import {

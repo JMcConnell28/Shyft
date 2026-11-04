@@ -33,7 +33,7 @@ const privacyProcessingSections: ReadonlyArray<LegalDocumentSection> = [
     paragraphs: [
       "Workforce information is made available within your workplace through the roles, permissions and features it uses. Authorised RocketRota operators may access information where needed for support, administration, security or lawful instructions. Your workplace may download files and share them with its payroll provider or other advisers; it is responsible for that subsequent use.",
       "We use infrastructure, deployment, communications and payment providers as described below. Information may also be disclosed to professional advisers, authorities or courts where necessary and lawful, or to a prospective business successor under appropriate safeguards. We do not sell personal information or use it to build advertising profiles.",
-      "Browser and operating-system push services handle delivery information when you enable notifications. If you contact our listed Gmail address once activated, Google also processes that correspondence as the email provider. Avoid sending sensitive workforce records by ordinary email; an appropriate method should be agreed for any such request.",
+      "Browser and operating-system push services handle delivery information when you enable notifications. If you contact our listed Gmail address, Google also processes that correspondence as the email provider. Avoid sending sensitive workforce records by ordinary email; an appropriate method should be agreed for any such request.",
     ],
   },
   {

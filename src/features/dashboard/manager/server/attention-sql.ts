@@ -44,20 +44,20 @@ const dashboardAttentionSql = `with ${dashboardScheduleSql},
       )))
   ), issues as materialized (
     select id, kind, employee_id, employee_name, location_id, location_name, time_zone,
-      occurred_at, segment, assignment_id, clocked_out_at, work_date, 0 as priority,
+      occurred_at, segment, assignment_id, clocked_out_at, work_date,
       case when kind = 'missing_clock_out' then
         'Clock-out not recorded beyond the configured review threshold.' || coalesce(E'\n' || nullif(notes, ''), '')
       else coalesce(nullif(btrim(notes), ''), 'Time entry requires manager review; no reason was recorded.') end as reason
     from clock_issues
     union all
     select w.assignment_id::text || ':' || w.segment, 'arrival', w.employee_id, w.employee_name,
-      w.location_id, w.location_name, w.time_zone, w.starts_at, w.segment, w.assignment_id, null::timestamptz, w.day_date::text, 1,
+      w.location_id, w.location_name, w.time_zone, w.starts_at, w.segment, w.assignment_id, null::timestamptz, w.day_date::text,
       'Arrival not recorded after the ' || w.late_grace || '-minute grace period. Confirm with the employee; this is not a recorded absence.'
     from schedule_windows w where ${unresolvedArrivalSql}
     union all
     select request.id::text, request.request_type, request.requester_employee_id,
       e.full_name, l.id, l.name, coalesce(c.timezone, 'Europe/London'), request.created_at,
-      'full', null::uuid, null::timestamptz, source.day_date::text, 2,
+      'full', null::uuid, null::timestamptz, source.day_date::text,
       case when request.status = 'pending_manager' then
         case when request.request_type = 'cover' then 'Cover request awaiting manager approval.' else 'Shift swap awaiting manager approval.' end
       else 'Open cover request awaiting a volunteer.' end
@@ -72,10 +72,10 @@ const dashboardAttentionSql = `with ${dashboardScheduleSql},
       and (request.status = 'pending_manager' or (request.request_type = 'cover' and request.status = 'open'))
   ), totals as (select count(*)::int as total from issues),
   paged as (
-    select * from issues order by priority, occurred_at, id
+    select * from issues order by occurred_at desc, kind, id
     limit $5 offset (least($6, greatest(1, ceil((select total from totals)::numeric / $5)::int)) - 1) * $5
   )
-  select total, coalesce((select jsonb_agg(to_jsonb(paged) order by priority, occurred_at, id) from paged), '[]'::jsonb) as items
+  select total, coalesce((select jsonb_agg(to_jsonb(paged) order by occurred_at desc, kind, id) from paged), '[]'::jsonb) as items
   from totals`
 
 export { dashboardAttentionSql, unresolvedArrivalSql }

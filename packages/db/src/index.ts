@@ -1,6 +1,8 @@
 import "@tanstack/react-start/server-only"
 
-import { Pool, type QueryResultRow } from "pg"
+import { Pool } from "pg"
+import { getDatabaseConnectionConfig } from "./connection-config.mjs"
+import type { QueryResultRow } from "pg"
 
 const globalForDatabase = globalThis as typeof globalThis & {
   rocketrotaDatabasePool?: Pool
@@ -19,7 +21,7 @@ function getRequiredServerEnv(name: string) {
 function getDatabase() {
   if (!globalForDatabase.rocketrotaDatabasePool) {
     globalForDatabase.rocketrotaDatabasePool = new Pool({
-      connectionString: getRequiredServerEnv("DATABASE_URL"),
+      ...getDatabaseConnectionConfig(getRequiredServerEnv("DATABASE_URL")),
     })
   }
 

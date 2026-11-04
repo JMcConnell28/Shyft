@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto"
 import { Pool } from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { collectPersonalDataDraft } from "@rocketrota/db/privacy"
 
@@ -9,7 +10,9 @@ describe.skipIf(!process.env.DATABASE_URL)(
   "personal data collection against Postgres",
   () => {
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      ...(process.env.DATABASE_URL
+        ? getDatabaseConnectionConfig(process.env.DATABASE_URL)
+        : {}),
       max: 1,
       connectionTimeoutMillis: 15000,
     })

@@ -1,0 +1,27 @@
+
+ RUN  v4.1.12 D:/Projects/Shyft/apps/admin
+
+ ❯ src/lib/admin-mfa.security.test.ts (4 tests | 1 failed) 19040ms
+     × verifies enrollment before enabling MFA and retires all password-only sessions 12195ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/admin-mfa.security.test.ts > operator provisioning and required admin MFA > verifies enrollment before enabling MFA and retires all password-only sessions
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/admin-mfa.security.test.ts:68:3
+     66|     ).rejects.toThrow("authorized operator")
+     67|   })
+     68|   it("verifies enrollment before enabling MFA and retires all password…
+       |   ^
+     69|     const old = await postAuth("/sign-in/email", operator)
+     70|     const setup = await enroll()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 14 passed (15)
+      Tests  1 failed | 63 passed (64)
+   Start at  14:49:54
+   Duration  256.58s (transform 23.90s, setup 0ms, import 173.98s, tests 312.55s, environment 6ms)
+

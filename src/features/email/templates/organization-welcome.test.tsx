@@ -1,5 +1,5 @@
-import { render, toPlainText } from "@react-email/components"
 import { describe, expect, it } from "vitest"
+import { render, toPlainText } from "@/features/email/testing/render"
 
 import { OrganizationWelcomeEmail } from "@/features/email/templates/organization-welcome"
 
@@ -17,7 +17,7 @@ describe("OrganizationWelcomeEmail", () => {
     )
     const content = toPlainText(html)
 
-    expect(content).toContain("WELCOME TO ROCKETROTA")
+    expect(content).toContain("Welcome to RocketRota")
     expect(content).toContain("The Crown Group is ready to go")
     expect(content).toContain("Open dashboard")
     expect(content.match(/Open dashboard/g)).toHaveLength(1)

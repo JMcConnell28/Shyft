@@ -12,6 +12,7 @@ import { RootErrorState } from "@/components/errors/root-error-state"
 import { AppToaster } from "@/components/providers/app-toaster"
 import { PwaAppController } from "@/features/pwa/components/pwa-app-controller"
 import { NavigationCacheController } from "@/features/navigation/components/navigation-cache-controller"
+import { siteMetadata } from "@/features/marketing/constants/site-metadata"
 
 type RouterContext = {
   queryClient: QueryClient
@@ -41,10 +42,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       },
       {
         name: "apple-mobile-web-app-title",
-        content: "RocketRota",
+        content: siteMetadata.name,
       },
       {
-        title: "RocketRota",
+        name: "application-name",
+        content: siteMetadata.name,
+      },
+      {
+        title: siteMetadata.name,
       },
     ],
     links: [

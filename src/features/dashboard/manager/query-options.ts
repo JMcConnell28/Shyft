@@ -21,7 +21,14 @@ const managerDashboardKeys = {
       input.date ?? "today",
     ] as const,
   attention: (organizationId: string, page: number, userId: string) =>
-    ["manager-dashboard", "attention", organizationId, userId, page] as const,
+    [
+      "manager-dashboard",
+      "attention",
+      organizationId,
+      userId,
+      "recent",
+      page,
+    ] as const,
 }
 function managerAccessOptions(organizationId: string, userId: string) {
   return queryOptions({

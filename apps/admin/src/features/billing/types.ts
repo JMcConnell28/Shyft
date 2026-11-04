@@ -1,3 +1,6 @@
+import type { PaymentRisk } from "@/features/billing/schemas/payment-risk-schemas"
+import type { BillingReconciliationHealth } from "@rocketrota/db/billing-reconciliation"
+
 type BillingLocation = {
   billingStatus: string | null
   locationId: string
@@ -7,7 +10,9 @@ type BillingLocation = {
 }
 
 type BillingPageData = {
-  locations: BillingLocation[]
+  locations: Array<BillingLocation>
+  risks: Array<PaymentRisk>
+  reconciliation: BillingReconciliationHealth
 }
 
 export type { BillingLocation, BillingPageData }

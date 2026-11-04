@@ -2,9 +2,7 @@ import { createServerFn } from "@tanstack/react-start"
 
 import { clockScanSearchSchema } from "@/features/time-clock/schemas/clock-scan-schemas"
 import {
-  adminUserInputSchema,
   approveTimeEntryAsRecordedInputSchema,
-  generateAdminClockTagSetupInputSchema,
   getClockSettingsPageInputSchema,
   getEmployeeClockPageInputSchema,
   getManagerClockPageInputSchema,
@@ -27,22 +25,6 @@ const getClockScanPageData = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const module = await import("@/features/time-clock/server/ntag-clock-test")
     return module.getClockScanPageData(data)
-  })
-
-const getAdminClockTagsPageData = createServerFn({ method: "POST" })
-  .validator((input: unknown) => adminUserInputSchema.parse(input))
-  .handler(async ({ data }) => {
-    const module = await import("@/features/time-clock/server/admin-tags")
-    return module.getAdminClockTagsPageData(data)
-  })
-
-const generateAdminClockTagSetup = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    generateAdminClockTagSetupInputSchema.parse(input)
-  )
-  .handler(async ({ data }) => {
-    const module = await import("@/features/time-clock/server/admin-tags")
-    return module.generateAdminClockTagSetup(data)
   })
 
 const submitEmployeeClock = createServerFn({ method: "POST" })
@@ -101,8 +83,6 @@ const updateClockSettings = createServerFn({ method: "POST" })
 
 export {
   approveTimeEntryAsRecorded,
-  generateAdminClockTagSetup,
-  getAdminClockTagsPageData,
   getClockScanPageData,
   getClockSettingsPageData,
   getEmployeeClockPageData,

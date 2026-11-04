@@ -2,6 +2,7 @@ import { Suspense, lazy, useState } from "react"
 import { format, parseISO } from "date-fns"
 import {
   CalendarDaysIcon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react"
@@ -38,19 +39,25 @@ function DashboardMobileDatePicker({
   }
 
   return (
-    <div className="w-36 shrink-0 sm:hidden">
+    <div className="min-w-0 sm:hidden">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger
           render={
             <Button
               variant="outline"
-              className="h-11 w-full justify-start gap-2 rounded-lg px-3 text-[#10204b]"
+              className="h-11 w-full justify-start gap-2 rounded-lg bg-card px-3 text-sm font-medium shadow-none"
               aria-label={`Staffing date: ${format(selectedDate, "EEEE d MMMM yyyy")}`}
             />
           }
         >
-          <CalendarDaysIcon className="size-4 text-[#7481a0]" />
-          {isToday ? "Today" : format(selectedDate, "d MMM yyyy")}
+          <CalendarDaysIcon
+            aria-hidden="true"
+            className="size-4 text-muted-foreground"
+          />
+          <span className="truncate">
+            {isToday ? "Today" : format(selectedDate, "d MMM yyyy")}
+          </span>
+          <ChevronDownIcon className="ml-auto size-4" />
         </PopoverTrigger>
         <PopoverContent
           align="end"

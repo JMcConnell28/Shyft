@@ -1,0 +1,632 @@
+[
+  {
+    "schemaname": "public",
+    "tablename": "announcement_locations",
+    "policyname": "announcement_locations_delete_server_only",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "false",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_locations",
+    "policyname": "announcement_locations_insert_server_only",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_locations",
+    "policyname": "announcement_locations_select_visible",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM locations location\n  WHERE ((location.id = announcement_locations.location_id) AND is_org_member(location.organization_id))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_locations",
+    "policyname": "announcement_locations_update_server_only",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "false",
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_poll_options",
+    "policyname": "announcement_poll_options_delete_server_only",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "false",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_poll_options",
+    "policyname": "announcement_poll_options_insert_server_only",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_poll_options",
+    "policyname": "announcement_poll_options_select_visible",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM announcements announcement\n  WHERE (announcement.id = announcement_poll_options.announcement_id)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_poll_options",
+    "policyname": "announcement_poll_options_update_server_only",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "false",
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_poll_votes",
+    "policyname": "announcement_poll_votes_delete_server_only",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "false",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_poll_votes",
+    "policyname": "announcement_poll_votes_insert_server_only",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_poll_votes",
+    "policyname": "announcement_poll_votes_select_own",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(user_id = current_better_auth_user_id())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_poll_votes",
+    "policyname": "announcement_poll_votes_update_server_only",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "false",
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_reads",
+    "policyname": "announcement_reads_delete_server_only",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "false",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_reads",
+    "policyname": "announcement_reads_insert_server_only",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_reads",
+    "policyname": "announcement_reads_select_own",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(user_id = current_better_auth_user_id())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcement_reads",
+    "policyname": "announcement_reads_update_server_only",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "false",
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcements",
+    "policyname": "announcements_delete_server_only",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "false",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcements",
+    "policyname": "announcements_insert_server_only",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcements",
+    "policyname": "announcements_select_visible",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(has_org_role(organization_id, ARRAY['owner'::text, 'admin'::text]) OR (author_user_id = current_better_auth_user_id()) OR ((status = 'active'::text) AND is_org_member(organization_id) AND ((target_scope = 'organization'::text) OR (EXISTS ( SELECT 1\n   FROM ((announcement_locations target\n     JOIN employees employee ON (((employee.organization_id = announcements.organization_id) AND (employee.user_id = current_better_auth_user_id()) AND (employee.status = 'active'::text))))\n     JOIN employee_location_assignments assignment ON (((assignment.employee_id = employee.id) AND (assignment.location_id = target.location_id) AND (assignment.is_enabled = true) AND (assignment.disabled_at IS NULL))))\n  WHERE (target.announcement_id = announcements.id))) OR (EXISTS ( SELECT 1\n   FROM announcement_locations target\n  WHERE ((target.announcement_id = announcements.id) AND has_location_role(target.location_id, ARRAY['manager'::text])))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "announcements",
+    "policyname": "announcements_update_server_only",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "false",
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "billing_accounts",
+    "policyname": "billing_accounts_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND is_org_member(organization_id)) OR (EXISTS ( SELECT 1\n   FROM locations l\n  WHERE ((l.billing_account_id = billing_accounts.id) AND is_location_member(l.id)))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "billing_subscriptions",
+    "policyname": "billing_subscriptions_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM billing_accounts ba\n  WHERE ((ba.id = billing_subscriptions.billing_account_id) AND (((ba.organization_id IS NOT NULL) AND is_org_member(ba.organization_id)) OR (EXISTS ( SELECT 1\n           FROM locations l\n          WHERE ((l.billing_account_id = ba.id) AND is_location_member(l.id))))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "clock_attempts",
+    "policyname": "clock_attempts_select_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "((location_id IS NOT NULL) AND has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'supervisor'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "clock_events",
+    "policyname": "clock_events_select_self_or_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'supervisor'::text]) OR (EXISTS ( SELECT 1\n   FROM employees employee\n  WHERE ((employee.id = clock_events.employee_id) AND (employee.user_id = current_better_auth_user_id())))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "clock_scan_sessions",
+    "policyname": "clock_scan_sessions_select_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'supervisor'::text])",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "clock_tag_counter_claims",
+    "policyname": "clock_tag_counter_claims_select_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM clock_tags tag\n  WHERE ((tag.id = clock_tag_counter_claims.clock_tag_id) AND has_location_role(tag.location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'supervisor'::text]))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "clock_tags",
+    "policyname": "clock_tags_select_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'supervisor'::text])",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "employee_compensation",
+    "policyname": "employee_compensation_select_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND has_org_role(organization_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])) OR ((location_id IS NOT NULL) AND has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "employee_location_assignments",
+    "policyname": "employee_location_assignments_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "is_location_member(location_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "employee_rota_notes",
+    "policyname": "employee_rota_notes_delete_server_only",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "false",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "employee_rota_notes",
+    "policyname": "employee_rota_notes_insert_server_only",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "employee_rota_notes",
+    "policyname": "employee_rota_notes_select_managers",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(has_org_role(organization_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'supervisor'::text]) OR ((location_id IS NOT NULL) AND has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'supervisor'::text])))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "employee_rota_notes",
+    "policyname": "employee_rota_notes_update_server_only",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "false",
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "employees",
+    "policyname": "employees_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND is_org_member(organization_id)) OR ((location_id IS NOT NULL) AND is_location_member(location_id)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "invitation",
+    "policyname": "invitation_select_admin_or_invitee",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(has_org_role(\"organizationId\", ARRAY['owner'::text, 'admin'::text]) OR (lower(email) = lower(current_better_auth_email())))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "location_clock_settings",
+    "policyname": "location_clock_settings_select_location_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "is_location_member(location_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "location_memberships",
+    "policyname": "location_memberships_select_location_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "is_location_member(location_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "location_operating_hours",
+    "policyname": "location_operating_hours_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "is_org_member(organization_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "location_rota_settings",
+    "policyname": "location_rota_settings_delete_manager",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "location_rota_settings",
+    "policyname": "location_rota_settings_insert_manager",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "location_rota_settings",
+    "policyname": "location_rota_settings_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "is_location_member(location_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "location_rota_settings",
+    "policyname": "location_rota_settings_update_manager",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])",
+    "with_check": "has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "locations",
+    "policyname": "locations_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND is_org_member(organization_id)) OR is_location_member(id))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "member",
+    "policyname": "member_select_org_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "is_org_member(\"organizationId\")",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "organization",
+    "policyname": "organization_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "is_org_member(id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "organization_onboarding_states",
+    "policyname": "onboarding_state_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "is_org_member(organization_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "rota_budgets",
+    "policyname": "rota_budgets_select_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND has_org_role(organization_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])) OR ((organization_id IS NULL) AND has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "rota_published_shift_assignments",
+    "policyname": "rota_published_shift_assignments_select_by_role",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM (rota_published_shifts rps\n     JOIN rotas r ON ((r.id = rps.rota_id)))\n  WHERE ((rps.id = rota_published_shift_assignments.rota_published_shift_id) AND can_read_org_rota(r.organization_id, 'published'::text))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "rota_published_shifts",
+    "policyname": "rota_published_shifts_select_by_role",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM rotas r\n  WHERE ((r.id = rota_published_shifts.rota_id) AND can_read_org_rota(r.organization_id, 'published'::text))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "rota_reads",
+    "policyname": "rota_reads_select_own",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(user_id = current_better_auth_user_id())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "rota_shift_assignments",
+    "policyname": "rota_shift_assignments_select_by_role",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM (rota_shifts rs\n     JOIN rotas r ON ((r.id = rs.rota_id)))\n  WHERE ((rs.id = rota_shift_assignments.rota_shift_id) AND can_read_org_rota(r.organization_id, r.status))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "rota_shifts",
+    "policyname": "rota_shifts_select_by_role",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM rotas r\n  WHERE ((r.id = rota_shifts.rota_id) AND can_read_org_rota(r.organization_id, r.status))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "rota_template_shifts",
+    "policyname": "rota_template_shifts_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM rota_templates template\n  WHERE ((template.id = rota_template_shifts.template_id) AND (((template.organization_id IS NOT NULL) AND is_org_member(template.organization_id)) OR ((template.location_id IS NOT NULL) AND is_location_member(template.location_id))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "rota_templates",
+    "policyname": "rota_templates_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND is_org_member(organization_id)) OR ((location_id IS NOT NULL) AND is_location_member(location_id)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "rotas",
+    "policyname": "rotas_select_by_role",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND can_read_org_rota(organization_id, status)) OR can_read_location_rota(location_id, status))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "shift_swap_requests",
+    "policyname": "shift_swap_requests_delete_server_only",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "false",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "shift_swap_requests",
+    "policyname": "shift_swap_requests_insert_server_only",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "shift_swap_requests",
+    "policyname": "shift_swap_requests_select_participant_or_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text]) OR (requester_user_id = current_better_auth_user_id()) OR (EXISTS ( SELECT 1\n   FROM employees employee\n  WHERE ((employee.id = shift_swap_requests.target_employee_id) AND (employee.user_id = current_better_auth_user_id())))) OR (EXISTS ( SELECT 1\n   FROM shift_swap_responses response\n  WHERE ((response.request_id = shift_swap_requests.id) AND (response.responder_user_id = current_better_auth_user_id())))) OR ((request_type = 'cover'::text) AND (status = 'open'::text) AND (EXISTS ( SELECT 1\n   FROM ((employees requester\n     JOIN employees responder ON (((NOT (responder.organization_id IS DISTINCT FROM requester.organization_id)) AND (NOT (responder.staff_group_id IS DISTINCT FROM requester.staff_group_id)))))\n     JOIN employee_location_assignments assignment ON (((assignment.employee_id = responder.id) AND (assignment.location_id = shift_swap_requests.location_id) AND (assignment.is_enabled = true) AND (assignment.disabled_at IS NULL))))\n  WHERE ((requester.id = shift_swap_requests.requester_employee_id) AND (responder.user_id = current_better_auth_user_id()) AND (responder.status = 'active'::text) AND (responder.id <> shift_swap_requests.requester_employee_id))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "shift_swap_requests",
+    "policyname": "shift_swap_requests_update_server_only",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "false",
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "shift_swap_responses",
+    "policyname": "shift_swap_responses_delete_server_only",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "false",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "shift_swap_responses",
+    "policyname": "shift_swap_responses_insert_server_only",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "shift_swap_responses",
+    "policyname": "shift_swap_responses_select_participant_or_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "((responder_user_id = current_better_auth_user_id()) OR (EXISTS ( SELECT 1\n   FROM shift_swap_requests request\n  WHERE ((request.id = shift_swap_responses.request_id) AND ((request.requester_user_id = current_better_auth_user_id()) OR has_location_role(request.location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text]) OR (EXISTS ( SELECT 1\n           FROM employees employee\n          WHERE ((employee.id = request.target_employee_id) AND (employee.user_id = current_better_auth_user_id())))))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "shift_swap_responses",
+    "policyname": "shift_swap_responses_update_server_only",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "false",
+    "with_check": "false"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "staff_groups",
+    "policyname": "staff_groups_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND is_org_member(organization_id)) OR ((location_id IS NOT NULL) AND is_location_member(location_id)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "staff_invite_links",
+    "policyname": "staff_invite_links_select_admin",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND has_org_role(organization_id, ARRAY['owner'::text, 'admin'::text])) OR has_location_role(location_id, ARRAY['owner'::text, 'admin'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "time_entries",
+    "policyname": "time_entries_select_self_or_manager",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'supervisor'::text]) OR (EXISTS ( SELECT 1\n   FROM employees employee\n  WHERE ((employee.id = time_entries.employee_id) AND (employee.user_id = current_better_auth_user_id())))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user",
+    "policyname": "user_select_self_or_shared_org",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "((id = current_better_auth_user_id()) OR (EXISTS ( SELECT 1\n   FROM (member self_member\n     JOIN member target_member ON ((target_member.\"organizationId\" = self_member.\"organizationId\")))\n  WHERE ((self_member.\"userId\" = current_better_auth_user_id()) AND (target_member.\"userId\" = \"user\".id)))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "worksites",
+    "policyname": "worksites_manage_admin",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(((organization_id IS NOT NULL) AND has_org_role(organization_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])) OR has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text]))",
+    "with_check": "(((organization_id IS NOT NULL) AND has_org_role(organization_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text])) OR has_location_role(location_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "worksites",
+    "policyname": "worksites_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND is_org_member(organization_id)) OR is_location_member(location_id))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "zones",
+    "policyname": "zones_select_member",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(((organization_id IS NOT NULL) AND is_org_member(organization_id)) OR is_location_member(location_id))",
+    "with_check": null
+  }
+]

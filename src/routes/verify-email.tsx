@@ -22,37 +22,13 @@ import { emailSchema } from "@/lib/onboarding-schemas"
 import { showSuccessToast } from "@/lib/toast"
 import { createZodFieldValidator } from "@/lib/validation"
 import { invalidateNavigationCache } from "@/features/navigation/invalidate-navigation-cache"
+import { verificationSearchSchema } from "@/features/account/schemas/authentication-search-schemas"
 
 export const Route = createFileRoute("/verify-email")({
-  validateSearch: (search) => ({
-    email:
-      typeof search.email === "string" && search.email.length > 0
-        ? search.email
-        : "",
-    redirect:
-      typeof search.redirect === "string" && search.redirect.length > 0
-        ? search.redirect
-        : "/dashboard",
-    sent: search.sent === "1" || search.sent === true,
-  }),
+  validateSearch: (search) => verificationSearchSchema.parse(search),
   loader: async ({ context, location }) => {
     await invalidateNavigationCache(context.queryClient)
-    const rawSearch = location.search as {
-      email?: string
-      redirect?: string
-      sent?: boolean | string
-    }
-    const search = {
-      email:
-        typeof rawSearch.email === "string" && rawSearch.email.length > 0
-          ? rawSearch.email
-          : "",
-      redirect:
-        typeof rawSearch.redirect === "string" && rawSearch.redirect.length > 0
-          ? rawSearch.redirect
-          : "/dashboard",
-      sent: rawSearch.sent === "1" || rawSearch.sent === true,
-    }
+    const search = verificationSearchSchema.parse(location.search)
     const session = await getSession()
 
     if (session && isEmailVerificationSatisfied(session.user.emailVerified)) {

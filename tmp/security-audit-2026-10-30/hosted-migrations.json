@@ -1,0 +1,334 @@
+[
+  {
+    "version": "20260323",
+    "name": "better_auth_foundation"
+  },
+  {
+    "version": "20260324",
+    "name": "onboarding_foundation"
+  },
+  {
+    "version": "20260325",
+    "name": "rota_foundation"
+  },
+  {
+    "version": "20260403",
+    "name": "enable_rls_on_rotas"
+  },
+  {
+    "version": "20260404",
+    "name": "enable_rls_on_auth_and_onboarding"
+  },
+  {
+    "version": "20260409",
+    "name": "better_auth_rls_policies"
+  },
+  {
+    "version": "20260418",
+    "name": "rota_workspace_board"
+  },
+  {
+    "version": "20260419",
+    "name": "staff_group_colors"
+  },
+  {
+    "version": "20260421",
+    "name": "general_settings_closing_estimate"
+  },
+  {
+    "version": "20260422",
+    "name": "location_closing_estimate"
+  },
+  {
+    "version": "20260423",
+    "name": "location_closing_estimate_next_day"
+  },
+  {
+    "version": "20260424000000",
+    "name": "locations_estimated_closing_next_day"
+  },
+  {
+    "version": "20260424120000",
+    "name": "rota_zone_snapshots"
+  },
+  {
+    "version": "20260425120000",
+    "name": "location_first_workspaces"
+  },
+  {
+    "version": "20260425123000",
+    "name": "backfill_location_member_employees"
+  },
+  {
+    "version": "20260425124500",
+    "name": "allow_standalone_rota_shift_rows"
+  },
+  {
+    "version": "20260427100000",
+    "name": "rota_template_shifts"
+  },
+  {
+    "version": "20260427103000",
+    "name": "allow_split_shift_close_end"
+  },
+  {
+    "version": "20260501100000",
+    "name": "better_auth_stripe_customer"
+  },
+  {
+    "version": "20260504110000",
+    "name": "better_auth_stripe_subscription"
+  },
+  {
+    "version": "20260504113000",
+    "name": "workspace_trials"
+  },
+  {
+    "version": "20260504120000",
+    "name": "billing_accounts"
+  },
+  {
+    "version": "20260505100000",
+    "name": "billing_subscription_statuses"
+  },
+  {
+    "version": "20260506100000",
+    "name": "unique_open_billing_subscription"
+  },
+  {
+    "version": "20260506103000",
+    "name": "billing_saved_payment_method"
+  },
+  {
+    "version": "20260507120000",
+    "name": "user_onboarding_preferences"
+  },
+  {
+    "version": "20260512120000",
+    "name": "billing_past_due_grace"
+  },
+  {
+    "version": "20260605201714",
+    "name": "defer_billing_account_location_fk"
+  },
+  {
+    "version": "20260605204832",
+    "name": "stripe_webhook_event_log"
+  },
+  {
+    "version": "20260605205638",
+    "name": "billing_reconciliation_runs"
+  },
+  {
+    "version": "20260605212321",
+    "name": "workspace_connection_events"
+  },
+  {
+    "version": "20260606215521",
+    "name": "time_clock_system"
+  },
+  {
+    "version": "20260607190107",
+    "name": "time_clock_shift_segments"
+  },
+  {
+    "version": "20260607200035",
+    "name": "time_clock_pay_rules"
+  },
+  {
+    "version": "20260610205920",
+    "name": "onboarding_planning_modes"
+  },
+  {
+    "version": "20260612200029",
+    "name": "workspace_welcome_dismissals"
+  },
+  {
+    "version": "20260612212939",
+    "name": "enable_rls_on_remaining_public_tables"
+  },
+  {
+    "version": "20260613205533",
+    "name": "employee_compensation_and_rota_budgets"
+  },
+  {
+    "version": "20260614150427",
+    "name": "location_operating_hours_next_day"
+  },
+  {
+    "version": "20260614172919",
+    "name": "billing_location_entitlements_and_usage"
+  },
+  {
+    "version": "20260616194149",
+    "name": "user_date_of_birth_and_minimum_wage_defaults"
+  },
+  {
+    "version": "20260621000000",
+    "name": "add_supervisor_role"
+  },
+  {
+    "version": "20260622202102",
+    "name": "soft_delete_zones"
+  },
+  {
+    "version": "20260622210024",
+    "name": "shift_swap_requests"
+  },
+  {
+    "version": "20260624211336",
+    "name": "add_employee_payroll_id"
+  },
+  {
+    "version": "20260701173151",
+    "name": "organization_based_pricing"
+  },
+  {
+    "version": "20260701193254",
+    "name": "announcements"
+  },
+  {
+    "version": "20260701201436",
+    "name": "employee_rota_notes"
+  },
+  {
+    "version": "20260703120000",
+    "name": "ntag_clock_tag_setup"
+  },
+  {
+    "version": "20260704100000",
+    "name": "production_ntag_clock_scan"
+  },
+  {
+    "version": "20260705120000",
+    "name": "admin_console_foundation"
+  },
+  {
+    "version": "20260709124653",
+    "name": "organization_billing_usage"
+  },
+  {
+    "version": "20260709203807",
+    "name": "employee_offboarding"
+  },
+  {
+    "version": "20260710213040",
+    "name": "page_load_performance_indexes"
+  },
+  {
+    "version": "20260711202136",
+    "name": "push_subscriptions"
+  },
+  {
+    "version": "20260712195616",
+    "name": "announcement_polls_and_pins"
+  },
+  {
+    "version": "20260716211450",
+    "name": "location_rota_settings"
+  },
+  {
+    "version": "20260716211658",
+    "name": "optimize_location_rota_settings_policies"
+  },
+  {
+    "version": "20260716211829",
+    "name": "secure_location_rota_settings_data_api"
+  },
+  {
+    "version": "20260720194523",
+    "name": "location_scoped_employee_groups"
+  },
+  {
+    "version": "20260720194635",
+    "name": "index_employee_location_assignments_location"
+  },
+  {
+    "version": "20260720205607",
+    "name": "organization_contact_details"
+  },
+  {
+    "version": "20260924191916",
+    "name": "onboarding_location_address_and_rota_visibility"
+  },
+  {
+    "version": "20260926202222",
+    "name": "workspace_shift_swaps_setting"
+  },
+  {
+    "version": "20260927113823",
+    "name": "staff_join_approvals"
+  },
+  {
+    "version": "20260929185443",
+    "name": "support_thread_reads"
+  },
+  {
+    "version": "20261001203130",
+    "name": "account_notification_preferences"
+  },
+  {
+    "version": "20261004165616",
+    "name": "time_attendance_included_employees"
+  },
+  {
+    "version": "20261004173658",
+    "name": "rota_content_versions"
+  },
+  {
+    "version": "20261004205705",
+    "name": "rota_time_format"
+  },
+  {
+    "version": "20261017211620",
+    "name": "manager_dashboard_arrival_resolutions"
+  },
+  {
+    "version": "20261018124937",
+    "name": "automatic_clock_out"
+  },
+  {
+    "version": "20261018131628",
+    "name": "configurable_clock_out_times"
+  },
+  {
+    "version": "20261023152746",
+    "name": "restrict_sensitive_employee_data_api_access"
+  },
+  {
+    "version": "20261023154318",
+    "name": "align_better_auth_subscription_schema"
+  },
+  {
+    "version": "20261023155307",
+    "name": "lock_auth_helper_search_paths"
+  },
+  {
+    "version": "20261023210435",
+    "name": "customer_station_fulfillment"
+  },
+  {
+    "version": "20261023214725",
+    "name": "extra_clock_station_purchases"
+  },
+  {
+    "version": "20261023215044",
+    "name": "require_paid_addon_for_extra_stations"
+  },
+  {
+    "version": "20261024193713",
+    "name": "managed_feature_flags"
+  },
+  {
+    "version": "20261025133237",
+    "name": "budget_manager_feature_flag"
+  },
+  {
+    "version": "20261026201743",
+    "name": "personal_data_requests"
+  },
+  {
+    "version": "20261026214603",
+    "name": "sage_employee_import_feature_flag"
+  }
+]

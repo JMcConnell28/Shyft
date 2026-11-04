@@ -1,0 +1,67 @@
+
+ RUN  v4.1.12 D:/Projects/Shyft
+
+ ❯ src/lib/app-return-path.test.ts (23 tests | 17 failed) 26ms
+     × falls back for "https://evil.example" across login, signup and verification 10ms
+     × falls back for "//evil.example" across login, signup and verification 1ms
+     × falls back for "\\evil.example" across login, signup and verification 1ms
+     × falls back for "/\\evil.example" across login, signup and verification 1ms
+     × falls back for "javascript:alert(1)" across login, signup and verification 1ms
+     × falls back for "data:text/html,hello" across login, signup and verification 1ms
+     × falls back for " //evil.example" across login, signup and verification 1ms
+     × falls back for "/\t/evil.example" across login, signup and verification 0ms
+     × falls back for "/%2fevil.example" across login, signup and verification 1ms
+     × falls back for "/%252fevil.example" across login, signup and verification 1ms
+     × falls back for "/%5cevil.example" across login, signup and verification 0ms
+     × falls back for "/%255cevil.example" across login, signup and verification 0ms
+     × falls back for "/%0a/evil.example" across login, signup and verification 0ms
+     × falls back for "/%2e%2e//evil.example" across login, signup and verification 0ms
+     × falls back for "/../ /evil.example" across login, signup and verification 0ms
+     × falls back for "/bad%zz" across login, signup and verification 0ms
+     × falls back for "" across login, signup and verification 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "https://evil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "//evil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "\\evil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/\\evil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "javascript:alert(1)" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "data:text/html,hello" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for " //evil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/\t/evil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/%2fevil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/%252fevil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/%5cevil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/%255cevil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/%0a/evil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/%2e%2e//evil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/../ /evil.example" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "/bad%zz" across login, signup and verification
+ FAIL  src/lib/app-return-path.test.ts > authentication return paths > falls back for "" across login, signup and verification
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "nonoptional",
+    "path": [
+      "sent"
+    ],
+    "message": "Invalid input: expected nonoptional, received undefined"
+  }
+]
+ ❯ src/lib/app-return-path.test.ts:10:37
+      8|     expect(isSafeAppReturnPath(redirect)).toBe(false)
+      9|     expect(authenticationSearchSchema.parse({ redirect }).redirect).to…
+     10|     expect(verificationSearchSchema.parse({ redirect }).redirect).toBe…
+       |                                     ^
+     11|     expect(getSafeAppReturnPath(redirect, "/dashboard")).toBe("/dashbo…
+     12|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  17 failed | 6 passed (23)
+   Start at  21:38:54
+   Duration  2.15s (transform 110ms, setup 0ms, import 1.19s, tests 26ms, environment 0ms)
+

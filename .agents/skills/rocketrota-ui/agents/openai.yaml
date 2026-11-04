@@ -1,0 +1,4 @@
+interface:
+  display_name: "RocketRota UI"
+  short_description: "Design and polish RocketRota product UI"
+  default_prompt: "Use $rocketrota-ui to redesign the manager dashboard for mobile while preserving attendance workflows."

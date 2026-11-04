@@ -1,4 +1,4 @@
-import { Button, Heading, Text } from "@react-email/components"
+import { Button, Heading, Text } from "@/features/email/components/primitives"
 
 import { AuthEmailLayout } from "@/features/email/templates/auth-email-layout"
 import {

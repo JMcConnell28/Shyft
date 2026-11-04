@@ -31,7 +31,7 @@ describe("station admin alerts", () => {
     await sendPendingStationAlerts()
     expect(send).toHaveBeenCalledWith(
       expect.objectContaining({
-        to: "jackmcconnell99@gmail.com",
+        to: "rocketrota.team@gmail.com",
         idempotencyKey: "station-needed/included:location",
       })
     )

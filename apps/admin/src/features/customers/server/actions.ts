@@ -24,8 +24,10 @@ async function updateFulfillment(
       needs_station: boolean
       has_delivery_address: boolean
       has_tag: boolean
+      has_payment_risk: boolean
     }>(
       `select s.fulfillment_status, s.needs_station, s.has_delivery_address,
+         exists(select 1 from billing_private.payment_risk_reviews r where r.billing_account_id = s.billing_account_id and r.reviewed_at is null) as has_payment_risk,
          exists(select 1 from public.clock_tags t where t.id = s.clock_tag_id and t.location_id = s.location_id and t.is_active and t.ntag_public_id is not null and t.ntag_aes_key_hex is not null) as has_tag
        from billing_private.station_fulfillment_requests s where request_id = $1`,
       [input.requestId]
@@ -40,6 +42,13 @@ async function updateFulfillment(
         "Another admin updated this station. Refresh the customer page before saving."
       )
     }
+    if (
+      row.has_payment_risk &&
+      (input.status === "shipped" || input.status === "delivered")
+    )
+      throw new Error(
+        "Review this customer's payment risk in Billing before dispatching a station."
+      )
     validateFulfillmentTransition(
       {
         currentStatus: row.fulfillment_status,

@@ -8,7 +8,6 @@ import { managerClockQueryOptions } from "@/features/time-clock/manager-query-op
 import { employeeClockQueryOptions } from "@/features/time-clock/employee-query-options"
 import { timeClockQueryKeys } from "@/features/time-clock/query-keys"
 import {
-  getAdminClockTagsPageData,
   getClockSettingsPageData,
   getEmployeeClockPageData,
   getManagerClockPageData,
@@ -26,15 +25,6 @@ function useEmployeeClockQuery(
   return useQuery(
     employeeClockQueryOptions(input, initialData, getEmployeeClockPageDataFn)
   )
-}
-
-function useAdminClockTagsQuery(input: { userId: string }) {
-  const getAdminClockTagsPageDataFn = useServerFn(getAdminClockTagsPageData)
-
-  return useQuery({
-    queryKey: timeClockQueryKeys.adminTags(input),
-    queryFn: () => getAdminClockTagsPageDataFn({ data: input }),
-  })
 }
 
 function useManagerClockQuery(input: {
@@ -62,7 +52,6 @@ function useClockSettingsQuery(input: {
 }
 
 export {
-  useAdminClockTagsQuery,
   useClockSettingsQuery,
   useEmployeeClockQuery,
   useManagerClockQuery,

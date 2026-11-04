@@ -1,0 +1,37 @@
+[PLUGIN_TIMINGS] JavaScript callbacks ran for 13.2s of this 18.8s build (70%).
+The slowest callbacks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - plugin externalize-deps resolveId (66%, 12.4s, 270 calls)
+Additional callback time came from callbacks under 1s.
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
+
+vite v8.3.5 building client environment for production...
+transforming...
+
+[@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+
+✓ 4481 modules transformed.
+✗ Build failed in 2m 43s
+error during build:
+Build failed with 1 error:
+
+[plugin vite:worker-import-meta-url] D:/Projects/Shyft/src/features/rota/utils/generate-rota-pdf.ts
+Error: EPERM: operation not permitted, realpath 'D:\Projects\Shyft\src\features\rota\workers\rota-pdf.worker.ts'
+    at node:fs:2849:18
+    at getRealPath (file:///D:/Projects/Shyft/node_modules/vite/dist/node/chunks/node.js:29695:36)
+    at tryResolveRealFileOrType (file:///D:/Projects/Shyft/node_modules/vite/dist/node/chunks/node.js:29689:9)
+    at tryCleanFsResolve (file:///D:/Projects/Shyft/node_modules/vite/dist/node/chunks/node.js:29438:21)
+    at tryFsResolve (file:///D:/Projects/Shyft/node_modules/vite/dist/node/chunks/node.js:29431:14)
+    at TransformPluginContextImpl.handler (file:///D:/Projects/Shyft/node_modules/vite/dist/node/chunks/node.js:34102:20)
+    at async plugin (file:///D:/Projects/Shyft/node_modules/rolldown/dist/shared/bindingify-input-options-BMZwyvQ7.mjs:1699:16)
+    at async plugin.<computed> (file:///D:/Projects/Shyft/node_modules/rolldown/dist/shared/bindingify-input-options-BMZwyvQ7.mjs:2284:12)
+    at aggregateBindingErrorsIntoJsError (file:///D:/Projects/Shyft/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:18)
+    at unwrapBindingResult (file:///D:/Projects/Shyft/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)
+    at #build (file:///D:/Projects/Shyft/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)
+    at async buildEnvironment (file:///D:/Projects/Shyft/node_modules/vite/dist/node/chunks/node.js:34849:66)
+    at async Object.build (file:///D:/Projects/Shyft/node_modules/vite/dist/node/chunks/node.js:35270:19)
+    at async buildStartViteEnvironments (file:///D:/Projects/Shyft/node_modules/@tanstack/start-plugin-core/dist/esm/vite/planning.js:85:23)
+    at async Object.buildApp (file:///D:/Projects/Shyft/node_modules/@tanstack/start-plugin-core/dist/esm/vite/plugin.js:114:8)
+    at async Object.buildApp (file:///D:/Projects/Shyft/node_modules/vite/dist/node/chunks/node.js:35262:6)
+    at async CAC.<anonymous> (file:///D:/Projects/Shyft/node_modules/vite/dist/node/cli.js:790:3) {
+  errors: [Getter/Setter]
+}

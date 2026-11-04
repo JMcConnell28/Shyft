@@ -19,7 +19,7 @@ async function extendLocationTrial(input: {
          updated_at = timezone('utc', now())
      where location_id = $1
      returning location_id, trial_ends_at`,
-    [input.locationId, input.days],
+    [input.locationId, input.days]
   )
   const entitlement = result.rows.at(0)
 

@@ -29,11 +29,18 @@ const teamFilterLabels: Record<TeamFilter, string> = {
   review: "Needs review",
 }
 const dashboardSelectClass =
-  "h-10 min-w-0 rounded-lg border border-[#dfe4ef] bg-white px-3 text-xs font-semibold text-[#10204b] outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+  "h-11 min-w-0 rounded-lg border border-input bg-card px-3 text-base font-medium text-foreground outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring sm:text-sm md:h-9"
+const dashboardTeamColumns = {
+  attendance:
+    "@2xl/team:grid-cols-[minmax(9rem,1.4fr)_minmax(7rem,1fr)_minmax(8rem,1.1fr)_minmax(7rem,1fr)_2.75rem]",
+  published:
+    "@2xl/team:grid-cols-[minmax(9rem,1.4fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_2.75rem]",
+}
 export {
   teamStatusLabels,
   teamFilterValues,
   teamFilterLabels,
   dashboardSelectClass,
+  dashboardTeamColumns,
 }
 export type { TeamFilter }

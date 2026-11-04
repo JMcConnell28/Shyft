@@ -1,4 +1,9 @@
-import { Column, Row, Section, Text } from "@react-email/components"
+import {
+  Column,
+  Row,
+  Section,
+  Text,
+} from "@/features/email/components/primitives"
 
 import {
   summary,

@@ -1,3 +1,4 @@
+import { getRequest } from "@tanstack/react-start/server"
 import type { z } from "zod"
 
 import type {
@@ -30,7 +31,11 @@ async function changeAccountPassword(input: ChangeAccountPasswordInput) {
 }
 
 async function requestPasswordReset(input: RequestPasswordResetInput) {
+  const request = getRequest()
   await auth.api.requestPasswordReset({
+    request,
+    headers: request.headers,
+    asResponse: false,
     body: {
       email: input.email,
       redirectTo: input.redirectTo,
@@ -41,7 +46,11 @@ async function requestPasswordReset(input: RequestPasswordResetInput) {
 }
 
 async function resetPassword(input: ResetPasswordInput) {
+  const request = getRequest()
   await auth.api.resetPassword({
+    request,
+    headers: request.headers,
+    asResponse: false,
     body: {
       newPassword: input.newPassword,
       token: input.token,

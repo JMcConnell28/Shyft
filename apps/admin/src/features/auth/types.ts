@@ -5,6 +5,7 @@ type AdminMembership = {
   email: string
   name: string
   role: AdminRole
+  twoFactorEnabled: boolean
   userId: string
 }
 

@@ -1,4 +1,5 @@
 import { Pool } from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { listAssignedClockEmployees } from "./manager-clock-employees"
 import { listManagedClockLocations } from "./managed-clock-locations"
@@ -17,7 +18,9 @@ describe.skipIf(!process.env.DATABASE_URL)(
   "scoped clock employees against isolated Postgres tables",
   () => {
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      ...(process.env.DATABASE_URL
+        ? getDatabaseConnectionConfig(process.env.DATABASE_URL)
+        : {}),
       max: 1,
       connectionTimeoutMillis: 15_000,
     })

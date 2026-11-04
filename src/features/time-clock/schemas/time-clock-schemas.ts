@@ -80,14 +80,6 @@ const approveTimeEntryAsRecordedInputSchema = workspaceClockScopeBaseSchema
 
 const getClockSettingsPageInputSchema = workspaceClockScopeSchema
 
-const adminUserInputSchema = z.object({
-  userId: z.string().trim().min(1, "Choose a user."),
-})
-
-const generateAdminClockTagSetupInputSchema = adminUserInputSchema.extend({
-  locationId: z.uuid("Choose a valid location."),
-})
-
 const updateClockSettingsInputSchema = clockAutomationSettingsSchema
   .safeExtend({
     ...workspaceClockScopeBaseSchema.shape,
@@ -112,12 +104,10 @@ const updateClockSettingsInputSchema = clockAutomationSettingsSchema
 
 export {
   approveTimeEntryAsRecordedInputSchema,
-  adminUserInputSchema,
   clockActionSchema,
   clockReasonSchema,
   clockShiftSegmentSchema,
   earlyClockInModeSchema,
-  generateAdminClockTagSetupInputSchema,
   getClockSettingsPageInputSchema,
   getEmployeeClockPageInputSchema,
   getManagerClockPageInputSchema,

@@ -5,6 +5,7 @@ import { z } from "zod"
 
 import type { PushPayload } from "@/features/push-notifications/types"
 import { deliverPushBatch } from "@/features/push-notifications/server/push-delivery"
+import { sendWebPush } from "@/features/push-notifications/server/push-transport"
 import {
   listActivePushSubscriptionsForUsers,
   markPushSubscriptionUsed,
@@ -80,7 +81,7 @@ async function sendPushBatch(
     safePayload,
     {
       send: async (subscription, payload) => {
-        await webPush.sendNotification(
+        await sendWebPush(
           {
             endpoint: subscription.endpoint,
             keys: {
@@ -88,12 +89,7 @@ async function sendPushBatch(
               p256dh: subscription.p256dh_key,
             },
           },
-          JSON.stringify(payload),
-          {
-            TTL: 60 * 60,
-            urgency: "normal",
-            topic: toPushTopic(payload.tag),
-          }
+          payload
         )
       },
       onSent: (subscription) => markPushSubscriptionUsed(subscription.id),
@@ -106,10 +102,6 @@ async function sendPushBatch(
       },
     }
   )
-}
-
-function toPushTopic(tag?: string) {
-  return tag?.replace(/[^A-Za-z0-9_-]/gu, "-").slice(0, 32)
 }
 
 function isValidVapidSubject(value: string) {

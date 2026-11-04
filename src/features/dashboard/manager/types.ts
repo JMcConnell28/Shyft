@@ -57,6 +57,16 @@ type PlanningWeek = {
   hasChanges: boolean
   unfilled: number
 }
+type DashboardTeamRowProps = {
+  row: TeamRow
+  location: DashboardLocation
+  isToday: boolean
+  workspaceSlug: string
+  canManageRota: boolean
+  isClockedIn: boolean
+  onClock: (row: TeamRow, action: "clock_in" | "clock_out") => void
+  onReview: (row: TeamRow) => void
+}
 type ManagerDayData = {
   date: string
   today: string
@@ -100,6 +110,7 @@ type ResolveArrivalInput = z.infer<typeof resolveArrivalSchema>
 
 export type {
   DashboardLocation,
+  DashboardTeamRowProps,
   ManagerDashboardAccess,
   ManagerDayData,
   TeamRow,

@@ -1,96 +1,20 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 import { APIError } from "better-auth/api"
-
+import {
+  getStoredUser,
+  operator,
+  postAuth,
+  requireMembership,
+  revokeSessions,
+  sessionCookie,
+} from "@/lib/testing/admin-auth-fixture"
 import { auth } from "@/lib/auth"
 
-const { database, requireMembership, ensureMembership, revokeSessions } =
-  vi.hoisted(() => {
-    const testDatabase: Record<string, Array<Record<string, unknown>>> = {}
-    return {
-      database: testDatabase,
-      requireMembership: vi.fn(),
-      ensureMembership: vi.fn(),
-      revokeSessions: vi.fn(),
-    }
-  })
-
-vi.mock("@tanstack/react-start/server-only", () => ({}))
-vi.mock("@/lib/admin-auth-database", async () => {
-  const { memoryAdapter } = await import("better-auth/adapters/memory")
-  return { getAdminAuthDatabase: () => memoryAdapter(database) }
-})
-vi.mock("@/lib/env.server", () => ({
-  getRequiredEnv: () => "admin-auth-regression-tests-only-secret-32-characters",
-  getOptionalEnv: (name: string) => {
-    if (name === "ADMIN_BETTER_AUTH_URL") return "http://localhost:3001"
-    if (name === "ADMIN_BOOTSTRAP_EMAILS") return "operator@example.test"
-    return undefined
-  },
-}))
-vi.mock("@/features/auth/server/admin-session", () => ({
-  ensureAdminMembershipForUser: ensureMembership,
-  requireAdminMembership: requireMembership,
-  revokeAdminSessionsForUser: revokeSessions,
-}))
-
 let cookie = ""
-
-function postAuth(
-  path: string,
-  body: Record<string, unknown>,
-  sessionCookie = ""
-) {
-  return auth.handler(
-    new Request(`http://localhost:3001/api/auth${path}`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        origin: "http://localhost:3001",
-        cookie: sessionCookie,
-      },
-      body: JSON.stringify(body),
-    })
-  )
-}
-
-function getStoredUser(): Record<string, unknown> {
-  const user = Object.values(database)
-    .flat()
-    .find((row) => row.email === "operator@example.test")
-  if (!user) throw new Error("Test operator was not created.")
-  return user
-}
-
 beforeEach(async () => {
-  vi.resetAllMocks()
-  for (const key of Object.keys(database)) delete database[key]
-  for (const model of [
-    "admin_user",
-    "admin_session",
-    "admin_account",
-    "admin_verification",
-  ]) {
-    database[model] = []
-  }
-  ensureMembership.mockResolvedValue({ disabledAt: null })
-  requireMembership.mockResolvedValue({ disabledAt: null })
-  revokeSessions.mockResolvedValue(undefined)
-
-  const response = await postAuth("/sign-up/email", {
-    email: "operator@example.test",
-    name: "Test operator",
-    password: "test-operator-password-only",
-  })
+  const response = await postAuth("/sign-in/email", operator)
   expect(response.status).toBe(200)
-  cookie = response.headers
-    .getSetCookie()
-    .map((value) => value.split(";")[0])
-    .join("; ")
-  expect(cookie).toContain("rocketrota-admin")
-  // Provision a readonly operator before exercising the public profile endpoint.
-  expect(getStoredUser().role).toBe("owner")
-  getStoredUser().role = "readonly"
-  vi.clearAllMocks()
+  cookie = sessionCookie(response)
 })
 
 describe("admin authentication boundaries", () => {
@@ -103,6 +27,8 @@ describe("admin authentication boundaries", () => {
     { disabledAt: false },
     { disabledAt: "2026-10-18T12:00:00Z" },
     { disabled_at: null },
+    { twoFactorEnabled: true },
+    { two_factor_enabled: true },
   ])(
     "rejects protected profile fields %j without applying other changes",
     async (fields) => {

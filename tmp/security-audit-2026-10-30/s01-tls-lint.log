@@ -1,0 +1,7 @@
+
+D:\Projects\Shyft\packages\db\src\index.ts
+  5:1  error  `./connection-config.mjs` import should occur before type import of `pg`  import/order
+
+✖ 1 problem (1 error, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

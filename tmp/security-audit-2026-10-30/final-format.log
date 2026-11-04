@@ -1,0 +1,98 @@
+apps/admin/src/features/auth/schemas/admin-profile-update-schema.ts 466ms (unchanged)
+apps/admin/src/features/auth/server-fns.ts 20ms (unchanged)
+apps/admin/src/features/auth/server/admin-session.ts 52ms (unchanged)
+apps/admin/src/features/auth/types.ts 18ms (unchanged)
+apps/admin/src/features/billing/components/billing-page.tsx 38ms
+apps/admin/src/features/billing/server-fns.ts 32ms (unchanged)
+apps/admin/src/features/billing/server/actions.ts 21ms (unchanged)
+apps/admin/src/features/billing/server/queries.ts 18ms (unchanged)
+apps/admin/src/features/billing/types.ts 14ms (unchanged)
+apps/admin/src/features/customers/server/actions.test.ts 37ms (unchanged)
+apps/admin/src/features/customers/server/actions.ts 26ms (unchanged)
+apps/admin/src/features/dashboard/components/dashboard-page.tsx 36ms
+apps/admin/src/features/dashboard/server-fns.ts 15ms (unchanged)
+apps/admin/src/features/dashboard/server/queries.ts 23ms (unchanged)
+apps/admin/src/features/dashboard/types.ts 19ms (unchanged)
+apps/admin/src/lib/auth-client.ts 12ms (unchanged)
+apps/admin/src/lib/auth-session.server.test.ts 37ms (unchanged)
+apps/admin/src/lib/auth-session.server.ts 17ms (unchanged)
+apps/admin/src/lib/auth.test.ts 31ms (unchanged)
+apps/admin/src/lib/auth.ts 22ms (unchanged)
+apps/admin/src/routes/login.tsx 13ms (unchanged)
+packages/shared/src/admin/index.ts 16ms (unchanged)
+scripts/billing-reconcile.mjs 29ms
+scripts/performance/lighthouse.mjs 21ms
+src/features/billing/server/email-notifications.ts 16ms (unchanged)
+src/features/billing/server/station-alerts.test.ts 27ms (unchanged)
+src/features/billing/server/station-alerts.tsx 21ms (unchanged)
+src/features/billing/server/station-payments.test.ts 15ms
+src/features/billing/server/station-payments.ts 16ms (unchanged)
+src/features/billing/server/subscriptions.ts 61ms
+src/features/billing/server/webhook-events.ts 16ms (unchanged)
+src/features/billing/server/webhook.ts 15ms (unchanged)
+src/features/email/server/billing-emails.tsx 12ms
+src/features/email/server/organization-welcome-email.test.tsx 9ms (unchanged)
+src/features/email/templates/auth-email-layout.tsx 10ms
+src/features/email/templates/branded-email-layout.tsx 19ms (unchanged)
+src/features/email/templates/organization-invitation.tsx 18ms
+src/features/email/templates/organization-welcome.test.tsx 12ms (unchanged)
+src/features/email/templates/organization-welcome.tsx 18ms (unchanged)
+src/features/email/templates/payment-failed.tsx 19ms
+src/features/email/templates/reset-password.test.tsx 9ms (unchanged)
+src/features/email/templates/reset-password.tsx 15ms (unchanged)
+src/features/email/templates/rota-published-summary.tsx 8ms
+src/features/email/templates/rota-published.test.tsx 17ms (unchanged)
+src/features/email/templates/rota-published.tsx 14ms (unchanged)
+src/features/email/templates/trial-ending.tsx 10ms
+src/features/email/templates/verify-email.test.tsx 14ms (unchanged)
+src/features/email/templates/verify-email.tsx 15ms (unchanged)
+src/features/timesheets/utils/csv.test.ts 16ms
+src/features/timesheets/utils/csv.ts 14ms
+src/lib/app-url.server.ts 10ms
+src/lib/email.ts 7ms
+apps/admin/src/features/auth/components/admin-auth-shell.tsx 13ms (unchanged)
+apps/admin/src/features/auth/components/admin-login-form.tsx 43ms (unchanged)
+apps/admin/src/features/auth/components/admin-mfa-setup.tsx 24ms (unchanged)
+apps/admin/src/features/auth/hooks/use-admin-login.ts 24ms (unchanged)
+apps/admin/src/features/auth/hooks/use-admin-mfa-setup.ts 20ms (unchanged)
+apps/admin/src/features/auth/schemas/mfa-schemas.ts 17ms (unchanged)
+apps/admin/src/features/billing/components/payment-risk-reviews.tsx 30ms (unchanged)
+apps/admin/src/features/billing/hooks/use-payment-risk-review.ts 15ms (unchanged)
+apps/admin/src/features/billing/schemas/payment-risk-schemas.ts 16ms (unchanged)
+apps/admin/src/features/billing/server/payment-risks.test.ts 23ms
+apps/admin/src/features/billing/server/payment-risks.ts 16ms (unchanged)
+apps/admin/src/lib/admin-mfa.security.test.ts 34ms (unchanged)
+apps/admin/src/lib/testing/admin-auth-fixture.ts 37ms (unchanged)
+apps/admin/src/routes/security-setup.tsx 18ms (unchanged)
+packages/db/src/billing-reconciliation.integration.test.ts 21ms
+packages/db/src/billing-reconciliation.ts 12ms
+packages/shared/src/security/response-headers.test.ts 18ms
+packages/shared/src/security/response-headers.ts 27ms
+scripts/admin/account-input.mjs 12ms (unchanged)
+scripts/admin/accounts.integration.test.ts 22ms
+scripts/admin/accounts.mjs 14ms (unchanged)
+scripts/admin/provision.mjs 15ms (unchanged)
+src/features/account/schemas/authentication-search-schemas.ts 11ms
+src/features/billing/schemas/payment-risk-schemas.ts 15ms (unchanged)
+src/features/billing/schemas/reconciliation-schemas.ts 21ms
+src/features/billing/server/current-subscription.test.ts 22ms (unchanged)
+src/features/billing/server/current-subscription.ts 18ms (unchanged)
+src/features/billing/server/payment-risk-references.ts 26ms (unchanged)
+src/features/billing/server/payment-risk-store.integration.test.ts 56ms (unchanged)
+src/features/billing/server/payment-risks.test.ts 29ms (unchanged)
+src/features/billing/server/payment-risks.ts 11ms
+src/features/billing/server/processing-locks.integration.test.ts 15ms
+src/features/billing/server/processing-locks.ts 46ms (unchanged)
+src/features/billing/server/reconciliation-endpoint.test.ts 16ms
+src/features/billing/server/reconciliation-endpoint.ts 14ms
+src/features/billing/server/webhook.security.test.ts 25ms
+src/features/email/components/primitives.ts 37ms (unchanged)
+src/features/email/schemas/delivery-schemas.ts 12ms (unchanged)
+src/features/email/server/delivery.ts 14ms
+src/features/email/server/render.ts 11ms (unchanged)
+src/features/email/testing/render.ts 12ms (unchanged)
+src/features/timesheets/schemas/csv-schemas.ts 10ms
+src/lib/app-return-path.test.ts 10ms
+src/lib/app-return-path.ts 10ms
+src/lib/email.security.test.tsx 12ms
+supabase/tests/application_api_grants.integration.test.ts 12ms

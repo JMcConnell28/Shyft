@@ -6,7 +6,7 @@ const serviceTermsSections: ReadonlyArray<TermsSection> = [
     title: "About RocketRota",
     paragraphs: [
       "These Terms and Conditions govern access to and use of RocketRota, a workforce scheduling, rota management and time and attendance service for businesses employing shift-based workers (the Service).",
-      `The Service is provided by ${legalBusinessDetails.providerName}, a sole trader, at ${legalBusinessDetails.address}. Email: ${legalBusinessDetails.contactEmail}. Website: rocketrota.com. RocketRota, we, us and our mean this service provider.`,
+      `The Service is provided by ${legalBusinessDetails.providerName}, a sole trader. Email: ${legalBusinessDetails.contactEmail}. Website: rocketrota.com. RocketRota, we, us and our mean this service provider.`,
       "Customer means the organisation or business using or purchasing the Service. Authorised Users means owners, administrators, managers, employees and other workforce members permitted to access it. Customer Data means information and records submitted by the Customer or its Authorised Users.",
     ],
   },

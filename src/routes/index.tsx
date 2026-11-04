@@ -3,6 +3,8 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 import { LandingPage } from "@/components/app/landing-page"
 import { getHelpHostState } from "@/features/help-center/server/host"
 import { getSession } from "@/lib/auth-server"
+import { siteMetadata } from "@/features/marketing/constants/site-metadata"
+import { createMarketingHead } from "@/features/marketing/utils/marketing-head"
 
 export const Route = createFileRoute("/")({
   loader: async () => {
@@ -19,16 +21,13 @@ export const Route = createFileRoute("/")({
       isAuthenticated: Boolean(session),
     }
   },
-  head: () => ({
-    meta: [
-      { title: "RocketRota | Rota management that launches productivity" },
-      {
-        name: "description",
-        content:
-          "RocketRota helps teams build fair, efficient rotas with less admin and more clarity.",
-      },
-    ],
-  }),
+  head: () =>
+    createMarketingHead({
+      path: "/",
+      title: siteMetadata.title,
+      description: siteMetadata.description,
+      includeSiteSchema: true,
+    }),
   component: App,
 })
 

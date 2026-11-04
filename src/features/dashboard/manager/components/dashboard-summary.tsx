@@ -1,11 +1,6 @@
-import {
-  CalendarDaysIcon,
-  Clock3Icon,
-  MapPinIcon,
-  TriangleAlertIcon,
-} from "lucide-react"
 import { getTeamSummary } from "../utils/team"
 import type { ManagerDayData } from "../types"
+import { cn } from "@/lib/utils"
 
 function ManagerDashboardSummary({
   data,
@@ -24,65 +19,54 @@ function ManagerDashboardSummary({
 }) {
   const summary = getTeamSummary(data.team)
   const items = [
-    {
-      label: "Staff scheduled",
-      mobileLabel: "Scheduled",
-      value: summary.scheduled,
-      icon: CalendarDaysIcon,
-      action: onScheduled,
-    },
+    { label: "Scheduled", value: summary.scheduled, action: onScheduled },
     data.location.attendanceEnabled
       ? {
-          label: data.isToday ? "Working now" : "Staff clocked in",
-          mobileLabel: data.isToday ? "Working now" : "Clocked in",
+          label: data.isToday ? "Working now" : "Clocked in",
           value: data.isToday ? summary.working : summary.recorded,
-          icon: Clock3Icon,
           action: data.isToday ? onWorking : onAll,
         }
       : {
           label: "Zones staffed",
-          mobileLabel: "Zones staffed",
           value: new Set(data.team.map((row) => row.zone)).size,
-          icon: MapPinIcon,
           action: onAll,
         },
     {
-      label: "Needs attention",
-      mobileLabel: "Attention",
+      label: "Attention",
       value: attentionTotal ?? "—",
-      icon: TriangleAlertIcon,
       action: onAttention,
+      scope: "All locations and dates",
+      highlighted: Boolean(attentionTotal),
     },
   ]
+
   return (
-    <div className="grid grid-cols-3 divide-x divide-[#e0e6f1] overflow-hidden rounded-xl border border-[#e0e6f1] bg-white sm:gap-3 sm:divide-x-0 sm:overflow-visible sm:rounded-none sm:border-0 sm:bg-transparent">
-      {items.map(({ label, mobileLabel, value, icon: Icon, action }) => (
+    <div className="grid grid-cols-3 divide-x divide-border rounded-xl border border-border bg-card">
+      {items.map(({ label, value, action, scope, highlighted }) => (
         <button
           key={label}
-          onClick={action}
           type="button"
-          aria-label={`${label}: ${value}${label === "Needs attention" ? ", all permitted locations" : ""}`}
-          className="flex min-w-0 flex-col px-3 py-3 text-left transition-colors hover:bg-blue-50/30 focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:outline-none focus-visible:ring-inset active:bg-blue-50 sm:block sm:rounded-xl sm:border sm:border-[#e0e6f1] sm:bg-white sm:p-4 sm:hover:border-blue-300"
+          onClick={action}
+          aria-label={
+            scope ? `${label}: ${value}, ${scope}` : `${label}: ${value}`
+          }
+          className="flex min-h-12 min-w-0 items-center justify-between gap-1 px-2.5 text-left transition-colors first:rounded-l-xl last:rounded-r-xl hover:bg-muted/60 focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring sm:gap-3 sm:px-4"
         >
-          <div className="flex items-center justify-between gap-1 text-[#7481a0]">
-            <span className="text-[11px] font-semibold sm:text-xs">
-              <span className="sm:hidden">{mobileLabel}</span>
-              <span className="hidden sm:inline">{label}</span>
-            </span>
-            <Icon className="hidden size-4 sm:block" />
-          </div>
-          <p className="order-first mb-1 text-2xl leading-none font-bold text-[#10204b] tabular-nums sm:order-none sm:mt-2 sm:mb-0 sm:leading-8">
+          <span className="text-xs font-medium text-muted-foreground sm:text-sm">
+            {label}
+          </span>
+          <span
+            className={cn(
+              "text-sm font-semibold tabular-nums sm:text-base",
+              highlighted && "text-amber-800 dark:text-amber-300"
+            )}
+          >
             {value}
-          </p>
-          {label === "Needs attention" ? (
-            <p className="mt-1 text-[10px] text-[#7481a0]">
-              <span className="sm:hidden">All locations</span>
-              <span className="hidden sm:inline">All permitted locations</span>
-            </p>
-          ) : null}
+          </span>
         </button>
       ))}
     </div>
   )
 }
+
 export { ManagerDashboardSummary }

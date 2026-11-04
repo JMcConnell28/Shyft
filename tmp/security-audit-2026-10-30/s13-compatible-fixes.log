@@ -1,0 +1,185 @@
+
+added 1 package, removed 1 package, and audited 1295 packages in 13s
+
+369 packages are looking for funding
+  run `npm fund` for details
+
+# npm audit report
+
+@opentelemetry/core  <2.8.0
+Severity: moderate
+OpenTelemetry Core: Unbounded memory allocation in W3C Baggage propagation - https://github.com/advisories/GHSA-8988-4f7v-96qf
+fix available via `npm audit fix --force`
+Will install lighthouse@12.6.1, which is a breaking change
+node_modules/@opentelemetry/core
+  @opentelemetry/instrumentation-amqplib  <=0.46.1
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/instrumentation-amqplib
+    @sentry/node  8.0.0-alpha.1 - 10.53.1
+    Depends on vulnerable versions of @opentelemetry/core
+    Depends on vulnerable versions of @opentelemetry/instrumentation-amqplib
+    Depends on vulnerable versions of @opentelemetry/instrumentation-connect
+    Depends on vulnerable versions of @opentelemetry/instrumentation-express
+    Depends on vulnerable versions of @opentelemetry/instrumentation-fs
+    Depends on vulnerable versions of @opentelemetry/instrumentation-hapi
+    Depends on vulnerable versions of @opentelemetry/instrumentation-http
+    Depends on vulnerable versions of @opentelemetry/instrumentation-knex
+    Depends on vulnerable versions of @opentelemetry/instrumentation-koa
+    Depends on vulnerable versions of @opentelemetry/instrumentation-mongoose
+    Depends on vulnerable versions of @opentelemetry/instrumentation-mysql
+    Depends on vulnerable versions of @opentelemetry/instrumentation-mysql2
+    Depends on vulnerable versions of @opentelemetry/instrumentation-pg
+    Depends on vulnerable versions of @opentelemetry/instrumentation-tedious
+    Depends on vulnerable versions of @opentelemetry/instrumentation-undici
+    Depends on vulnerable versions of @opentelemetry/resources
+    Depends on vulnerable versions of @opentelemetry/sdk-trace-base
+    Depends on vulnerable versions of minimatch
+    node_modules/@sentry/node
+      lighthouse  11.7.0-dev.20240320 - 13.4.0
+      Depends on vulnerable versions of @sentry/node
+      Depends on vulnerable versions of puppeteer-core
+      node_modules/lighthouse
+  @opentelemetry/instrumentation-connect  <=0.43.1
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/instrumentation-connect
+  @opentelemetry/instrumentation-express  <=0.47.1
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/instrumentation-express
+  @opentelemetry/instrumentation-fs  <=0.19.1
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/instrumentation-fs
+  @opentelemetry/instrumentation-hapi  0.24.0 - 0.45.2
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/instrumentation-hapi
+  @opentelemetry/instrumentation-http  <=0.16.0 || 0.19.1-alpha.7 - 0.218.0
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/instrumentation-http
+  @opentelemetry/instrumentation-koa  <=0.15.0 || 0.20.0 - 0.47.1
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/instrumentation-koa
+  @opentelemetry/instrumentation-mongoose  <=0.66.0
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/instrumentation-mongoose
+  @opentelemetry/instrumentation-pg  <=0.72.0
+  Depends on vulnerable versions of @opentelemetry/core
+  Depends on vulnerable versions of @opentelemetry/sql-common
+  node_modules/@opentelemetry/instrumentation-pg
+  @opentelemetry/instrumentation-undici  <=0.10.1
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/instrumentation-undici
+  @opentelemetry/resources  0.8.0 - 2.7.1
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/resources
+  @opentelemetry/sdk-trace-base  <=2.7.1
+  Depends on vulnerable versions of @opentelemetry/core
+  Depends on vulnerable versions of @opentelemetry/resources
+  node_modules/@opentelemetry/sdk-trace-base
+  @opentelemetry/sql-common  <=0.40.1
+  Depends on vulnerable versions of @opentelemetry/core
+  node_modules/@opentelemetry/sql-common
+    @opentelemetry/instrumentation-mysql2  <=0.66.0
+    Depends on vulnerable versions of @opentelemetry/sql-common
+    node_modules/@opentelemetry/instrumentation-mysql2
+
+@opentelemetry/instrumentation-knex  <0.65.0
+Severity: moderate
+Multiple @opentelemetry/instrumentation-* packages expose database username via unconditional db.user span attribute - https://github.com/advisories/GHSA-qqmp-wf37-98f9
+fix available via `npm audit fix --force`
+Will install lighthouse@12.6.1, which is a breaking change
+node_modules/@opentelemetry/instrumentation-knex
+
+
+@opentelemetry/instrumentation-mysql  <0.67.0
+Severity: moderate
+Multiple @opentelemetry/instrumentation-* packages expose database username via unconditional db.user span attribute - https://github.com/advisories/GHSA-qqmp-wf37-98f9
+fix available via `npm audit fix`
+node_modules/@opentelemetry/instrumentation-mysql
+
+
+
+@opentelemetry/instrumentation-tedious  <0.40.0
+Severity: moderate
+Multiple @opentelemetry/instrumentation-* packages expose database username via unconditional db.user span attribute - https://github.com/advisories/GHSA-qqmp-wf37-98f9
+fix available via `npm audit fix`
+node_modules/@opentelemetry/instrumentation-tedious
+
+basic-ftp  <=6.2.0
+Severity: high
+basic-ftp: Quadratic-time CPU denial of service in Client.list() Unix directory-listing parser (RE_LINE backtracking) - https://github.com/advisories/GHSA-c475-qrg2-pj4r
+fix available via `npm audit fix --force`
+Will install lighthouse@12.6.1, which is a breaking change
+node_modules/basic-ftp
+  get-uri  >=5.0.0
+  Depends on vulnerable versions of basic-ftp
+  node_modules/get-uri
+    pac-proxy-agent  >=6.0.0
+    Depends on vulnerable versions of get-uri
+    node_modules/pac-proxy-agent
+      proxy-agent  >=6.0.0
+      Depends on vulnerable versions of pac-proxy-agent
+      node_modules/proxy-agent
+        @puppeteer/browsers  *
+        Depends on vulnerable versions of extract-zip
+        Depends on vulnerable versions of proxy-agent
+        node_modules/@puppeteer/browsers
+          puppeteer-core  19.8.4 - 25.12.0
+          Depends on vulnerable versions of @puppeteer/browsers
+          Depends on vulnerable versions of chromium-bidi
+          node_modules/puppeteer-core
+
+deepmerge  >=4.2.0
+deepmerge mergeObject() allows prototype poisoning of returned objects - https://github.com/advisories/GHSA-gcqx-w48m-w2h4
+No fix available
+node_modules/deepmerge
+  @shadcn/registry  <=0.0.0-rc-20261007105214 || >=0.1.0
+  Depends on vulnerable versions of deepmerge
+  node_modules/@shadcn/registry
+    shadcn  <=0.0.0-rc-20261007105214 || >=2.0.0
+    Depends on vulnerable versions of @shadcn/registry
+    Depends on vulnerable versions of deepmerge
+    node_modules/shadcn
+  html-to-text  6.0.0 - 9.0.5
+  Depends on vulnerable versions of deepmerge
+  node_modules/html-to-text
+    @react-email/render  0.0.4 - 2.1.1
+    Depends on vulnerable versions of html-to-text
+    node_modules/@react-email/render
+      @react-email/components  *
+      Depends on vulnerable versions of @react-email/render
+      node_modules/@react-email/components
+
+extract-zip  *
+Severity: high
+extract-zip unvalidated symlink path traversal - https://github.com/advisories/GHSA-jmr9-qjv8-65gv
+extract-zip allows arbitrary file writes through symlink archive entries - https://github.com/advisories/GHSA-7pqw-9j4j-h8q3
+fix available via `npm audit fix --force`
+Will install lighthouse@12.6.1, which is a breaking change
+node_modules/extract-zip
+
+minimatch  <11.0.1
+Severity: moderate
+minimatch has potential denial of service via globparts amplification - https://github.com/advisories/GHSA-g3hv-75wg-m249
+fix available via `npm audit fix --force`
+Will install lighthouse@12.6.1, which is a breaking change
+node_modules/@sentry/node/node_modules/minimatch
+
+zod  <4.6.6
+Severity: high
+Zod can exhaust memory while validating oversized constrained collections - https://github.com/advisories/GHSA-mrhx-c7xc-m3w5
+fix available via `npm audit fix --force`
+Will install lighthouse@12.6.1, which is a breaking change
+node_modules/chromium-bidi/node_modules/zod
+  chromium-bidi  0.5.13 - 157.0.8081-0
+  Depends on vulnerable versions of zod
+  node_modules/chromium-bidi
+
+36 vulnerabilities (6 low, 20 moderate, 10 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.

@@ -2,6 +2,7 @@ import fs from "node:fs"
 import path from "node:path"
 import process from "node:process"
 import pg from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 
 const { Client } = pg
 
@@ -279,7 +280,7 @@ async function main() {
     throw new Error("DATABASE_URL is missing.")
   }
 
-  const client = new Client({ connectionString: databaseUrl })
+  const client = new Client(getDatabaseConnectionConfig(databaseUrl))
   await client.connect()
 
   try {

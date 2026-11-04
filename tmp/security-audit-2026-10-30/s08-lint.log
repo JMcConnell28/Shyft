@@ -1,0 +1,36 @@
+
+D:\Projects\Shyft\src\features\account\hooks\use-passkey-support.ts
+  12:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Projects\Shyft\src\features\account\hooks\use-passkey-support.ts:12:7
+  10 |   React.useEffect(() => {
+  11 |     if (!window.isSecureContext) {
+> 12 |       setSupport("insecure")
+     |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  13 |       return
+  14 |     }
+  15 |  react-hooks/set-state-in-effect
+
+D:\Projects\Shyft\src\features\account\queries\passkey-queries.ts
+  9:10  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+D:\Projects\Shyft\src\features\account\server\password-recovery-guard.ts
+  7:1  error  '@/features/account/constants/password-recovery-limits' import is duplicated  no-duplicate-imports
+
+D:\Projects\Shyft\src\lib\auth.ts
+  120:48  warning  'organization' is already declared in the upper scope on line 8 column 10  no-shadow
+
+D:\Projects\Shyft\src\lib\auth\recovery-abuse.security.test.ts
+  11:34  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+
+D:\Projects\Shyft\src\lib\auth\testing\main-auth-fixture.ts
+  86:68  warning  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+✖ 6 problems (4 errors, 2 warnings)
+

@@ -1,9 +1,12 @@
 import type {
+  PayrollExportColumnKey,
   PayrollExportData,
   PayrollExportProfile,
   PayrollExportRow,
 } from "@/features/payroll/types"
-import { serializeCsv } from "@/features/timesheets/utils/csv"
+import { numericCsvCell, serializeCsv } from "@/features/timesheets/utils/csv"
+
+const numericPayrollColumns = new Set<PayrollExportColumnKey>(["units", "rate", "amount"])
 
 const DEFAULT_SAGE_BASIC_HOURS_PAY_ELEMENT = "Basic Hours"
 
@@ -57,9 +60,14 @@ function buildSagePayrollExportRow(input: {
 function serializeSagePayrollExportCsv(data: PayrollExportData) {
   const headers = data.profile.columns.map((column) => column.label)
   const rows = data.rows.map((row) =>
-    data.profile.columns.map((column) => row[column.key] ?? "")
+    data.profile.columns.map((column) => {
+      const value = row[column.key] ?? ""
+      return value && numericPayrollColumns.has(column.key) ? numericCsvCell(value) : value
+    })
   )
 
+  // Sage reference fields must remain exact. Refuse unsafe text rather than
+  // silently adding a character to an employee's payroll reference.
   return serializeCsv([headers, ...rows])
 }
 

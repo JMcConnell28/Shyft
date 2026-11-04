@@ -20,6 +20,7 @@ import {
 import { syncSubscriptionUsagePeriods } from "@/features/billing/server/usage"
 import { ensureWorkspaceTrial } from "@/features/billing/server/trials"
 import { getDatabase } from "@/lib/db"
+import { syncCurrentStripeSubscription } from "@/features/billing/server/current-subscription"
 
 const openSubscriptionStatuses = new Set([
   "incomplete",
@@ -86,7 +87,16 @@ async function syncStripeCustomerTaxState(customer: Stripe.Customer) {
   )
 }
 
-async function upsertStripeSubscription(subscription: Stripe.Subscription) {
+async function upsertStripeSubscription(
+  subscription: Pick<Stripe.Subscription, "id">
+): Promise<Stripe.Subscription> {
+  return syncCurrentStripeSubscription(
+    subscription.id,
+    persistStripeSubscription
+  )
+}
+
+async function persistStripeSubscription(subscription: Stripe.Subscription) {
   const customerId =
     typeof subscription.customer === "string"
       ? subscription.customer
@@ -342,10 +352,7 @@ async function syncSubscriptionFromInvoice(invoice: Stripe.Invoice) {
     return null
   }
 
-  const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
-  await upsertStripeSubscription(subscription)
-
-  return subscription
+  return upsertStripeSubscription({ id: subscriptionId })
 }
 
 async function upsertSetupCheckoutSession(session: Stripe.Checkout.Session) {
@@ -539,7 +546,9 @@ async function refreshStripeSubscriptionsForBillingAccount(input: {
     return subscription.metadata.billingAccountId === input.billingAccountId
   })
 
-  await Promise.all(matchingSubscriptions.map(upsertStripeSubscription))
+  const currentSubscriptions: Array<Stripe.Subscription> = []
+  for (const subscription of matchingSubscriptions)
+    currentSubscriptions.push(await upsertStripeSubscription(subscription))
 
   if (matchingSubscriptions.length === 0) {
     await getDatabase().query(
@@ -551,7 +560,7 @@ async function refreshStripeSubscriptionsForBillingAccount(input: {
     )
   }
 
-  return matchingSubscriptions
+  return currentSubscriptions
 }
 
 async function syncBillingSubscriptionQuantities(billingAccountId: string) {

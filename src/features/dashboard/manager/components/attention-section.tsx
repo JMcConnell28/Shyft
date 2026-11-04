@@ -2,6 +2,10 @@ import { Link } from "@tanstack/react-router"
 import { formatAttentionDate } from "../utils/date"
 import type { AttentionItem, AttentionPage } from "../types"
 import { Button } from "@/components/ui/button"
+import {
+  DashboardPanel,
+  DashboardPanelHeader,
+} from "@/features/dashboard/components/dashboard-layout"
 
 function ManagerAttentionSection({
   data,
@@ -20,28 +24,33 @@ function ManagerAttentionSection({
   onReview: (item: AttentionItem) => void
   onRetry: () => void
 }) {
-  const now = new Date(data?.updatedAt ?? Date.now())
   return (
-    <section
+    <DashboardPanel
       id="dashboard-attention"
       aria-labelledby="attention-heading"
-      className="scroll-mt-4 rounded-xl border border-[#e0e6f1] bg-white"
+      aria-describedby="attention-scope"
+      tabIndex={-1}
+      className="scroll-mt-4 xl:col-start-2 xl:row-start-1"
     >
-      <div className="border-b border-[#edf0f6] p-4">
-        <div className="flex items-center justify-between gap-2">
-          <h2 id="attention-heading" className="text-sm font-bold">
-            Needs attention
-          </h2>
-          <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-bold text-orange-800">
-            {data?.total ?? "—"}
-          </span>
-        </div>
-        <p className="mt-1 text-[11px] text-[#7481a0]">
-          All permitted locations · unresolved across all dates
-        </p>
-      </div>
+      <span id="attention-scope" className="sr-only">
+        All locations and dates
+      </span>
+      <DashboardPanelHeader
+        headingId="attention-heading"
+        title="Needs attention"
+        action={
+          data && data.total > 1 ? (
+            <AttentionPager data={data} pending={pending} onPage={onPage} />
+          ) : (
+            <span className="text-xs text-muted-foreground">All locations</span>
+          )
+        }
+      />
       {error ? (
-        <div role="alert" className="p-4 text-xs text-[#7481a0]">
+        <div
+          role="alert"
+          className="border-t px-4 py-2 text-sm text-muted-foreground"
+        >
           Could not refresh outstanding items.{" "}
           <Button variant="link" onClick={onRetry}>
             Retry
@@ -49,22 +58,28 @@ function ManagerAttentionSection({
         </div>
       ) : null}
       {!data && pending ? (
-        <div role="status" className="p-6 text-xs text-[#7481a0]">
+        <div
+          role="status"
+          className="border-t px-4 py-3 text-sm text-muted-foreground"
+        >
           Loading outstanding items…
         </div>
       ) : null}
       {data?.total === 0 ? (
-        <p className="p-6 text-center text-xs text-[#7481a0]">
+        <p className="border-t px-4 py-3 text-sm text-muted-foreground">
           Nothing needs attention.
         </p>
       ) : null}
-      <ul className="divide-y divide-[#edf0f6]">
-        {data?.items.map((item) => (
-          <li key={`${item.kind}:${item.id}`} className="space-y-2 p-4">
+      <ul>
+        {data?.items.slice(0, 1).map((item) => (
+          <li
+            key={`${item.kind}:${item.id}`}
+            className="space-y-1.5 border-t px-3.5 py-3 sm:px-4"
+          >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-xs font-bold">{item.employeeName}</p>
-                <p className="mt-0.5 text-[10px] text-[#7481a0]">
+                <p className="text-sm font-semibold">{item.employeeName}</p>
+                <p className="text-xs text-muted-foreground">
                   {item.locationName}
                 </p>
               </div>
@@ -72,7 +87,7 @@ function ManagerAttentionSection({
                 <Button
                   nativeButton={false}
                   variant="outline"
-                  className="h-8 rounded-lg"
+                  className="h-11 shrink-0 rounded-lg text-sm sm:h-10 md:h-8 md:text-xs"
                   render={
                     <Link
                       to="/app/$workspaceSlug/shift-swaps"
@@ -85,47 +100,68 @@ function ManagerAttentionSection({
               ) : (
                 <Button
                   variant="outline"
-                  className="h-8 rounded-lg"
+                  className="h-11 shrink-0 rounded-lg text-sm sm:h-10 md:h-8 md:text-xs"
                   onClick={() => onReview(item)}
                 >
                   {item.kind === "arrival" ? "Resolve" : "Review"}
                 </Button>
               )}
             </div>
-            <p className="text-[11px] leading-relaxed wrap-anywhere whitespace-pre-wrap text-[#46577d]">
+            <p
+              title={item.reason}
+              className="line-clamp-3 text-sm wrap-anywhere whitespace-pre-wrap text-muted-foreground"
+            >
               {item.reason}
             </p>
-            <p className="text-[10px] font-semibold text-[#7481a0]">
+            <p className="text-xs text-muted-foreground">
               <time dateTime={item.occurredAt}>
-                {formatAttentionDate(item.occurredAt, item.timeZone, now)}
+                {formatAttentionDate(
+                  item.occurredAt,
+                  item.timeZone,
+                  new Date(data.updatedAt)
+                )}
               </time>
             </p>
           </li>
         ))}
       </ul>
-      {data && data.total > data.pageSize ? (
-        <div className="flex items-center justify-between gap-2 border-t border-[#edf0f6] p-3 text-[11px] text-[#7481a0]">
-          <Button
-            variant="outline"
-            disabled={data.page === 1 || pending}
-            onClick={() => onPage(data.page - 1)}
-          >
-            Previous
-          </Button>
-          <span>
-            {(data.page - 1) * data.pageSize + 1}–
-            {Math.min(data.page * data.pageSize, data.total)} of {data.total}
-          </span>
-          <Button
-            variant="outline"
-            disabled={data.page * data.pageSize >= data.total || pending}
-            onClick={() => onPage(data.page + 1)}
-          >
-            Next
-          </Button>
-        </div>
-      ) : null}
-    </section>
+    </DashboardPanel>
+  )
+}
+
+function AttentionPager({
+  data,
+  pending,
+  onPage,
+}: {
+  data: AttentionPage
+  pending: boolean
+  onPage: (page: number) => void
+}) {
+  return (
+    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+      <Button
+        variant="ghost"
+        className="h-11 min-w-11 rounded-lg px-1.5 text-xs md:h-8"
+        aria-label="Newer attention item"
+        disabled={data.page === 1 || pending}
+        onClick={() => onPage(data.page - 1)}
+      >
+        Newer
+      </Button>
+      <span role="status" className="whitespace-nowrap tabular-nums">
+        {data.page} of {data.total}
+      </span>
+      <Button
+        variant="ghost"
+        className="h-11 min-w-11 rounded-lg px-1.5 text-xs md:h-8"
+        aria-label="Older attention item"
+        disabled={data.page * data.pageSize >= data.total || pending}
+        onClick={() => onPage(data.page + 1)}
+      >
+        Older
+      </Button>
+    </div>
   )
 }
 export { ManagerAttentionSection }

@@ -1,0 +1,26 @@
+[
+  {
+    "role": "browser",
+    "selection": "ntag_aes_key_hex",
+    "status": 401,
+    "passed": true
+  },
+  {
+    "role": "browser",
+    "selection": "*",
+    "status": 401,
+    "passed": true
+  },
+  {
+    "role": "server",
+    "selection": "ntag_aes_key_hex",
+    "status": 200,
+    "passed": true
+  },
+  {
+    "role": "server",
+    "selection": "*",
+    "status": 200,
+    "passed": true
+  }
+]

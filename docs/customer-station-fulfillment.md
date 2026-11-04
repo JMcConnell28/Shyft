@@ -38,7 +38,7 @@ Status updates lock the hardware record, reject stale status changes and write
 an audit record in the same transaction. No dispatch email goes to customers.
 
 The header badge and Clock stations queue refresh every minute. Operator email
-defaults to `jackmcconnell99@gmail.com`; `STATION_ALERT_EMAIL` overrides it.
+defaults to `rocketrota.team@gmail.com`; `STATION_ALERT_EMAIL` overrides it.
 Emails contain customer/location names and an optional admin link, never NFC
 keys or the delivery address. `ADMIN_BASE_URL` supplies that link. Existing
 Resend configuration is reused; local development keeps the existing test-email

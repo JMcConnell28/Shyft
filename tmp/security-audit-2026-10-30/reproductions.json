@@ -1,0 +1,8 @@
+{
+  "pushRequestPreparedForLoopback": true,
+  "pushRequestMethod": "POST",
+  "networkRequestPerformed": false,
+  "csvFormulaPreserved": true,
+  "localHostedAuthSecretReused": true,
+  "localHostedSupabaseProjectReused": true
+}

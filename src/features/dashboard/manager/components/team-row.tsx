@@ -1,38 +1,13 @@
-import { Link } from "@tanstack/react-router"
-import { MoreHorizontalIcon } from "lucide-react"
-import { teamStatusLabels } from "../constants"
+import { dashboardTeamColumns, teamStatusLabels } from "../constants"
 import { formatDashboardTime } from "../utils/date"
-import type { DashboardLocation, TeamRow } from "../types"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DashboardTeamRowActions } from "./team-row-actions"
+import type { DashboardTeamRowProps } from "../types"
 import { EmployeeIdentity } from "@/features/time-clock/components/employee-identity"
 import { getDateKeyInTimeZone } from "@/lib/time-zone"
 import { cn } from "@/lib/utils"
 
-function DashboardTeamRow({
-  row,
-  location,
-  isToday,
-  workspaceSlug,
-  canManageRota,
-  isClockedIn,
-  onClock,
-  onReview,
-}: {
-  row: TeamRow
-  location: DashboardLocation
-  isToday: boolean
-  workspaceSlug: string
-  canManageRota: boolean
-  isClockedIn: boolean
-  onClock: (row: TeamRow, action: "clock_in" | "clock_out") => void
-  onReview: (row: TeamRow) => void
-}) {
+function DashboardTeamRow(props: DashboardTeamRowProps) {
+  const { row, location } = props
   const time = (value: string) =>
     formatDashboardTime(value, location.timeZone, location.timeFormat)
   const overnight =
@@ -40,120 +15,98 @@ function DashboardTeamRow({
     row.endsAt &&
     getDateKeyInTimeZone(row.startsAt, location.timeZone) !==
       getDateKeyInTimeZone(row.endsAt, location.timeZone)
-  const canClock =
-    isToday && row.isActive && location.attendanceEnabled && location.canWrite
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-[#edf0f6] px-4 py-3 lg:grid-cols-[minmax(7rem,1fr)_minmax(7rem,1fr)_minmax(6rem,1fr)_minmax(6rem,1fr)_2rem]">
-      <EmployeeIdentity
-        name={row.employeeName}
-        secondary={row.zone}
-        size="compact"
-      />
-      <div className="col-start-1 row-start-2 text-xs lg:col-auto lg:row-auto">
-        <p className="font-semibold text-[#46577d]">
+    <div
+      role="row"
+      className={cn(
+        "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center gap-x-2 gap-y-1 border-t px-3.5 py-2.5 sm:px-4 @2xl/team:gap-3 @2xl/team:py-1.5",
+        location.attendanceEnabled
+          ? dashboardTeamColumns.attendance
+          : dashboardTeamColumns.published
+      )}
+    >
+      <div role="cell" className="col-span-2 min-w-0 @2xl/team:col-span-1">
+        <EmployeeIdentity
+          name={row.employeeName}
+          secondary={row.zone}
+          size="compact"
+        />
+      </div>
+      <div
+        role="cell"
+        className="col-start-1 row-start-2 text-sm @2xl/team:col-auto @2xl/team:row-auto"
+      >
+        <p className="text-xs font-medium text-foreground tabular-nums sm:text-sm">
           {row.startsAt && row.endsAt
             ? `${time(row.startsAt)} – ${time(row.endsAt)}`
             : "Unscheduled"}
           {overnight ? " (+1 day)" : ""}
         </p>
-        <p className="mt-1 text-[10px] text-[#7481a0]">
-          {row.segment === "split_first"
-            ? "Split · first half"
-            : row.segment === "split_second"
-              ? "Split · second half"
-              : row.closesAtEstimate
-                ? "To close · estimated finish"
-                : "Scheduled shift"}
-        </p>
+        {row.segment === "split_first" ||
+        row.segment === "split_second" ||
+        row.closesAtEstimate ? (
+          <p className="text-xs text-muted-foreground">
+            {row.segment === "split_first"
+              ? "Split · first half"
+              : row.segment === "split_second"
+                ? "Split · second half"
+                : row.closesAtEstimate
+                  ? "To close · estimated finish"
+                  : null}
+          </p>
+        ) : null}
       </div>
       {location.attendanceEnabled ? (
-        <div className="col-start-1 text-xs lg:col-auto">
-          <p className="text-[#46577d]">
-            {row.clockedInAt
-              ? `In ${time(row.clockedInAt)}`
-              : "No clock-in recorded"}
+        <div
+          role="cell"
+          className="col-start-1 row-start-3 text-xs @2xl/team:col-auto @2xl/team:row-auto"
+        >
+          <p className="text-muted-foreground tabular-nums">
+            {row.clockedInAt ? (
+              `In ${time(row.clockedInAt)}`
+            ) : (
+              <span className="hidden @2xl/team:inline">
+                <span aria-hidden="true">—</span>
+                <span className="sr-only">No clock-in recorded</span>
+              </span>
+            )}
             {row.clockedOutAt ? ` · Out ${time(row.clockedOutAt)}` : ""}
           </p>
           {row.lateMinutes > 0 ? (
-            <p className="mt-1 text-[10px] font-semibold text-orange-700">
-              Arrived {row.lateMinutes} min late
+            <p className="text-xs font-medium text-amber-800 dark:text-amber-300">
+              {row.lateMinutes} min late
             </p>
           ) : null}
         </div>
-      ) : (
-        <span className="hidden lg:block" />
-      )}
-      <div className="col-start-2 row-start-1 text-right lg:col-auto lg:row-auto lg:text-left">
+      ) : null}
+      <div
+        role="cell"
+        className="col-start-2 row-span-2 row-start-2 max-w-28 text-right @2xl/team:col-auto @2xl/team:row-auto @2xl/team:text-left"
+      >
         <span
           className={cn(
-            "inline-block rounded-md px-2 py-1 text-[10px] font-semibold",
+            "inline-block text-xs font-medium",
             row.status === "working"
-              ? "bg-blue-50 text-blue-700"
+              ? "text-emerald-700 dark:text-emerald-300"
               : row.status === "arrival_due" ||
                   row.status === "clock_out_missing"
-                ? "bg-orange-50 text-orange-800"
-                : "bg-[#f0f3f8] text-[#68769a]"
+                ? "text-amber-800 dark:text-amber-300"
+                : "text-muted-foreground"
           )}
         >
           {teamStatusLabels[row.status]}
         </span>
         {row.requiresReview ? (
-          <p className="mt-1 text-[10px] text-orange-700">Needs review</p>
+          <p className="text-xs text-amber-800 dark:text-amber-300">
+            Needs review
+          </p>
         ) : null}
       </div>
-      <div className="col-start-2 row-start-2 justify-self-end lg:col-auto lg:row-auto">
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={`Actions for ${row.employeeName}`}
-              />
-            }
-          >
-            <MoreHorizontalIcon />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {row.rotaId ? (
-              <DropdownMenuItem
-                render={
-                  <Link
-                    to={
-                      canManageRota
-                        ? "/app/$workspaceSlug/rota/$locationSlug/$rotaId"
-                        : "/app/$workspaceSlug/rota/$locationSlug/$rotaId/view"
-                    }
-                    params={{
-                      workspaceSlug,
-                      locationSlug: location.slug,
-                      rotaId: row.rotaId,
-                    }}
-                  />
-                }
-              >
-                Open rota
-              </DropdownMenuItem>
-            ) : null}
-            {location.attendanceEnabled && row.entryId ? (
-              <DropdownMenuItem onClick={() => onReview(row)}>
-                Review time entry
-              </DropdownMenuItem>
-            ) : null}
-            {canClock && (row.status !== "finished" || isClockedIn) ? (
-              <DropdownMenuItem
-                onClick={() =>
-                  onClock(row, isClockedIn ? "clock_out" : "clock_in")
-                }
-              >
-                Manual {isClockedIn ? "clock out" : "clock in"}
-              </DropdownMenuItem>
-            ) : null}
-            {!row.rotaId && !location.attendanceEnabled ? (
-              <DropdownMenuItem disabled>No actions available</DropdownMenuItem>
-            ) : null}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div
+        role="cell"
+        className="col-start-3 row-span-3 row-start-1 justify-self-end @2xl/team:col-auto @2xl/team:row-auto"
+      >
+        <DashboardTeamRowActions {...props} />
       </div>
     </div>
   )

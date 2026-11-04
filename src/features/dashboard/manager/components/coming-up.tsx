@@ -1,8 +1,14 @@
 import { Link } from "@tanstack/react-router"
 import { format, parseISO } from "date-fns"
+import { ChevronRightIcon } from "lucide-react"
 import type { ManagerDashboardAccess, ManagerDayData } from "../types"
 import { Button } from "@/components/ui/button"
 import { NewRotaDialog } from "@/features/rota/components/new-rota-dialog"
+import { parseRotaListSearch } from "@/features/rota/schemas/rota-schemas"
+import {
+  DashboardPanel,
+  DashboardPanelHeader,
+} from "@/features/dashboard/components/dashboard-layout"
 
 function ManagerComingUp({
   data,
@@ -21,88 +27,92 @@ function ManagerComingUp({
   const selectedLocation =
     locations.find((item) => item.id === data.location.id) ?? null
   return (
-    <section
-      className="rounded-xl border border-[#e0e6f1] bg-white"
+    <DashboardPanel
+      className="xl:col-start-2 xl:row-start-2"
       aria-labelledby="coming-up-heading"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#edf0f6] p-4">
-        <h2 id="coming-up-heading" className="text-sm font-bold">
-          Coming up
-        </h2>
-      </div>
-      <div className="divide-y divide-[#edf0f6] sm:grid sm:grid-cols-2 sm:divide-x sm:divide-y-0">
-        {data.planning.map((week, index) => (
-          <div
-            key={week.weekStart}
-            className="flex flex-wrap items-center justify-between gap-3 p-4"
-          >
-            <div>
-              <p className="text-xs font-bold">
-                {index === 0 ? "This week" : "Next week"}{" "}
-                <span className="font-medium text-[#7481a0]">
-                  · {format(parseISO(week.weekStart), "d MMM")}
-                </span>
-              </p>
-              <p className="mt-1 text-[11px] text-[#7481a0]">
-                {week.status === "not_started"
-                  ? "Not started"
-                  : week.status === "draft"
-                    ? "Draft"
-                    : week.hasChanges
-                      ? "Published · unpublished changes"
-                      : "Published"}
-                {week.rotaId ? ` · ${week.unfilled} unfilled shifts` : ""}
-              </p>
-            </div>
-            {week.rotaId ? (
-              <Button
-                nativeButton={false}
-                variant="outline"
-                className="h-9 rounded-lg"
-                render={
-                  <Link
-                    to={
-                      canEdit || week.status === "draft"
-                        ? "/app/$workspaceSlug/rota/$locationSlug/$rotaId"
-                        : "/app/$workspaceSlug/rota/$locationSlug/$rotaId/view"
-                    }
-                    params={{
-                      workspaceSlug,
-                      locationSlug: data.location.slug,
-                      rotaId: week.rotaId,
-                    }}
-                  />
-                }
-              >
-                {canEdit && (week.status === "draft" || week.hasChanges)
-                  ? "Continue editing"
-                  : "Open rota"}
-              </Button>
-            ) : canCreate ? (
-              <NewRotaDialog
-                key={`${data.location.id}:${week.weekStart}`}
-                locations={locations}
-                selectedLocation={selectedLocation}
-                initialWeekStart={week.weekStart}
-                triggerLabel="Create rota"
-                triggerClassName="h-9 rounded-lg border border-[#dfe4ef] bg-white text-[#236cff] hover:bg-blue-50"
-              />
-            ) : null}
-          </div>
-        ))}
-      </div>
-      {data.location.attendanceEnabled ? (
-        <div className="border-t border-[#edf0f6] px-4 py-3">
+      <DashboardPanelHeader
+        headingId="coming-up-heading"
+        title="Coming up"
+        action={
           <Link
-            to="/app/$workspaceSlug/timesheets"
+            to="/app/$workspaceSlug/rota"
             params={{ workspaceSlug }}
-            className="text-xs font-semibold text-blue-600 hover:underline"
+            search={parseRotaListSearch({ location: data.location.slug })}
+            className="inline-flex min-h-11 items-center gap-1 text-xs font-medium text-primary hover:underline md:min-h-8 dark:text-sky-300"
           >
-            Review timesheets →
+            View all <ChevronRightIcon className="size-4" />
           </Link>
+        }
+      />
+      {data.planning.some((week) => week.rotaId) ? (
+        <div className="divide-y divide-border border-t">
+          {data.planning.map((week, index) => (
+            <div
+              key={week.weekStart}
+              className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 sm:px-4"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">
+                  {index === 0 ? "This week" : "Next week"}{" "}
+                  <span className="font-normal text-muted-foreground">
+                    · {format(parseISO(week.weekStart), "d MMM")}
+                  </span>
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {week.status === "not_started"
+                    ? "Not started"
+                    : week.status === "draft"
+                      ? "Draft"
+                      : week.hasChanges
+                        ? "Published · unpublished changes"
+                        : "Published"}
+                  {week.unfilled > 0 ? ` · ${week.unfilled} unfilled` : ""}
+                </p>
+              </div>
+              {week.rotaId ? (
+                <Button
+                  nativeButton={false}
+                  variant="outline"
+                  className="h-11 rounded-lg text-sm sm:h-10 md:h-8 md:text-xs"
+                  render={
+                    <Link
+                      to={
+                        canEdit || week.status === "draft"
+                          ? "/app/$workspaceSlug/rota/$locationSlug/$rotaId"
+                          : "/app/$workspaceSlug/rota/$locationSlug/$rotaId/view"
+                      }
+                      params={{
+                        workspaceSlug,
+                        locationSlug: data.location.slug,
+                        rotaId: week.rotaId,
+                      }}
+                    />
+                  }
+                >
+                  {canEdit && (week.status === "draft" || week.hasChanges)
+                    ? "Continue editing"
+                    : "Open rota"}
+                </Button>
+              ) : canCreate ? (
+                <NewRotaDialog
+                  key={`${data.location.id}:${week.weekStart}`}
+                  locations={locations}
+                  selectedLocation={selectedLocation}
+                  initialWeekStart={week.weekStart}
+                  triggerLabel="Create rota"
+                  triggerClassName="h-11 rounded-lg border border-input bg-card text-sm text-primary shadow-none hover:bg-muted hover:text-primary sm:h-10 md:h-8 md:text-xs dark:text-sky-300 dark:hover:text-sky-300"
+                />
+              ) : null}
+            </div>
+          ))}
         </div>
-      ) : null}
-    </section>
+      ) : (
+        <p className="border-t px-4 py-3 text-sm text-muted-foreground">
+          No upcoming rotas.
+        </p>
+      )}
+    </DashboardPanel>
   )
 }
 export { ManagerComingUp }

@@ -1,0 +1,22 @@
+.output/server\_tanstack-start-manifest_v-3EY8WacI.mjs:20:			"/admin/clock-tags",
+.output/server\_tanstack-start-manifest_v-3EY8WacI.mjs:558:	"/admin/clock-tags": {
+.output/server\_tanstack-start-manifest_v-3EY8WacI.mjs:559:		filePath: "D:/Projects/Shyft/src/routes/admin/clock-tags.tsx",
+.output/server\_ssr\admin-tags-Bc20oPoT.mjs:9:async function getAdminClockTagsPageData(input) {
+.output/server\_ssr\admin-tags-Bc20oPoT.mjs:38:async function generateAdminClockTagSetup(input) {
+.output/server\_ssr\admin-tags-Bc20oPoT.mjs:85:export { generateAdminClockTagSetup, getAdminClockTagsPageData };
+.output/server\_ssr\router-hbbFrzyZ.mjs:27:import { adminUserInputSchema, approveTimeEntryAsRecordedInputSchema, clockScanSearchSchema, generateAdminClockTagSetupInputSchema, getClockSettingsPageInputSchema, getEmployeeClockPageInputSchema, getManagerClockPageInputSchema, managerClockOverrideInputSchema, submitEmployeeClockInputSchema, updateClockSettingsInputSchema } from "./time-clock-schemas-DIqZ710t.mjs";
+.output/server\_ssr\router-hbbFrzyZ.mjs:9898:var getAdminClockTagsPageData = createServerFn({ method: "POST" }).validator((input) => adminUserInputSchema.parse(input)).handler(createSsrRpc("020bb31270a3d20463452a1496fc66b63140b8d6de079dfa3606c57f78caed6c"));
+.output/server\_ssr\router-hbbFrzyZ.mjs:9899:var generateAdminClockTagSetup = createServerFn({ method: "POST" }).validator((input) => generateAdminClockTagSetupInputSchema.parse(input)).handler(createSsrRpc("e6ef59b4a2fb34c35b1a83693211de67368a201cd97d76ef5d44616cbe239259"));
+.output/server\_ssr\server-fns-BBl2FYFz.mjs:3:import { adminUserInputSchema, approveTimeEntryAsRecordedInputSchema, clockScanSearchSchema, generateAdminClockTagSetupInputSchema, getClockSettingsPageInputSchema, getEmployeeClockPageInputSchema, getManagerClockPageInputSchema, managerClockOverrideInputSchema, submitEmployeeClockInputSchema, updateClockSettingsInputSchema } from "./time-clock-schemas-DIqZ710t.mjs";
+.output/server\_ssr\server-fns-BBl2FYFz.mjs:22:var getAdminClockTagsPageData_createServerFn_handler = createServerRpc({
+.output/server\_ssr\server-fns-BBl2FYFz.mjs:24:	name: "getAdminClockTagsPageData",
+.output/server\_ssr\ssr.mjs:7366:		functionName: "getAdminClockTagsPageData_createServerFn_handler",
+.output/server\_ssr\ssr.mjs:7882:		functionName: "generateAdminClockTagSetup_createServerFn_handler",
+.output/server\_ssr\time-clock-schemas-DIqZ710t.mjs:100:var generateAdminClockTagSetupInputSchema = adminUserInputSchema.extend({ locationId: uuid("Choose a valid location.") });
+.output/server\_ssr\time-clock-schemas-DIqZ710t.mjs:117:export { CLOCK_OUT_TIME_LIMITS, adminUserInputSchema, approveTimeEntryAsRecordedInputSchema, clockScanSearchSchema, generateAdminClockTagSetupInputSchema, getClockSettingsPageInputSchema, getEmployeeClockPageInputSchema, getManagerClockPageInputSchema, managerClockOverrideInputSchema, submitEmployeeClockInputSchema, updateClockSettingsInputSchema };
+.output/server\_ssr\use-time-clock-mutations-Bcdj91Qm.mjs:2:import { approveTimeEntryAsRecorded, generateAdminClockTagSetup, managerClockOverride, showErrorToast, showSuccessToast, submitEmployeeClock, timeClockQueryKeys, updateClockSettings, useQueryClient } from "./router-hbbFrzyZ.mjs";
+.output/server\_ssr\use-time-clock-mutations-Bcdj91Qm.mjs:63:	const generateAdminClockTagSetupFn = useServerFn(generateAdminClockTagSetup);
+.output/server\_ssr\use-time-clock-mutations-Bcdj91Qm.mjs:65:		mutationFn: (variables) => generateAdminClockTagSetupFn({ data: {
+.output/server\_ssr\use-time-clock-query-Xz2vDoJi.mjs:2:import { getAdminClockTagsPageData, getClockSettingsPageData, getEmployeeClockPageData, getManagerClockPageData, managerClockQueryOptions, queryOptions, timeClockQueryKeys } from "./router-hbbFrzyZ.mjs";
+.output/server\_ssr\use-time-clock-query-Xz2vDoJi.mjs:19:	const getAdminClockTagsPageDataFn = useServerFn(getAdminClockTagsPageData);
+.output/server\_ssr\use-time-clock-query-Xz2vDoJi.mjs:22:		queryFn: () => getAdminClockTagsPageDataFn({ data: input })

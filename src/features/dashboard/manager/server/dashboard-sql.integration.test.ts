@@ -8,6 +8,7 @@ import {
   it,
 } from "vitest"
 import { Pool } from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 import { z } from "zod"
 import { dashboardAttentionSql } from "./attention-sql"
 import { dashboardScheduleSql } from "./schedule-sql"
@@ -31,7 +32,9 @@ describe.skipIf(!process.env.DATABASE_URL)(
   "dashboard SQL against isolated Postgres fixtures",
   () => {
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      ...(process.env.DATABASE_URL
+        ? getDatabaseConnectionConfig(process.env.DATABASE_URL)
+        : {}),
       max: 1,
       connectionTimeoutMillis: 15000,
     })
@@ -169,10 +172,14 @@ describe.skipIf(!process.env.DATABASE_URL)(
       )
       expect((await attention("2026-10-16T10:00:00Z")).total).toBe(0)
     })
-    it("prioritises old clock issues, counts all pages and clamps out-of-range pages", async () => {
+    it("shows the newest issue across types, counts all items and clamps older pages", async () => {
       await client.query(
         `insert into pg_temp.time_entries (id, organization_id, location_id, employee_id, clocked_in_at, clocked_out_at, status) values ($1, 'org-dashboard-test', $2, $3, '2026-02-01T10:00Z', '2026-02-01T18:00Z', 'requires_review')`,
         [ids.assignment, ids.location, ids.employee]
+      )
+      await client.query(
+        `insert into pg_temp.shift_swap_requests (id, request_type, status, location_id, requester_employee_id, source_published_shift_id, created_at) values ($1, 'cover', 'open', $2, $3, $4, '2026-10-16T11:00Z')`,
+        [ids.rota, ids.location, ids.employee, ids.shift]
       )
       const first = await attention(
         "2026-10-16T12:00:00Z",
@@ -186,8 +193,11 @@ describe.skipIf(!process.env.DATABASE_URL)(
         [ids.location],
         1
       )
-      expect(first).toMatchObject({ total: 2, items: [{ kind: "review" }] })
-      expect(last).toMatchObject({ total: 2, items: [{ kind: "arrival" }] })
+      expect(first).toMatchObject({ total: 3, items: [{ kind: "cover" }] })
+      expect(last).toMatchObject({ total: 3, items: [{ kind: "review" }] })
+      expect(
+        await attention("2026-10-16T12:00:00Z", 2, [ids.location], 1)
+      ).toMatchObject({ total: 3, items: [{ kind: "arrival" }] })
     })
     it("returns no attendance issues without the add-on or outside the organisation", async () => {
       expect((await attention("2026-10-16T12:00:00Z", 1, [])).total).toBe(0)

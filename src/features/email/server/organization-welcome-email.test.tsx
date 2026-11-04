@@ -1,5 +1,5 @@
-import { render, toPlainText } from "@react-email/components"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { render, toPlainText } from "@/features/email/testing/render"
 
 import { sendOrganizationWelcomeEmail } from "@/features/email/server/organization-welcome-email"
 import { sendTransactionalEmail } from "@/lib/email"
@@ -28,7 +28,7 @@ describe("sendOrganizationWelcomeEmail", () => {
     )
     expect(email.text).toContain("Your first location is set up")
     expect(toPlainText(await render(email.react))).toContain(
-      "WELCOME TO ROCKETROTA"
+      "Welcome to RocketRota"
     )
   })
 })

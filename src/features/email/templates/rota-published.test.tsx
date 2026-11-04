@@ -1,5 +1,5 @@
-import { render, toPlainText } from "@react-email/components"
 import { describe, expect, it } from "vitest"
+import { render, toPlainText } from "@/features/email/testing/render"
 
 import { RotaPublishedEmail } from "@/features/email/templates/rota-published"
 
@@ -31,7 +31,7 @@ describe("RotaPublishedEmail", () => {
     const html = await render(<RotaPublishedEmail {...props} />)
     const content = toPlainText(html)
 
-    expect(content).toContain("YOUR ROTA HAS BEEN PUBLISHED")
+    expect(content).toContain("Your rota has been published")
     expect(content).toContain("The Harbour Bar")
     expect(content).toContain("Mon 29 Sep – Sun 5 Oct 2025")
     expect(content).toContain("11.5 hours")

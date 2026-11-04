@@ -29,16 +29,12 @@ import {
 } from "@/lib/onboarding-schemas"
 import { signUpAccessCodeSchema } from "@/lib/auth/sign-up-access-schema"
 import { createZodFieldValidator } from "@/lib/validation"
+import { authenticationSearchSchema } from "@/features/account/schemas/authentication-search-schemas"
 
 type SignupIntent = "manage" | "join"
 
 export const Route = createFileRoute("/sign-up")({
-  validateSearch: (search) => ({
-    redirect:
-      typeof search.redirect === "string" && search.redirect.length > 0
-        ? search.redirect
-        : "/dashboard",
-  }),
+  validateSearch: (search) => authenticationSearchSchema.parse(search),
   beforeLoad: async () => {
     const session = await getSession()
 

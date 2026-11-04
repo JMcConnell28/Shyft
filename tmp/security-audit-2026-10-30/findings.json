@@ -1,0 +1,130 @@
+[
+  {
+    "id":"S01","severity":"High","status":"Confirmed local configuration against hosted database","title":"Database connection does not use TLS",
+    "evidence":"All three database pool factories supply only DATABASE_URL. Neither inspected environment file requests TLS. A read-only connection using .env.local to the hosted Supabase pooler returned current_user postgres and pg_stat_ssl.ssl false.",
+    "impact":"Employee records, session values and query results travel from this client to the hosted pooler without transport encryption. This is a demonstrated local-to-hosted exposure; the Coolify application's connection was not available for inspection.",
+    "fix":"Require certificate-verified TLS in every pool and connection string, configure Supabase SSL enforcement, and reject startup configurations that disable verification. Do not use rejectUnauthorized false as a workaround.",
+    "verify":"Repeat the same pg_stat_ssl check from local development and both deployed apps. Require ssl true and a TLS version. Demonstrate that a non-TLS connection is refused after enforcement.",
+    "sources":[["src/lib/db.ts","new Pool"],["packages/db/src/index.ts","new Pool"],["apps/admin/src/lib/admin-auth-database.ts","new Pool"]]
+  },
+  {
+    "id":"S02","severity":"High","status":"Confirmed hosted authorization mismatch","title":"Workplace roles can reach NFC cryptographic keys through the Data API",
+    "evidence":"Hosted clock_tags_select_manager permits owner, admin, manager and supervisor. Both browser roles have SELECT on ntag_aes_key_hex. The public identity helper accepts a raw Better Auth session token and checks expiry. The main getSession server function returns the complete session object, while the intended NFC setup UI separately requires the operator email allowlist or dedicated admin permissions.",
+    "impact":"A legitimate workplace manager or supervisor with their own raw session token can satisfy the table policy and request their location's NFC AES key directly, bypassing the operator-only UI. An exposed key could support forged station scans for that location. This is not anonymous key disclosure or a demonstrated cross-workplace leak. No real NFC key was retrieved during the audit.",
+    "fix":"Remove browser-role table SELECT on clock_tags and expose only a safe projection if direct client reads are needed. A column revoke alone does not override an existing table-level SELECT grant. Keep AES keys behind the dedicated clock_stations.manage server permission, with audited access.",
+    "verify":"Using a disposable workplace, confirm direct manager and supervisor requests for the AES column fail, operator setup still works, and ordinary scans continue through server-only RPC calls.",
+    "sources":[["supabase/migrations/20260621000000_add_supervisor_role.sql","create policy \"clock_tags_select_manager\""],["supabase/migrations/20260409_better_auth_rls_policies.sql","create or replace function public.current_better_auth_user_id"],["src/lib/auth-server.ts","return readSessionFromRequestHeaders()"],["src/features/time-clock/server/admin-tags.ts","async function requireAdminUser"]]
+  },
+  {
+    "id":"S03","severity":"High","status":"Confirmed code and installed library behavior","title":"Password reset leaves existing sessions valid",
+    "evidence":"The main auth configuration does not enable emailAndPassword.revokeSessionsOnPasswordReset. The installed Better Auth 1.7.12 resetCredentialPassword function deletes sessions only when that option is enabled. changeAccountPassword revokes other sessions, but the forgotten-password reset path simply calls auth.api.resetPassword.",
+    "impact":"Someone holding a stolen session can remain signed in after the legitimate user resets their password to recover the account. The default session lifetime and five-minute cookie cache can extend the exposure.",
+    "fix":"Enable revokeSessionsOnPasswordReset and make sensitive session checks authoritative. Review recovery behavior for passkeys and other account credentials. Keep reset tokens single use and short lived.",
+    "verify":"In an isolated account, retain a second browser session, reset the password, and verify the old session is rejected immediately by sensitive endpoints as well as after cache expiry. Test change-password separately.",
+    "sources":[["src/lib/auth.ts","emailAndPassword:"],["src/features/account/server/actions.ts","async function resetPassword"],["node_modules/better-auth/dist/utils/password.mjs","revokeSessionsOnPasswordReset"]]
+  },
+  {
+    "id":"S04","severity":"High","status":"Confirmed request preparation and code path","title":"Push subscription endpoints permit server side requests to arbitrary hosts",
+    "evidence":"pushEndpointSchema accepts any URL. Verified users can store that endpoint, and push-service passes it to webPush.sendNotification without a host allowlist, private-address filter or explicit timeout. A local test with disposable cryptographic keys confirmed web-push prepares a POST to https://127.0.0.1:8443. No connection to an internal address was made.",
+    "impact":"A verified account can plant an endpoint for a later notification, causing outbound HTTPS requests from the application server to attacker-selected or internal services. Reachability, valid TLS and network policy constrain exploitation. Slow endpoints can also occupy workers; saved subscriptions are not visibly capped per account.",
+    "fix":"Accept HTTPS push endpoints only from documented supported push-provider hosts, reject credentials and unexpected ports, validate resolved addresses against private and reserved ranges, enforce egress restrictions and timeouts, and cap active subscriptions. Account for DNS rebinding.",
+    "verify":"Unit-test localhost, IPv4 and IPv6 private networks, encoded addresses, redirects, arbitrary domains and excessive subscription counts. Confirm real supported push providers still deliver. Do not test private destinations against production.",
+    "sources":[["src/features/push-notifications/schemas/push-schemas.ts","const pushEndpointSchema"],["src/features/push-notifications/server/actions.ts","async function saveCurrentPushSubscription"],["src/features/push-notifications/server/push-service.ts","webPush.sendNotification"]]
+  },
+  {
+    "id":"S05","severity":"High","status":"Conditional deployment risk","title":"Admin bootstrap can grant ownership without proving mailbox ownership",
+    "evidence":"The admin signup hook grants role owner when the submitted email matches ADMIN_BOOTSTRAP_EMAILS. Email verification is disabled and there is no visible one-time bootstrap lock or authenticated provisioning requirement. The local environment still has a bootstrap allowlist configured. Production allowlist values were not inspected.",
+    "impact":"If a listed address has not already been registered, an outsider who knows it can claim the first account and become an admin owner. Existing registered addresses reduce this immediate opportunity; they do not make the reusable bootstrap mechanism safe. The admin app also has password-only login with no configured MFA or passkey plugin.",
+    "fix":"Close bootstrap after initial provisioning and make it a one-time operator-controlled procedure. Require verified ownership before privilege assignment. Add strong MFA for the dedicated admin app and maintain a documented recovery process.",
+    "verify":"With an isolated database, attempt signup using an allowlisted but unregistered address and confirm no owner account is created without an authorized provisioning step. Verify the production bootstrap setting is empty or disabled.",
+    "sources":[["apps/admin/src/lib/auth.ts","requireEmailVerification: false"],["apps/admin/src/lib/auth.ts","if (!isBootstrapAdminEmail"],["apps/admin/src/lib/auth.ts","function isBootstrapAdminEmail"]]
+  },
+  {
+    "id":"S06","severity":"Medium","status":"Confirmed configured behavior","title":"Cookie caching delays session revocation checks",
+    "evidence":"Main-app session.cookieCache is enabled for 300 seconds. readSessionFromRequestHeaders calls getSession without disableCookieCache. The installed library can return valid cached session data before consulting the database. The personal-data feature already requests disableCookieCache true, demonstrating an available authoritative pattern.",
+    "impact":"Deleting a session centrally does not guarantee that every ordinary application endpoint immediately rejects the old cached session. Fresh membership checks reduce role-revocation risk but do not replace session revocation checks.",
+    "fix":"Use authoritative session reads for billing, permission changes, exports, NFC setup and other sensitive actions. Decide and document the acceptable cache window for lower-risk page reads.",
+    "verify":"Revoke a session in a second browser and replay the first browser's cookies against sensitive actions before and after five minutes. Require immediate rejection for the sensitive actions.",
+    "sources":[["src/lib/auth.ts","cookieCache:"],["src/lib/auth-session.server.ts","auth.api.getSession"],["src/features/personal-data/server/access.ts","disableCookieCache: true"]]
+  },
+  {
+    "id":"S07","severity":"Medium","status":"Confirmed alternate privileged access path","title":"Legacy main app administration bypasses dedicated admin revocation",
+    "evidence":"The main /admin/clock-tags tools authorize a verified main-app account through ADMIN_EMAILS, independently of admin_private.admin_user, its disabled_at value and clock_stations.manage. The local environment configures ADMIN_EMAILS. The dedicated admin app correctly rechecks its own current membership.",
+    "impact":"Disabling an operator in the dedicated admin app does not remove this separate route to read NFC keys and generate station setup material if that person's main-app email remains allowlisted. This requires an allowlisted main-app account, not an arbitrary user.",
+    "fix":"Retire the legacy tools or route them through the same dedicated administrator permission and revocation model. Treat the main and admin origins as separate trust boundaries, with separate credentials and clear operator offboarding.",
+    "verify":"Disable a test operator in the dedicated admin app and confirm all privileged key-reading and setup endpoints, including legacy main-app paths, deny access.",
+    "sources":[["src/features/time-clock/server/admin-tags.ts","async function requireAdminUser"],["src/features/time-clock/server/admin-tags.ts","getOptionalEnv(\"ADMIN_EMAILS\")"],["apps/admin/src/features/auth/server/admin-session.ts","async function getActiveAdminMembership"]]
+  },
+  {
+    "id":"S08","severity":"Medium","status":"Confirmed missing application-level abuse control","title":"Password recovery wrappers bypass auth router rate limiting",
+    "evidence":"Public TanStack server functions delegate requestPasswordReset and resetPassword directly to auth.api methods. Those calls omit request context and the wrapper has no limiter. In the installed library, rate limiting is installed in the HTTP router onRequest path; direct API dispatch does not traverse it. Passing headers alone would not create that router-level protection.",
+    "impact":"An unauthenticated caller can repeatedly invoke recovery work and send reset messages through a different surface than the rate-limited auth routes. CSRF checks are not request throttling. Missing request context also skips request-dependent callback-origin checks at the direct API boundary; no token-exfiltration exploit was demonstrated.",
+    "fix":"Add bounded, shared IP and account-based rate limits to these server functions, constrain reset destinations to a fixed internal path, preserve request context where required, and return non-enumerating responses. Check equivalent wrappers around other auth operations.",
+    "verify":"With mocked mail, demonstrate limits apply to direct server-function calls, across workers and after repeated attempts. Confirm legitimate recovery still works and external callback destinations are rejected.",
+    "sources":[["src/features/account/server-fns.ts","const requestPasswordReset"],["src/features/account/server/actions.ts","async function requestPasswordReset"],["node_modules/better-auth/dist/api/index.mjs","onRequestRateLimit(currentRequest"],["node_modules/better-auth/dist/api/to-auth-endpoints.mjs","return dispatchAuthEndpoint"]]
+  },
+  {
+    "id":"S09","severity":"Medium","status":"Confirmed client authorization flow weakness","title":"Passkey login redirects to an unchecked destination",
+    "evidence":"The login route accepts any nonempty redirect search value. After explicit passkey success it assigns that value to window.location.href. That branch does not send the destination through Better Auth's callback validation. The password branch has an additional callbackURL validation opportunity and should not be assumed equally exploitable.",
+    "impact":"A crafted login link can send a user to an attacker-controlled site after a genuine passkey login, supporting phishing. Same-origin session cookies are not automatically sent to that other site. The deployed CSP constrains javascript URL execution, so arbitrary script execution is not claimed.",
+    "fix":"Validate redirect search values as same-origin internal paths at the route boundary, including protocol-relative URLs, backslashes and encoded forms. Reuse a small client-safe path validator.",
+    "verify":"Test https external destinations, double-slash paths, backslashes and javascript URLs. Require a safe dashboard fallback for both password and passkey login.",
+    "sources":[["src/routes/login.tsx","validateSearch:"],["src/routes/login.tsx","async function handlePasskeySignIn"]]
+  },
+  {
+    "id":"S10","severity":"Medium","status":"Confirmed export behavior","title":"CSV exports preserve spreadsheet formulas in text fields",
+    "evidence":"serializeCsvCell quotes and escapes strings but does not neutralize formula prefixes. A local call with the harmless value =1+1 preserved it as a quoted CSV cell. Sage payroll exports use this serializer for employee names, payroll references, location and other text; current text schemas do not exclude formula prefixes.",
+    "impact":"When a manager opens attacker-influenced exported text in a spreadsheet, it can be interpreted as a formula rather than data. Effects depend on the spreadsheet's protections and user actions. A direct Sage import may have different requirements.",
+    "fix":"Provide spreadsheet-safe text serialization or a separate safe spreadsheet export, and preserve the payroll import format where necessary. Define handling for equals, plus, minus, at-sign, tab and carriage-return prefixes without corrupting legitimate numeric values.",
+    "verify":"Open controlled exports in the supported spreadsheet applications and confirm text stays literal. Run the existing Sage CSV import-compatibility tests after the change.",
+    "sources":[["src/features/timesheets/utils/csv.ts","function serializeCsvCell"],["src/features/payroll/adapters/sage-csv.ts","function serializeSagePayrollExportCsv"],["src/features/company/schemas/company-schemas.ts","const payrollIdSchema"]]
+  },
+  {
+    "id":"S11","severity":"Medium","status":"Confirmed local secret and privilege configuration","title":"Development shares hosted credentials and uses broad privileges",
+    "evidence":"The local and hosted environment files point to the same Supabase project and contain the same main auth secret. The tested database connection uses the RLS-bypassing postgres role. The server Supabase client uses a privileged secret key, and the inspected local Stripe key is an unrestricted secret rather than a restricted key. Actual deployed Stripe key permissions were not inspected.",
+    "impact":"A compromised development machine or application path can affect the hosted employee database. Application authorization errors have a large blast radius because privileged clients bypass RLS. A shared auth signing secret also crosses the environment trust boundary.",
+    "fix":"Separate development, staging and production databases, auth secrets, Stripe resources and email routing. Use restricted Stripe keys and narrower database roles where practical. Keep privileged Supabase clients server-only and retain explicit authorization at every entry point.",
+    "verify":"Record environment-to-project mappings without secret values, verify auth secrets differ, and test each narrowed role or restricted key against the full required workflow before rotating old credentials.",
+    "sources":[["src/lib/supabase.server.ts","getRequiredEnv(\"SUPABASE_SECRET_KEY\")"],["src/lib/db.ts","connectionString:"],["src/features/billing/server/stripe.ts","getRequiredEnv(\"STRIPE_SECRET_KEY\")"]]
+  },
+  {
+    "id":"S12","severity":"Medium","status":"Confirmed payment control gaps","title":"Subscription risk events and event ordering need stronger handling",
+    "evidence":"The signed webhook handles subscription lifecycle and invoice events. Refund and dispute handlers only hold extra station orders. radar.early_fraud_warning.created has no branch. Subscription update payloads are applied directly without an event-age guard or retrieving the current Stripe state. The event log deduplicates processed IDs but does not atomically lease processing between concurrent requests.",
+    "impact":"Refunded or disputed subscription payments have no explicit operator/risk policy in this handler. Delayed authentic updates can temporarily restore stale access state, and simultaneous deliveries can repeat downstream work. This is not proof of forged payment acceptance; signature verification and extra-station payment validation are strong.",
+    "fix":"Define operator handling for subscription refunds, disputes and fraud warnings, then subscribe only to events acted upon. Reconcile authoritative current Stripe state, make processing claims atomic, and ensure downstream effects are idempotent. Do not blindly cancel subscriptions for every partial refund.",
+    "verify":"Replay duplicate, concurrent and deliberately out-of-order authentic fixtures. Check a cancellation cannot be undone by an older event. Test subscription refunds and disputes separately from one-off station orders, with no real charge required.",
+    "sources":[["src/features/billing/server/webhook.ts","event.type === \"charge.refunded\""],["src/features/billing/server/webhook.ts","await upsertStripeSubscription(event.data.object)"],["src/features/billing/server/webhook-events.ts","async function recordStripeWebhookReceived"],["src/features/billing/server/subscriptions.ts","async function upsertStripeSubscription"]]
+  },
+  {
+    "id":"S13","severity":"Medium","status":"Confirmed dependency advisories with limited runtime reachability","title":"Dependency audit is no longer clean",
+    "evidence":"The current npm audit returned 34 affected package entries: 11 high, 19 moderate and 4 low, with no critical. Production-classified dependencies returned 6 entries: 2 high and 4 low. These are dependency graph counts, not independent exploitable vulnerabilities. High production entries are shadcn and its nested Zod 3.25.76; application Zod is 4.6.7. Tooling-only high chains include Lighthouse and archive/proxy dependencies.",
+    "impact":"Developer tooling and build environments carry known risks. shadcn is listed as a production dependency even though it is a generator, which increases installed attack surface. No attacker-reachable request path into the vulnerable nested Zod was established. Low deepmerge advisories also affect email tooling.",
+    "fix":"Remove or move generator tooling out of production dependencies, update compatible transitive dependencies and inspect each advisory's actual reachability. Do not run npm audit fix force blindly. Recheck lockfile and runtime images after changes.",
+    "verify":"Repeat full and omit-dev audits, document justified exceptions, and verify the shipped server excludes generator, performance and archive tooling. Keep dependency scanning in the release process.",
+    "sources":[["package.json","\"shadcn\":"],["package.json","\"lighthouse\":"],["package-lock.json","\"node_modules/shadcn/node_modules/zod\""]]
+  },
+  {
+    "id":"S14","severity":"Medium","status":"Observed production failure with cause unverified","title":"Hosted billing reconciliation rejection returns a server error",
+    "evidence":"An unauthenticated POST to https://rocketrota.com/api/billing/reconcile returned 500. The reviewed route should return 401 when a configured secret exists and the token is missing; getRequiredEnv runs before that check. Missing deployment configuration is one plausible cause. The precise hosted revision and error logs were not available.",
+    "impact":"The general billing recovery path cannot be treated as operationally verified. A configuration failure could prevent recovery from missed webhooks. The observed error is not proof that unauthenticated billing work ran or that authorization was bypassed.",
+    "fix":"Inspect the deployed route and logs, configure a strong reconciliation secret and its authenticated schedule, return a controlled unavailable response for missing configuration, and add an actionable job-failure alert.",
+    "verify":"Require 401 for missing or invalid tokens and a successful authorized dry run or isolated test reconciliation. Confirm regular run records and failed-account alerts without exposing the bearer secret.",
+    "sources":[["src/routes/api/billing/reconcile.ts","const expectedToken"],["docs/billing-reconciliation.md","## Production Scheduling"]]
+  },
+  {
+    "id":"S15","severity":"Low","status":"Confirmed unnecessary surface and defense in depth gaps","title":"Database API grants exceed the server first design",
+    "evidence":"The hosted advisor reports 49 anonymously discoverable and 49 authenticated GraphQL objects, plus 9 public SECURITY DEFINER functions callable by both roles. Their inspected bodies are session and role helpers, not unrestricted dump functions. Twenty RLS-without-policy notices mostly represent deliberate deny-by-default tables. Private schemas deny browser USAGE; 13 of 14 admin, 11 of 14 billing and the one push table lack RLS.",
+    "impact":"These warnings do not establish anonymous row disclosure. Broad grants and unnecessary APIs increase the chance that a future policy error becomes exploitable, as S02 illustrates. Missing private-schema RLS reduces defense in depth but does not make those tables publicly accessible today.",
+    "fix":"Inventory client-required objects and revoke unused grants from anon, authenticated and PUBLIC with dependency-aware testing. Disable unused GraphQL only after confirming no clients depend on it. Add appropriate private-schema RLS as defense in depth and restrict default privileges.",
+    "verify":"Re-run advisors and zero-row API checks. Distinguish discovery from data access, maintain safe projections, and ensure auth helper dependencies and service-role clock RPCs still work.",
+    "sources":[["supabase/migrations/20260409_better_auth_rls_policies.sql","create or replace function public.current_better_auth_user_id"],["supabase/migrations/20261023152746_restrict_sensitive_employee_data_api_access.sql","revoke"]]
+  },
+  {
+    "id":"S16","severity":"Low","status":"Confirmed middleware behavior","title":"Global headers replace the stricter privacy download policy",
+    "evidence":"The privacy download explicitly requests a sandboxed default-src none CSP. After the handler returns, shared securityMiddleware sets every global security header on result.response, including CSP, replacing that stricter route policy with the ordinary app policy.",
+    "impact":"The download loses its additional sandbox defense. HTML values are escaped and files are attachments, so a working script injection was not demonstrated. This is a defense-in-depth regression rather than proven data disclosure.",
+    "fix":"Preserve stricter route-specific headers or provide a deliberate middleware override mechanism while retaining global baseline protections.",
+    "verify":"Test the final response headers of both HTML and JSON privacy downloads, not just the handler's header object. Require the intended sandbox policy to survive middleware composition.",
+    "sources":[["src/features/personal-data/server/download.ts","default-src 'none'"],["packages/shared/src/security/security-middleware.ts","result.response.headers.set"]]
+  }
+]

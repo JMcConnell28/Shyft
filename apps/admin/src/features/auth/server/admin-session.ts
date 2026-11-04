@@ -12,6 +12,7 @@ type AdminMembershipRow = {
   email: string
   name: string
   role: string
+  two_factor_enabled: boolean
   user_id: string
 }
 
@@ -25,6 +26,7 @@ async function ensureAdminMembershipForUser(input: {
        email,
        name,
        role,
+       "twoFactorEnabled" as two_factor_enabled,
        disabled_at
      from admin_private.admin_user
      where id = $1
@@ -101,6 +103,7 @@ function mapAdminMembership(row: AdminMembershipRow): AdminMembership {
     email: row.email,
     name: row.name,
     role,
+    twoFactorEnabled: row.two_factor_enabled === true,
     userId: row.user_id,
   }
 }

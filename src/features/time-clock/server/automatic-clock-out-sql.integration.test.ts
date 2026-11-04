@@ -8,6 +8,7 @@ import {
   it,
 } from "vitest"
 import { Pool } from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 import {
   automaticClockOutSql,
   claimClockRemindersSql,
@@ -31,7 +32,9 @@ describe.skipIf(!process.env.DATABASE_URL)(
   "clock automation against isolated Postgres tables",
   () => {
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      ...(process.env.DATABASE_URL
+        ? getDatabaseConnectionConfig(process.env.DATABASE_URL)
+        : {}),
       max: 1,
       connectionTimeoutMillis: 15_000,
     })

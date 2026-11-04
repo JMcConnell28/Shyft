@@ -3,6 +3,7 @@ const adminRoles = ["owner", "developer", "support", "readonly"] as const
 const adminPermissions = [
   "audit.read",
   "billing.trials.update",
+  "billing.risks.review",
   "clock_stations.manage",
   "errors.manage",
   "feature_flags.manage",

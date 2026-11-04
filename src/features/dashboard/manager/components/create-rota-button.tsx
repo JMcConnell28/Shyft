@@ -24,7 +24,7 @@ function DashboardCreateRotaButton({
         getDateKeyInTimeZone(new Date(), location.timeZone)
       )}
       triggerLabel="Create rota"
-      triggerClassName="h-9 gap-1 rounded-lg bg-blue-600 px-2 text-[11px] text-white hover:bg-blue-700 sm:gap-2 sm:px-3.5 sm:text-[13px] [&_svg]:size-3.5 sm:[&_svg]:size-4"
+      triggerClassName="h-11 gap-1.5 rounded-lg bg-primary px-2.5 text-xs text-primary-foreground shadow-none hover:bg-primary/90 hover:text-primary-foreground sm:px-3 sm:text-sm md:h-9 [&_svg]:size-4"
     />
   )
 }

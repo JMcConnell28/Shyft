@@ -1,10 +1,11 @@
 import { Pool } from "pg"
+import { getDatabaseConnectionConfig } from "@rocketrota/db/connection-config"
 import { createClient } from "@supabase/supabase-js"
 import { z } from "zod"
 
 process.loadEnvFile(process.env.PERF_ENV_FILE ?? ".env.local")
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  ...getDatabaseConnectionConfig(process.env.DATABASE_URL),
   max: 1,
   connectionTimeoutMillis: 5000,
 })

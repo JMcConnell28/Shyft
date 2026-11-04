@@ -2,10 +2,12 @@
 
 Internal drafting notes, 23 October 2026. These notes are not part of the customer contract. The terms remain a draft while the items below are unresolved.
 
+30 October update: Jack requested temporarily omitting the public business-address wording from the legal pages. The address remains outstanding internally. The shared legal contact is now rocketrota.team@gmail.com; this edit does not verify mailbox delivery or monitoring.
+
 ## Confirmed details
 
 - Provider: Jack McConnell trading as RocketRota, a sole trader. Company-registration wording has been removed.
-- Intended contact: RocketRota@gmail.com. Jack still needs to create and monitor this mailbox.
+- Contact: rocketrota.team@gmail.com. Mailbox delivery and monitoring still need verification.
 - Effective date and terms version: 23 October 2026 / 2026-10-23.
 - Privacy-notice URL: https://rocketrota.com/privacy. A pre-launch draft page now exists with footer and sign-up links. It identifies unresolved business contact, provider, retention and backup details, and does not promise a self-service export feature.
 - Cancellation stops renewal; access continues until the paid period ends, subject to the existing suspension and termination provisions.

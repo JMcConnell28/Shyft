@@ -1,0 +1,5 @@
+
+> typecheck
+> fumadocs-mdx && tsc --noEmit
+
+[MDX] generated files in 12.250700000004144ms

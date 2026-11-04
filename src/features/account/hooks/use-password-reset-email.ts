@@ -11,10 +11,6 @@ function usePasswordResetEmail(email: string) {
       requestPasswordResetFn({
         data: {
           email,
-          redirectTo:
-            typeof window === "undefined"
-              ? "/reset-password"
-              : `${window.location.origin}/reset-password`,
         },
       }),
     onSuccess: () => {

@@ -1,5 +1,5 @@
-import { render } from "@react-email/components"
 import { describe, expect, it } from "vitest"
+import { render } from "@/features/email/testing/render"
 
 import { VerifyEmail } from "@/features/email/templates/verify-email"
 
