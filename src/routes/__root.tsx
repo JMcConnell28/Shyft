@@ -1,7 +1,9 @@
+import { CSPProvider } from "@base-ui/react/csp-provider"
 import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
+  useRouter,
 } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
@@ -85,6 +87,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const nonce = useRouter().options.ssr?.nonce
+
   return (
     <html lang="en">
       <head>
@@ -93,7 +97,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <PwaAppController />
         <NavigationCacheController />
-        {children}
+        <CSPProvider nonce={nonce}>{children}</CSPProvider>
         <AppToaster />
         <TanStackDevtools
           config={{
