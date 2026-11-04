@@ -1,10 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, notFound } from "@tanstack/react-router"
 
 import { DemoRotaPage } from "@/features/rota-demo/components/demo-rota-page"
+import { getDemoAvailability } from "@/features/rota-demo/server-fns"
 import { RotaWorkspaceSkeleton } from "@/features/rota/components/rota-workspace-skeleton"
 
 export const Route = createFileRoute("/demo")({
-  ssr: false,
+  ssr: "data-only",
+  beforeLoad: async () => {
+    if (!(await getDemoAvailability())) throw notFound()
+  },
   pendingComponent: DemoPending,
   head: () => ({
     meta: [
