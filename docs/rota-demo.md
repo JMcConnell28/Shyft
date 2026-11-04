@@ -1,8 +1,10 @@
 # Harbour House rota demo
 
-Open `/demo`. This public, client-rendered route has no loader, account lookup,
-database access or application data fetching. It renders the same `RotaWorkspace`
-used by the real rota page, with its existing local state and demo toolbar.
+Open `/demo` in local development or at `https://dev.rocketrota.com/demo`.
+Hosted builds check the configured `BETTER_AUTH_URL` on the server. The route
+returns 404 unless that URL has the staging origin. The board renders in the
+browser using the same `RotaWorkspace` as the real rota page, with local state
+and a demo toolbar. It requires no account lookup or database access.
 
 ## Controls
 
