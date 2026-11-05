@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start"
 import type { PoolClient } from "pg"
-
 import type { TimeAttendanceDeliveryAddress } from "@/features/billing/schemas/time-attendance-addon-schemas"
+import { assertLocationNameAvailable } from "@/features/locations/server/assert-location-name-available"
+
 import {
   activateOrganizationSchema,
   locationSetupSchema,
@@ -120,6 +121,8 @@ const createFirstLocationAndZone = createServerFn({ method: "POST" })
 
     try {
       await client.query("BEGIN")
+
+      await assertLocationNameAvailable(client, organizationId, locationName)
 
       const locationResult = await client.query<{ id: string }>(
         `insert into public.locations (

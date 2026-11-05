@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg"
 import type { LocationAddress } from "@/features/locations/schemas/location-address-schema"
+import { assertLocationNameAvailable } from "@/features/locations/server/assert-location-name-available"
 
 import { getDatabase } from "@/lib/db"
 import { slugify } from "@/lib/slug"
@@ -14,7 +15,7 @@ async function createLocation(input: {
   name: string
   businessType: string
   planningMode: "fixed_location" | "variable_location"
-  zoneNames: string[]
+  zoneNames: Array<string>
   worksiteName: string
 }) {
   await requireOrgPermission({
@@ -37,6 +38,12 @@ async function createLocation(input: {
 
   try {
     await client.query("BEGIN")
+
+    await assertLocationNameAvailable(
+      client,
+      input.organizationId,
+      locationName
+    )
 
     const locationResult = await client.query<{
       id: string
@@ -216,7 +223,7 @@ async function updateLocationSettings(input: {
   }
 }
 
-function getUniqueNames(names: string[]) {
+function getUniqueNames(names: Array<string>) {
   return Array.from(
     new Map(
       names
@@ -260,7 +267,7 @@ async function createInitialPlaces(input: {
   organizationId: string
   locationId: string
   planningMode: "fixed_location" | "variable_location"
-  zoneNames: string[]
+  zoneNames: Array<string>
   worksiteName: string
 }) {
   if (input.planningMode === "fixed_location") {
