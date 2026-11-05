@@ -1,8 +1,5 @@
-import { useForm } from "@tanstack/react-form"
 import { Link } from "@tanstack/react-router"
-import { useServerFn } from "@tanstack/react-start"
 import { ArrowRightIcon, Building2Icon } from "lucide-react"
-import { useState } from "react"
 
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
@@ -17,38 +14,13 @@ import { Input } from "@/components/ui/input"
 import { SetupArtworkShell } from "@/features/onboarding/components/setup-artwork-shell"
 import { StepIntro } from "@/features/onboarding/components/setup-step-intro"
 import { SetupStepper } from "@/features/onboarding/components/setup-stepper"
-import { getErrorMessage } from "@/lib/errors"
+import { useCreateOrganizationForm } from "@/features/onboarding/hooks/use-create-organization-form"
 import { getFieldError } from "@/lib/forms"
-import { createOrganizationWithBootstrap } from "@/lib/onboarding"
-import {
-  onboardingOrganizationSchema,
-  organizationNameSchema,
-} from "@/lib/onboarding-schemas"
+import { organizationNameSchema } from "@/lib/onboarding-schemas"
 import { createZodFieldValidator } from "@/lib/validation"
 
 function CreateOrganizationPage() {
-  const createOrganizationFn = useServerFn(createOrganizationWithBootstrap)
-  const [error, setError] = useState<string | null>(null)
-  const form = useForm({
-    defaultValues: { name: "" },
-    onSubmit: async ({ value }) => {
-      setError(null)
-
-      try {
-        const result = await createOrganizationFn({
-          data: onboardingOrganizationSchema.parse(value),
-        })
-        window.location.href = result.redirectTo
-      } catch (submissionError) {
-        setError(
-          getErrorMessage(
-            submissionError,
-            "We could not create your organisation."
-          )
-        )
-      }
-    },
-  })
+  const { form, error } = useCreateOrganizationForm()
 
   return (
     <SetupArtworkShell>
@@ -103,16 +75,24 @@ function CreateOrganizationPage() {
           </form.Field>
         </FieldGroup>
 
-        <FormErrorMessage message={error} />
+        {error ? (
+          <div role="alert">
+            <FormErrorMessage message={error} />
+          </div>
+        ) : null}
 
         <div className="space-y-2 text-center">
-          <FormSubmitButton
-            className="h-11 w-full rounded-xl bg-[#1264e9] text-sm font-semibold shadow-[0_10px_24px_rgba(18,100,233,0.16)] transition-[transform,box-shadow] hover:-translate-y-0.5 hover:bg-[#0757d7] hover:shadow-[0_14px_28px_rgba(18,100,233,0.2)] motion-reduce:transform-none"
-            isSubmitting={form.state.isSubmitting}
-            submittingText="Creating organisation..."
-          >
-            Continue <ArrowRightIcon className="ml-2 size-4" />
-          </FormSubmitButton>
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <FormSubmitButton
+                className="h-11 w-full rounded-xl bg-[#1264e9] text-sm font-semibold shadow-[0_10px_24px_rgba(18,100,233,0.16)] transition-[transform,box-shadow] hover:-translate-y-0.5 hover:bg-[#0757d7] hover:shadow-[0_14px_28px_rgba(18,100,233,0.2)] motion-reduce:transform-none"
+                isSubmitting={isSubmitting}
+                submittingText="Creating organisation..."
+              >
+                Continue <ArrowRightIcon className="ml-2 size-4" />
+              </FormSubmitButton>
+            )}
+          </form.Subscribe>
           <Link
             to="/"
             className="inline-flex min-h-9 items-center justify-center text-sm font-semibold text-[#075fe6] underline underline-offset-4 hover:text-[#064cb8]"
