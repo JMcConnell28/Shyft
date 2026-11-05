@@ -22,18 +22,14 @@ import {
 } from "@/features/settings/schemas/rota-settings-schemas"
 
 const getGeneralSettingsPageData = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    getGeneralSettingsInputSchema.parse(input)
-  )
+  .validator((input: unknown) => getGeneralSettingsInputSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/settings/server/queries")
     return module.getGeneralSettingsPageData(data)
   })
 
 const updateGeneralSettings = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    updateGeneralSettingsInputSchema.parse(input)
-  )
+  .validator((input: unknown) => updateGeneralSettingsInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/actions")
@@ -41,9 +37,7 @@ const updateGeneralSettings = createServerFn({ method: "POST" })
   })
 
 const getLocationSettingsPageData = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    getLocationSettingsInputSchema.parse(input)
-  )
+  .validator((input: unknown) => getLocationSettingsInputSchema.parse(input))
   .handler(async ({ data }) => {
     const module = await import("@/features/settings/server/location-queries")
     return module.getLocationSettingsPageData(data)
@@ -52,15 +46,12 @@ const getLocationSettingsPageData = createServerFn({ method: "POST" })
 const createLocation = createServerFn({ method: "POST" })
   .validator((input: unknown) => createLocationInputSchema.parse(input))
   .handler(async ({ data }) => {
-    await requireWorkspaceWriteAccess(data)
-    const module = await import("@/features/settings/server/location-actions")
+    const module = await import("@/features/settings/server/create-location")
     return module.createLocation(data)
   })
 
 const updateLocationSettings = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    updateLocationSettingsInputSchema.parse(input)
-  )
+  .validator((input: unknown) => updateLocationSettingsInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/location-actions")
@@ -75,9 +66,7 @@ const getRotaSettingsPageData = createServerFn({ method: "POST" })
   })
 
 const updateRotaSettings = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    updateRotaSettingsInputSchema.parse(input)
-  )
+  .validator((input: unknown) => updateRotaSettingsInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/rota-actions")
@@ -85,9 +74,7 @@ const updateRotaSettings = createServerFn({ method: "POST" })
   })
 
 const updateShiftSwapSetting = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    updateShiftSwapSettingInputSchema.parse(input)
-  )
+  .validator((input: unknown) => updateShiftSwapSettingInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/shift-swap-setting")
@@ -97,8 +84,7 @@ const updateShiftSwapSetting = createServerFn({ method: "POST" })
 const createZone = createServerFn({ method: "POST" })
   .validator((input: unknown) => createZoneInputSchema.parse(input))
   .handler(async ({ data }) => {
-    await requireWorkspaceWriteAccess(data)
-    const module = await import("@/features/settings/server/zone-actions")
+    const module = await import("@/features/settings/server/create-zone")
     return module.createZone(data)
   })
 
@@ -119,9 +105,7 @@ const deleteZone = createServerFn({ method: "POST" })
   })
 
 const renameRotaTemplate = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    renameRotaTemplateInputSchema.parse(input)
-  )
+  .validator((input: unknown) => renameRotaTemplateInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/template-actions")
@@ -129,9 +113,7 @@ const renameRotaTemplate = createServerFn({ method: "POST" })
   })
 
 const deleteRotaTemplate = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    deleteRotaTemplateInputSchema.parse(input)
-  )
+  .validator((input: unknown) => deleteRotaTemplateInputSchema.parse(input))
   .handler(async ({ data }) => {
     await requireWorkspaceWriteAccess(data)
     const module = await import("@/features/settings/server/template-actions")

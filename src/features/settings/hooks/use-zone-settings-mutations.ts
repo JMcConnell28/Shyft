@@ -3,8 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
 
-import { rotaQueryKeys } from "@/features/rota/query-keys"
-import { settingsQueryKeys } from "@/features/settings/query-keys"
+import { applyZoneCacheChange } from "@/features/settings/utils/zone-mutation-cache"
 import {
   createZone,
   deleteZone,
@@ -22,17 +21,6 @@ function useZoneSettingsMutations(input: {
   const updateZoneFn = useServerFn(updateZone)
   const deleteZoneFn = useServerFn(deleteZone)
 
-  async function invalidate() {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: settingsQueryKeys.all,
-      }),
-      queryClient.invalidateQueries({
-        queryKey: rotaQueryKeys.all,
-      }),
-    ])
-  }
-
   const createMutation = useMutation({
     mutationFn: (data: { locationId: string; name: string }) =>
       createZoneFn({
@@ -41,8 +29,12 @@ function useZoneSettingsMutations(input: {
           ...data,
         },
       }),
-    onSuccess: async () => {
-      await invalidate()
+    onSuccess: async (zone) => {
+      await applyZoneCacheChange(queryClient, input, {
+        type: "created",
+        locationId: zone.locationId,
+        zone,
+      })
       showSuccessToast("Zone created.")
     },
     onError: (error) => {
@@ -60,8 +52,11 @@ function useZoneSettingsMutations(input: {
           ...data,
         },
       }),
-    onSuccess: async () => {
-      await invalidate()
+    onSuccess: async (zone) => {
+      await applyZoneCacheChange(queryClient, input, {
+        type: "renamed",
+        ...zone,
+      })
       showSuccessToast("Zone updated.")
     },
     onError: (error) => {
@@ -79,8 +74,12 @@ function useZoneSettingsMutations(input: {
           zoneId,
         },
       }),
-    onSuccess: async () => {
-      await invalidate()
+    onSuccess: async (zone) => {
+      await applyZoneCacheChange(queryClient, input, {
+        type: "archived",
+        id: zone.id,
+        locationId: zone.locationId,
+      })
       showSuccessToast("Zone archived.")
     },
     onError: (error) => {

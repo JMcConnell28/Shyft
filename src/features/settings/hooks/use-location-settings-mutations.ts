@@ -7,11 +7,9 @@ import type {
   OnboardingBusinessType,
   OnboardingPlanningMode,
 } from "@/features/onboarding/schemas/onboarding-schemas"
-import { rotaQueryKeys } from "@/features/rota/query-keys"
-import { settingsQueryKeys } from "@/features/settings/query-keys"
+import { applyCreatedLocation } from "@/features/settings/utils/location-mutation-cache"
 import { createLocation } from "@/features/settings/server-fns"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
-import { useRefreshNavigation } from "@/features/navigation/hooks/use-refresh-navigation"
 
 function useLocationSettingsMutations(input: {
   organizationId?: string
@@ -19,19 +17,7 @@ function useLocationSettingsMutations(input: {
   userId: string
 }) {
   const queryClient = useQueryClient()
-  const refreshNavigation = useRefreshNavigation()
   const createLocationFn = useServerFn(createLocation)
-
-  async function invalidate() {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: settingsQueryKeys.all,
-      }),
-      queryClient.invalidateQueries({
-        queryKey: rotaQueryKeys.all,
-      }),
-    ])
-  }
 
   const createMutation = useMutation({
     mutationFn: (data: {
@@ -48,9 +34,8 @@ function useLocationSettingsMutations(input: {
           organizationId: input.organizationId ?? "",
         },
       }),
-    onSuccess: async () => {
-      await invalidate()
-      await refreshNavigation()
+    onSuccess: async (location) => {
+      await applyCreatedLocation(queryClient, input, location)
       showSuccessToast("Location created.")
     },
     onError: (error) => {

@@ -3,59 +3,6 @@ import { getDatabase } from "@/lib/db"
 import { requireLocationPermission } from "@/lib/auth/has-location-permission"
 import { requireOrgPermission } from "@/lib/auth/has-org-permission"
 
-async function createZone(input: {
-  organizationId?: string
-  userId: string
-  locationId: string
-  name: string
-}) {
-  await requireZonePermission(input)
-
-  const database = getDatabase()
-  const normalizedName = input.name.trim()
-  const location = await getLocationForWorkspace(database, input)
-  await assertUniqueZoneName(database, {
-    organizationId: location.organizationId,
-    locationId: input.locationId,
-    name: normalizedName,
-  })
-
-  const result = await database.query<{
-    id: string
-    location_id: string
-    name: string
-    sort_order: number
-  }>(
-    `insert into public.zones (
-       organization_id,
-       location_id,
-       name,
-       sort_order
-     )
-     values (
-       $1,
-       $2,
-       $3,
-       (
-         select coalesce(max(z.sort_order) + 1, 0)
-         from public.zones z
-         where (($1::text is null and z.organization_id is null) or z.organization_id = $1::text)
-           and z.location_id = $2::uuid
-           and z.deleted_at is null
-       )
-     )
-     returning id, location_id, name, sort_order`,
-    [location.organizationId, input.locationId, normalizedName]
-  )
-
-  return {
-    id: result.rows[0]?.id ?? "",
-    locationId: result.rows[0]?.location_id ?? input.locationId,
-    name: result.rows[0]?.name ?? normalizedName,
-    sortOrder: result.rows[0]?.sort_order ?? 0,
-  }
-}
-
 async function updateZone(input: {
   organizationId?: string
   locationId?: string
@@ -148,7 +95,8 @@ async function deleteZone(input: {
        returning id`,
       [input.organizationId ?? null, input.zoneId, input.locationId ?? null]
     )
-    if (!result.rows.at(0)) throw new Error("This zone has already been archived.")
+    if (!result.rows.at(0))
+      throw new Error("This zone has already been archived.")
     await client.query("COMMIT")
   } catch (error) {
     await client.query("ROLLBACK")
@@ -159,6 +107,7 @@ async function deleteZone(input: {
 
   return {
     id: input.zoneId,
+    locationId: zone.locationId,
   }
 }
 
@@ -191,39 +140,6 @@ async function requireZonePermission(input: {
     },
     errorMessage: "You do not have permission to manage zones.",
   })
-}
-
-async function getLocationForWorkspace(
-  database: ReturnType<typeof getDatabase>,
-  input: {
-    organizationId?: string
-    locationId: string
-  }
-) {
-  const result = await database.query<{
-    id: string
-    organization_id: string | null
-  }>(
-    `select id, organization_id
-     from public.locations
-     where id = $2::uuid
-       and (
-         ($1::text is not null and organization_id = $1::text)
-         or $1::text is null
-       )
-     limit 1`,
-    [input.organizationId ?? null, input.locationId]
-  )
-  const location = result.rows.at(0)
-
-  if (!location) {
-    throw new Error("Choose a valid location.")
-  }
-
-  return {
-    id: location.id,
-    organizationId: location.organization_id,
-  }
 }
 
 async function getZoneForWorkspace(
@@ -297,4 +213,4 @@ async function assertUniqueZoneName(
   }
 }
 
-export { createZone, deleteZone, updateZone }
+export { deleteZone, updateZone }
