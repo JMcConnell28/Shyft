@@ -16,6 +16,7 @@ import { TermsAcceptanceField } from "@/features/legal/components/terms-acceptan
 import { termsAcceptanceSchema } from "@/features/legal/schemas/terms-acceptance-schema"
 import { termsVersion } from "@/features/legal/terms"
 import { authClient } from "@/lib/auth-client"
+import { getErrorMessage } from "@/lib/errors"
 import { getSession } from "@/lib/auth-server"
 import { isPublicDevelopmentEmailVerificationBypassed } from "@/lib/email-verification"
 import { saveOnboardingIntent } from "@/lib/onboarding"
@@ -87,50 +88,59 @@ function SignUpRoute() {
         return
       }
 
-      const fullName = `${parsed.data.firstName} ${parsed.data.lastName}`
-      const signUpResult = await authClient.signUp.email(
-        {
-          name: fullName,
-          email: parsed.data.email,
-          password: parsed.data.password,
-          dateOfBirth: parsed.data.dateOfBirth,
-          callbackURL: redirectTarget,
-        },
-        {
-          headers: {
-            "x-signup-access-code": parsed.data.accessCode,
-            "x-terms-version": termsVersion,
+      try {
+        const fullName = `${parsed.data.firstName} ${parsed.data.lastName}`
+        const signUpResult = await authClient.signUp.email(
+          {
+            name: fullName,
+            email: parsed.data.email,
+            password: parsed.data.password,
+            dateOfBirth: parsed.data.dateOfBirth,
+            callbackURL: redirectTarget,
           },
+          {
+            headers: {
+              "x-signup-access-code": parsed.data.accessCode,
+              "x-terms-version": termsVersion,
+            },
+          }
+        )
+
+        if (signUpResult.error) {
+          setError(signUpResult.error.message ?? "Unable to create account.")
+          return
         }
-      )
 
-      if (signUpResult.error) {
-        setError(signUpResult.error.message ?? "Unable to create account.")
-        return
-      }
+        await saveOnboardingIntentFn({
+          data: {
+            email: parsed.data.email,
+            intent,
+          },
+        })
 
-      await saveOnboardingIntentFn({
-        data: {
-          email: parsed.data.email,
-          intent,
-        },
-      })
-
-      if (isPublicDevelopmentEmailVerificationBypassed()) {
-        if (typeof window !== "undefined") {
-          window.location.href = redirectTarget
+        if (isPublicDevelopmentEmailVerificationBypassed()) {
+          if (typeof window !== "undefined") {
+            window.location.href = redirectTarget
+          }
+          return
         }
-        return
-      }
 
-      await navigate({
-        to: "/verify-email",
-        search: {
-          email: parsed.data.email,
-          redirect: redirectTarget,
-          sent: true,
-        },
-      })
+        await navigate({
+          to: "/verify-email",
+          search: {
+            email: parsed.data.email,
+            redirect: redirectTarget,
+            sent: true,
+          },
+        })
+      } catch (submissionError) {
+        setError(
+          getErrorMessage(
+            submissionError,
+            "Unable to create account. Try again."
+          )
+        )
+      }
     },
   })
 
@@ -280,14 +290,18 @@ function SignUpRoute() {
 
         <FormErrorMessage message={error} />
 
-        <FormSubmitButton
-          className={setupAuthPrimaryButtonClassName}
-          isSubmitting={form.state.isSubmitting}
-          submittingText="Creating account..."
-        >
-          Continue
-          <ArrowRightIcon className="size-4" />
-        </FormSubmitButton>
+        <form.Subscribe selector={(state) => state.isSubmitting}>
+          {(isSubmitting) => (
+            <FormSubmitButton
+              className={setupAuthPrimaryButtonClassName}
+              isSubmitting={isSubmitting}
+              submittingText="Creating account..."
+            >
+              Continue
+              <ArrowRightIcon className="size-4" />
+            </FormSubmitButton>
+          )}
+        </form.Subscribe>
       </form>
     </SetupAuthShell>
   )

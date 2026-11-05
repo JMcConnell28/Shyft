@@ -12,6 +12,7 @@ import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { TextFormField } from "@/components/forms/text-form-field"
 import { authClient } from "@/lib/auth-client"
+import { getErrorMessage } from "@/lib/errors"
 import { getSession } from "@/lib/auth-server"
 import { createZodFieldValidator } from "@/lib/validation"
 import { emailSchema, passwordSchema } from "@/lib/onboarding-schemas"
@@ -75,19 +76,25 @@ function LoginRoute() {
     onSubmit: async ({ value }) => {
       setError(null)
 
-      const result = await authClient.signIn.email({
-        email: value.email,
-        password: value.password,
-        callbackURL: search.redirect,
-      })
+      try {
+        const result = await authClient.signIn.email({
+          email: value.email,
+          password: value.password,
+          callbackURL: search.redirect,
+        })
 
-      if (result.error) {
-        setError(result.error.message ?? "Unable to sign in.")
-        return
-      }
+        if (result.error) {
+          setError(result.error.message ?? "Unable to sign in.")
+          return
+        }
 
-      if (typeof window !== "undefined") {
-        window.location.href = search.redirect
+        if (typeof window !== "undefined") {
+          window.location.href = search.redirect
+        }
+      } catch (submissionError) {
+        setError(
+          getErrorMessage(submissionError, "Unable to sign in. Try again.")
+        )
       }
     },
   })
@@ -96,25 +103,31 @@ function LoginRoute() {
     setError(null)
     setIsPasskeyPending(true)
 
-    const result = await authClient.signIn.passkey()
+    try {
+      const result = await authClient.signIn.passkey()
 
-    setIsPasskeyPending(false)
+      if (result.error) {
+        const errorCode = "code" in result.error ? result.error.code : undefined
 
-    if (result.error) {
-      const errorCode = "code" in result.error ? result.error.code : undefined
+        setError(
+          errorCode === "AUTH_CANCELLED"
+            ? "Passkey sign-in was cancelled."
+            : typeof result.error.message === "string"
+              ? result.error.message
+              : "Unable to sign in with a passkey."
+        )
+        return
+      }
 
+      if (typeof window !== "undefined") {
+        window.location.href = search.redirect
+      }
+    } catch (submissionError) {
       setError(
-        errorCode === "AUTH_CANCELLED"
-          ? "Passkey sign-in was cancelled."
-          : typeof result.error.message === "string"
-            ? result.error.message
-            : "Unable to sign in with a passkey."
+        getErrorMessage(submissionError, "Unable to sign in with a passkey.")
       )
-      return
-    }
-
-    if (typeof window !== "undefined") {
-      window.location.href = search.redirect
+    } finally {
+      setIsPasskeyPending(false)
     }
   }
 
@@ -187,24 +200,30 @@ function LoginRoute() {
               Forgot password?
             </Button>
           </div>
-          <FormSubmitButton
-            className={setupAuthPrimaryButtonClassName}
-            isSubmitting={form.state.isSubmitting || isPasskeyPending}
-            submittingText="Signing in..."
-          >
-            Sign in
-          </FormSubmitButton>
-          <Button
-            variant="outline"
-            size="lg"
-            className={setupAuthSecondaryButtonClassName}
-            type="button"
-            onClick={() => void handlePasskeySignIn()}
-            disabled={form.state.isSubmitting || isPasskeyPending}
-          >
-            <KeyRoundIcon />
-            Use passkey
-          </Button>
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <>
+                <FormSubmitButton
+                  className={setupAuthPrimaryButtonClassName}
+                  isSubmitting={isSubmitting || isPasskeyPending}
+                  submittingText="Signing in..."
+                >
+                  Sign in
+                </FormSubmitButton>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className={setupAuthSecondaryButtonClassName}
+                  type="button"
+                  onClick={() => void handlePasskeySignIn()}
+                  disabled={isSubmitting || isPasskeyPending}
+                >
+                  <KeyRoundIcon />
+                  Use passkey
+                </Button>
+              </>
+            )}
+          </form.Subscribe>
         </div>
       </form>
     </SetupAuthShell>
