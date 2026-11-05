@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { needsTimeAttendanceSetup } from "@/features/time-clock/utils/time-attendance-access"
+import { TimeAttendanceSetupPrompt } from "@/features/time-clock/components/time-attendance-setup-prompt"
 
 import { AccessDeniedState } from "@/components/errors/access-denied-state"
 import { ManagerTimeClockPage } from "@/features/time-clock/components/manager-time-clock-page"
@@ -28,6 +30,9 @@ export const Route = createFileRoute(
     if (!context.capabilities.canManageTimeClock) {
       return { status: "forbidden" as const }
     }
+
+    if (needsTimeAttendanceSetup(context.viewer.billing))
+      return { status: "setup-required" as const }
 
     const data = await context.queryClient.ensureQueryData({
       ...managerClockQueryOptions({
@@ -61,6 +66,14 @@ function WorkspaceTimeClockRoute() {
       />
     )
   }
+
+  if (result.status === "setup-required")
+    return (
+      <TimeAttendanceSetupPrompt
+        workspaceSlug={activeWorkspace.slug}
+        canActivate={viewer.activeRole === "owner"}
+      />
+    )
 
   return (
     <ManagerTimeClockPage

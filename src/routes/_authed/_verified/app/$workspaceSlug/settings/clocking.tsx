@@ -1,4 +1,6 @@
 import { createFileRoute, useLocation } from "@tanstack/react-router"
+import { needsTimeAttendanceSetup } from "@/features/time-clock/utils/time-attendance-access"
+import { TimeAttendanceSetupPrompt } from "@/features/time-clock/components/time-attendance-setup-prompt"
 
 import { SettingsLayout } from "@/features/settings/components/settings-layout"
 import { ClockSettingsPage } from "@/features/time-clock/components/clock-settings-page"
@@ -13,6 +15,8 @@ export const Route = createFileRoute(
     if (!activeWorkspace) {
       throw new Error("An active workspace is required.")
     }
+
+    if (needsTimeAttendanceSetup(context.viewer.billing, true)) return null
 
     return getClockSettingsPageData({
       data: {
@@ -39,12 +43,19 @@ function WorkspaceClockingSettingsRoute() {
 
   return (
     <SettingsLayout workspaceSlug={workspaceSlug} activePath={pathname}>
-      <ClockSettingsPage
-        initialData={data}
-        organizationId={activeWorkspace.id}
-        userId={viewer.user.id}
-        workspaceSlug={workspaceSlug}
-      />
+      {data === null ? (
+        <TimeAttendanceSetupPrompt
+          workspaceSlug={workspaceSlug}
+          canActivate={viewer.activeRole === "owner"}
+        />
+      ) : (
+        <ClockSettingsPage
+          initialData={data}
+          organizationId={activeWorkspace.id}
+          userId={viewer.user.id}
+          workspaceSlug={workspaceSlug}
+        />
+      )}
     </SettingsLayout>
   )
 }
