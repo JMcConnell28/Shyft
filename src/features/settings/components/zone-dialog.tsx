@@ -1,7 +1,9 @@
 "use client"
 
+
 import * as React from "react"
 import { PencilIcon, PlusIcon } from "lucide-react"
+import { MAX_ZONE_NAME_LENGTH } from "@/lib/zone-limits"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -111,7 +113,7 @@ function ZoneDialog({
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="Zone 1"
-                maxLength={80}
+                maxLength={MAX_ZONE_NAME_LENGTH}
                 autoFocus
               />
               <FieldError>{error}</FieldError>

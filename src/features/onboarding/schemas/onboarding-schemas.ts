@@ -1,4 +1,8 @@
 import { z } from "zod"
+import {
+  MAX_ZONE_NAME_LENGTH,
+  ZONE_NAME_LENGTH_MESSAGE,
+} from "@/lib/zone-limits"
 
 import { timeAttendanceDeliveryAddressSchema } from "@/features/billing/schemas/time-attendance-addon-schemas"
 import { termsAcceptanceSchema } from "@/features/legal/schemas/terms-acceptance-schema"
@@ -97,7 +101,7 @@ const zoneNameSchema = z
   .string()
   .trim()
   .min(2, "Area name must be at least 2 characters.")
-  .max(80, "Zone name is too long.")
+  .max(MAX_ZONE_NAME_LENGTH, ZONE_NAME_LENGTH_MESSAGE)
 
 const worksiteNameSchema = z
   .string()

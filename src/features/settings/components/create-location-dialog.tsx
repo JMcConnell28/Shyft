@@ -1,5 +1,6 @@
 "use client"
 
+
 import * as React from "react"
 import { MapPinPlusIcon, PlusIcon, XIcon } from "lucide-react"
 
@@ -7,6 +8,7 @@ import type {
   OnboardingBusinessType,
   OnboardingPlanningMode,
 } from "@/features/onboarding/schemas/onboarding-schemas"
+import { MAX_ZONE_NAME_LENGTH } from "@/lib/zone-limits"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -136,7 +138,7 @@ function CreateLocationDialog({
                     <Input
                       aria-label={`Zone ${index + 1} name`}
                       value={zone}
-                      maxLength={80}
+                      maxLength={MAX_ZONE_NAME_LENGTH}
                       placeholder={index === 0 ? "Main area" : "Another zone"}
                       onChange={(event) =>
                         setZones((current) =>

@@ -1,4 +1,8 @@
 import { z } from "zod"
+import {
+  MAX_ZONE_NAME_LENGTH,
+  ZONE_NAME_LENGTH_MESSAGE,
+} from "@/lib/zone-limits"
 import { locationAddressSchema } from "@/features/locations/schemas/location-address-schema"
 
 import {
@@ -38,7 +42,7 @@ const createLocationInputSchema = organizationScopedUserSchema.extend({
         .string()
         .trim()
         .min(1, "Enter a zone name.")
-        .max(80, "Zone name is too long.")
+        .max(MAX_ZONE_NAME_LENGTH, ZONE_NAME_LENGTH_MESSAGE)
     )
     .min(1, "Add at least one zone for this location.")
     .max(12, "Use 12 zones or fewer.")

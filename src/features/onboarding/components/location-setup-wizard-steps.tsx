@@ -1,5 +1,6 @@
 import { Building2Icon, PlusIcon, XIcon } from "lucide-react"
 import * as React from "react"
+import { MAX_ZONE_NAME_LENGTH } from "@/lib/zone-limits"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -112,7 +113,7 @@ function ZonesStep({
             <Input
               id="new-zone"
               value={newName}
-              maxLength={80}
+              maxLength={MAX_ZONE_NAME_LENGTH}
               onChange={(event) => setNewName(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {

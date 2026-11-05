@@ -1,4 +1,8 @@
 import { z } from "zod"
+import {
+  MAX_ZONE_NAME_LENGTH,
+  ZONE_NAME_LENGTH_MESSAGE,
+} from "@/lib/zone-limits"
 import { rotaTimeFormatSchema } from "@/features/rota/schemas/time-format-schema"
 import { DEFAULT_ROTA_TIME_FORMAT } from "@/features/rota/constants/time-format"
 import { rotaTemplateNameSchema } from "@/features/rota/schemas/rota-server-schemas"
@@ -17,7 +21,7 @@ const zoneNameSchema = z
   .string()
   .trim()
   .min(1, "Enter a zone name.")
-  .max(80, "Zone names must be 80 characters or fewer.")
+  .max(MAX_ZONE_NAME_LENGTH, ZONE_NAME_LENGTH_MESSAGE)
 
 const getRotaSettingsInputSchema = workspaceScopedUserSchema.refine(
   (value) => Boolean(value.organizationId) !== Boolean(value.locationId),
