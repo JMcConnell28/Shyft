@@ -16,6 +16,8 @@ const buttonVariants = variants.cva(
         pill: "rounded-lg border-border bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.12)] hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30",
         raised:
           "rounded-lg border-black/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_1px_2px_rgba(0,0,0,0.16)] hover:brightness-[0.97] focus-visible:ring-white/10",
+        glossy:
+          "rounded-[10px] border-t-white/40 border-x-white/30 border-b-white/15 bg-[#296ff0] text-white shadow-[0_3px_6px_rgba(0,0,0,0.2),inset_0_0_6px_2px_rgba(255,255,255,0.24),0_0_0_1px_#296ff0] hover:bg-[#2464dc] focus-visible:ring-[#296ff0]/40 active:shadow-[0_1px_3px_rgba(0,0,0,0.15),inset_0_0_6px_2px_rgba(255,255,255,0.24),0_0_0_1px_#296ff0]",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         warm: "rounded-lg border-emerald-700 bg-emerald-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_1px_2px_rgba(0,0,0,0.16)] hover:bg-emerald-700 focus-visible:border-emerald-800 focus-visible:ring-emerald-500/30",
