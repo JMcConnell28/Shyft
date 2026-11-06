@@ -3,9 +3,9 @@
 import * as React from "react"
 import {
   ChevronDown,
+  LayoutTemplateIcon,
   LoaderCircleIcon,
   SaveIcon,
-  ShapesIcon,
 } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start"
@@ -189,7 +189,7 @@ function TemplateMenuContents({
           {isBusy ? (
             <LoaderCircleIcon className="size-3.5 animate-spin" />
           ) : (
-            <ShapesIcon className="size-3.5" />
+            <LayoutTemplateIcon className="size-3.5" />
           )}
           <span className="hidden group-data-[toolbar-more=true]/toolbar-more:inline md:inline">
             Templates

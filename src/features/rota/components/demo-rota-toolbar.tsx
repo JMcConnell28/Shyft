@@ -1,10 +1,10 @@
 import {
   ChevronDown,
   FileDown,
+  LayoutTemplateIcon,
   SaveIcon,
   Send,
   Settings,
-  ShapesIcon,
 } from "lucide-react"
 
 import CreateShift from "./create-shift"
@@ -44,8 +44,8 @@ export function DemoToolBar() {
       }
       tools={
         <>
-          <ZonePicker />
           <CreateShift />
+          <ZonePicker />
           <div className="hidden md:contents">
             <Button
               type="button"
@@ -54,7 +54,7 @@ export function DemoToolBar() {
               aria-label="Templates"
               className={rotaToolbarButtonClassName}
             >
-              <ShapesIcon data-icon="inline-start" />
+              <LayoutTemplateIcon data-icon="inline-start" />
               Templates
               <ChevronDown className="size-3.5" />
             </Button>

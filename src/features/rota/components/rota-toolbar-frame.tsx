@@ -16,7 +16,7 @@ function ToolBarFrame({
   const status = meta.status
 
   return (
-    <div className="flex w-full shrink-0 flex-col gap-2 md:h-10 md:flex-row md:items-center md:gap-3 md:px-2">
+    <div className="flex w-full shrink-0 flex-col gap-2 md:h-10 md:flex-row md:items-center md:gap-2">
       <div className="w-full shrink-0 md:w-64">
         <div className="flex w-full min-w-0 flex-col justify-center rounded-xl bg-white px-3 py-2 shadow-[0_6px_18px_rgba(30,50,96,0.05)] ring-1 ring-[#e7eaf2] sm:bg-transparent md:shadow-none md:ring-0">
           <div className="flex min-w-0 items-center gap-2">
@@ -47,7 +47,7 @@ function ToolBarFrame({
       </div>
 
       <div className="flex min-w-0 flex-1 items-center justify-between gap-2 overflow-hidden">
-        <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto p-px">
+        <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto py-px">
           {tools}
         </div>
 

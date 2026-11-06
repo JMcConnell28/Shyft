@@ -9,7 +9,10 @@ import { useRotaWorkspace } from "./rota-workspace-provider"
 import { RotaExportDialog } from "./rota-export-dialog"
 import { RotaTemplateMenu } from "./rota-template-menu"
 import ZonePicker from "./zone-picker"
-import { rotaToolbarButtonClassName } from "@/features/rota/constants/rota-toolbar-styles"
+import {
+  rotaToolbarButtonClassName,
+  rotaToolbarPrimaryButtonClassName,
+} from "@/features/rota/constants/rota-toolbar-styles"
 import { usePublishRota } from "@/features/rota/hooks/use-publish-rota"
 import { useSaveRotaWorkspace } from "@/features/rota/hooks/use-save-rota-workspace"
 import { Button } from "@/components/ui/button"
@@ -56,9 +59,9 @@ function ConnectedToolBar() {
                 <span className="hidden md:inline">Save</span>
               </Button>
               <Button
-                variant="glossy"
+                variant="raised"
                 size="icon"
-                className="size-7 md:h-7 md:w-auto md:gap-2 md:px-2 md:text-sm"
+                className={rotaToolbarPrimaryButtonClassName}
                 disabled={!canPublish}
                 onClick={() => {
                   void publish()
@@ -119,8 +122,8 @@ function ConnectedToolBar() {
       }
       tools={
         <>
-          <ZonePicker />
           {meta.canEdit ? <CreateShift /> : null}
+          <ZonePicker />
           {meta.canEdit ? (
             <div className="hidden md:contents">
               <RotaTemplateMenu isSaving={isSaving} saveCurrentRota={save} />
