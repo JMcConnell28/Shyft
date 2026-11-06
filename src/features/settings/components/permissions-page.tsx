@@ -14,7 +14,12 @@ import {
 } from "@/components/ui/table"
 
 function PermissionValue({ value }: { value: boolean | string }) {
-  if (typeof value === "string") return <span className="text-xs">{value}</span>
+  if (typeof value === "string")
+    return (
+      <span className="relative inline-block text-xs whitespace-nowrap">
+        {value}
+      </span>
+    )
   const Icon = value ? CheckIcon : MinusIcon
   return (
     <span className="inline-flex items-center justify-center">
@@ -31,19 +36,24 @@ function PermissionValue({ value }: { value: boolean | string }) {
 
 function PermissionsPage() {
   return (
-    <section className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Current organization permissions. This reference is visible only to
-        owners; change individual roles in Company settings.
-      </p>
-      <div className="overflow-hidden rounded-xl border bg-card">
-        <Table className="min-w-[760px]">
+    <section className="min-w-0 space-y-4">
+      <h1 className="text-2xl font-bold tracking-[-0.035em]">
+        Role Permissions
+      </h1>
+      <div className="w-full max-w-full min-w-0 overflow-hidden rounded-xl border bg-card [&_[data-slot=table-container]]:overscroll-x-contain">
+        <Table className="w-full min-w-[820px] table-fixed">
           <caption className="sr-only">Organization role permissions</caption>
+          <colgroup>
+            <col className="w-[220px]" />
+            {permissionRoles.map((role) => (
+              <col key={role} />
+            ))}
+          </colgroup>
           <TableHeader>
             <TableRow>
               <TableHead
                 scope="col"
-                className="sticky left-0 z-10 min-w-48 bg-card px-4"
+                className="sticky left-0 z-10 bg-card px-4"
               >
                 Capability
               </TableHead>
@@ -59,7 +69,7 @@ function PermissionsPage() {
               <TableRow key={permission.label}>
                 <TableHead
                   scope="row"
-                  className="sticky left-0 bg-card px-4 py-3 whitespace-normal"
+                  className="sticky left-0 z-10 bg-card px-4 py-3 whitespace-normal"
                 >
                   {permission.label}
                 </TableHead>
@@ -73,11 +83,6 @@ function PermissionsPage() {
           </TableBody>
         </Table>
       </div>
-      <p className="text-xs text-muted-foreground">
-        Location access, enabled features and subscription status still apply.
-        “Member” is an older name for Employee. Owners cannot be reassigned
-        through the normal role selector.
-      </p>
     </section>
   )
 }

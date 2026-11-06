@@ -48,8 +48,8 @@ function SettingsLayout({
   })
 
   return (
-    <div className="flex w-full flex-1 flex-col bg-[#f6f8fc] px-4 py-5 text-[#10204b] sm:px-5 sm:py-6 md:min-h-full md:p-0">
-      <div className="settings-layout-grid flex-1 md:min-h-full">
+    <div className="flex w-full min-w-0 flex-1 flex-col bg-[#f6f8fc] px-4 py-5 text-[#10204b] sm:px-5 sm:py-6 md:min-h-full md:p-0">
+      <div className="settings-layout-grid min-w-0 flex-1 md:min-h-full">
         <aside className="hidden border-r border-[#e3e8f2] bg-white px-4 py-6 md:block">
           <div className="md:sticky md:top-6">
             <h2 className="mb-4 px-2.5 text-base font-bold tracking-[-0.025em] text-[#10204b]">

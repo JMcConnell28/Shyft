@@ -10,7 +10,7 @@ export const Route = createFileRoute(
       throw redirect({ to: "/app/$workspaceSlug/dashboard", params })
     }
   },
-  head: () => ({ meta: [{ title: "Permissions | RocketRota" }] }),
+  head: () => ({ meta: [{ title: "Role Permissions | RocketRota" }] }),
   component: PermissionsRoute,
 })
 
@@ -18,7 +18,11 @@ function PermissionsRoute() {
   const { workspaceSlug } = Route.useParams()
   const pathname = useLocation({ select: (location) => location.pathname })
   return (
-    <SettingsLayout workspaceSlug={workspaceSlug} activePath={pathname}>
+    <SettingsLayout
+      workspaceSlug={workspaceSlug}
+      activePath={pathname}
+      contentOnly
+    >
       <PermissionsPage />
     </SettingsLayout>
   )
