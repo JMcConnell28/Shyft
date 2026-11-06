@@ -50,19 +50,24 @@ function ManagerDashboardSummary({
           aria-label={
             scope ? `${label}: ${value}, ${scope}` : `${label}: ${value}`
           }
-          className="flex min-h-12 min-w-0 items-center justify-between gap-1 px-2.5 text-left transition-colors first:rounded-l-xl last:rounded-r-xl hover:bg-muted/60 focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring sm:gap-3 sm:px-4"
+          className="flex min-h-24 min-w-0 flex-col items-start justify-start gap-2 px-3 py-4 text-left transition-colors first:rounded-l-xl last:rounded-r-xl hover:bg-muted/60 focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring sm:px-5"
         >
           <span className="text-xs font-medium text-muted-foreground sm:text-sm">
             {label}
           </span>
           <span
             className={cn(
-              "text-sm font-semibold tabular-nums sm:text-base",
+              "text-2xl leading-none font-semibold tracking-tight tabular-nums sm:text-[28px]",
               highlighted && "text-amber-800 dark:text-amber-300"
             )}
           >
             {value}
           </span>
+          {scope && (
+            <span className="text-[10px] leading-4 text-muted-foreground sm:text-[11px]">
+              {scope}
+            </span>
+          )}
         </button>
       ))}
     </div>

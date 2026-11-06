@@ -6,7 +6,7 @@ import { parseRotaListSearch } from "@/features/rota/schemas/rota-schemas"
 import { Button } from "@/components/ui/button"
 
 const dashboardActionClassName =
-  "h-11 rounded-lg px-2.5 text-xs shadow-none sm:px-3 sm:text-sm md:h-9"
+  "h-11 rounded-lg px-3 text-sm font-medium shadow-none md:h-9"
 
 function ManagerDashboardHeader({
   access,
@@ -24,11 +24,16 @@ function ManagerDashboardHeader({
   onDate: (date?: string) => void
 }) {
   return (
-    <header className="grid min-w-0 gap-3">
+    <header className="grid min-w-0 gap-5">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5">
-        <h1 className="text-xl leading-tight font-semibold tracking-tight sm:text-2xl">
-          Manager dashboard
-        </h1>
+        <div className="min-w-0">
+          <h1 className="text-2xl leading-tight font-semibold tracking-[-0.03em] sm:text-[28px]">
+            Manager dashboard
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Staffing, attendance and rota planning.
+          </p>
+        </div>
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
           <DashboardCreateRotaButton
             key={locationId}

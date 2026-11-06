@@ -13,7 +13,7 @@ function ManagerTeamFilters({
   attendanceEnabled: boolean
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 px-3.5 pb-3 sm:px-4 @2xl/team:flex @2xl/team:flex-wrap">
+    <div className="grid grid-cols-2 gap-2 border-t border-border/70 bg-muted/15 px-4 py-3 sm:px-5 @2xl/team:flex @2xl/team:flex-wrap">
       <div className="relative col-span-2 min-w-0 @2xl/team:min-w-40 @2xl/team:flex-1">
         <SearchIcon
           aria-hidden="true"

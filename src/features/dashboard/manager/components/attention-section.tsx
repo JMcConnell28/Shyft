@@ -38,6 +38,7 @@ function ManagerAttentionSection({
       <DashboardPanelHeader
         headingId="attention-heading"
         title="Needs attention"
+        description="Outstanding items across all locations and dates."
         action={
           data && data.total > 1 ? (
             <AttentionPager data={data} pending={pending} onPage={onPage} />
@@ -60,7 +61,7 @@ function ManagerAttentionSection({
       {!data && pending ? (
         <div
           role="status"
-          className="border-t px-4 py-3 text-sm text-muted-foreground"
+          className="border-t px-5 py-6 text-sm leading-6 text-muted-foreground"
         >
           Loading outstanding items…
         </div>
@@ -74,7 +75,7 @@ function ManagerAttentionSection({
         {data?.items.slice(0, 1).map((item) => (
           <li
             key={`${item.kind}:${item.id}`}
-            className="space-y-1.5 border-t px-3.5 py-3 sm:px-4"
+            className="space-y-2 border-t px-4 py-4 sm:px-5"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">

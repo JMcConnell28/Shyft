@@ -87,7 +87,7 @@ function ManagerDashboard({
   }
   const data = day.data ?? placeholder
   return (
-    <DashboardLayout>
+    <DashboardLayout className="max-w-[1440px] gap-5 sm:gap-6 sm:pt-7">
       <ManagerDashboardHeader
         access={access.data}
         data={data}
@@ -122,21 +122,7 @@ function ManagerDashboard({
           onRetry={() => void day.refetch()}
         />
       ) : null}
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(17rem,0.42fr)] xl:grid-rows-[auto_1fr]">
-        <ManagerAttentionSection
-          data={attention.data}
-          error={attention.isError}
-          pending={attention.isFetching}
-          workspaceSlug={workspaceSlug}
-          onPage={setAttentionPage}
-          onReview={(item) =>
-            actions.setRequest({
-              kind: item.kind === "arrival" ? "arrival" : "review",
-              item,
-            })
-          }
-          onRetry={() => void attention.refetch()}
-        />
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.42fr)] xl:grid-rows-[auto_1fr]">
         <div className="min-w-0 xl:col-start-1 xl:row-span-2 xl:row-start-1">
           {day.isPending ? (
             <ManagerDashboardLoading />
@@ -153,6 +139,20 @@ function ManagerDashboard({
             />
           ) : null}
         </div>
+        <ManagerAttentionSection
+          data={attention.data}
+          error={attention.isError}
+          pending={attention.isFetching}
+          workspaceSlug={workspaceSlug}
+          onPage={setAttentionPage}
+          onReview={(item) =>
+            actions.setRequest({
+              kind: item.kind === "arrival" ? "arrival" : "review",
+              item,
+            })
+          }
+          onRetry={() => void attention.refetch()}
+        />
         {day.data ? (
           <ManagerComingUp
             data={day.data}

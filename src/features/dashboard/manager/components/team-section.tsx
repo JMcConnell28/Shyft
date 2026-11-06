@@ -35,6 +35,12 @@ function ManagerTeamSection({
       <DashboardPanelHeader
         headingId="team-heading"
         title={data.isToday ? "Today’s team" : "Team"}
+        description={data.location.name}
+        action={
+          <span className="rounded-md bg-muted px-2.5 py-1 text-xs font-medium tabular-nums">
+            {filters.total} results
+          </span>
+        }
       />
       <ManagerTeamFilters
         filters={filters}
@@ -45,7 +51,7 @@ function ManagerTeamSection({
           <div
             role="row"
             className={cn(
-              "sr-only @2xl/team:not-sr-only @2xl/team:grid @2xl/team:items-center @2xl/team:gap-3 @2xl/team:border-t @2xl/team:bg-muted/40 @2xl/team:px-4 @2xl/team:py-2 @2xl/team:text-xs @2xl/team:font-medium @2xl/team:text-muted-foreground",
+              "sr-only @2xl/team:not-sr-only @2xl/team:grid @2xl/team:items-center @2xl/team:gap-3 @2xl/team:border-t @2xl/team:bg-muted/25 @2xl/team:px-5 @2xl/team:py-3 @2xl/team:text-xs @2xl/team:font-medium @2xl/team:text-muted-foreground",
               data.location.attendanceEnabled
                 ? dashboardTeamColumns.attendance
                 : dashboardTeamColumns.published

@@ -19,7 +19,7 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
     <div
       role="row"
       className={cn(
-        "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center gap-x-2 gap-y-1 border-t px-3.5 py-2.5 sm:px-4 @2xl/team:gap-3 @2xl/team:py-1.5",
+        "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center gap-x-2 gap-y-1 border-t border-border/70 px-4 py-4 transition-colors hover:bg-muted/25 sm:px-5 @2xl/team:min-h-18 @2xl/team:gap-3 @2xl/team:py-3",
         location.attendanceEnabled
           ? dashboardTeamColumns.attendance
           : dashboardTeamColumns.published
@@ -85,13 +85,13 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
       >
         <span
           className={cn(
-            "inline-block text-xs font-medium",
+            "inline-flex rounded-md px-2 py-1 text-xs font-medium",
             row.status === "working"
-              ? "text-emerald-700 dark:text-emerald-300"
+              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
               : row.status === "arrival_due" ||
                   row.status === "clock_out_missing"
-                ? "text-amber-800 dark:text-amber-300"
-                : "text-muted-foreground"
+                ? "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                : "bg-muted/60 text-muted-foreground"
           )}
         >
           {teamStatusLabels[row.status]}

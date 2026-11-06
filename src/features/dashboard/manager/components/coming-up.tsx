@@ -34,6 +34,7 @@ function ManagerComingUp({
       <DashboardPanelHeader
         headingId="coming-up-heading"
         title="Coming up"
+        description="Rota planning for this location."
         action={
           <Link
             to="/app/$workspaceSlug/rota"
@@ -50,7 +51,7 @@ function ManagerComingUp({
           {data.planning.map((week, index) => (
             <div
               key={week.weekStart}
-              className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 sm:px-4"
+              className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5"
             >
               <div className="min-w-0">
                 <p className="text-sm font-semibold">

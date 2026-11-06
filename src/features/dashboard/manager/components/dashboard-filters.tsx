@@ -23,10 +23,10 @@ function ManagerDashboardFilters({
   onDate: (date?: string) => void
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+    <div className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-3 sm:flex sm:flex-wrap sm:items-center">
       <DashboardSelect
         label="Location"
-        containerClassName="sm:min-w-48 sm:max-w-72 sm:flex-1"
+        containerClassName="sm:min-w-48 sm:max-w-72 sm:flex-1 sm:mr-auto"
         className="truncate"
         value={locationId}
         onChange={(event) => onLocation(event.target.value)}

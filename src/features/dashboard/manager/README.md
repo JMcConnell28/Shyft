@@ -45,3 +45,16 @@ component immediately starts its import even when its dialog is closed.
 The SQL integration tests run when `DATABASE_URL` is available. All fixtures use
 connection-local temporary tables inside rolled-back transactions; the tests do
 not write application records or apply migrations to the configured database.
+
+## Presentation
+
+The staffing overview leads the manager dashboard. After the summary, source
+order and narrow-screen layout show the team, outstanding attention items, then
+rota planning. At wide widths, the team occupies the main column with attention
+and planning alongside it.
+
+Team, attention and planning panels reuse `DashboardPanelHeader` with an optional
+description to identify location or scope. Summary values have visible scope
+labels; team statuses retain text labels alongside their colour treatment.
+These refinements preserve the existing Manrope typography, RocketRota blue and
+semantic surface tokens rather than introducing a separate visual system.

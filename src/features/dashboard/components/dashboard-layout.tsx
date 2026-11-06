@@ -36,19 +36,33 @@ function DashboardPanelHeader({
   action,
   title,
   headingId,
+  description,
 }: {
   action?: ReactNode
   title: string
   headingId?: string
+  description?: string
 }) {
   return (
-    <div className="flex min-h-12 items-center justify-between gap-3 px-3.5 sm:px-4">
-      <h2
-        id={headingId}
-        className="min-w-0 text-sm font-semibold tracking-tight sm:text-[15px]"
-      >
-        {title}
-      </h2>
+    <div
+      className={cn(
+        "flex min-h-12 items-center justify-between gap-3 px-3.5 sm:px-4",
+        description && "min-h-16 px-4 py-4 sm:px-5"
+      )}
+    >
+      <div className="min-w-0">
+        <h2
+          id={headingId}
+          className="min-w-0 text-sm font-semibold tracking-tight sm:text-[15px]"
+        >
+          {title}
+        </h2>
+        {description && (
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            {description}
+          </p>
+        )}
+      </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   )
