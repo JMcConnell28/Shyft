@@ -94,6 +94,7 @@ function ManagerDashboardDialogs({
         item={request.item}
         workspaceSlug={workspaceSlug}
         canApprove={canWrite}
+        canViewTimesheets={access.capabilities.canManageTimesheets}
         pending={clock.approveAsRecordedMutation.isPending}
         onClose={close}
         onApprove={() =>

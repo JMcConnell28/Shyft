@@ -35,7 +35,7 @@ function PendingJoinRequestsPage({
         <h2 className="text-xl font-bold">Pending join requests</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Review employees who used a staff invite link. Approval gives them
-          access to the organization and requested location.
+          access to the organization and selected locations.
         </p>
       </div>
       {requestsQuery.isPending ? (

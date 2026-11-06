@@ -15,6 +15,7 @@ function DashboardTimeReviewDialog({
   item,
   workspaceSlug,
   canApprove,
+  canViewTimesheets,
   pending,
   onApprove,
   onClose,
@@ -22,6 +23,7 @@ function DashboardTimeReviewDialog({
   item: AttentionItem
   workspaceSlug: string
   canApprove: boolean
+  canViewTimesheets: boolean
   pending: boolean
   onApprove: () => void
   onClose: () => void
@@ -65,23 +67,25 @@ function DashboardTimeReviewDialog({
           requiresReview={item.kind === "review"}
         />
         <div className="flex flex-wrap justify-end gap-2">
-          <Button
-            nativeButton={false}
-            variant="outline"
-            className="h-9"
-            render={
-              <Link
-                to="/app/$workspaceSlug/timesheets"
-                params={{ workspaceSlug }}
-                search={{
-                  entryId: item.id,
-                  weekStart: getDashboardWeekStart(item.workDate),
-                }}
-              />
-            }
-          >
-            Correct in timesheets
-          </Button>
+          {canViewTimesheets && (
+            <Button
+              nativeButton={false}
+              variant="outline"
+              className="h-9"
+              render={
+                <Link
+                  to="/app/$workspaceSlug/timesheets"
+                  params={{ workspaceSlug }}
+                  search={{
+                    entryId: item.id,
+                    weekStart: getDashboardWeekStart(item.workDate),
+                  }}
+                />
+              }
+            >
+              Correct in timesheets
+            </Button>
+          )}
           {item.kind === "review" ? (
             <Button
               className="h-9"

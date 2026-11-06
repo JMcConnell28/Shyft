@@ -5,6 +5,7 @@ import {
   CreditCardIcon,
   MapPinnedIcon,
   Settings2Icon,
+  ShieldCheckIcon,
   UserRoundCheckIcon,
   UsersIcon,
 } from "lucide-react"
@@ -62,6 +63,13 @@ const workspaceSettingsNavItems: Array<SettingsNavItem> = [
     label: "Join requests",
     requiresJoinApproval: true,
     to: "/app/$workspaceSlug/settings/company/join-requests",
+  },
+  {
+    description: "Compare what each organization role can view and manage.",
+    icon: ShieldCheckIcon,
+    label: "Permissions",
+    requiresOwner: true,
+    to: "/app/$workspaceSlug/settings/permissions",
   },
 ]
 

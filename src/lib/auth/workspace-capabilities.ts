@@ -13,6 +13,7 @@ type OrganizationCapabilities = {
   canManageRota: boolean
   canViewRotaCosts: boolean
   canManageTimeClock: boolean
+  canManageTimesheets: boolean
   canManageSettings: boolean
   canManageLocations: boolean
   canInviteTeamMembers: boolean
@@ -49,6 +50,7 @@ function getOrgCapabilitiesForRole(
     canManageRota: canCreateRota || canUpdateRota || canPublishRota,
     canViewRotaCosts: can(role, { rota: ["viewCosts"] }),
     canManageTimeClock: can(role, { shift: ["update"] }),
+    canManageTimesheets: can(role, { timesheet: ["manage"] }),
     canManageSettings: can(role, { location: ["update"] }),
     canManageLocations: can(role, { location: ["create"] }),
     canInviteTeamMembers: can(role, { invitation: ["create"] }),

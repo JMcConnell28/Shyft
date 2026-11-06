@@ -2,14 +2,14 @@ import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { useServerFn } from "@tanstack/react-start"
 import { CopyIcon, UserPlus2Icon } from "lucide-react"
+import { EmailMemberInviteCard } from "./email-member-invite-card"
+import { InviteLocationSelector } from "./invite-location-selector"
 
 import type { ViewerState } from "@/features/onboarding/types"
-import type { AssignableOrganizationRole } from "@/lib/auth/permissions"
 import { OnboardingShell } from "@/components/app/onboarding-shell"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { SelectFormField } from "@/components/forms/select-form-field"
-import { TextFormField } from "@/components/forms/text-form-field"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,32 +21,17 @@ import {
 } from "@/components/ui/card"
 import { FieldGroup } from "@/components/ui/field"
 import { getErrorMessage } from "@/lib/errors"
-import {
-  createStaffInviteLink,
-  inviteOrganizationMemberByEmail,
-} from "@/lib/onboarding"
+import { createStaffInviteLink } from "@/lib/onboarding"
 import { getOrganizationDashboardPath } from "@/lib/organization-paths"
-import {
-  emailSchema,
-  organizationMemberInviteSchema,
-  staffInviteSelectionSchema,
-} from "@/lib/onboarding-schemas"
-import { showSuccessToast } from "@/lib/toast"
+import { staffInviteSelectionSchema } from "@/lib/onboarding-schemas"
 import { createZodFieldValidator } from "@/lib/validation"
 
 function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
   const createStaffInviteLinkFn = useServerFn(createStaffInviteLink)
-  const inviteOrganizationMemberByEmailFn = useServerFn(
-    inviteOrganizationMemberByEmail
-  )
   const [error, setError] = React.useState<string | null>(null)
   const [inviteUrl, setInviteUrl] = React.useState<string | null>(null)
   const [copyState, setCopyState] = React.useState<"idle" | "copied">("idle")
-  const [memberInviteError, setMemberInviteError] = React.useState<
-    string | null
-  >(null)
 
-  const defaultLocationId = viewer.locations.at(0)?.id ?? ""
   const defaultStaffGroupId =
     viewer.staffGroups.find((group) => group.isFallback)?.id ??
     viewer.staffGroups.at(0)?.id ??
@@ -54,7 +39,8 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
 
   const form = useForm({
     defaultValues: {
-      locationId: defaultLocationId,
+      organizationId: viewer.activeOrganizationId ?? "",
+      locationIds: [] as Array<string>,
       defaultStaffGroupId,
     },
     onSubmit: async ({ value }) => {
@@ -72,29 +58,6 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
             submissionError,
             "We could not generate that invite link."
           )
-        )
-      }
-    },
-  })
-
-  const memberInviteForm = useForm({
-    defaultValues: {
-      email: "",
-      role: "manager" as AssignableOrganizationRole,
-    },
-    onSubmit: async ({ value }) => {
-      setMemberInviteError(null)
-
-      try {
-        await inviteOrganizationMemberByEmailFn({
-          data: organizationMemberInviteSchema.parse(value),
-        })
-
-        showSuccessToast(`Invitation sent to ${value.email}.`)
-        memberInviteForm.reset()
-      } catch (submissionError) {
-        setMemberInviteError(
-          getErrorMessage(submissionError, "We could not send that invitation.")
         )
       }
     },
@@ -121,7 +84,7 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
         "Invite your team"
       }
       title="Generate the first invite link for your team."
-      description="This reusable staff link is the fastest way to get employees into the right workplace, location, and rota group."
+      description="Choose the locations for this organization invite. Employees become active there after an owner or admin approves their request."
       progress={90}
       showSignOut
     >
@@ -151,27 +114,22 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
             >
               <FieldGroup>
                 <form.Field
-                  name="locationId"
-                  validators={{
-                    onSubmit: createZodFieldValidator(
-                      staffInviteSelectionSchema.shape.locationId
-                    ),
-                  }}
+                  name="locationIds"
+                  listeners={{ onChange: () => setInviteUrl(null) }}
                 >
                   {(field) => (
-                    <SelectFormField
-                      field={field}
-                      label="Location"
-                      options={viewer.locations.map((location) => ({
-                        label: location.name,
-                        value: location.id,
-                      }))}
+                    <InviteLocationSelector
+                      locations={viewer.locations}
+                      selectedIds={field.state.value}
+                      onChange={field.handleChange}
+                      disabled={form.state.isSubmitting}
                     />
                   )}
                 </form.Field>
 
                 <form.Field
                   name="defaultStaffGroupId"
+                  listeners={{ onChange: () => setInviteUrl(null) }}
                   validators={{
                     onSubmit: createZodFieldValidator(
                       staffInviteSelectionSchema.shape.defaultStaffGroupId
@@ -186,7 +144,7 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
                         label: group.name,
                         value: group.id,
                       }))}
-                      description="Staff joining from this link will be placed into this rota group."
+                      description="After approval, staff will use this group at each selected location."
                     />
                   )}
                 </form.Field>
@@ -243,80 +201,7 @@ function InviteTeamPage({ viewer }: { viewer: ViewerState }) {
           </Card>
         ) : null}
 
-        {viewer.activeOrganization ? (
-          <Card className="rounded-3xl border-border/60 bg-background/90 shadow-2xl shadow-slate-950/10 backdrop-blur">
-            <CardHeader>
-              <CardTitle className="text-xl">
-                Invite a manager or admin by email
-              </CardTitle>
-              <CardDescription>
-                Use Better Auth email invitations when someone should join by
-                email rather than through the reusable staff link.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form
-                className="space-y-5"
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  void memberInviteForm.handleSubmit()
-                }}
-              >
-                <FieldGroup>
-                  <memberInviteForm.Field
-                    name="email"
-                    validators={{
-                      onSubmit: createZodFieldValidator(emailSchema),
-                    }}
-                  >
-                    {(field) => (
-                      <TextFormField
-                        field={field}
-                        label="Invite email"
-                        type="email"
-                        placeholder="manager@venue.com"
-                      />
-                    )}
-                  </memberInviteForm.Field>
-
-                  <memberInviteForm.Field
-                    name="role"
-                    validators={{
-                      onSubmit: createZodFieldValidator(
-                        organizationMemberInviteSchema.shape.role
-                      ),
-                    }}
-                  >
-                    {(field) => (
-                      <SelectFormField
-                        field={field}
-                        label="Organization role"
-                        options={[
-                          { label: "Admin", value: "admin" },
-                          { label: "Manager", value: "manager" },
-                          { label: "Supervisor", value: "supervisor" },
-                          { label: "Employee", value: "employee" },
-                        ]}
-                        description="Managers can build rotas. Supervisors can oversee rotas, timesheets, and attendance without editing schedules."
-                      />
-                    )}
-                  </memberInviteForm.Field>
-                </FieldGroup>
-
-                <FormErrorMessage message={memberInviteError} />
-
-                <FormSubmitButton
-                  className="w-full sm:w-auto"
-                  isSubmitting={memberInviteForm.state.isSubmitting}
-                  submittingText="Sending invite..."
-                >
-                  Send email invite
-                </FormSubmitButton>
-              </form>
-            </CardContent>
-          </Card>
-        ) : null}
+        {viewer.activeOrganization && <EmailMemberInviteCard />}
       </div>
     </OnboardingShell>
   )

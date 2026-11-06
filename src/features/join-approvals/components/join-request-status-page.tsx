@@ -40,7 +40,7 @@ function JoinRequestStatusPage({
       }
       description={
         isPending
-          ? "A manager needs to approve your request before you can enter this workplace. This page checks for updates automatically and stays open while you wait."
+          ? "An owner or admin needs to approve your request before you can enter this workplace. This page checks for updates automatically and stays open while you wait."
           : request?.status === "approved"
             ? "You can now open your workplace."
             : request?.status === "denied"

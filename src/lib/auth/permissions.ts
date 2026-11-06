@@ -39,6 +39,7 @@ const statements = {
   location: locationActions,
   teamMember: teamMemberActions,
   announcement: announcementActions,
+  timesheet: ["manage"],
 } as const
 
 const ac = createAccessControl(statements)
@@ -54,6 +55,7 @@ const owner = ac.newRole({
   location: [...locationActions],
   teamMember: [...teamMemberActions],
   announcement: [...announcementActions],
+  timesheet: ["manage"],
 })
 
 const admin = ac.newRole({
@@ -67,6 +69,7 @@ const admin = ac.newRole({
   location: ["view", "create", "update"],
   teamMember: [...teamMemberActions],
   announcement: [...announcementActions],
+  timesheet: ["manage"],
 })
 
 const manager = ac.newRole({
@@ -78,8 +81,9 @@ const manager = ac.newRole({
   rota: ["view", "create", "update", "publish", "viewCosts"],
   shift: [...shiftActions],
   location: ["view"],
-  teamMember: ["view", "approve"],
+  teamMember: ["view"],
   announcement: [...announcementActions],
+  timesheet: ["manage"],
 })
 
 const supervisor = ac.newRole({

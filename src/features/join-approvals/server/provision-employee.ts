@@ -10,21 +10,21 @@ async function provisionApprovedEmployee(
   client: PoolClient,
   request: LockedJoinRequest
 ): Promise<void> {
-  if (!request.location_id || !request.staff_group_id) {
+  if (!request.staff_group_id) {
     throw new Error(
       "This location or staff group was removed. Deny the request and share a new link."
     )
   }
 
   const location = await client.query(
-    `select id from public.locations where id = $1 and organization_id = $2`,
-    [request.location_id, request.organization_id]
+    `select id from public.locations where id = any($1::uuid[]) and organization_id = $2 for share`,
+    [request.location_ids, request.organization_id]
   )
   const group = await client.query(
-    `select id from public.staff_groups where id = $1 and organization_id = $2`,
+    `select id from public.staff_groups where id = $1 and organization_id = $2 for share`,
     [request.staff_group_id, request.organization_id]
   )
-  if (!location.rows[0] || !group.rows[0]) {
+  if (location.rows.length !== request.location_ids.length || !group.rows[0]) {
     throw new Error("This location or staff group is no longer available.")
   }
 
@@ -79,14 +79,14 @@ async function provisionApprovedEmployee(
   await client.query(
     `insert into public.employee_location_assignments
        (organization_id, employee_id, location_id, staff_group_id, is_enabled, disabled_at)
-     values ($1, $2, $3, $4, true, null)
+     select $1, $2, location_id, $4, true, null from unnest($3::uuid[]) location_id
      on conflict (employee_id, location_id)
      do update set staff_group_id = excluded.staff_group_id,
                    is_enabled = true, disabled_at = null`,
     [
       request.organization_id,
       employeeId,
-      request.location_id,
+      request.location_ids,
       request.staff_group_id,
     ]
   )

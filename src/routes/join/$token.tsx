@@ -117,7 +117,7 @@ function JoinInviteRoute() {
       badge="Workplace invite"
       eyebrow="Join workplace"
       title={`Join ${loaderData.preview.organizationName} on RocketRota.`}
-      description="Request access to this workplace and location. A manager will review your request."
+      description="Request access to this organization and the selected locations. An owner or admin will review your request."
       progress={80}
       showSignOut={Boolean(loaderData.viewer)}
     >
@@ -143,7 +143,9 @@ function JoinInviteRoute() {
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium text-foreground">Location</p>
+              <p className="text-sm font-medium text-foreground">
+                Locations after approval
+              </p>
               <p className="text-sm text-muted-foreground">
                 {loaderData.preview.locationName}
               </p>

@@ -30,14 +30,13 @@ function SettingsLayout({
     from: "/_authed/_verified/app/$workspaceSlug",
   })
   const canReviewJoinRequests =
-    viewer.activeRole === "owner" ||
-    viewer.activeRole === "admin" ||
-    viewer.activeRole === "manager"
+    viewer.activeRole === "owner" || viewer.activeRole === "admin"
   const canManageCompany =
     viewer.activeRole === "owner" || viewer.activeRole === "admin"
   const navItems = workspaceSettingsNavItems.filter(
     (item) =>
       (!item.requiresJoinApproval || canReviewJoinRequests) &&
+      (!item.requiresOwner || viewer.activeRole === "owner") &&
       (!item.requiresCompanyAdmin || canManageCompany)
   )
   const settingsRootPath = `/app/${workspaceSlug}/settings`

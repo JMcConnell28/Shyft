@@ -2795,7 +2795,8 @@ export type Database = {
           disabled_at: string | null
           expires_at: string | null
           id: string
-          location_id: string
+          location_ids: Array<string> | null
+          location_id: string | null
           organization_id: string
           token: string
         }
@@ -2807,7 +2808,8 @@ export type Database = {
           disabled_at?: string | null
           expires_at?: string | null
           id?: string
-          location_id: string
+          location_ids?: Array<string> | null
+          location_id?: string | null
           organization_id: string
           token: string
         }
@@ -2819,7 +2821,8 @@ export type Database = {
           disabled_at?: string | null
           expires_at?: string | null
           id?: string
-          location_id?: string
+          location_ids?: Array<string> | null
+          location_id?: string | null
           organization_id?: string
           token?: string
         }

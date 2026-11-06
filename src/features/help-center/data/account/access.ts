@@ -30,7 +30,7 @@ const accountAccessPages: ReadonlyArray<HelpPage> = [
           "Ask your manager for the workplace invitation or staff joining link.",
           "Sign in to your existing RocketRota account or create one with the email address you intend to use. Complete email verification if requested.",
           "Follow the invitation. If you are on the Join workplace page, enter the invitation information supplied by your manager.",
-          "If the page says your request needs approval, wait for an authorised manager to review it. Creating an account alone does not give you workplace access.",
+          "If the page says your request needs approval, wait for an owner or administrator to review it. Creating an account alone does not give you workplace access.",
           "After approval, choose the workplace and check that your published shifts appear.",
         ],
       },

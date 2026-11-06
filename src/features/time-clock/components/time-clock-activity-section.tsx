@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useRouteContext } from "@tanstack/react-router"
 import {
   ArrowRightIcon,
   CircleStopIcon,
@@ -30,25 +30,30 @@ function TimeClockActivitySection({
   workspaceSlug: string
 }) {
   const recentEntries = entries.slice(0, 8)
+  const { capabilities } = useRouteContext({
+    from: "/_authed/_verified/app/$workspaceSlug",
+  })
 
   return (
     <TimeClockPanel>
       <TimeClockPanelHeader
         action={
-          <Button
-            className="h-8 px-2 text-[#236cff]"
-            nativeButton={false}
-            render={
-              <Link
-                params={{ workspaceSlug }}
-                to="/app/$workspaceSlug/timesheets"
-              />
-            }
-            variant="ghost"
-          >
-            View timesheets
-            <ArrowRightIcon className="size-3.5" />
-          </Button>
+          capabilities.canManageTimesheets ? (
+            <Button
+              className="h-8 px-2 text-[#236cff]"
+              nativeButton={false}
+              render={
+                <Link
+                  params={{ workspaceSlug }}
+                  to="/app/$workspaceSlug/timesheets"
+                />
+              }
+              variant="ghost"
+            >
+              View timesheets
+              <ArrowRightIcon className="size-3.5" />
+            </Button>
+          ) : null
         }
         icon={HistoryIcon}
         title="Recent activity"

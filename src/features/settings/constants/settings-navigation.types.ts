@@ -9,6 +9,7 @@ type SettingsRoute =
   | "/app/$workspaceSlug/settings/rota"
   | "/app/$workspaceSlug/settings/team"
   | "/app/$workspaceSlug/settings/billing"
+  | "/app/$workspaceSlug/settings/permissions"
 
 type SettingsNavItem = {
   description: string
@@ -16,6 +17,7 @@ type SettingsNavItem = {
   label: string
   requiresCompanyAdmin?: boolean
   requiresJoinApproval?: boolean
+  requiresOwner?: boolean
   to: SettingsRoute
 }
 

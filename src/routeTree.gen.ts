@@ -73,6 +73,7 @@ import { Route as AuthedVerifiedAppWorkspaceSlugSettingsCompanyRouteImport } fro
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsConnectionsRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/connections'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsGeneralRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/general'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsLocationsRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/locations'
+import { Route as AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/permissions'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsRotaRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/rota'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsTeamRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings/team'
 import { Route as AuthedVerifiedAppWorkspaceSlugSupportIndexRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/support/index'
@@ -440,6 +441,12 @@ const AuthedVerifiedAppWorkspaceSlugSettingsLocationsRoute =
     path: '/locations',
     getParentRoute: () => AuthedVerifiedAppWorkspaceSlugSettingsRoute,
   } as any)
+const AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRoute =
+  AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRouteImport.update({
+    id: '/permissions',
+    path: '/permissions',
+    getParentRoute: () => AuthedVerifiedAppWorkspaceSlugSettingsRoute,
+  } as any)
 const AuthedVerifiedAppWorkspaceSlugSettingsRotaRoute =
   AuthedVerifiedAppWorkspaceSlugSettingsRotaRouteImport.update({
     id: '/rota',
@@ -608,6 +615,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/settings/connections': typeof AuthedVerifiedAppWorkspaceSlugSettingsConnectionsRoute
   '/app/$workspaceSlug/settings/general': typeof AuthedVerifiedAppWorkspaceSlugSettingsGeneralRoute
   '/app/$workspaceSlug/settings/locations': typeof AuthedVerifiedAppWorkspaceSlugSettingsLocationsRouteWithChildren
+  '/app/$workspaceSlug/settings/permissions': typeof AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRoute
   '/app/$workspaceSlug/settings/rota': typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaRouteWithChildren
   '/app/$workspaceSlug/settings/team': typeof AuthedVerifiedAppWorkspaceSlugSettingsTeamRouteWithChildren
   '/app/$workspaceSlug/support/$threadId': typeof AuthedVerifiedAppWorkspaceSlugSupportThreadIdRoute
@@ -684,6 +692,7 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/settings/clocking': typeof AuthedVerifiedAppWorkspaceSlugSettingsClockingRoute
   '/app/$workspaceSlug/settings/connections': typeof AuthedVerifiedAppWorkspaceSlugSettingsConnectionsRoute
   '/app/$workspaceSlug/settings/general': typeof AuthedVerifiedAppWorkspaceSlugSettingsGeneralRoute
+  '/app/$workspaceSlug/settings/permissions': typeof AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRoute
   '/app/$workspaceSlug/support/$threadId': typeof AuthedVerifiedAppWorkspaceSlugSupportThreadIdRoute
   '/app/$workspaceSlug/account': typeof AuthedVerifiedAppWorkspaceSlugAccountIndexRoute
   '/app/$workspaceSlug/rota': typeof AuthedVerifiedAppWorkspaceSlugRotaIndexRoute
@@ -765,6 +774,7 @@ export interface FileRoutesById {
   '/_authed/_verified/app/$workspaceSlug/settings/connections': typeof AuthedVerifiedAppWorkspaceSlugSettingsConnectionsRoute
   '/_authed/_verified/app/$workspaceSlug/settings/general': typeof AuthedVerifiedAppWorkspaceSlugSettingsGeneralRoute
   '/_authed/_verified/app/$workspaceSlug/settings/locations': typeof AuthedVerifiedAppWorkspaceSlugSettingsLocationsRouteWithChildren
+  '/_authed/_verified/app/$workspaceSlug/settings/permissions': typeof AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRoute
   '/_authed/_verified/app/$workspaceSlug/settings/rota': typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaRouteWithChildren
   '/_authed/_verified/app/$workspaceSlug/settings/team': typeof AuthedVerifiedAppWorkspaceSlugSettingsTeamRouteWithChildren
   '/_authed/_verified/app/$workspaceSlug/support/$threadId': typeof AuthedVerifiedAppWorkspaceSlugSupportThreadIdRoute
@@ -848,6 +858,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings/connections'
     | '/app/$workspaceSlug/settings/general'
     | '/app/$workspaceSlug/settings/locations'
+    | '/app/$workspaceSlug/settings/permissions'
     | '/app/$workspaceSlug/settings/rota'
     | '/app/$workspaceSlug/settings/team'
     | '/app/$workspaceSlug/support/$threadId'
@@ -924,6 +935,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings/clocking'
     | '/app/$workspaceSlug/settings/connections'
     | '/app/$workspaceSlug/settings/general'
+    | '/app/$workspaceSlug/settings/permissions'
     | '/app/$workspaceSlug/support/$threadId'
     | '/app/$workspaceSlug/account'
     | '/app/$workspaceSlug/rota'
@@ -1004,6 +1016,7 @@ export interface FileRouteTypes {
     | '/_authed/_verified/app/$workspaceSlug/settings/connections'
     | '/_authed/_verified/app/$workspaceSlug/settings/general'
     | '/_authed/_verified/app/$workspaceSlug/settings/locations'
+    | '/_authed/_verified/app/$workspaceSlug/settings/permissions'
     | '/_authed/_verified/app/$workspaceSlug/settings/rota'
     | '/_authed/_verified/app/$workspaceSlug/settings/team'
     | '/_authed/_verified/app/$workspaceSlug/support/$threadId'
@@ -1508,6 +1521,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsLocationsRouteImport
       parentRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsRoute
     }
+    '/_authed/_verified/app/$workspaceSlug/settings/permissions': {
+      id: '/_authed/_verified/app/$workspaceSlug/settings/permissions'
+      path: '/permissions'
+      fullPath: '/app/$workspaceSlug/settings/permissions'
+      preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRouteImport
+      parentRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsRoute
+    }
     '/_authed/_verified/app/$workspaceSlug/settings/rota': {
       id: '/_authed/_verified/app/$workspaceSlug/settings/rota'
       path: '/rota'
@@ -1733,6 +1753,7 @@ interface AuthedVerifiedAppWorkspaceSlugSettingsRouteChildren {
   AuthedVerifiedAppWorkspaceSlugSettingsConnectionsRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsConnectionsRoute
   AuthedVerifiedAppWorkspaceSlugSettingsGeneralRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsGeneralRoute
   AuthedVerifiedAppWorkspaceSlugSettingsLocationsRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsLocationsRouteWithChildren
+  AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRoute
   AuthedVerifiedAppWorkspaceSlugSettingsRotaRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsRotaRouteWithChildren
   AuthedVerifiedAppWorkspaceSlugSettingsTeamRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsTeamRouteWithChildren
   AuthedVerifiedAppWorkspaceSlugSettingsIndexRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsIndexRoute
@@ -1752,6 +1773,8 @@ const AuthedVerifiedAppWorkspaceSlugSettingsRouteChildren: AuthedVerifiedAppWork
       AuthedVerifiedAppWorkspaceSlugSettingsGeneralRoute,
     AuthedVerifiedAppWorkspaceSlugSettingsLocationsRoute:
       AuthedVerifiedAppWorkspaceSlugSettingsLocationsRouteWithChildren,
+    AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRoute:
+      AuthedVerifiedAppWorkspaceSlugSettingsPermissionsRoute,
     AuthedVerifiedAppWorkspaceSlugSettingsRotaRoute:
       AuthedVerifiedAppWorkspaceSlugSettingsRotaRouteWithChildren,
     AuthedVerifiedAppWorkspaceSlugSettingsTeamRoute:

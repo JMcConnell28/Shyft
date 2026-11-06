@@ -74,9 +74,9 @@ const managerPeoplePages: ReadonlyArray<HelpPage> = [
         type: "steps",
         title: "Invite and connect an employee",
         items: [
-          "An owner or administrator with invitation access can use the team controls to invite staff or share the workplace's staff joining link.",
+          "An owner or administrator can create a staff joining link and select one, several, or no locations. Employees become active only at the selected locations after approval.",
           "Ask the employee to sign in with the account they intend to use and follow the joining instructions. They may need to verify their email.",
-          "Open Settings → Join requests if the joining route requires approval and your role has that permission.",
+          "An owner or admin must open Settings → Join requests to approve organization access. Managers cannot approve these requests.",
           "Check the person's identity and match the request to an existing employee profile where appropriate. Confirm the correct locations before approving.",
         ],
       },

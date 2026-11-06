@@ -129,7 +129,14 @@ const inviteLinkSchema = z
   .min(1, "Paste an invite link or token.")
 
 const staffInviteSelectionSchema = z.object({
-  locationId: z.string().uuid("Choose a location."),
+  organizationId: z.string().min(1),
+  locationIds: z
+    .array(z.uuid())
+    .max(100)
+    .refine(
+      (ids) => new Set(ids).size === ids.length,
+      "Choose each location only once."
+    ),
   defaultStaffGroupId: z.string().uuid("Choose a staff group."),
 })
 
