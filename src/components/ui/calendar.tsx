@@ -1,16 +1,15 @@
 "use client"
 
 import * as React from "react"
+import * as DayPickerPrimitive from "react-day-picker"
 import {
-  DayPicker,
-  getDefaultClassNames,
-  type DayButton,
-  type Locale,
-} from "react-day-picker"
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
 
 function Calendar({
   className,
@@ -22,13 +21,13 @@ function Calendar({
   formatters,
   components,
   ...props
-}: React.ComponentProps<typeof DayPicker> & {
+}: React.ComponentProps<typeof DayPickerPrimitive.DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
 }) {
-  const defaultClassNames = getDefaultClassNames()
+  const defaultClassNames = DayPickerPrimitive.getDefaultClassNames()
 
   return (
-    <DayPicker
+    <DayPickerPrimitive.DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
         "group/calendar bg-background p-3 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(6)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
@@ -153,7 +152,10 @@ function Calendar({
 
           if (orientation === "right") {
             return (
-              <ChevronRightIcon className={cn("size-4", className)} {...props} />
+              <ChevronRightIcon
+                className={cn("size-4", className)}
+                {...props}
+              />
             )
           }
 
@@ -186,8 +188,10 @@ function CalendarDayButton({
   modifiers,
   locale,
   ...props
-}: React.ComponentProps<typeof DayButton> & { locale?: Partial<Locale> }) {
-  const defaultClassNames = getDefaultClassNames()
+}: React.ComponentProps<typeof DayPickerPrimitive.DayButton> & {
+  locale?: Partial<DayPickerPrimitive.Locale>
+}) {
+  const defaultClassNames = DayPickerPrimitive.getDefaultClassNames()
 
   const ref = React.useRef<HTMLButtonElement>(null)
   React.useEffect(() => {
@@ -196,6 +200,7 @@ function CalendarDayButton({
 
   return (
     <Button
+      appearance="default"
       variant="ghost"
       size="icon"
       data-day={day.date.toLocaleDateString(locale?.code)}

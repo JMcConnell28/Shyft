@@ -131,13 +131,15 @@ reference's layered appearance. Use surface tone and the existing outer edge.
 ### Buttons and form controls
 
 Use existing `Button`, selects, date controls and inputs. For dashboard defaults,
-compose a 32px desktop size with 14px medium labels; compact 28px controls belong
-to tertiary card actions. Use 8–10px radii consistently. One blue primary action
-may lead a group; outlined controls and ghost icon menus recede.
+use the shared workspace button scope: 32px desktop size, 14px semibold labels
+and 10px corners, including tertiary actions. Phone hit areas are 44px. Following
+the user's button refinement, primary uses the rota Publish blue and secondary
+uses the Notes border/surface/shadow. The measured 28px demo actions above remain
+reference observations. Rota routes keep their existing styling.
 
 Keep the label short and literal: Create rota, Review, Open rota, Export. Icons
-are Lucide, generally 16px, with 4–8px text gap. No glossy fills, pronounced inset
-shadows or gradient treatments. Focus must remain visible. A pressed state should
+are Lucide, generally 16px, with an 8px text gap. Keep the reference rota buttons'
+subtle shadow; no glossy fills, glows or gradients. Focus must remain visible. A pressed state should
 be subtle, not a jump that disturbs the control group.
 
 Current `Button` defaults are smaller than this target. Add/reuse a dashboard

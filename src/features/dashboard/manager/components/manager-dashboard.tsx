@@ -15,6 +15,7 @@ import type { ManagerDayData } from "../types"
 import { getDateKeyInTimeZone } from "@/lib/time-zone"
 import { useContentReadyTiming } from "@/features/navigation/hooks/use-content-ready-timing"
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout"
+import { Button } from "@/components/ui/button"
 
 function ManagerDashboard({
   organizationId,
@@ -64,12 +65,13 @@ function ManagerDashboard({
           ? "This location is not available in your current workspace. Choose a permitted location from the dashboard."
           : "No locations are available to manage yet."}
         {search.location ? (
-          <button
-            className="ml-2 font-semibold text-blue-600"
+          <Button
+            variant="outline"
+            className="ml-2"
             onClick={() => onSearch({ date: search.date })}
           >
             Show permitted locations
-          </button>
+          </Button>
         ) : null}
       </div>
     )

@@ -56,9 +56,9 @@ function StationPurchaseSection({
       {options.isError && (
         <p role="alert" className="text-sm text-destructive">
           Could not load station orders.{" "}
-          <button className="underline" onClick={() => options.refetch()}>
+          <Button variant="outline" onClick={() => void options.refetch()}>
             Try again
-          </button>
+          </Button>
         </p>
       )}
       {data?.reason && (

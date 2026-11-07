@@ -32,6 +32,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { ButtonStyleProvider } from "@/components/ui/button-style-provider"
 import {
   SidebarInset,
   SidebarProvider,
@@ -156,155 +157,161 @@ function DashboardShell({
           capabilities={capabilities}
           shiftSwapsEnabled={shiftSwapsEnabled}
         />
-        <SidebarInset className="min-h-0 overflow-hidden">
-          <header
-            className={cn(
-              "sticky top-0 z-20 flex shrink-0 items-center gap-3 backdrop-blur md:static md:h-12 md:border-b md:bg-card md:px-4",
-              hasMobileBrandHeader
-                ? "h-[4.75rem] border-b-0 bg-background/95 px-4"
-                : "h-12 border-b bg-background/95 px-4"
-            )}
-          >
-            <SidebarTrigger
+        <ButtonStyleProvider
+          appearance={routeKey === "rota" ? "default" : "workspace"}
+        >
+          <SidebarInset className="min-h-0 overflow-hidden">
+            <header
               className={cn(
-                "-ml-1 md:hidden",
-                hasMobileBrandHeader &&
-                  "size-9 rounded-lg bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white"
+                "sticky top-0 z-20 flex shrink-0 items-center gap-3 backdrop-blur md:static md:h-12 md:border-b md:bg-card md:px-4",
+                hasMobileBrandHeader
+                  ? "h-[4.75rem] border-b-0 bg-background/95 px-4"
+                  : "h-12 border-b bg-background/95 px-4"
               )}
-            />
-            {hasMobileBrandHeader ? (
-              <Link
-                to={getWorkspaceAppPath(
-                  activeWorkspace?.slug ?? "",
-                  "dashboard"
-                )}
-                className="flex w-full min-w-0 items-center justify-center gap-2.5 md:hidden"
-              >
-                <BrandMark className="size-8 rounded-none bg-transparent p-0 shadow-none ring-0" />
-                <div>
-                  <span className="truncate text-lg font-extrabold tracking-[-0.025em] text-[#0d1b3d]">
-                    Rocket
-                  </span>
-                  <span className="truncate text-lg font-extrabold tracking-[-0.025em] text-[#2f6bff]">
-                    Rota
-                  </span>
-                </div>
-              </Link>
-            ) : null}
-            {backLink ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  "gap-2 text-muted-foreground",
-                  hasMobileBrandHeader && "hidden md:inline-flex"
-                )}
-                nativeButton={false}
-                render={<Link to={backLink.href} />}
-              >
-                <ArrowLeftIcon className="size-3.5" />
-                <span className="hidden sm:inline">{backLink.label}</span>
-                <span className="sm:hidden">Back</span>
-              </Button>
-            ) : null}
-            <Breadcrumb
-              className={cn(hasMobileBrandHeader && "hidden md:block")}
             >
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  {activeOrganization ? (
-                    <BreadcrumbLink
-                      render={
-                        <Link
-                          to={getWorkspaceDashboardPath(
-                            activeOrganization.slug
-                          )}
-                        />
-                      }
-                    >
-                      {activeOrganization.name}
-                    </BreadcrumbLink>
-                  ) : (
-                    <BreadcrumbLink render={<Link to="/dashboard" />}>
-                      RocketRota
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{title}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            <div className="ml-auto flex items-center gap-2">
-              {canViewTrialBanner ? (
-                <TrialBanner
-                  billing={billing ?? null}
-                  isDismissed={isTrialBannerDismissed}
-                  onDismiss={() => setIsTrialBannerDismissed(true)}
-                  trial={trial ?? null}
-                  variant="header"
-                />
-              ) : null}
-              <NotificationMenu
-                announcements={recentAnnouncements}
-                supportThreads={supportNotifications}
-                supportUnreadCount={supportUnreadCount}
-                hasUnreadRotaUpdates={Boolean(hasUnreadRotaUpdates)}
-                hasError={notificationsError}
-                isLoading={notificationsLoading}
-                prominent={hasMobileBrandHeader}
-                workspaceSlug={activeWorkspace?.slug ?? ""}
-              />
-            </div>
-            {capabilities.canManageSettings && activeOrganization ? (
-              <Button
-                variant="pill"
-                size="icon"
+              <SidebarTrigger
                 className={cn(
+                  "-ml-1 md:hidden",
                   hasMobileBrandHeader &&
-                    "size-9 rounded-lg bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
+                    "size-9 rounded-lg bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white"
                 )}
-                nativeButton={false}
-                render={
-                  <Link
-                    to={getWorkspaceSettingsPath(activeOrganization.slug)}
-                  />
-                }
+              />
+              {hasMobileBrandHeader ? (
+                <Link
+                  to={getWorkspaceAppPath(
+                    activeWorkspace?.slug ?? "",
+                    "dashboard"
+                  )}
+                  className="flex w-full min-w-0 items-center justify-center gap-2.5 md:hidden"
+                >
+                  <BrandMark className="size-8 rounded-none bg-transparent p-0 shadow-none ring-0" />
+                  <div>
+                    <span className="truncate text-lg font-extrabold tracking-[-0.025em] text-[#0d1b3d]">
+                      Rocket
+                    </span>
+                    <span className="truncate text-lg font-extrabold tracking-[-0.025em] text-[#2f6bff]">
+                      Rota
+                    </span>
+                  </div>
+                </Link>
+              ) : null}
+              {backLink ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "gap-2 text-muted-foreground",
+                    hasMobileBrandHeader && "hidden md:inline-flex"
+                  )}
+                  nativeButton={false}
+                  render={<Link to={backLink.href} />}
+                >
+                  <ArrowLeftIcon className="size-3.5" />
+                  <span className="hidden sm:inline">{backLink.label}</span>
+                  <span className="sm:hidden">Back</span>
+                </Button>
+              ) : null}
+              <Breadcrumb
+                className={cn(hasMobileBrandHeader && "hidden md:block")}
               >
-                <SettingsIcon />
-                <span className="sr-only">Settings</span>
-              </Button>
-            ) : null}
-          </header>
-
-          <div
-            className={cn(
-              "no-scrollbar flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
-            )}
-          >
-            <WorkspaceRecoveryNotice
-              billing={billing ?? null}
-              trial={trial ?? null}
-              isManager={
-                capabilities.canManageRota || capabilities.canManageSettings
-              }
-              canManageBilling={capabilities.role === "owner"}
-              organizationId={resolvedActiveWorkspace?.id ?? null}
-              locationId={null}
-            />
-            {canInviteTeamMembers ? (
-              <>
-                <PastDueBillingNotice
-                  billing={billing}
-                  organizationId={activeWorkspace?.id ?? null}
-                  locationId={null}
+                <BreadcrumbList>
+                  <BreadcrumbItem className="hidden md:block">
+                    {activeOrganization ? (
+                      <BreadcrumbLink
+                        render={
+                          <Link
+                            to={getWorkspaceDashboardPath(
+                              activeOrganization.slug
+                            )}
+                          />
+                        }
+                      >
+                        {activeOrganization.name}
+                      </BreadcrumbLink>
+                    ) : (
+                      <BreadcrumbLink render={<Link to="/dashboard" />}>
+                        RocketRota
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{title}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+              <div className="ml-auto flex items-center gap-2">
+                {canViewTrialBanner ? (
+                  <TrialBanner
+                    billing={billing ?? null}
+                    isDismissed={isTrialBannerDismissed}
+                    onDismiss={() => setIsTrialBannerDismissed(true)}
+                    trial={trial ?? null}
+                    variant="header"
+                  />
+                ) : null}
+                <NotificationMenu
+                  announcements={recentAnnouncements}
+                  supportThreads={supportNotifications}
+                  supportUnreadCount={supportUnreadCount}
+                  hasUnreadRotaUpdates={Boolean(hasUnreadRotaUpdates)}
+                  hasError={notificationsError}
+                  isLoading={notificationsLoading}
+                  prominent={hasMobileBrandHeader}
+                  workspaceSlug={activeWorkspace?.slug ?? ""}
                 />
-              </>
-            ) : null}
-            {children ?? <ShellBody title={title} description={description} />}
-          </div>
-        </SidebarInset>
+              </div>
+              {capabilities.canManageSettings && activeOrganization ? (
+                <Button
+                  variant="pill"
+                  size="icon"
+                  className={cn(
+                    hasMobileBrandHeader &&
+                      "size-9 rounded-lg bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
+                  )}
+                  nativeButton={false}
+                  render={
+                    <Link
+                      to={getWorkspaceSettingsPath(activeOrganization.slug)}
+                    />
+                  }
+                >
+                  <SettingsIcon />
+                  <span className="sr-only">Settings</span>
+                </Button>
+              ) : null}
+            </header>
+
+            <div
+              className={cn(
+                "no-scrollbar flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
+              )}
+            >
+              <WorkspaceRecoveryNotice
+                billing={billing ?? null}
+                trial={trial ?? null}
+                isManager={
+                  capabilities.canManageRota || capabilities.canManageSettings
+                }
+                canManageBilling={capabilities.role === "owner"}
+                organizationId={resolvedActiveWorkspace?.id ?? null}
+                locationId={null}
+              />
+              {canInviteTeamMembers ? (
+                <>
+                  <PastDueBillingNotice
+                    billing={billing}
+                    organizationId={activeWorkspace?.id ?? null}
+                    locationId={null}
+                  />
+                </>
+              ) : null}
+              {children ?? (
+                <ShellBody title={title} description={description} />
+              )}
+            </div>
+          </SidebarInset>
+        </ButtonStyleProvider>
       </SidebarProvider>
     </TooltipProvider>
   )

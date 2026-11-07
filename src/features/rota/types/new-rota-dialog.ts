@@ -1,5 +1,7 @@
 import type { NewRotaSource } from "../schemas/rota-schemas"
 import type { AccessibleRotaLocation } from "../types"
+import type { Button } from "@/components/ui/button"
+import type { ComponentProps } from "react"
 
 type NewRotaDialogOptions = {
   locations: Array<AccessibleRotaLocation>
@@ -11,6 +13,7 @@ type NewRotaDialogOptions = {
 type NewRotaDialogProps = NewRotaDialogOptions & {
   triggerLabel: string
   triggerClassName?: string
+  triggerVariant?: ComponentProps<typeof Button>["variant"]
   triggerIcon?: "plus" | "template"
   disabled?: boolean
 }

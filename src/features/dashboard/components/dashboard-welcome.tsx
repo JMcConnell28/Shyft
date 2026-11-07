@@ -2,6 +2,7 @@ import * as React from "react"
 import { useQuery } from "@tanstack/react-query"
 import { dashboardWelcomeQueryOptions } from "../query-options"
 import type { DashboardWelcomeModal } from "./dashboard-welcome-modal"
+import { Button } from "@/components/ui/button"
 
 const WelcomeModal = React.lazy(() =>
   import("./dashboard-welcome-modal").then((module) => ({
@@ -23,9 +24,9 @@ function DashboardWelcome(props: DashboardWelcomeProps) {
     return (
       <p role="status" className="px-4 py-2 text-sm text-muted-foreground">
         Getting-started tips are unavailable.{" "}
-        <button className="underline" onClick={() => void query.refetch()}>
+        <Button variant="outline" onClick={() => void query.refetch()}>
           Try again
-        </button>
+        </Button>
       </p>
     )
   }

@@ -40,6 +40,7 @@ spacing:
 components:
   dashboard-button:
     typography: "{typography.label}"
+    fontWeight: 600
     rounded: "{rounded.control}"
     height: 32px
   dashboard-panel:
@@ -96,7 +97,8 @@ Target surface relationships:
 | Main text | `text-foreground`; near-black, not blue on every label |
 | Supporting text | `text-muted-foreground`, with readable contrast |
 | Edge | One fine neutral border or one subtle outline ring |
-| Primary action/selection | Existing RocketRota primary blue |
+| Primary action | Publish button blue (`blue-600`, `blue-700` on hover) |
+| Selection | Existing RocketRota blue, with an explicit state marker |
 | Success | Soft green with a readable green label |
 | Review/exception | Soft amber with a readable amber label |
 | Error/destructive | Red reserved for actual errors or destructive actions |
@@ -179,9 +181,9 @@ blurred shadow. Inset white content on a lightly tinted frame is allowed when it
 clarifies header/body structure. Do not add another full bordered card around
 each inner section. Reserve stronger elevation for menus, popovers and dialogs.
 
-Default dashboard buttons are flat. Do not use the experimental `glossy` button,
-inset glows, bevels, coloured halos or raised styles as the dashboard's visual
-language. A loading or disabled state must remain legible without extra effects.
+Workspace action buttons follow the rota Publish and Notes treatments: a subtle
+inset highlight and short neutral shadow. Do not use the experimental `glossy`
+button, glows or coloured halos. A loading or disabled state must remain legible.
 
 ## Shapes
 
@@ -195,15 +197,21 @@ but choose one status treatment across the page. No oversized icon tiles.
 
 ## Components
 
-**Buttons and inputs.** Standard desktop height is 32px, with 12px horizontal
-padding and 8px internal gap. Card-level secondary actions can be 28px with
-12–13px labels. Phone actions should have approximately 44px hit targets. Do not
-make every card button 44px tall on desktop, or every important action 24–28px.
-Primary is blue/white; secondary is white/card with a fine neutral border; ghost
-is reserved for low-priority or icon actions. Match the height and radius of
-adjacent date inputs, selects, search and buttons. Provide hover, keyboard focus,
+**Buttons and inputs.** All workspace action buttons, including panel actions,
+use 32px desktop height, 14px/20px semibold labels, 10px corners, 12px horizontal
+padding and an 8px icon gap. Phone actions use 44px hit targets. Primary uses the
+rota Publish blue; secondary matches Notes: a white/card surface, fine neutral
+border and subtle shadow. Destructive actions retain red. Match adjacent date
+inputs, selects and search. Provide hover, keyboard focus,
 active, disabled and pending states. Disable duplicate submissions, retain labels
 while loading, and give icon-only actions accessible names.
+
+This button standard is enforced by `ButtonStyleProvider` and
+`src/components/ui/button-workspace.css` across workspace content and portaled
+dialogs. Layout utilities still control width and placement. The rota routes,
+sidebar, public/auth screens and calendar day cells retain their own treatment.
+Use `Button` with its semantic variant, including for button-style links; avoid
+raw action buttons or `buttonVariants` links that bypass the workspace scope.
 
 **Panels.** Use a lightly tinted frame/header, a white/card content surface and
 consistent 16px insets. A simple title/action header is approximately 52px high.

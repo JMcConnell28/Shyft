@@ -58,7 +58,8 @@ attention and planning reuse the shared `DashboardPanel` framed variant,
 `DashboardPanelHeader` and `DashboardPanelContent`: lightly tinted 52px headers,
 card-coloured bodies, 16px insets and a fine edge. Other dashboard consumers keep
 the default panel treatment. Manager controls share 32px desktop sizing and 44px
-phone hit areas; tertiary panel actions use 28px desktop sizing.
+phone hit areas, including panel actions. Primary buttons use the rota Publish
+blue; secondary actions use the Notes treatment. Button labels are semibold.
 
 Three summary cards use real counts and compact phone layouts. Location and date
 controls establish staffing scope; attention explicitly spans all locations and

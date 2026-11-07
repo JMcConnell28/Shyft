@@ -1,5 +1,6 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import * as variants from "class-variance-authority"
+import * as ButtonStyle from "./button-style-provider"
 
 import { cn } from "@/lib/utils"
 
@@ -51,11 +52,29 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  appearance,
   ...props
-}: ButtonPrimitive.Props & variants.VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props &
+  variants.VariantProps<typeof buttonVariants> & {
+    appearance?: ButtonStyle.ButtonAppearance
+  }) {
+  const resolvedAppearance = ButtonStyle.useButtonAppearance(appearance)
+  const tone =
+    variant === "destructive"
+      ? "destructive"
+      : variant === "default" ||
+          variant === "brand" ||
+          variant === "raised" ||
+          variant === "glossy" ||
+          variant === "warm"
+        ? "primary"
+        : "secondary"
   return (
     <ButtonPrimitive
       data-slot="button"
+      data-appearance={resolvedAppearance}
+      data-button-tone={tone}
+      data-button-icon={size?.startsWith("icon") || undefined}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />

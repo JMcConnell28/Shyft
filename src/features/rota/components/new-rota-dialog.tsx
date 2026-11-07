@@ -18,6 +18,7 @@ const NewRotaDialogContent = lazy(() =>
 function NewRotaDialog({
   triggerLabel,
   triggerClassName,
+  triggerVariant = "base",
   triggerIcon = "plus",
   disabled = false,
   ...options
@@ -36,7 +37,7 @@ function NewRotaDialog({
         render={
           <Button
             type="button"
-            variant="base"
+            variant={triggerVariant}
             className={cn(rotaListPrimaryButtonClassName, triggerClassName)}
           />
         }
