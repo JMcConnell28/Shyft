@@ -5,10 +5,10 @@ const rotaListPrimaryButtonClassName =
   "h-10 gap-2 rounded-[10px] border-0 bg-[#0868f7] px-3.5 text-[13px] font-semibold text-white shadow-[0_7px_16px_rgba(8,104,247,0.18)] hover:bg-[#005de2] hover:text-white focus-visible:ring-[#0868f7]/30"
 
 const rotaListInputClassName =
-  "h-10 rounded-[10px] border-[#d7e0ed] bg-white text-[13px] font-medium text-[#405782] shadow-[0_2px_8px_rgba(30,50,96,0.025)] focus-visible:border-[#0868f7] focus-visible:ring-[#0868f7]/20"
+  "h-11 rounded-[10px] border-border bg-card text-base font-semibold text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.12)] focus-visible:border-ring focus-visible:ring-ring/30 md:h-8 md:text-sm"
 
 const rotaListSelectClassName =
-  "w-full [&_select]:h-10 [&_select]:rounded-[10px] [&_select]:border-[#d7e0ed] [&_select]:bg-white [&_select]:text-[13px] [&_select]:font-semibold [&_select]:text-[#405782] [&_select]:shadow-[0_2px_8px_rgba(30,50,96,0.025)] [&_select]:focus-visible:border-[#0868f7] [&_select]:focus-visible:ring-[#0868f7]/20"
+  "w-full [&_select]:h-11 [&_select]:rounded-[10px] [&_select]:border-border [&_select]:bg-card [&_select]:text-base [&_select]:font-semibold [&_select]:text-foreground [&_select]:shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.12)] [&_select]:focus-visible:border-ring [&_select]:focus-visible:ring-ring/30 md:[&_select]:h-8 md:[&_select]:text-sm"
 
 export {
   rotaListInputClassName,

@@ -289,6 +289,7 @@ function RotaListPage({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
+              variant="secondary"
               disabled={
                 deleteDraftMutation.isPending || unpublishMutation.isPending
               }
@@ -298,8 +299,8 @@ function RotaListPage({
             <AlertDialogAction
               variant={
                 pendingLifecycleAction?.type === "unpublish"
-                  ? "outline"
-                  : "destructive"
+                  ? "secondary"
+                  : "danger"
               }
               disabled={
                 deleteDraftMutation.isPending || unpublishMutation.isPending

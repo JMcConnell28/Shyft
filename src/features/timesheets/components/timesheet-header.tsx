@@ -7,7 +7,6 @@ import type {
   TimesheetScopeInput,
   TimesheetViewMode,
 } from "@/features/timesheets/types"
-import { Button } from "@/components/ui/button"
 import { SageTimesheetExportButton } from "@/features/timesheets/components/sage-timesheet-export-button"
 import {
   getTimesheetWeek,
@@ -137,20 +136,20 @@ function ViewButton({
   const isActive = activeView === view
 
   return (
-    <Button
+    <button
+      type="button"
       aria-pressed={isActive}
       className={cn(
-        "h-9 rounded-lg border-0 px-3 font-semibold shadow-none",
+        "inline-flex h-9 items-center justify-center gap-2 rounded-lg border-0 px-3 text-sm font-semibold shadow-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         isActive
           ? "bg-white text-[#10204b] shadow-[0_2px_8px_rgba(26,43,83,0.08)]"
           : "bg-transparent text-[#68769a] hover:bg-white/60"
       )}
       onClick={() => onViewChange(view)}
-      variant="ghost"
     >
       <Icon className="size-4" />
       {label}
-    </Button>
+    </button>
   )
 }
 
