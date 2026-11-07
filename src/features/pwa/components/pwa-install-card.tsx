@@ -44,7 +44,7 @@ function PwaInstallCard() {
         </p>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={!installPrompt || isInstalled}
           onClick={() => void handleInstall()}
         >

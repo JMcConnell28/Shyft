@@ -69,6 +69,7 @@ function PendingJoinRequestsPage({
                 </div>
                 <div className="flex gap-2">
                   <Button
+                    variant="primary"
                     size="sm"
                     disabled={decision.isPending}
                     onClick={() =>
@@ -82,7 +83,7 @@ function PendingJoinRequestsPage({
                   </Button>
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="secondary"
                     disabled={decision.isPending}
                     onClick={() =>
                       decision.mutate({

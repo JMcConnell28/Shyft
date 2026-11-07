@@ -54,7 +54,7 @@ function AccountPasswordSection({ email }: { email: string }) {
         <FieldError>{form.error}</FieldError>
         <div className="flex justify-end">
           <Button
-            variant="brand"
+            variant="primary"
             type="submit"
             size="lg"
             disabled={form.mutation.isPending}
@@ -82,7 +82,7 @@ function PasswordResetOption({ email }: { email: string }) {
       </div>
       <Button
         type="button"
-        variant="outline"
+        variant="secondary"
         size="sm"
         disabled={mutation.isPending}
         onClick={() => mutation.mutate()}

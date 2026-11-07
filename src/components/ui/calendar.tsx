@@ -200,7 +200,6 @@ function CalendarDayButton({
 
   return (
     <Button
-      appearance="default"
       variant="ghost"
       size="icon"
       data-day={day.date.toLocaleDateString(locale?.code)}

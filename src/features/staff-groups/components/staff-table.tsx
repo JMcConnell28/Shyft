@@ -34,7 +34,10 @@ function StaffTable({
     () => filterTeamEmployees(employees, { search, status }),
     [employees, search, status]
   )
-  const totalPages = Math.max(1, Math.ceil(filteredEmployees.length / PAGE_SIZE))
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredEmployees.length / PAGE_SIZE)
+  )
   const safePage = Math.min(page, totalPages)
   const visibleEmployees = filteredEmployees.slice(
     (safePage - 1) * PAGE_SIZE,
@@ -44,11 +47,21 @@ function StaffTable({
   React.useEffect(() => setPage(1), [search, status])
 
   if (employees.length === 0) {
-    return <TeamEmptyState icon={UsersIcon} message="No active staff assignments at this location yet." />
+    return (
+      <TeamEmptyState
+        icon={UsersIcon}
+        message="No active staff assignments at this location yet."
+      />
+    )
   }
 
   if (filteredEmployees.length === 0) {
-    return <TeamEmptyState icon={SearchIcon} message="No team members match these filters." />
+    return (
+      <TeamEmptyState
+        icon={SearchIcon}
+        message="No team members match these filters."
+      />
+    )
   }
 
   return (
@@ -81,7 +94,7 @@ function StaffTable({
           <div className="flex gap-1">
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               size="sm"
               disabled={safePage === 1}
               onClick={() => setPage(safePage - 1)}
@@ -90,7 +103,7 @@ function StaffTable({
             </Button>
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               size="sm"
               disabled={safePage === totalPages}
               onClick={() => setPage(safePage + 1)}

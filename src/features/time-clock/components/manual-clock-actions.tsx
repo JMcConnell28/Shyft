@@ -24,9 +24,8 @@ function ManualClockActions({
       <div className="grid grid-cols-2 gap-3 p-4">
         <Button
           disabled={disabled}
-          className="h-12 rounded-xl border-emerald-200 bg-emerald-50 text-sm font-semibold text-emerald-700 shadow-none hover:bg-emerald-100 hover:text-emerald-800"
           onClick={() => onAction("clock_in")}
-          variant="outline"
+          variant="secondary"
         >
           <span className="flex size-7 items-center justify-center rounded-lg bg-white">
             <LogInIcon className="size-4" />
@@ -35,9 +34,8 @@ function ManualClockActions({
         </Button>
         <Button
           disabled={disabled}
-          className="h-12 rounded-xl border-rose-200 bg-rose-50 text-sm font-semibold text-rose-700 shadow-none hover:bg-rose-100 hover:text-rose-800"
           onClick={() => onAction("clock_out")}
-          variant="outline"
+          variant="secondary"
         >
           <span className="flex size-7 items-center justify-center rounded-lg bg-white">
             <LogOutIcon className="size-4" />

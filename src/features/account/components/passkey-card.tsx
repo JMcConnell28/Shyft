@@ -61,10 +61,10 @@ function PasskeyCard({ allowNaming = false }: { allowNaming?: boolean }) {
               />
             ) : null}
             <Button
-              variant="brand"
+              variant="primary"
               size="lg"
               type="button"
-              className="sm:shrink-0"
+              className={"sm:shrink-0"}
               disabled={!isSupported || addMutation.isPending}
               onClick={() => addMutation.mutate()}
             >
@@ -86,7 +86,7 @@ function PasskeyCard({ allowNaming = false }: { allowNaming?: boolean }) {
             We could not load your saved sign-ins.
             <Button
               type="button"
-              variant="link"
+              variant="secondary"
               onClick={() => void passkeysQuery.refetch()}
             >
               Try again

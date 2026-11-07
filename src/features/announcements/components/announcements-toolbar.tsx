@@ -2,6 +2,7 @@ import { PlusIcon } from "lucide-react"
 
 import type { AnnouncementFilter } from "@/features/announcements/types"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 const filters: Array<{ label: string; value: AnnouncementFilter }> = [
   { label: "All", value: "all" },
@@ -41,8 +42,9 @@ function AnnouncementsToolbar({
         </div>
         {canCreate ? (
           <Button
+            variant="primary"
             type="button"
-            className="h-10 w-full rounded-lg bg-[#0867f2] px-4 text-sm font-semibold text-white hover:bg-[#075edc] sm:w-auto"
+            className={"w-full sm:w-auto"}
             onClick={onCreate}
           >
             <PlusIcon className="size-4" />
@@ -55,22 +57,26 @@ function AnnouncementsToolbar({
         <div
           role="group"
           aria-label="Filter announcements"
-          className="flex w-full flex-wrap gap-2 sm:w-auto"
+          className="inline-flex w-full rounded-lg border border-[#dfe5f0] bg-white p-1 sm:w-auto"
         >
           {filters.map((item) => (
-            <Button
+            <button
               key={item.value}
               type="button"
-              variant="outline"
               aria-pressed={filter === item.value}
               onClick={() => onFilterChange(item.value)}
-              className="flex-1 sm:flex-none"
+              className={cn(
+                "min-h-9 flex-1 rounded-md px-3 text-xs font-semibold transition-colors sm:flex-none sm:px-4",
+                filter === item.value
+                  ? "bg-[#eef3ff] text-[#0968f5]"
+                  : "text-[#61709a] hover:bg-[#f6f8fc] hover:text-[#10204b]"
+              )}
             >
               {item.label}
               {item.value === "unread" && unreadCount > 0
                 ? ` (${unreadCount})`
                 : ""}
-            </Button>
+            </button>
           ))}
         </div>
 
@@ -78,8 +84,8 @@ function AnnouncementsToolbar({
           <Button
             type="button"
             size="sm"
-            variant="ghost"
-            className="h-9 self-end px-2 text-xs font-semibold text-[#0968f5] hover:bg-[#eef3ff] hover:text-[#075edc] sm:self-auto"
+            variant="secondary"
+            className={"self-end sm:self-auto"}
             disabled={isMarkingAllRead}
             onClick={onMarkAllRead}
           >

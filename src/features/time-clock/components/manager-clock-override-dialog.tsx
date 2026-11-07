@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input"
 import { getManagerClockEmployeeKey } from "@/features/time-clock/utils/manager-clock-employees"
 import { toLocalClockInput } from "@/features/time-clock/utils/manual-clock-time"
 import { useManualClockOverrideForm } from "@/features/time-clock/hooks/use-manual-clock-override-form"
-import { cn } from "@/lib/utils"
 
 type OverrideSubmission = {
   action: ClockAction
@@ -149,12 +148,8 @@ function ManagerClockOverrideDialog({
             </p>
           )}
           <Button
-            className={cn(
-              "h-11 w-full rounded-xl text-sm font-semibold",
-              action === "clock_in"
-                ? "bg-emerald-600 hover:bg-emerald-700"
-                : "bg-rose-600 hover:bg-rose-700"
-            )}
+            variant="primary"
+            className={"w-full"}
             disabled={!isValid || isPending || clockInBlocked}
             onClick={() => {
               if (employee && form.occurredAt && isValid && !clockInBlocked)

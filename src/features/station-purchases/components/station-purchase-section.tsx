@@ -41,7 +41,7 @@ function StationPurchaseSection({
         {data?.canPurchase && (
           <Button
             size="sm"
-            variant="outline"
+            variant="secondary"
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? "Close" : `Buy extra station · ${price}`}
@@ -56,7 +56,7 @@ function StationPurchaseSection({
       {options.isError && (
         <p role="alert" className="text-sm text-destructive">
           Could not load station orders.{" "}
-          <Button variant="outline" onClick={() => void options.refetch()}>
+          <Button variant="secondary" onClick={() => void options.refetch()}>
             Try again
           </Button>
         </p>
@@ -82,7 +82,12 @@ function StationPurchaseSection({
             One additional station: {price}. Check the total in Stripe before
             paying. Delivery is currently available to BT47 and BT48 postcodes.
           </p>
-          <Button size="sm" type="submit" disabled={checkout.isPending}>
+          <Button
+            variant="primary"
+            size="sm"
+            type="submit"
+            disabled={checkout.isPending}
+          >
             {checkout.isPending ? "Opening checkout…" : "Continue to payment"}
           </Button>
           {checkout.isError && (

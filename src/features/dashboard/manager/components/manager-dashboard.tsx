@@ -66,8 +66,8 @@ function ManagerDashboard({
           : "No locations are available to manage yet."}
         {search.location ? (
           <Button
-            variant="outline"
-            className="ml-2"
+            variant="secondary"
+            className={"ml-2"}
             onClick={() => onSearch({ date: search.date })}
           >
             Show permitted locations

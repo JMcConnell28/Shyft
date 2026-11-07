@@ -1,6 +1,5 @@
 "use client"
 
-
 import * as React from "react"
 import { PencilIcon, PlusIcon } from "lucide-react"
 import { MAX_ZONE_NAME_LENGTH } from "@/lib/zone-limits"
@@ -92,7 +91,7 @@ function ZoneDialog({
             type="button"
             variant={triggerVariant}
             size="sm"
-            className="gap-2"
+            className=""
           />
         }
       >
@@ -141,7 +140,7 @@ function ZoneDialog({
           ) : null}
 
           <DialogFooter className="mt-4">
-            <Button type="submit" disabled={pending}>
+            <Button variant="primary" type="submit" disabled={pending}>
               {pending ? "Saving..." : submitLabel}
             </Button>
           </DialogFooter>

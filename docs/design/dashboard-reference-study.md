@@ -131,11 +131,11 @@ reference's layered appearance. Use surface tone and the existing outer edge.
 ### Buttons and form controls
 
 Use existing `Button`, selects, date controls and inputs. For dashboard defaults,
-use the shared workspace button scope: 32px desktop size, 14px semibold labels
+use explicit shared `Button` action variants: 32px desktop size, 14px semibold labels
 and 10px corners, including tertiary actions. Phone hit areas are 44px. Following
 the user's button refinement, primary uses the rota Publish blue and secondary
 uses the Notes border/surface/shadow. The measured 28px demo actions above remain
-reference observations. Rota routes keep their existing styling.
+reference observations. The rota builder retains its existing styling; rota list actions use the shared variants.
 
 Keep the label short and literal: Create rota, Review, Open rota, Export. Icons
 are Lucide, generally 16px, with an 8px text gap. Keep the reference rota buttons'

@@ -95,8 +95,8 @@ function ConnectedShiftSwapPage({ initialData, ...scope }: ShiftSwapPageProps) {
             {data.incomingRequests.map((request) => (
               <RequestCard key={request.id} request={request}>
                 <Button
+                  variant="primary"
                   size="sm"
-                  className="h-9 rounded-lg px-3 text-xs font-semibold"
                   disabled={
                     mutations.respondMutation.isPending ||
                     request.status === "expired"
@@ -113,8 +113,7 @@ function ConnectedShiftSwapPage({ initialData, ...scope }: ShiftSwapPageProps) {
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="h-9 rounded-lg border-[#dfe5f0] bg-white px-3 text-xs font-semibold text-[#11245a] shadow-none hover:bg-[#fbfcff]"
+                  variant="secondary"
                   disabled={
                     mutations.respondMutation.isPending ||
                     request.status === "expired"
@@ -142,8 +141,8 @@ function ConnectedShiftSwapPage({ initialData, ...scope }: ShiftSwapPageProps) {
             {data.openCoverRequests.map((request) => (
               <RequestCard key={request.id} request={request}>
                 <Button
+                  variant="primary"
                   size="sm"
-                  className="h-9 rounded-lg px-3 text-xs font-semibold"
                   disabled={
                     mutations.offerCoverMutation.isPending ||
                     request.status === "expired"
@@ -170,8 +169,7 @@ function ConnectedShiftSwapPage({ initialData, ...scope }: ShiftSwapPageProps) {
               {canCancel(request.status) ? (
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="h-9 rounded-lg border-[#dfe5f0] bg-white px-3 text-xs font-semibold text-[#11245a] shadow-none hover:bg-[#fbfcff]"
+                  variant="secondary"
                   disabled={mutations.cancelMutation.isPending}
                   onClick={() => mutations.cancelMutation.mutate(request.id)}
                 >

@@ -27,7 +27,7 @@ function DeleteRotaTemplateDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger
-        render={<Button type="button" variant="pill" size="sm" className="gap-2" />}
+        render={<Button type="button" variant="secondary" size="sm" />}
       >
         <Trash2Icon className="size-3.5" />
         Delete

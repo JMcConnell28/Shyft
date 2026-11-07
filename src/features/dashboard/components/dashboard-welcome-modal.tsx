@@ -162,7 +162,7 @@ function DashboardWelcomeModal({
           {!isFirstStep ? (
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               onClick={() => setStep(step - 1)}
             >
               <ArrowLeftIcon />
@@ -171,13 +171,14 @@ function DashboardWelcomeModal({
           ) : (
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               onClick={() => void dismiss()}
             >
               Skip
             </Button>
           )}
           <Button
+            variant="primary"
             type="button"
             disabled={isDismissing}
             onClick={() => {

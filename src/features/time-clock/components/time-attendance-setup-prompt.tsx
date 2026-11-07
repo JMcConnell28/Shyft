@@ -29,6 +29,7 @@ function TimeAttendanceSetupPrompt({
       {canActivate ? (
         <>
           <Button
+            variant="primary"
             nativeButton={false}
             render={
               <Link

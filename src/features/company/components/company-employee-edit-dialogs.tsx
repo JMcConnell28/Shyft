@@ -75,13 +75,14 @@ function RoleDialog({
         <DialogFooter>
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             disabled={pending}
             onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
           <Button
+            variant="primary"
             type="button"
             disabled={pending}
             onClick={() => {
@@ -136,13 +137,14 @@ function PayrollIdDialog({
         <DialogFooter>
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             disabled={pending}
             onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
           <Button
+            variant="primary"
             type="button"
             disabled={pending}
             onClick={() => {

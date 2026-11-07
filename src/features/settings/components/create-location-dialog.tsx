@@ -1,6 +1,5 @@
 "use client"
 
-
 import * as React from "react"
 import { MapPinPlusIcon, PlusIcon, XIcon } from "lucide-react"
 
@@ -92,13 +91,7 @@ function CreateLocationDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        render={
-          <Button
-            type="button"
-            size="sm"
-            className="h-9 gap-2 rounded-xl px-3 text-xs font-extrabold"
-          />
-        }
+        render={<Button variant="primary" type="button" size="sm" />}
       >
         <MapPinPlusIcon className="size-4" />
         New location
@@ -150,7 +143,7 @@ function CreateLocationDialog({
                     />
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="secondary"
                       size="icon"
                       aria-label={`Remove zone ${index + 1}`}
                       disabled={zones.length === 1}
@@ -166,7 +159,7 @@ function CreateLocationDialog({
                 ))}
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   disabled={zones.length >= 12}
                   onClick={() => setZones((current) => [...current, ""])}
@@ -180,7 +173,7 @@ function CreateLocationDialog({
           <FieldError>{error}</FieldError>
 
           <DialogFooter>
-            <Button type="submit" disabled={pending}>
+            <Button variant="primary" type="submit" disabled={pending}>
               {pending ? "Creating..." : "Create location"}
             </Button>
           </DialogFooter>

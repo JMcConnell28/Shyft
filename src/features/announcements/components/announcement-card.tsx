@@ -101,8 +101,7 @@ function AnnouncementCard({
               <Button
                 type="button"
                 size="sm"
-                variant="ghost"
-                className="h-9 px-2 text-xs font-semibold text-[#0968f5] hover:bg-[#eef3ff]"
+                variant="secondary"
                 disabled={isMarkingRead}
                 onClick={() => onMarkRead?.(announcement.id)}
               >
@@ -114,8 +113,7 @@ function AnnouncementCard({
                 <Button
                   type="button"
                   size="sm"
-                  variant="ghost"
-                  className="h-9 px-2 text-xs font-semibold text-[#405078]"
+                  variant="secondary"
                   onClick={() => onEdit?.(announcement)}
                 >
                   Edit
@@ -123,8 +121,7 @@ function AnnouncementCard({
                 <Button
                   type="button"
                   size="sm"
-                  variant="ghost"
-                  className="h-9 px-2 text-xs font-semibold text-[#61709a]"
+                  variant="secondary"
                   disabled={isArchiving}
                   onClick={() => onArchive?.(announcement)}
                 >

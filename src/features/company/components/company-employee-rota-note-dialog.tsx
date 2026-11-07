@@ -176,7 +176,9 @@ function CompanyEmployeeRotaNoteDialog({
                   }))
                 }}
               >
-                <NativeSelectOption value="all">All locations</NativeSelectOption>
+                <NativeSelectOption value="all">
+                  All locations
+                </NativeSelectOption>
                 {locations.map((location) => (
                   <NativeSelectOption key={location.id} value={location.id}>
                     {location.name}
@@ -196,7 +198,9 @@ function CompanyEmployeeRotaNoteDialog({
                   }))
                 }
               >
-                <NativeSelectOption value="all">No zone scope</NativeSelectOption>
+                <NativeSelectOption value="all">
+                  No zone scope
+                </NativeSelectOption>
                 {filteredZones.map((zone) => (
                   <NativeSelectOption key={zone.id} value={zone.id}>
                     {zone.name}
@@ -219,13 +223,14 @@ function CompanyEmployeeRotaNoteDialog({
         <DialogFooter>
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             disabled={pending}
             onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
           <Button
+            variant="primary"
             type="button"
             disabled={pending || !canSave}
             onClick={() => {

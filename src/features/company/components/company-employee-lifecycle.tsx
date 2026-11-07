@@ -64,6 +64,7 @@ function FormerEmployeeSection({
           Choose the locations where this employee should be active again.
         </p>
         <Button
+          variant="primary"
           type="button"
           disabled={pending}
           onClick={() => onOpenChange(true)}
@@ -101,13 +102,14 @@ function FormerEmployeeSection({
           <DialogFooter>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               disabled={pending}
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
             <Button
+              variant="primary"
               type="button"
               disabled={pending || locationIds.length === 0}
               onClick={() => {

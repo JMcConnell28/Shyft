@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { format, parseISO } from "date-fns"
 import { ChevronRightIcon } from "lucide-react"
-import { dashboardCompactButtonClass } from "../constants"
+
 import type { ManagerDashboardAccess, ManagerDayData } from "../types"
 import { Button } from "@/components/ui/button"
 import { NewRotaDialog } from "@/features/rota/components/new-rota-dialog"
@@ -77,8 +77,7 @@ function ManagerComingUp({
                 {week.rotaId ? (
                   <Button
                     nativeButton={false}
-                    variant="outline"
-                    className={dashboardCompactButtonClass}
+                    variant="secondary"
                     render={
                       <Link
                         to={
@@ -105,7 +104,7 @@ function ManagerComingUp({
                     selectedLocation={selectedLocation}
                     initialWeekStart={week.weekStart}
                     triggerLabel="Create rota"
-                    triggerClassName={`${dashboardCompactButtonClass} border border-input bg-card text-foreground hover:bg-muted hover:text-foreground`}
+                    triggerVariant="secondary"
                   />
                 ) : null}
               </div>

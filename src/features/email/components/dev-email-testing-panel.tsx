@@ -67,7 +67,7 @@ function DevEmailTestingPanel({ workspaceSlug }: { workspaceSlug: string }) {
         </NativeSelect>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="sm"
           disabled={isSending}
           onClick={() => {

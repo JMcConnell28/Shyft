@@ -98,7 +98,7 @@ function PasskeyRow({
         {allowNaming && isEditing ? (
           <>
             <Button
-              variant="brand"
+              variant="primary"
               type="button"
               disabled={!name.trim() || updateMutation.isPending}
               onClick={() => updateMutation.mutate()}
@@ -107,7 +107,7 @@ function PasskeyRow({
             </Button>
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               onClick={() => setIsEditing(false)}
             >
               Cancel
@@ -116,7 +116,7 @@ function PasskeyRow({
         ) : allowNaming ? (
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={() => setIsEditing(true)}
           >
             <PencilIcon />
@@ -143,7 +143,7 @@ function PasskeyDeleteDialog({
     <AlertDialog>
       <AlertDialogTrigger
         render={
-          <Button type="button" variant="destructive" size="icon">
+          <Button type="button" variant="danger" size="icon">
             <Trash2Icon />
             <span className="sr-only">Remove saved sign-in</span>
           </Button>

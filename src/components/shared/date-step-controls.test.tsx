@@ -133,6 +133,11 @@ describe("date navigation controls", () => {
         workspaceSlug="shack"
       />
     )
+    const teamTab = screen.getByRole("button", { name: "Team timesheets" })
+    expect(teamTab.getAttribute("aria-pressed")).toBe("true")
+    expect(teamTab.classList.contains("bg-white")).toBe(true)
+    expect(teamTab.classList.contains("border-0")).toBe(true)
+    expect(teamTab.classList.contains("md:h-8")).toBe(false)
     expect(
       screen.getByRole("button", { name: "Export" }).hasAttribute("disabled")
     ).toBe(false)

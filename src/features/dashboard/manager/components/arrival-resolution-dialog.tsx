@@ -70,10 +70,11 @@ function ArrivalResolutionDialog({
             />
           </label>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
             <Button
+              variant="primary"
               type="submit"
               disabled={!canResolve || pending || !parsedReason.success}
             >

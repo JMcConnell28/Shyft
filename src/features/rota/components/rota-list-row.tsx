@@ -10,10 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { RotaListStatusBadge } from "@/features/rota/components/rota-list-status-badge"
-import {
-  rotaListActionButtonClassName,
-  rotaListInteractiveSurfaceClassName,
-} from "@/features/rota/constants/rota-list-styles"
+import { rotaListInteractiveSurfaceClassName } from "@/features/rota/constants/rota-list-styles"
 import { formatRotaUpdatedLabel } from "@/features/rota/utils/rota-list-format"
 import { cn } from "@/lib/utils"
 
@@ -108,24 +105,18 @@ function RotaListRow({
 
       <div className="flex shrink-0 items-center gap-2">
         <Button
-          variant="outline"
+          variant="secondary"
           nativeButton={false}
           render={<Link to={openRoute} params={routeParams} />}
-          className={rotaListActionButtonClassName}
         >
           Open
         </Button>
 
         {canEdit ? (
           <Button
+            variant="primary"
             nativeButton={false}
             render={<Link to={editRoute} params={routeParams} />}
-            className={cn(
-              "h-8 gap-1.5 rounded-lg px-3 text-xs font-semibold shadow-none",
-              row.status === "draft"
-                ? "bg-[#0868f7] text-white hover:bg-[#005de2]"
-                : "bg-[#edf3ff] text-[#0765e8] hover:bg-[#e4edff]"
-            )}
           >
             <PencilIcon className="size-3.5" />
             Edit
@@ -135,14 +126,7 @@ function RotaListRow({
         {canEdit ? (
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={
-                <Button
-                  size="sm"
-                  variant="outline"
-                  type="button"
-                  className="size-8 rounded-lg border-[#d8e2f0] text-[#405782] shadow-none"
-                />
-              }
+              render={<Button size="icon" variant="secondary" type="button" />}
             >
               <MoreHorizontalIcon className="size-4" />
               <span className="sr-only">Rota actions</span>

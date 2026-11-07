@@ -37,8 +37,7 @@ function DashboardAnnouncementsPanel({
         action={
           <Button
             size="sm"
-            variant="outline"
-            className="h-8 rounded-[10px] border-[#dfe5f0] bg-white px-3 text-xs font-semibold text-[#33477d] shadow-none hover:bg-[#f7f8fb]"
+            variant="secondary"
             nativeButton={false}
             render={<Link to={href} />}
           >

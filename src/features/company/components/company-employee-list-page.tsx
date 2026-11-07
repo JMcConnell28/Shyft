@@ -13,7 +13,7 @@ import {
   ResourceSearch,
 } from "@/features/settings/components/resource-settings-page"
 import { getErrorMessage } from "@/lib/errors"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 function CompanyEmployeeListPage({
   organizationId,
@@ -191,14 +191,19 @@ function StatusButton({
   onClick: () => void
 }) {
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
       aria-pressed={active}
       onClick={onClick}
+      className={cn(
+        "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
+        active
+          ? "bg-[#eef3ff] text-[#0968f5]"
+          : "text-[#61709a] hover:bg-[#f6f8fc] hover:text-[#10204b]"
+      )}
     >
       {label}
-    </Button>
+    </button>
   )
 }
 

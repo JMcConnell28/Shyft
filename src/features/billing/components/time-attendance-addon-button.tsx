@@ -134,9 +134,8 @@ function AddonControls({
         <div className="flex flex-wrap gap-2">
           <TestAddFlowButton onClick={onTest} />
           <Button
-            className="h-8 rounded-lg px-3 text-[11px] font-bold"
             type="button"
-            variant="outline"
+            variant="secondary"
             disabled={isPending}
             onClick={onKeep}
           >
@@ -151,9 +150,8 @@ function AddonControls({
     <div className="flex flex-wrap gap-2">
       {enabled ? <TestAddFlowButton onClick={onTest} /> : null}
       <Button
-        className="h-8 rounded-lg px-3 text-[11px] font-bold"
         type="button"
-        variant={enabled ? "outline" : "default"}
+        variant={enabled ? "secondary" : "primary"}
         disabled={isPending}
         onClick={enabled ? onCancel : onAdd}
       >
@@ -171,12 +169,7 @@ function TestAddFlowButton({ onClick }: { onClick: () => void }) {
   if (!import.meta.env.DEV) return null
 
   return (
-    <Button
-      className="h-8 rounded-lg px-2 text-[10px] font-bold"
-      onClick={onClick}
-      type="button"
-      variant="ghost"
-    >
+    <Button onClick={onClick} type="button" variant="secondary">
       <FlaskConicalIcon className="size-3.5" />
       Test add flow
     </Button>

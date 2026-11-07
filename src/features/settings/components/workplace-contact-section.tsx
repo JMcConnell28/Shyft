@@ -62,7 +62,7 @@ function WorkplaceContactSection({
       </WorkplaceSettingRow>
       <div className="flex min-h-14 items-center justify-end py-2">
         <Button
-          className="h-8 rounded-lg px-3 text-[11px] font-bold"
+          variant="primary"
           disabled={!hasChanges || isSaving}
           onClick={onSave}
         >

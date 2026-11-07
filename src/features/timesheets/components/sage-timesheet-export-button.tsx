@@ -122,13 +122,14 @@ function SageTimesheetExportButton({
           <DialogFooter className="mx-0 mb-0 rounded-b-xl">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               disabled={isExporting}
               onClick={() => setOpen(false)}
             >
               Cancel
             </Button>
             <Button
+              variant="primary"
               type="button"
               disabled={!selectedLocationId || isExporting}
               onClick={() => void handleSelectedExport()}

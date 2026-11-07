@@ -39,7 +39,7 @@ function ClockStationHealthSection({
           />
         </div>
         <Button
-          className="mt-4 h-9 w-full rounded-lg border-[#cbd9f8] bg-white text-[#1769ff] shadow-none hover:bg-blue-50"
+          className={"mt-4 w-full"}
           nativeButton={false}
           render={
             <Link
@@ -47,7 +47,7 @@ function ClockStationHealthSection({
               to="/app/$workspaceSlug/time-clock"
             />
           }
-          variant="outline"
+          variant="secondary"
         >
           View time tracking
           <ExternalLinkIcon className="size-3.5" />

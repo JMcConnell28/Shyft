@@ -24,7 +24,7 @@ function DashboardWelcome(props: DashboardWelcomeProps) {
     return (
       <p role="status" className="px-4 py-2 text-sm text-muted-foreground">
         Getting-started tips are unavailable.{" "}
-        <Button variant="outline" onClick={() => void query.refetch()}>
+        <Button variant="secondary" onClick={() => void query.refetch()}>
           Try again
         </Button>
       </p>

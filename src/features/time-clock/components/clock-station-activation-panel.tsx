@@ -70,10 +70,11 @@ function ClockStationActivationPanel({
             ready for staff to use.
           </div>
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
+            <DialogClose render={<Button variant="secondary" />}>
               Cancel
             </DialogClose>
             <Button
+              variant="primary"
               disabled={isPending}
               onClick={() => {
                 onActivate(location.id)

@@ -38,7 +38,10 @@ function NewRotaDialog({
           <Button
             type="button"
             variant={triggerVariant}
-            className={cn(rotaListPrimaryButtonClassName, triggerClassName)}
+            className={cn(
+              triggerVariant === "base" && rotaListPrimaryButtonClassName,
+              triggerClassName
+            )}
           />
         }
       >

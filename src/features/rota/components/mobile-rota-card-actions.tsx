@@ -29,22 +29,17 @@ function MobileRotaCardActions({
   return (
     <div className="flex items-center justify-end gap-1.5">
       <Button
-        variant="outline"
+        variant="secondary"
         nativeButton={false}
         render={<Link to={openRoute} params={routeParams} />}
-        className="h-8 rounded-lg border-[#d8e2f0] bg-white px-2.5 text-xs font-semibold text-[#0765e8] shadow-none"
       >
         Open
       </Button>
       {canEdit ? (
         <Button
+          variant="primary"
           nativeButton={false}
           render={<Link to={editRoute} params={routeParams} />}
-          className={
-            row.status === "draft"
-              ? "h-8 gap-1.5 rounded-lg bg-[#0868f7] px-2.5 text-xs font-semibold text-white shadow-none hover:bg-[#005de2]"
-              : "h-8 gap-1.5 rounded-lg bg-[#edf3ff] px-2.5 text-xs font-semibold text-[#0765e8] shadow-none hover:bg-[#e4edff]"
-          }
         >
           <PencilIcon className="size-3.5" />
           Edit

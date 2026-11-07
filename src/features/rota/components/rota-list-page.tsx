@@ -135,11 +135,12 @@ function RotaListPage({
             </div>
             {canCreateRota ? (
               <NewRotaDialog
+                triggerVariant="primary"
                 locations={data.locations}
                 selectedLocation={data.selectedLocation}
                 triggerLabel="New rota"
                 triggerIcon="plus"
-                triggerClassName="h-10 shrink-0 rounded-[10px] border-0 bg-[#0868f7] px-4 text-[13px] font-semibold text-white shadow-[0_7px_16px_rgba(8,104,247,0.18)] hover:bg-[#005de2]"
+                triggerClassName={"shrink-0"}
                 defaultSourceType="blank"
               />
             ) : null}
@@ -186,11 +187,11 @@ function RotaListPage({
               action={
                 canCreateRota ? (
                   <NewRotaDialog
+                    triggerVariant="primary"
                     locations={data.locations}
                     selectedLocation={data.selectedLocation}
                     triggerLabel="Create rota"
                     triggerIcon="plus"
-                    triggerClassName="h-10 rounded-[10px] border-0 bg-[#0868f7] px-4 text-sm font-semibold text-white hover:bg-[#005de2]"
                     defaultSourceType="blank"
                   />
                 ) : null
@@ -238,8 +239,7 @@ function RotaListPage({
                   <Button
                     size="sm"
                     type="button"
-                    variant="outline"
-                    className="h-8 rounded-lg border-[#d8e2f0] bg-white px-3 text-xs font-semibold text-[#0765e8] shadow-none"
+                    variant="secondary"
                     onClick={() => onPageChange(data.pagination.page - 1)}
                     disabled={data.pagination.page <= 1}
                   >
@@ -248,8 +248,7 @@ function RotaListPage({
                   <Button
                     size="sm"
                     type="button"
-                    variant="outline"
-                    className="h-8 rounded-lg border-[#d8e2f0] bg-white px-3 text-xs font-semibold text-[#0765e8] shadow-none"
+                    variant="secondary"
                     onClick={() => onPageChange(data.pagination.page + 1)}
                     disabled={
                       data.pagination.page >= data.pagination.totalPages

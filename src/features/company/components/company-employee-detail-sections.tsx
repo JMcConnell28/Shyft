@@ -120,8 +120,7 @@ function EmployeeSettingRow({
       <Button
         type="button"
         size="sm"
-        variant="outline"
-        className="h-8 rounded-lg border-[#dfe5f0] px-3 text-xs font-semibold"
+        variant="secondary"
         disabled={disabled}
         onClick={onAction}
       >
@@ -231,7 +230,7 @@ function CompanyEmployeeOffboardingSection({
         </p>
         <Button
           type="button"
-          variant="destructive"
+          variant="danger"
           disabled={pending}
           onClick={onRemove}
         >

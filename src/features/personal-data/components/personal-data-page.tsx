@@ -62,7 +62,7 @@ function PersonalDataPage({ userId }: { userId: string }) {
             We could not load your requests. Check that your email is verified,
             or contact us for help.
           </p>
-          <Button variant="outline" onClick={() => void query.refetch()}>
+          <Button variant="secondary" onClick={() => void query.refetch()}>
             Try again
           </Button>
         </div>
@@ -94,6 +94,7 @@ function PersonalDataPage({ userId }: { userId: string }) {
                 </span>
               </label>
               <Button
+                variant="primary"
                 disabled={!confirmed || mutation.isPending}
                 onClick={() => mutation.mutate()}
               >

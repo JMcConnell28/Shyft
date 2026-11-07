@@ -1,5 +1,5 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
-import { dashboardButtonClass, dashboardSelectClass } from "../constants"
+import { dashboardSelectClass } from "../constants"
 import { moveDashboardDate } from "../utils/date"
 import { DashboardMobileDatePicker } from "./mobile-date-picker"
 import { DashboardSelect } from "./dashboard-select"
@@ -45,8 +45,7 @@ function ManagerDashboardFilters({
       <div className="hidden items-center gap-2 sm:flex">
         <Button
           aria-label="Previous day"
-          variant="outline"
-          className="size-11 rounded-lg bg-card shadow-none md:size-8"
+          variant="secondary"
           onClick={() => onDate(moveDashboardDate(date, -1))}
         >
           <ChevronLeftIcon />
@@ -65,16 +64,15 @@ function ManagerDashboardFilters({
         </label>
         <Button
           aria-label="Next day"
-          variant="outline"
-          className="size-11 rounded-lg bg-card shadow-none md:size-8"
+          variant="secondary"
           onClick={() => onDate(moveDashboardDate(date, 1))}
         >
           <ChevronRightIcon />
         </Button>
       </div>
       <Button
-        variant={isToday ? "secondary" : "outline"}
-        className={`${dashboardButtonClass} hidden sm:inline-flex`}
+        variant={isToday ? "secondary" : "secondary"}
+        className={`hidden sm:inline-flex`}
         onClick={() => onDate(undefined)}
       >
         Today

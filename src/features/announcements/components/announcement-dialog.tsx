@@ -177,9 +177,9 @@ function AnnouncementDialog({
                     {pollOptions.length > 2 ? (
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
-                        className="shrink-0"
+                        className={"shrink-0"}
                         onClick={() =>
                           setPollOptions((current) =>
                             current.filter(
@@ -196,9 +196,9 @@ function AnnouncementDialog({
                 {pollOptions.length < 6 ? (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
-                    className="w-fit"
+                    className={"w-fit"}
                     onClick={() =>
                       setPollOptions((current) => [...current, ""])
                     }
@@ -281,15 +281,16 @@ function AnnouncementDialog({
           <DialogFooter className="shrink-0 bg-white pb-[max(1rem,env(safe-area-inset-bottom))]">
             <Button
               type="button"
-              variant="outline"
-              className="w-full sm:w-auto"
+              variant="secondary"
+              className={"w-full sm:w-auto"}
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
             <Button
+              variant="primary"
               type="submit"
-              className="w-full sm:w-auto"
+              className={"w-full sm:w-auto"}
               disabled={pending}
             >
               {pending ? <LoaderCircleIcon className="animate-spin" /> : null}

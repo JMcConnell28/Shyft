@@ -108,10 +108,9 @@ function ClockedInSection({
                     disabled={
                       !writableLocationIds.includes(employee.locationId)
                     }
-                    className="h-8 rounded-lg border-[#dfe4ef] bg-white px-3 text-[#33456f] shadow-none hover:bg-rose-50 hover:text-rose-700"
                     onClick={() => onClockOut(employee)}
                     size="sm"
-                    variant="outline"
+                    variant="secondary"
                   >
                     <LogOutIcon className="size-3.5" />
                     Clock out

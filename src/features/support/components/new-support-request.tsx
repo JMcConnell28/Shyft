@@ -183,8 +183,9 @@ function NewSupportRequest({
         </p>
       ) : null}
       <Button
+        variant="primary"
         type="submit"
-        className="h-10 justify-self-end rounded-lg bg-[#0867f2] px-4 font-semibold text-white hover:bg-[#075edc]"
+        className={"justify-self-end"}
         disabled={form.state.isSubmitting || createMutation.isPending}
       >
         {createMutation.isPending ? "Sending…" : "Send request"}

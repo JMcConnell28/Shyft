@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import type React from "react"
+import * as React from "react"
 import { useServerFn } from "@tanstack/react-start"
 import { CreditCardIcon } from "lucide-react"
 
@@ -22,7 +21,7 @@ function CheckoutButton({
   className,
   children = "Start subscription",
 }: CheckoutButtonProps) {
-  const [isStarting, setIsStarting] = useState(false)
+  const [isStarting, setIsStarting] = React.useState(false)
   const startCheckout = useServerFn(startSubscriptionCheckout)
 
   async function handleClick() {
@@ -48,6 +47,7 @@ function CheckoutButton({
 
   return (
     <Button
+      variant="primary"
       className={className}
       disabled={isStarting}
       onClick={() => {

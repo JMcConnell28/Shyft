@@ -53,14 +53,13 @@ function TimeClockExceptionsSection({
                 </span>
                 <Button
                   aria-label={`Approve ${entry.employeeName}'s time entry`}
-                  className="h-8 rounded-lg border-[#dfe4ef] bg-white px-2.5 text-[#236cff] shadow-none hover:bg-blue-50"
                   disabled={
                     isApproving ||
                     !data.writableLocationIds.includes(entry.locationId)
                   }
                   onClick={() => onApprove(entry.id)}
                   size="sm"
-                  variant="outline"
+                  variant="secondary"
                 >
                   <CheckIcon className="size-3.5" />
                   Approve

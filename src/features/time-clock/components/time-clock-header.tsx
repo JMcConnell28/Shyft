@@ -64,11 +64,11 @@ function TimeClockHeader({
         />
         <Button
           aria-label="Refresh clock activity"
-          className="size-10 rounded-xl border-[#dfe4ef] bg-white text-[#10204b] shadow-none hover:bg-[#f9faff] sm:w-auto sm:px-3"
+          className={"sm:w-auto"}
           disabled={isRefreshing || isPending}
           onClick={onRefresh}
           size="icon-lg"
-          variant="outline"
+          variant="secondary"
         >
           <RefreshCwIcon
             className={cn("size-4", isRefreshing && "animate-spin")}

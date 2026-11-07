@@ -62,8 +62,8 @@ function TimesheetMessage({
       <TimesheetPanel className="m-auto w-full max-w-lg p-6 text-center text-sm font-medium text-[#68769a]">
         {children}
         <Button
-          className="mx-auto mt-4"
-          variant="outline"
+          className={"mx-auto mt-4"}
+          variant="secondary"
           disabled={pending}
           onClick={onRetry}
         >

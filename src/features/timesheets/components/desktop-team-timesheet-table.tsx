@@ -76,10 +76,9 @@ function DesktopTeamTimesheetTable({
                 <TableCell className="px-4 text-right">
                   <Button
                     aria-expanded={isExpanded}
-                    className="h-8 rounded-lg border-[#dfe4ef] bg-white px-3 text-[#236cff] shadow-none"
                     onClick={() => onToggle(employee.employeeId)}
                     size="sm"
-                    variant="outline"
+                    variant="secondary"
                   >
                     {isExpanded ? "Hide" : "Review"}
                     {isExpanded ? (

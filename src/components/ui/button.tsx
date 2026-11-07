@@ -1,14 +1,22 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import * as variants from "class-variance-authority"
-import * as ButtonStyle from "./button-style-provider"
 
 import { cn } from "@/lib/utils"
+
+const actionButtonClassName =
+  "h-11 min-h-11 gap-2 rounded-[10px] px-3 py-0 text-sm/5 font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:translate-y-0 md:h-8 md:min-h-8 [&_svg]:size-4"
 
 const buttonVariants = variants.cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-xs/relaxed font-medium whitespace-nowrap transition-all outline-none select-none hover:cursor-pointer focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
+        primary:
+          "border-blue-700 bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500/30",
+        secondary:
+          "border-border bg-card text-[#202433] hover:bg-input/50 hover:text-foreground aria-pressed:border-blue-200 aria-pressed:bg-blue-50 aria-pressed:text-blue-700 dark:text-foreground dark:aria-pressed:border-blue-800 dark:aria-pressed:bg-blue-950 dark:aria-pressed:text-blue-200",
+        danger:
+          "border-red-700 bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600",
         default: "bg-primary text-primary-foreground hover:bg-primary/80",
         brand:
           "rounded-lg bg-[#0868f7] font-semibold text-white shadow-none hover:bg-[#005de2] focus-visible:ring-[#0868f7]/30",
@@ -19,7 +27,7 @@ const buttonVariants = variants.cva(
           "rounded-lg border-black/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_1px_2px_rgba(0,0,0,0.16)] hover:brightness-[0.97] focus-visible:ring-white/10",
         glossy:
           "rounded-[10px] border-t-white/40 border-x-white/30 border-b-white/15 bg-[#296ff0] text-white shadow-[0_3px_6px_rgba(0,0,0,0.2),inset_0_0_6px_2px_rgba(255,255,255,0.24),0_0_0_1px_#296ff0] hover:bg-[#2464dc] focus-visible:ring-[#296ff0]/40 active:shadow-[0_1px_3px_rgba(0,0,0,0.15),inset_0_0_6px_2px_rgba(255,255,255,0.24),0_0_0_1px_#296ff0]",
-        secondary:
+        muted:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         warm: "rounded-lg border-emerald-700 bg-emerald-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_1px_2px_rgba(0,0,0,0.16)] hover:bg-emerald-700 focus-visible:border-emerald-800 focus-visible:ring-emerald-500/30",
         ghost:
@@ -41,6 +49,18 @@ const buttonVariants = variants.cva(
         "icon-lg": "size-8 [&_svg:not([class*='size-'])]:size-4",
       },
     },
+    compoundVariants: [
+      {
+        variant: ["primary", "secondary", "danger"],
+        class: actionButtonClassName,
+      },
+      {
+        variant: ["primary", "secondary", "danger"],
+        size: ["icon", "icon-xs", "icon-sm", "icon-lg"],
+        class:
+          "size-11 px-0 md:size-8 sm:has-[>span:not(.sr-only)]:w-auto sm:has-[>span:not(.sr-only)]:px-3",
+      },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",
@@ -52,29 +72,11 @@ function Button({
   className,
   variant = "default",
   size = "default",
-  appearance,
   ...props
-}: ButtonPrimitive.Props &
-  variants.VariantProps<typeof buttonVariants> & {
-    appearance?: ButtonStyle.ButtonAppearance
-  }) {
-  const resolvedAppearance = ButtonStyle.useButtonAppearance(appearance)
-  const tone =
-    variant === "destructive"
-      ? "destructive"
-      : variant === "default" ||
-          variant === "brand" ||
-          variant === "raised" ||
-          variant === "glossy" ||
-          variant === "warm"
-        ? "primary"
-        : "secondary"
+}: ButtonPrimitive.Props & variants.VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      data-appearance={resolvedAppearance}
-      data-button-tone={tone}
-      data-button-icon={size?.startsWith("icon") || undefined}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />

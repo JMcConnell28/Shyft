@@ -12,7 +12,10 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import type { TimesheetEntry, TimesheetScopeInput } from "@/features/timesheets/types"
+import type {
+  TimesheetEntry,
+  TimesheetScopeInput,
+} from "@/features/timesheets/types"
 import { useTimesheetMutations } from "@/features/timesheets/hooks/use-timesheet-mutations"
 import { TimeEntryNotes } from "@/features/time-clock/components/time-entry-notes"
 
@@ -31,16 +34,18 @@ function EditTimesheetEntryDialog({
   const [payableStartAt, setPayableStartAt] = React.useState("")
   const [payableEndAt, setPayableEndAt] = React.useState("")
   const [reason, setReason] = React.useState("")
-  const [status, setStatus] = React.useState<"open" | "closed" | "requires_review">(
-    "closed",
-  )
+  const [status, setStatus] = React.useState<
+    "open" | "closed" | "requires_review"
+  >("closed")
 
   React.useEffect(() => {
     setClockedInAt(toDateTimeLocal(entry?.clockedInAt))
     setClockedOutAt(toDateTimeLocal(entry?.clockedOutAt))
     setPayableStartAt(toDateTimeLocal(entry?.payableStartAt))
     setPayableEndAt(toDateTimeLocal(entry?.payableEndAt))
-    setStatus(entry?.status === "scheduled" ? "closed" : entry?.status ?? "closed")
+    setStatus(
+      entry?.status === "scheduled" ? "closed" : (entry?.status ?? "closed")
+    )
     setReason("")
   }, [entry])
 
@@ -96,7 +101,9 @@ function EditTimesheetEntryDialog({
             className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm"
             value={status}
             onChange={(event) =>
-              setStatus(event.target.value as "open" | "closed" | "requires_review")
+              setStatus(
+                event.target.value as "open" | "closed" | "requires_review"
+              )
             }
           >
             <option value="closed">Closed</option>
@@ -115,10 +122,11 @@ function EditTimesheetEntryDialog({
         </label>
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="secondary" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button
+            variant="primary"
             disabled={!canSubmit || updateEntryMutation.isPending}
             onClick={() => {
               if (!entry?.id) {
@@ -141,7 +149,7 @@ function EditTimesheetEntryDialog({
                 },
                 {
                   onSuccess: () => onOpenChange(false),
-                },
+                }
               )
             }}
           >

@@ -55,8 +55,8 @@ function TeamSettingsToolbar({
               params={{ workspaceSlug }}
             />
           }
-          variant="outline"
-          className="order-2 h-10 justify-center rounded-lg border-[#dfe5f0] px-4 text-[#10204b] lg:order-none"
+          variant="secondary"
+          className={"order-2 justify-center lg:order-none"}
         >
           <Layers3Icon className="size-4" />
           Groups
@@ -87,7 +87,6 @@ function TeamSettingsToolbar({
             <NativeSelectOption value="inactive">Inactive</NativeSelectOption>
           </NativeSelect>
         </div>
-
       </div>
     </section>
   )

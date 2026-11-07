@@ -40,7 +40,6 @@ function TimeClockActivitySection({
         action={
           capabilities.canManageTimesheets ? (
             <Button
-              className="h-8 px-2 text-[#236cff]"
               nativeButton={false}
               render={
                 <Link
@@ -48,7 +47,7 @@ function TimeClockActivitySection({
                   to="/app/$workspaceSlug/timesheets"
                 />
               }
-              variant="ghost"
+              variant="secondary"
             >
               View timesheets
               <ArrowRightIcon className="size-3.5" />

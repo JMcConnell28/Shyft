@@ -24,7 +24,7 @@ function AccountPreferencesPage({ userId }: { userId: string }) {
         ) : query.isError ? (
           <div role="alert" className="space-y-2 py-3 text-xs">
             <p>We could not load your preferences.</p>
-            <Button variant="outline" onClick={() => void query.refetch()}>
+            <Button variant="secondary" onClick={() => void query.refetch()}>
               Try again
             </Button>
           </div>

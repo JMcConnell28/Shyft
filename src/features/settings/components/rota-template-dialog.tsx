@@ -57,7 +57,7 @@ function RenameRotaTemplateDialog({
       setError(
         submissionError instanceof Error
           ? submissionError.message
-          : "We could not rename that template.",
+          : "We could not rename that template."
       )
     }
   }
@@ -65,7 +65,7 @@ function RenameRotaTemplateDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        render={<Button type="button" variant="pill" size="sm" className="gap-2" />}
+        render={<Button type="button" variant="secondary" size="sm" />}
       >
         <PencilIcon className="size-3.5" />
         Rename
@@ -95,7 +95,7 @@ function RenameRotaTemplateDialog({
           </Field>
 
           <DialogFooter className="mt-4">
-            <Button type="submit" disabled={pending}>
+            <Button variant="primary" type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>

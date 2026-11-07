@@ -70,8 +70,7 @@ function DashboardTimeReviewDialog({
           {canViewTimesheets && (
             <Button
               nativeButton={false}
-              variant="outline"
-              className="h-9"
+              variant="secondary"
               render={
                 <Link
                   to="/app/$workspaceSlug/timesheets"
@@ -88,7 +87,7 @@ function DashboardTimeReviewDialog({
           )}
           {item.kind === "review" ? (
             <Button
-              className="h-9"
+              variant="primary"
               disabled={!canApprove || pending}
               onClick={onApprove}
             >

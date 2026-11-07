@@ -90,7 +90,6 @@ function TrialBanner({
           <CheckoutButton
             organizationId={trialState.organizationId}
             locationId={trialState.locationId}
-            className="h-6 px-2 text-[11px]"
           >
             {checkoutLabel}
           </CheckoutButton>
@@ -131,7 +130,7 @@ function TrialBanner({
           <CheckoutButton
             organizationId={trialState.organizationId}
             locationId={trialState.locationId}
-            className="h-8 w-full rounded-lg bg-[#3975b9] font-semibold text-white hover:bg-[#2f67a6]"
+            className="w-full"
           >
             {checkoutLabel}
           </CheckoutButton>

@@ -48,10 +48,11 @@ function MobileRotaList({
 
             {canCreateRota ? (
               <NewRotaDialog
+                triggerVariant="primary"
                 locations={data.locations}
                 selectedLocation={data.selectedLocation}
                 triggerLabel="New rota"
-                triggerClassName="h-10 shrink-0 gap-1 rounded-[10px] border-0 bg-[#0868f7] px-2 text-xs font-semibold text-white shadow-[0_7px_16px_rgba(8,104,247,0.18)] hover:bg-[#005de2] sm:gap-2 sm:px-3.5 sm:text-[13px]"
+                triggerClassName="shrink-0"
                 triggerIcon="plus"
                 disabled={!canCreateRota}
                 defaultSourceType="blank"

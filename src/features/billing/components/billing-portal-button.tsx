@@ -26,7 +26,7 @@ function BillingPortalButton({
 
   return (
     <Button
-      variant="outline"
+      variant="secondary"
       className={className}
       disabled={isOpening}
       aria-busy={isOpening}

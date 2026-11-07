@@ -88,8 +88,8 @@ function GeneralSettingsState({
       {message}
       {onRetry && (
         <Button
-          className="mx-auto mt-4"
-          variant="outline"
+          className={"mx-auto mt-4"}
+          variant="secondary"
           disabled={pending}
           onClick={onRetry}
         >

@@ -3,11 +3,7 @@
 import { Link } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 import { useServerFn } from "@tanstack/react-start"
-import {
-  CheckCircle2Icon,
-  ClockIcon,
-  TriangleAlertIcon,
-} from "lucide-react"
+import { CheckCircle2Icon, ClockIcon, TriangleAlertIcon } from "lucide-react"
 
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button"
 import { getWorkspaceBillingStatus } from "@/features/billing/server-fns"
@@ -34,15 +30,16 @@ function BillingSuccessPanel({
 }: BillingSuccessPanelProps) {
   const [billing, setBilling] = useState(initialBilling)
   const [status, setStatus] = useState<ConfirmationState>(
-    initialBilling?.hasActiveSubscription || initialBilling?.hasSavedPaymentMethod
+    initialBilling?.hasActiveSubscription ||
+      initialBilling?.hasSavedPaymentMethod
       ? "active"
-      : "checking",
+      : "checking"
   )
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const getStatus = useServerFn(getWorkspaceBillingStatus)
   const content = useMemo(
     () => getStatusContent(status, billing),
-    [billing, status],
+    [billing, status]
   )
 
   useEffect(() => {
@@ -109,7 +106,10 @@ function BillingSuccessPanel({
 
   return (
     <div className="space-y-5">
-      <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 data-[state=checking]:bg-blue-100 data-[state=checking]:text-blue-700 data-[state=failed]:bg-red-100 data-[state=failed]:text-red-700 data-[state=pending]:bg-amber-100 data-[state=pending]:text-amber-700" data-state={status}>
+      <div
+        className="flex size-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 data-[state=checking]:bg-blue-100 data-[state=checking]:text-blue-700 data-[state=failed]:bg-red-100 data-[state=failed]:text-red-700 data-[state=pending]:bg-amber-100 data-[state=pending]:text-amber-700"
+        data-state={status}
+      >
         {content.icon}
       </div>
 
@@ -125,6 +125,7 @@ function BillingSuccessPanel({
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button
+          variant="primary"
           disabled={status !== "active"}
           nativeButton={false}
           render={<Link to={dashboardHref} />}
@@ -144,7 +145,7 @@ function BillingSuccessPanel({
 
 function getStatusContent(
   status: ConfirmationState,
-  billing: WorkspaceBillingState | null,
+  billing: WorkspaceBillingState | null
 ) {
   if (status === "active") {
     if (billing?.hasSavedPaymentMethod && !billing.hasActiveSubscription) {

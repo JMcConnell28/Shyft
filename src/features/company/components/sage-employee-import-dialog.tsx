@@ -84,14 +84,7 @@ function SageEmployeeImportDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button
-            type="button"
-            className="h-10 rounded-lg bg-[#0867f2] text-white hover:bg-[#075edc]"
-          />
-        }
-      >
+      <DialogTrigger render={<Button variant="primary" type="button" />}>
         <FileUpIcon data-icon="inline-start" />
         Import Sage employees
       </DialogTrigger>
@@ -130,13 +123,14 @@ function SageEmployeeImportDialog({
         <DialogFooter>
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             disabled={isImporting}
             onClick={() => setOpen(false)}
           >
             Cancel
           </Button>
           <Button
+            variant="primary"
             type="button"
             disabled={!preview || preview.updates.length === 0 || isImporting}
             onClick={() => void handleImport()}

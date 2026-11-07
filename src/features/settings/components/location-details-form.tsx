@@ -130,7 +130,11 @@ function LocationDetailsForm({
         )}
       </form.Subscribe>
       <div className="flex justify-end">
-        <Button type="submit" disabled={form.state.isSubmitting || isSaving}>
+        <Button
+          variant="primary"
+          type="submit"
+          disabled={form.state.isSubmitting || isSaving}
+        >
           {form.state.isSubmitting || isSaving ? "Saving..." : "Save changes"}
         </Button>
       </div>

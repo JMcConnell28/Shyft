@@ -26,9 +26,8 @@ function DashboardTeamRowActions({
       <DropdownMenuTrigger
         render={
           <Button
-            variant="ghost"
+            variant="secondary"
             size="icon"
-            className="size-11 rounded-lg md:size-8"
             aria-label={`Actions for ${row.employeeName}`}
           />
         }

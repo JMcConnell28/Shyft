@@ -1,4 +1,4 @@
-import { dashboardCompactButtonClass, dashboardTeamColumns } from "../constants"
+import { dashboardTeamColumns } from "../constants"
 import { ManagerTeamFilters } from "./team-filters"
 import { DashboardTeamRow } from "./team-row"
 import type { ManagerDayData, TeamRow } from "../types"
@@ -99,7 +99,7 @@ function ManagerTeamSection({
                   : "No team members for this day"}
             </p>
             {data.team.length ? (
-              <Button variant="link" onClick={filters.reset}>
+              <Button variant="secondary" onClick={filters.reset}>
                 Clear filters
               </Button>
             ) : null}
@@ -108,8 +108,7 @@ function ManagerTeamSection({
         {filters.total > filters.pageSize ? (
           <div className="flex items-center justify-end gap-2 border-t px-4 py-3 text-xs">
             <Button
-              variant="outline"
-              className={dashboardCompactButtonClass}
+              variant="secondary"
               disabled={filters.page === 1}
               onClick={() => filters.setPage(filters.page - 1)}
             >
@@ -119,8 +118,7 @@ function ManagerTeamSection({
               {filters.page} / {Math.ceil(filters.total / filters.pageSize)}
             </span>
             <Button
-              variant="outline"
-              className={dashboardCompactButtonClass}
+              variant="secondary"
               disabled={filters.page * filters.pageSize >= filters.total}
               onClick={() => filters.setPage(filters.page + 1)}
             >

@@ -54,8 +54,8 @@ function ManagerApprovalSection({
             />
             <div className="flex gap-2 md:justify-end">
               <Button
+                variant="primary"
                 size="sm"
-                className="h-9 rounded-lg px-3 text-xs font-semibold"
                 disabled={isApproving || request.status === "expired"}
                 onClick={() => onApprove(request.id, notes[request.id])}
               >
@@ -63,8 +63,7 @@ function ManagerApprovalSection({
               </Button>
               <Button
                 size="sm"
-                variant="outline"
-                className="h-9 rounded-lg border-[#dfe5f0] bg-white px-3 text-xs font-semibold text-[#11245a] shadow-none hover:bg-[#fbfcff]"
+                variant="secondary"
                 disabled={isDenying}
                 onClick={() => onDeny(request.id, notes[request.id])}
               >

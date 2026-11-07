@@ -79,7 +79,6 @@ function TimesheetHeader({
           />
           {isTeamView ? (
             <SageTimesheetExportButton
-              className="h-10 rounded-xl border-[#dfe4ef] bg-white px-3 font-semibold shadow-none"
               disabledReason={
                 isPending
                   ? "Wait for the selected week to load before exporting."

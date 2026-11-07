@@ -121,13 +121,17 @@ function TimeAttendanceAddonDialog({
           <DialogFooter>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               disabled={isPending}
               onClick={onClose}
             >
               Not now
             </Button>
-            <Button type="submit" disabled={isPending || !confirmed}>
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={isPending || !confirmed}
+            >
               {isPending
                 ? "Activating..."
                 : isTestMode

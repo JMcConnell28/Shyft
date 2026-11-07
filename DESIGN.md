@@ -206,12 +206,12 @@ inputs, selects and search. Provide hover, keyboard focus,
 active, disabled and pending states. Disable duplicate submissions, retain labels
 while loading, and give icon-only actions accessible names.
 
-This button standard is enforced by `ButtonStyleProvider` and
-`src/components/ui/button-workspace.css` across workspace content and portaled
-dialogs. Layout utilities still control width and placement. The rota routes,
-sidebar, public/auth screens and calendar day cells retain their own treatment.
-Use `Button` with its semantic variant, including for button-style links; avoid
-raw action buttons or `buttonVariants` links that bypass the workspace scope.
+Use the shared `Button` component’s explicit `primary`, `secondary` and `danger`
+variants. They own sizing, label weight, colours and interaction states; page
+classes should only control placement and width. No provider or CSS override
+layer is required. Tabs, segmented selectors, calendar cells and the rota
+builder retain their existing variants and geometry. The rota list uses the
+standard action variants, including its New rota, Open and Edit buttons.
 
 **Panels.** Use a lightly tinted frame/header, a white/card content surface and
 consistent 16px insets. A simple title/action header is approximately 52px high.

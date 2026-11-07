@@ -140,13 +140,13 @@ function EmployeeCompensationDialog({
           <DialogFooter>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               disabled={pending}
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={pending}>
+            <Button variant="primary" type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save rate"}
             </Button>
           </DialogFooter>

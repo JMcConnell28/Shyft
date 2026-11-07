@@ -47,9 +47,9 @@ function CompanyEmployeeRotaNotesCard({
     >
       <div className="flex justify-end py-3">
         <Button
+          variant="primary"
           type="button"
           size="sm"
-          className="h-8 rounded-lg px-3 text-xs font-semibold"
           disabled={pending}
           onClick={() => {
             setEditingNote(null)
@@ -139,8 +139,7 @@ function RotaNoteItem({
           <Button
             type="button"
             size="icon"
-            variant="outline"
-            className="size-8 rounded-lg"
+            variant="secondary"
             disabled={pending}
             onClick={onEdit}
             aria-label="Edit rota note"
@@ -150,8 +149,7 @@ function RotaNoteItem({
           <Button
             type="button"
             size="sm"
-            variant="outline"
-            className="h-8 rounded-lg px-3 text-xs font-extrabold"
+            variant="secondary"
             disabled={pending}
             onClick={() => void onArchive()}
           >

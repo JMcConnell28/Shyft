@@ -111,7 +111,7 @@ function ShiftSwapComposer({
         </Field>
         <div className="grid gap-2 sm:flex lg:col-span-3 xl:col-span-1 xl:justify-end">
           <Button
-            className="h-10 rounded-xl font-semibold"
+            variant="primary"
             disabled={!selectedOwnShiftId || !selectedSwapShiftId || isCreating}
             onClick={() =>
               onCreateSwap(selectedOwnShiftId, selectedSwapShiftId)
@@ -121,8 +121,7 @@ function ShiftSwapComposer({
             Request swap
           </Button>
           <Button
-            variant="outline"
-            className="h-10 rounded-xl border-[#dfe5f0] bg-white font-semibold text-[#11245a] shadow-none hover:bg-[#fbfcff]"
+            variant="secondary"
             disabled={!selectedOwnShiftId || isCreating}
             onClick={() => onCreateCover(selectedOwnShiftId)}
           >

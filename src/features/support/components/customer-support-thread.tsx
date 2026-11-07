@@ -164,8 +164,8 @@ function CustomerSupportThread({
                     </p>
                   ) : null}
                   <Button
+                    variant="primary"
                     type="submit"
-                    className="h-10 rounded-lg bg-[#0867f2] px-4 font-semibold text-white hover:bg-[#075edc]"
                     disabled={
                       form.state.isSubmitting || replyMutation.isPending
                     }

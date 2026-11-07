@@ -119,12 +119,10 @@ function HoldToConfirmButton({
 
   return (
     <Button
+      variant="primary"
       type="button"
       size="lg"
-      className={cn(
-        "relative touch-none overflow-hidden rounded-2xl text-base",
-        className
-      )}
+      className={cn("relative touch-none overflow-hidden", className)}
       disabled={disabled || isPending}
       aria-label={label}
       onBlur={cancel}

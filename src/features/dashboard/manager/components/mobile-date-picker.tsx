@@ -44,8 +44,8 @@ function DashboardMobileDatePicker({
         <PopoverTrigger
           render={
             <Button
-              variant="outline"
-              className="h-11 w-full justify-start gap-2 rounded-lg bg-card px-3 text-sm font-medium shadow-none"
+              variant="secondary"
+              className={"w-full justify-start"}
               aria-label={`Staffing date: ${format(selectedDate, "EEEE d MMMM yyyy")}`}
             />
           }
@@ -87,23 +87,17 @@ function DashboardMobileDatePicker({
           </Suspense>
           <div className="flex items-center justify-between border-t border-border p-2">
             <Button
-              variant="ghost"
-              className="size-11 rounded-lg"
+              variant="secondary"
               aria-label="Previous day"
               onClick={() => selectDate(moveDashboardDate(date, -1))}
             >
               <ChevronLeftIcon />
             </Button>
-            <Button
-              variant="ghost"
-              className="h-11 rounded-lg px-4"
-              onClick={() => selectDate()}
-            >
+            <Button variant="secondary" onClick={() => selectDate()}>
               Today
             </Button>
             <Button
-              variant="ghost"
-              className="size-11 rounded-lg"
+              variant="secondary"
               aria-label="Next day"
               onClick={() => selectDate(moveDashboardDate(date, 1))}
             >

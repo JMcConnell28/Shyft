@@ -48,9 +48,7 @@ function DeleteZoneDialog({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger
         disabled={disabled}
-        render={
-          <Button type="button" variant="pill" size="sm" className="gap-2" />
-        }
+        render={<Button type="button" variant="secondary" size="sm" />}
       >
         <ArchiveIcon className="size-3.5" />
         Archive

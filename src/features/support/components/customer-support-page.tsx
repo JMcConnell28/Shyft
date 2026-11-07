@@ -37,8 +37,9 @@ function CustomerSupportPage({
             </p>
           </div>
           <Button
+            variant="primary"
             type="button"
-            className="h-10 w-full rounded-lg bg-[#0867f2] px-4 font-semibold text-white hover:bg-[#075edc] sm:w-auto"
+            className={"w-full sm:w-auto"}
             onClick={() => setIsCreating(true)}
           >
             <PlusIcon className="size-4" />
@@ -72,8 +73,7 @@ function CustomerSupportPage({
             </section>
             <div className="flex items-center justify-between gap-3 text-xs font-medium text-[#61709a]">
               <Button
-                variant="outline"
-                className="h-9 rounded-lg border-[#dfe5f0] bg-white text-[#10204b]"
+                variant="secondary"
                 disabled={page === 0 || threads.isFetching}
                 onClick={() => setPage(page - 1)}
               >
@@ -81,8 +81,7 @@ function CustomerSupportPage({
               </Button>
               <span>Page {page + 1}</span>
               <Button
-                variant="outline"
-                className="h-9 rounded-lg border-[#dfe5f0] bg-white text-[#10204b]"
+                variant="secondary"
                 disabled={!threads.data.hasMore || threads.isFetching}
                 onClick={() => setPage(page + 1)}
               >

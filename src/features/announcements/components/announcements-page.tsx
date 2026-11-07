@@ -122,8 +122,8 @@ function AnnouncementsPage({
         {data.canViewArchived ? (
           <Button
             type="button"
-            variant="outline"
-            className="h-10 w-full self-center rounded-lg border-[#dfe5f0] bg-white px-4 text-xs font-semibold text-[#0968f5] hover:bg-[#f8faff] sm:w-auto"
+            variant="secondary"
+            className={"w-full self-center sm:w-auto"}
             onClick={() => setIncludeArchived((current) => !current)}
           >
             {includeArchived ? "Hide archived" : "Include archived"}

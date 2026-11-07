@@ -86,7 +86,6 @@ function BillingSubscriptionSection({
         <div className="flex shrink-0 flex-wrap gap-2">
           {canStartCheckout ? (
             <CheckoutButton
-              className="h-8 rounded-lg px-3 text-[11px] font-bold"
               locationId={locationId}
               organizationId={organizationId}
             >
@@ -95,7 +94,6 @@ function BillingSubscriptionSection({
           ) : null}
           {canOpenPortal ? (
             <BillingPortalButton
-              className="h-8 rounded-lg px-3 text-[11px] font-bold"
               locationId={locationId}
               organizationId={organizationId}
             />

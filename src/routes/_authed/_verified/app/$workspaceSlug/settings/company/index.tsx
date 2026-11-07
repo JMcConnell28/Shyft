@@ -43,8 +43,8 @@ function WorkspaceCompanySettingsIndexRoute() {
         <Button
           nativeButton={false}
           role="link"
-          variant="outline"
-          className="mb-4"
+          variant="secondary"
+          className={"mb-4"}
           render={
             <Link
               to="/app/$workspaceSlug/settings/company/join-requests"

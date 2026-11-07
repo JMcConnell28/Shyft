@@ -18,7 +18,8 @@ function ShiftSwapDisabledState({ dashboardHref }: { dashboardHref: string }) {
           manager if you need to change a shift.
         </p>
         <Button
-          className="mt-6 h-10 rounded-xl px-4 font-semibold"
+          variant="primary"
+          className={"mt-6"}
           nativeButton={false}
           render={<Link to={dashboardHref} />}
         >

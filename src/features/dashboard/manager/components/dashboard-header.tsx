@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { dashboardButtonClass } from "../constants"
+
 import { DashboardCreateRotaButton } from "./create-rota-button"
 import { ManagerDashboardFilters } from "./dashboard-filters"
 import type { ManagerDashboardAccess, ManagerDayData } from "../types"
@@ -32,8 +32,7 @@ function ManagerDashboardHeader({
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <Button
             nativeButton={false}
-            variant="outline"
-            className={dashboardButtonClass}
+            variant="secondary"
             render={
               <Link
                 to="/app/$workspaceSlug/rota"
@@ -47,8 +46,7 @@ function ManagerDashboardHeader({
           {data.location.attendanceEnabled ? (
             <Button
               nativeButton={false}
-              variant="outline"
-              className={dashboardButtonClass}
+              variant="secondary"
               render={
                 <Link
                   to="/app/$workspaceSlug/time-clock"

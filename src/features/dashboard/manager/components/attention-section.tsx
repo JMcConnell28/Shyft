@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
-import { dashboardCompactButtonClass } from "../constants"
+
 import { formatAttentionDate } from "../utils/date"
 import type { AttentionItem, AttentionPage } from "../types"
 import { Button } from "@/components/ui/button"
@@ -57,7 +57,7 @@ function ManagerAttentionSection({
         {error ? (
           <div role="alert" className="px-4 py-3 text-sm text-muted-foreground">
             Could not refresh outstanding items.{" "}
-            <Button variant="link" onClick={onRetry}>
+            <Button variant="secondary" onClick={onRetry}>
               Retry
             </Button>
           </div>
@@ -88,8 +88,8 @@ function ManagerAttentionSection({
                 {item.kind === "swap" || item.kind === "cover" ? (
                   <Button
                     nativeButton={false}
-                    variant="outline"
-                    className={`${dashboardCompactButtonClass} shrink-0`}
+                    variant="secondary"
+                    className={`shrink-0`}
                     render={
                       <Link
                         to="/app/$workspaceSlug/shift-swaps"
@@ -101,8 +101,8 @@ function ManagerAttentionSection({
                   </Button>
                 ) : (
                   <Button
-                    variant="outline"
-                    className={`${dashboardCompactButtonClass} shrink-0`}
+                    variant="secondary"
+                    className={`shrink-0`}
                     onClick={() => onReview(item)}
                   >
                     {item.kind === "arrival" ? "Resolve" : "Review"}
@@ -144,8 +144,7 @@ function AttentionPager({
   return (
     <div className="flex items-center justify-between gap-2 border-t border-border/60 px-4 py-2 text-xs text-muted-foreground">
       <Button
-        variant="ghost"
-        className={dashboardCompactButtonClass}
+        variant="secondary"
         aria-label="Newer attention item"
         disabled={data.page === 1 || pending}
         onClick={() => onPage(data.page - 1)}
@@ -157,8 +156,7 @@ function AttentionPager({
         {data.page} of {data.total}
       </span>
       <Button
-        variant="ghost"
-        className={dashboardCompactButtonClass}
+        variant="secondary"
         aria-label="Older attention item"
         disabled={data.page * data.pageSize >= data.total || pending}
         onClick={() => onPage(data.page + 1)}

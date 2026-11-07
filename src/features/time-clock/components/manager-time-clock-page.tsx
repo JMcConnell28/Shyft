@@ -74,8 +74,8 @@ function ManagerTimeClockPage({
         >
           <p>Could not refresh attendance. Showing the last loaded data.</p>
           <Button
-            className="mt-3"
-            variant="outline"
+            className={"mt-3"}
+            variant="secondary"
             disabled={query.isFetching}
             onClick={() => void query.refetch()}
           >
