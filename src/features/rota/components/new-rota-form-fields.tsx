@@ -32,7 +32,6 @@ function NewRotaFormFields({ model }: { model: NewRotaForm }) {
             <DialogSelectRow
               id={field.name}
               icon={MapPinIcon}
-              iconTone="green"
               label="Location"
               value={field.state.value}
               options={locationOptions}
@@ -58,7 +57,6 @@ function NewRotaFormFields({ model }: { model: NewRotaForm }) {
             <DialogSelectRow
               id={field.name}
               icon={CalendarDaysIcon}
-              iconTone="blue"
               label="Week"
               value={field.state.value}
               options={weekSelectOptions}

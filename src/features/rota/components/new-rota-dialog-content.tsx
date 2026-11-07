@@ -41,22 +41,12 @@ function NewRotaDialogContent(props: NewRotaDialogContentProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-2.5 bg-white px-6 pt-1 pb-6 sm:border-t sm:border-[#dfe5f0] sm:bg-[#fbfcff] sm:px-7 sm:py-4">
-          <DialogClose
-            render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="default"
-                className="h-11 rounded-xl border border-[#b9c6da] bg-white text-sm font-semibold text-[#0765e8] hover:bg-[#f7f9fc]"
-              />
-            }
-          >
+          <DialogClose render={<Button type="button" variant="secondary" />}>
             Cancel
           </DialogClose>
           <Button
             type="submit"
-            size="default"
-            className="h-11 gap-2 rounded-xl bg-[#0868f7] text-sm font-semibold text-white shadow-[0_8px_18px_rgba(8,104,247,0.2)] hover:bg-[#005de2]"
+            variant="primary"
             disabled={isSubmitting || isPreviewPending}
           >
             <PrimaryIcon className="size-4" />

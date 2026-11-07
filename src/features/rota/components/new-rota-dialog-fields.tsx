@@ -1,6 +1,6 @@
-import { ChevronDownIcon } from "lucide-react"
+import { rotaListSelectClassName } from "../constants/rota-list-styles"
 import type { ComponentType } from "react"
-
+import { buttonVariants } from "@/components/ui/button"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import {
   Select,
@@ -11,27 +11,14 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
-type DialogSelectOption = {
-  label: string
-  value: string
-}
-
+type DialogSelectOption = { label: string; value: string }
 type DialogSelectRowProps = {
   disabled?: boolean
   error?: string
-  icon: ComponentType<{ className?: string }>
-  iconTone: "green" | "blue"
+  icon?: ComponentType<{ className?: string }>
   id: string
   label: string
   options: Array<DialogSelectOption>
-  value: string
-  onBlur: () => void
-  onChange: (value: string) => void
-}
-
-type TemplateSelectProps = {
-  error?: string
-  templates: Array<{ id: string; name: string }>
   value: string
   onBlur: () => void
   onChange: (value: string) => void
@@ -41,7 +28,6 @@ function DialogSelectRow({
   disabled = false,
   error,
   icon: Icon,
-  iconTone,
   id,
   label,
   options,
@@ -51,170 +37,89 @@ function DialogSelectRow({
 }: DialogSelectRowProps) {
   const selectedLabel =
     options.find((option) => option.value === value)?.label ?? ""
-
   return (
-    <div className="block">
-      <div className="relative flex min-h-16 items-center gap-3 rounded-xl border border-[#d7e0ed] bg-white px-3 py-2 shadow-[0_3px_12px_rgba(30,50,96,0.035)] sm:min-h-12 sm:gap-2.5 sm:rounded-[10px] sm:bg-[#fbfcff]">
-        <span
-          className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-xl sm:size-8 sm:rounded-[9px]",
-            "bg-[#edf3ff] text-[#0868f7]",
-            iconTone === "green" && "sm:bg-[#e1f8eb] sm:text-[#00a84f]"
-          )}
+    <div className="min-w-0">
+      <div className="relative sm:hidden">
+        {Icon && (
+          <Icon className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+        )}
+        <NativeSelect
+          id={id}
+          name={id}
+          aria-label={label}
+          aria-invalid={Boolean(error)}
+          value={value}
+          disabled={disabled}
+          onBlur={onBlur}
+          onChange={(event) => onChange(event.target.value)}
+          className={cn(rotaListSelectClassName, Icon && "[&_select]:pl-9")}
         >
-          <Icon className="size-5 sm:size-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <label
-            htmlFor={id}
-            className="sr-only sm:block sm:text-[11px] sm:leading-none sm:font-semibold sm:text-[#7a86a4]"
-          >
-            {label}
-          </label>
-          <NativeSelect
-            id={id}
-            name={id}
-            value={value}
-            disabled={disabled}
-            onBlur={onBlur}
-            onChange={(event) => onChange(event.target.value)}
-            className="w-full sm:hidden [&_[data-slot=native-select-icon]]:hidden [&_select]:h-auto [&_select]:border-0 [&_select]:bg-transparent [&_select]:p-0 [&_select]:pr-6 [&_select]:text-[16px] [&_select]:font-semibold [&_select]:text-[#10285c] [&_select]:shadow-none"
-          >
-            {options.map((option) => (
-              <NativeSelectOption key={option.value} value={option.value}>
-                {option.label}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-
-          <Select
-            disabled={disabled}
-            value={value}
-            onValueChange={(nextValue) => {
-              if (typeof nextValue === "string") {
-                onChange(nextValue)
-              }
-            }}
-          >
-            <SelectTrigger
-              id={`${id}-desktop`}
-              onBlur={onBlur}
-              className="mt-1 hidden h-auto w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 pr-6 text-[13px] font-bold text-[#11245a] shadow-none hover:bg-transparent focus-visible:border-0 focus-visible:ring-0 sm:flex [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate [&_[data-slot=select-value]]:overflow-hidden [&_[data-slot=select-value]]:text-[13px] [&_[data-slot=select-value]]:leading-tight [&_[data-slot=select-value]]:font-bold [&_[data-slot=select-value]]:text-ellipsis [&_[data-slot=select-value]]:whitespace-nowrap [&_[data-slot=select-value]]:text-[#11245a] [&>svg]:hidden"
-            >
-              <SelectValue>{selectedLabel}</SelectValue>
-            </SelectTrigger>
-            <SelectContent
-              align="start"
-              alignItemWithTrigger
-              className="max-h-64 rounded-[12px] border border-[#dfe5f0] bg-white p-1.5 shadow-[0_18px_45px_rgba(15,23,42,0.16)] ring-0"
-            >
-              {options.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value}
-                  className="min-h-8 cursor-pointer rounded-[8px] px-2.5 py-1.5 text-xs font-semibold text-[#11245a] outline-none focus:bg-[#eef4ff] focus:text-[#11245a] data-[selected]:bg-[#eef4ff] data-[selected]:text-[#0069ff] [&_svg]:text-[#0069ff]"
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-[#7a86a4]" />
+          {options.map((option) => (
+            <NativeSelectOption key={option.value} value={option.value}>
+              {option.label}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
       </div>
-      <FieldErrorMessage message={error} />
-    </div>
-  )
-}
-
-function TemplateSelect({
-  error,
-  templates,
-  value,
-  onBlur,
-  onChange,
-}: TemplateSelectProps) {
-  const options = [
-    {
-      value: "",
-      label: "Choose a template",
-    },
-    ...templates.map((template) => ({
-      value: template.id,
-      label: template.name,
-    })),
-  ]
-  const selectedLabel =
-    options.find((option) => option.value === value)?.label ??
-    "Choose a template"
-
-  return (
-    <div className="block">
-      <label
-        htmlFor="new-rota-template"
-        className="mb-1.5 block text-xs font-semibold text-[#7a86a4]"
-      >
-        Template
-      </label>
-      <NativeSelect
-        id="new-rota-template"
-        value={value}
-        onBlur={onBlur}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full sm:hidden [&_select]:h-11 [&_select]:rounded-xl [&_select]:border-[#d7e0ed] [&_select]:bg-white [&_select]:px-3 [&_select]:text-sm [&_select]:font-semibold [&_select]:text-[#10285c] [&_select]:shadow-none"
-      >
-        {options.map((option) => (
-          <NativeSelectOption key={option.value} value={option.value}>
-            {option.label}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
-
       <Select
+        disabled={disabled}
         value={value}
-        onValueChange={(nextValue) => {
-          if (typeof nextValue === "string") {
-            onChange(nextValue)
-          }
+        onValueChange={(next) => {
+          if (typeof next === "string") onChange(next)
         }}
       >
         <SelectTrigger
-          id="new-rota-template-desktop"
+          id={id + "-desktop"}
+          aria-label={label}
+          aria-invalid={Boolean(error)}
           onBlur={onBlur}
-          className="hidden h-10 w-full cursor-pointer rounded-[10px] border border-[#dfe5f0] bg-[#fbfcff] px-3 text-[13px] font-bold text-[#11245a] shadow-[0_5px_16px_rgba(30,50,96,0.045)] hover:bg-white focus-visible:border-[#b8c3d9] focus-visible:ring-2 focus-visible:ring-[#0069ff]/10 sm:flex [&_[data-slot=select-value]]:font-bold [&_[data-slot=select-value]]:text-[#11245a]"
+          className={cn(
+            buttonVariants({ variant: "secondary" }),
+            "hidden w-full min-w-0 sm:flex"
+          )}
         >
-          <SelectValue>{selectedLabel}</SelectValue>
+          {Icon && <Icon className="size-4 shrink-0 text-muted-foreground" />}
+          <SelectValue className="min-w-0 flex-1 truncate text-left">
+            {selectedLabel}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent
           align="start"
-          alignItemWithTrigger
-          className="max-h-64 rounded-[12px] border border-[#dfe5f0] bg-white p-1.5 shadow-[0_18px_45px_rgba(15,23,42,0.16)] ring-0"
+          alignItemWithTrigger={false}
+          className="max-h-64"
         >
           {options.map((option) => (
-            <SelectItem
-              key={option.value}
-              value={option.value}
-              className="min-h-8 cursor-pointer rounded-[8px] px-2.5 py-1.5 text-xs font-semibold text-[#11245a] outline-none focus:bg-[#eef4ff] focus:text-[#11245a] data-[selected]:bg-[#eef4ff] data-[selected]:text-[#0069ff] [&_svg]:text-[#0069ff]"
-            >
+            <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <FieldErrorMessage message={error} />
+      {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
     </div>
   )
 }
 
-function FieldErrorMessage({ message }: { message?: string }) {
-  if (!message) {
-    return null
-  }
-
+function TemplateSelect({
+  templates,
+  ...props
+}: Omit<
+  DialogSelectRowProps,
+  "id" | "label" | "options" | "icon" | "disabled"
+> & { templates: Array<{ id: string; name: string }> }) {
   return (
-    <p className="mt-1.5 px-1 text-xs font-medium text-destructive">
-      {message}
-    </p>
+    <DialogSelectRow
+      {...props}
+      id="new-rota-template"
+      label="Template"
+      options={[
+        { value: "", label: "Choose a template" },
+        ...templates.map((template) => ({
+          value: template.id,
+          label: template.name,
+        })),
+      ]}
+    />
   )
 }
 

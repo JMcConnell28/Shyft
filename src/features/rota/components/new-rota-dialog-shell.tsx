@@ -20,9 +20,9 @@ function NewRotaDialogShell({ children }: { children: ReactNode }) {
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             size="icon"
-            className="absolute top-5 right-5 size-9 rounded-full bg-[#f3f5f9] text-[#10285c] hover:bg-[#e9edf4]"
+            className="absolute top-5 right-5"
           />
         }
       >

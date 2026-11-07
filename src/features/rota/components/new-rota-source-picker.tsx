@@ -85,18 +85,6 @@ function NewRotaSourcePicker({
                 isDisabled && "cursor-not-allowed opacity-45"
               )}
             >
-              <span
-                className={cn(
-                  "flex size-5 shrink-0 items-center justify-center rounded-full border-2",
-                  isSelected
-                    ? "border-[#0868f7] bg-[#0868f7]"
-                    : "border-[#71809b] bg-white"
-                )}
-              >
-                {isSelected ? (
-                  <span className="size-2 rounded-full bg-white" />
-                ) : null}
-              </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm leading-tight font-semibold sm:text-xs sm:font-bold">
                   {option.title}
