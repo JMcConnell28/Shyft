@@ -13,7 +13,7 @@ function ManagerTeamFilters({
   attendanceEnabled: boolean
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 border-t border-border/70 bg-muted/15 px-4 py-3 sm:px-5 @2xl/team:flex @2xl/team:flex-wrap">
+    <div className="grid grid-cols-2 gap-2 p-4 @2xl/team:flex @2xl/team:flex-wrap">
       <div className="relative col-span-2 min-w-0 @2xl/team:min-w-40 @2xl/team:flex-1">
         <SearchIcon
           aria-hidden="true"
@@ -22,7 +22,7 @@ function ManagerTeamFilters({
         <Input
           aria-label="Search employees"
           placeholder="Search employees…"
-          className="h-11 min-w-0 rounded-lg bg-card pl-9 text-base shadow-none md:h-9 md:text-sm"
+          className="h-11 min-w-0 rounded-lg bg-card pl-9 text-base shadow-none md:h-8 md:text-sm"
           value={filters.search}
           onChange={(event) => filters.setSearch(event.target.value)}
         />

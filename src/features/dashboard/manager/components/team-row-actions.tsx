@@ -28,7 +28,7 @@ function DashboardTeamRowActions({
           <Button
             variant="ghost"
             size="icon"
-            className="size-11 rounded-lg sm:size-9"
+            className="size-11 rounded-lg md:size-8"
             aria-label={`Actions for ${row.employeeName}`}
           />
         }

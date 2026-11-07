@@ -42,6 +42,8 @@ All code must follow best practices for these tools.
 
 Use `$rocketrota-ui` by default for RocketRota UI implementation, redesign, and UX polish. Read [the project skill](.agents/skills/rocketrota-ui/SKILL.md) before planning or editing the affected interface.
 
+For dashboard content work, also read [DESIGN.md](DESIGN.md) and its [reference study](docs/design/dashboard-reference-study.md). They define the approved target for dashboard layout, controls, cards, typography and spacing. Preserve the existing sidebar; existing dashboard code is an implementation inventory, not proof that this design target is already met.
+
 ---
 
 ## Core Principles

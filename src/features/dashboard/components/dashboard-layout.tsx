@@ -17,14 +17,17 @@ function DashboardLayout({ className, ...props }: ComponentProps<"div">) {
 function DashboardPanel({
   children,
   className,
+  variant = "default",
   ...props
-}: ComponentProps<"section">) {
+}: ComponentProps<"section"> & { variant?: "default" | "framed" }) {
   return (
     <section
       className={cn(
-        "min-w-0 rounded-xl border border-border bg-card text-card-foreground",
+        "group/dashboard-panel min-w-0 rounded-xl border border-border bg-card text-card-foreground",
+        variant === "framed" && "rounded-[14px] bg-muted/30",
         className
       )}
+      data-variant={variant}
       {...props}
     >
       {children}
@@ -47,13 +50,14 @@ function DashboardPanelHeader({
     <div
       className={cn(
         "flex min-h-12 items-center justify-between gap-3 px-3.5 sm:px-4",
-        description && "min-h-16 px-4 py-4 sm:px-5"
+        description && "min-h-16 px-4 py-4 sm:px-5",
+        "group-data-[variant=framed]/dashboard-panel:min-h-13 group-data-[variant=framed]/dashboard-panel:px-4 group-data-[variant=framed]/dashboard-panel:py-2.5"
       )}
     >
       <div className="min-w-0">
         <h2
           id={headingId}
-          className="min-w-0 text-sm font-semibold tracking-tight sm:text-[15px]"
+          className="min-w-0 text-sm font-semibold tracking-tight group-data-[variant=framed]/dashboard-panel:text-sm group-data-[variant=framed]/dashboard-panel:leading-5 group-data-[variant=framed]/dashboard-panel:tracking-normal sm:text-[15px]"
         >
           {title}
         </h2>
@@ -65,6 +69,18 @@ function DashboardPanelHeader({
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>
+  )
+}
+
+function DashboardPanelContent({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      className={cn(
+        "min-w-0 rounded-b-[13px] border-t border-border/60 bg-card",
+        className
+      )}
+      {...props}
+    />
   )
 }
 
@@ -91,5 +107,6 @@ export {
   DashboardEmptyState,
   DashboardLayout,
   DashboardPanel,
+  DashboardPanelContent,
   DashboardPanelHeader,
 }

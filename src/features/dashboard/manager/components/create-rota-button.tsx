@@ -1,4 +1,5 @@
 import { getDashboardWeekStart } from "../utils/date"
+import { dashboardButtonClass } from "../constants"
 import type { DashboardLocation, ManagerDashboardAccess } from "../types"
 import { getDateKeyInTimeZone } from "@/lib/time-zone"
 import { NewRotaDialog } from "@/features/rota/components/new-rota-dialog"
@@ -24,7 +25,7 @@ function DashboardCreateRotaButton({
         getDateKeyInTimeZone(new Date(), location.timeZone)
       )}
       triggerLabel="Create rota"
-      triggerClassName="h-11 gap-1.5 rounded-lg bg-primary px-2.5 text-xs text-primary-foreground shadow-none hover:bg-primary/90 hover:text-primary-foreground sm:px-3 sm:text-sm md:h-9 [&_svg]:size-4"
+      triggerClassName={`${dashboardButtonClass} bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground`}
     />
   )
 }

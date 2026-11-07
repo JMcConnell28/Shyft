@@ -1,5 +1,5 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
-import { dashboardSelectClass } from "../constants"
+import { dashboardButtonClass, dashboardSelectClass } from "../constants"
 import { moveDashboardDate } from "../utils/date"
 import { DashboardMobileDatePicker } from "./mobile-date-picker"
 import { DashboardSelect } from "./dashboard-select"
@@ -23,10 +23,10 @@ function ManagerDashboardFilters({
   onDate: (date?: string) => void
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-3 sm:flex sm:flex-wrap sm:items-center">
+    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
       <DashboardSelect
         label="Location"
-        containerClassName="sm:min-w-48 sm:max-w-72 sm:flex-1 sm:mr-auto"
+        containerClassName="sm:w-52 sm:max-w-72"
         className="truncate"
         value={locationId}
         onChange={(event) => onLocation(event.target.value)}
@@ -42,11 +42,11 @@ function ManagerDashboardFilters({
         isToday={isToday}
         onDate={onDate}
       />
-      <div className="hidden items-center gap-1 sm:flex">
+      <div className="hidden items-center gap-2 sm:flex">
         <Button
           aria-label="Previous day"
           variant="outline"
-          className="size-11 rounded-lg shadow-none md:size-9"
+          className="size-11 rounded-lg bg-card shadow-none md:size-8"
           onClick={() => onDate(moveDashboardDate(date, -1))}
         >
           <ChevronLeftIcon />
@@ -66,7 +66,7 @@ function ManagerDashboardFilters({
         <Button
           aria-label="Next day"
           variant="outline"
-          className="size-11 rounded-lg shadow-none md:size-9"
+          className="size-11 rounded-lg bg-card shadow-none md:size-8"
           onClick={() => onDate(moveDashboardDate(date, 1))}
         >
           <ChevronRightIcon />
@@ -74,7 +74,7 @@ function ManagerDashboardFilters({
       </div>
       <Button
         variant={isToday ? "secondary" : "outline"}
-        className="hidden h-11 rounded-lg shadow-none sm:inline-flex md:h-9"
+        className={`${dashboardButtonClass} hidden sm:inline-flex`}
         onClick={() => onDate(undefined)}
       >
         Today

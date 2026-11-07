@@ -53,8 +53,16 @@ order and narrow-screen layout show the team, outstanding attention items, then
 rota planning. At wide widths, the team occupies the main column with attention
 and planning alongside it.
 
-Team, attention and planning panels reuse `DashboardPanelHeader` with an optional
-description to identify location or scope. Summary values have visible scope
-labels; team statuses retain text labels alongside their colour treatment.
-These refinements preserve the existing Manrope typography, RocketRota blue and
-semantic surface tokens rather than introducing a separate visual system.
+Dashboard content follows the root `DESIGN.md` and its reference study. Team,
+attention and planning reuse the shared `DashboardPanel` framed variant,
+`DashboardPanelHeader` and `DashboardPanelContent`: lightly tinted 52px headers,
+card-coloured bodies, 16px insets and a fine edge. Other dashboard consumers keep
+the default panel treatment. Manager controls share 32px desktop sizing and 44px
+phone hit areas; tertiary panel actions use 28px desktop sizing.
+
+Three summary cards use real counts and compact phone layouts. Location and date
+controls establish staffing scope; attention explicitly spans all locations and
+dates. The staffing table shares its column tracks and 16px insets between header
+and rows, with a compact layout below its container breakpoint. Neutral employee
+initials leave colour for actions and text-labelled statuses. Attention paging,
+permission checks, data loading and mutation boundaries remain unchanged.

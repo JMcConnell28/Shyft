@@ -19,7 +19,7 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
     <div
       role="row"
       className={cn(
-        "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center gap-x-2 gap-y-1 border-t border-border/70 px-4 py-4 transition-colors hover:bg-muted/25 sm:px-5 @2xl/team:min-h-18 @2xl/team:gap-3 @2xl/team:py-3",
+        "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center gap-x-2 gap-y-1 border-t border-border/60 px-4 py-4 transition-colors last:rounded-b-[13px] hover:bg-muted/25 @2xl/team:min-h-16 @2xl/team:gap-3 @2xl/team:py-3",
         location.attendanceEnabled
           ? dashboardTeamColumns.attendance
           : dashboardTeamColumns.published
@@ -30,13 +30,14 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
           name={row.employeeName}
           secondary={row.zone}
           size="compact"
+          tone="neutral"
         />
       </div>
       <div
         role="cell"
         className="col-start-1 row-start-2 text-sm @2xl/team:col-auto @2xl/team:row-auto"
       >
-        <p className="text-xs font-medium text-foreground tabular-nums sm:text-sm">
+        <p className="text-sm font-medium text-foreground tabular-nums">
           {row.startsAt && row.endsAt
             ? `${time(row.startsAt)} – ${time(row.endsAt)}`
             : "Unscheduled"}
@@ -59,7 +60,7 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
       {location.attendanceEnabled ? (
         <div
           role="cell"
-          className="col-start-1 row-start-3 text-xs @2xl/team:col-auto @2xl/team:row-auto"
+          className="col-start-1 row-start-3 text-sm @2xl/team:col-auto @2xl/team:row-auto"
         >
           <p className="text-muted-foreground tabular-nums">
             {row.clockedInAt ? (

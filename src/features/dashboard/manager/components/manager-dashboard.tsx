@@ -87,7 +87,7 @@ function ManagerDashboard({
   }
   const data = day.data ?? placeholder
   return (
-    <DashboardLayout className="max-w-[1440px] gap-5 sm:gap-6 sm:pt-7">
+    <DashboardLayout className="max-w-[1440px] gap-4 sm:gap-6 sm:pt-6">
       <ManagerDashboardHeader
         access={access.data}
         data={data}
@@ -122,7 +122,7 @@ function ManagerDashboard({
           onRetry={() => void day.refetch()}
         />
       ) : null}
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.42fr)] xl:grid-rows-[auto_1fr]">
+      <div className="grid items-start gap-4 sm:gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] xl:grid-rows-[auto_1fr]">
         <div className="min-w-0 xl:col-start-1 xl:row-span-2 xl:row-start-1">
           {day.isPending ? (
             <ManagerDashboardLoading />

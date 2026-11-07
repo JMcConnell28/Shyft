@@ -68,7 +68,7 @@ function DashboardMobileDatePicker({
             fallback={
               <div
                 role="status"
-                className="flex h-80 w-69 items-center justify-center text-xs text-[#7481a0] min-[360px]:w-76"
+                className="flex h-80 w-69 items-center justify-center text-sm text-muted-foreground min-[360px]:w-76"
               >
                 Loading calendar…
               </div>
@@ -85,7 +85,7 @@ function DashboardMobileDatePicker({
               onSelect={(value) => selectDate(format(value, "yyyy-MM-dd"))}
             />
           </Suspense>
-          <div className="flex items-center justify-between border-t border-[#edf0f6] p-2">
+          <div className="flex items-center justify-between border-t border-border p-2">
             <Button
               variant="ghost"
               className="size-11 rounded-lg"
