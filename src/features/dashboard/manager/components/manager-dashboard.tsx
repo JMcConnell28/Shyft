@@ -7,10 +7,8 @@ import { ManagerTeamSection } from "./team-section"
 import { ManagerAttentionSection } from "./attention-section"
 import { ManagerComingUp } from "./coming-up"
 import { ManagerDashboardDialogs } from "./dashboard-dialogs"
-import {
-  ManagerDashboardError,
-  ManagerDashboardLoading,
-} from "./dashboard-state"
+import { ManagerDashboardLoading } from "./dashboard-loading"
+import { ManagerDashboardError } from "./dashboard-state"
 import type { ManagerDayData } from "../types"
 import { getDateKeyInTimeZone } from "@/lib/time-zone"
 import { useContentReadyTiming } from "@/features/navigation/hooks/use-content-ready-timing"

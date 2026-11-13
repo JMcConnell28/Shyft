@@ -13,8 +13,8 @@ function ManagerTeamFilters({
   attendanceEnabled: boolean
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 p-4 @2xl/team:flex @2xl/team:flex-wrap">
-      <div className="relative col-span-2 min-w-0 @2xl/team:min-w-40 @2xl/team:flex-1">
+    <div className="grid gap-2 p-4 min-[360px]:grid-cols-2 @2xl/team:flex @2xl/team:flex-wrap">
+      <div className="relative min-w-0 min-[360px]:col-span-2 @2xl/team:min-w-40 @2xl/team:flex-1">
         <SearchIcon
           aria-hidden="true"
           className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground"
@@ -29,7 +29,9 @@ function ManagerTeamFilters({
       </div>
       <DashboardSelect
         label="Filter by zone"
-        containerClassName={!attendanceEnabled ? "col-span-2" : undefined}
+        containerClassName={
+          !attendanceEnabled ? "min-[360px]:col-span-2" : undefined
+        }
         value={filters.zone}
         onChange={(event) => filters.setZone(event.target.value)}
       >

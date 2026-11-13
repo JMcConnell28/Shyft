@@ -3,7 +3,7 @@ import type { DashboardView } from "@/features/dashboard/schemas/dashboard-searc
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const dashboardTabClassName =
-  "h-11 rounded-none px-3 text-sm font-medium text-muted-foreground after:bottom-0 after:bg-primary data-active:text-foreground md:h-10"
+  "h-auto min-h-11 min-w-0 flex-auto rounded-lg px-2.5 text-sm whitespace-normal text-muted-foreground data-active:bg-card data-active:shadow-xs sm:px-3 md:min-h-8 dark:data-active:border-border dark:data-active:bg-card"
 
 function DashboardViewTabs({
   canManage,
@@ -26,11 +26,10 @@ function DashboardViewTabs({
       }}
       className="min-w-0 flex-1 gap-0"
     >
-      <div className="border-b border-border px-4 sm:px-6">
+      <div className="px-4 pt-3 sm:px-6">
         <TabsList
           aria-label="Dashboard view"
-          variant="line"
-          className="max-w-full justify-start gap-2 p-0 group-data-horizontal/tabs:h-11 md:group-data-horizontal/tabs:h-10"
+          className="max-w-full rounded-xl p-1 group-data-horizontal/tabs:h-auto"
         >
           <TabsTrigger value="personal" className={dashboardTabClassName}>
             My dashboard

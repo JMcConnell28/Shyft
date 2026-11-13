@@ -54,12 +54,12 @@ rota planning. At wide widths, the team occupies the main column with attention
 and planning alongside it.
 
 Dashboard content follows the root `DESIGN.md` and its reference study. Team,
-attention and planning reuse the shared `DashboardPanel` framed variant,
-`DashboardPanelHeader` and `DashboardPanelContent`: lightly tinted 52px headers,
-card-coloured bodies, 16px insets and a fine edge. Other dashboard consumers keep
-the default panel treatment. Manager controls share 32px desktop sizing and 44px
-phone hit areas, including panel actions. Primary buttons use the rota Publish
-blue; secondary actions use the Notes treatment. Button labels are semibold.
+attention and planning share `ManagerDashboardCard`, which uses PanelUI's
+`Frame` band variant with a heading in the muted band and an inset card surface.
+The summary metrics use the same band variant with a button as the frame root.
+Manager controls use 32px desktop sizing and 44px phone hit areas. Primary
+buttons use the rota Publish blue; secondary actions use the Notes treatment.
+Button labels are semibold.
 
 Three summary cards use real counts and compact phone layouts. Location and date
 controls establish staffing scope; attention explicitly spans all locations and

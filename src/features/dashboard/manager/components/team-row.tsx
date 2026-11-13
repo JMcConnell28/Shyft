@@ -19,7 +19,7 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
     <div
       role="row"
       className={cn(
-        "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center gap-x-2 gap-y-1 border-t border-border/60 px-4 py-4 transition-colors last:rounded-b-[13px] hover:bg-muted/25 @2xl/team:min-h-16 @2xl/team:gap-3 @2xl/team:py-3",
+        "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center gap-x-2 gap-y-1 border-t border-border/60 px-4 py-4 transition-colors hover:bg-muted/25 @2xl/team:min-h-16 @2xl/team:gap-3 @2xl/team:py-3",
         location.attendanceEnabled
           ? dashboardTeamColumns.attendance
           : dashboardTeamColumns.published

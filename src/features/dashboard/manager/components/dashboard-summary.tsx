@@ -6,6 +6,7 @@ import {
 } from "lucide-react"
 import { getTeamSummary } from "../utils/team"
 import type { ManagerDayData } from "../types"
+import { Frame } from "@/components/panelui/frame"
 import { cn } from "@/lib/utils"
 
 function ManagerDashboardSummary({
@@ -63,21 +64,31 @@ function ManagerDashboardSummary({
     <div className="grid grid-cols-3 gap-2 sm:gap-6">
       {items.map(
         ({ label, value, action, context, icon: Icon, highlighted }) => (
-          <button
+          <Frame
             key={label}
-            type="button"
-            onClick={action}
+            variant="band"
+            render={<button type="button" onClick={action} />}
             aria-label={`${label}: ${value}, ${context}`}
-            className="group flex min-w-0 flex-col rounded-[14px] border border-border bg-muted/30 text-left transition-colors hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="min-w-0 cursor-pointer text-start transition-colors hover:bg-accent/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
           >
-            <span className="flex min-h-12 w-full items-center justify-between gap-2 px-3 py-2.5 text-xs font-medium sm:min-h-13 sm:px-4 sm:text-sm">
-              <span>{label}</span>
-              <Icon
-                aria-hidden="true"
-                className="hidden size-4 shrink-0 text-muted-foreground sm:block"
-              />
-            </span>
-            <span className="flex w-full flex-1 flex-col gap-1.5 rounded-b-[13px] border-t border-border/60 bg-card px-3 py-3 transition-colors group-hover:bg-card/80 sm:p-4">
+            <Frame.Header
+              render={<span />}
+              className="min-h-11 w-full group-data-[variant=band]/frame:px-1.5 group-data-[variant=band]/frame:py-1.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:group-data-[variant=band]/frame:px-4"
+            >
+              <span className="text-xs leading-4 font-semibold sm:text-sm">
+                {label}
+              </span>
+              <Frame.Action
+                render={<span />}
+                className="row-span-1 hidden sm:block"
+              >
+                <Icon aria-hidden="true" className="size-4" />
+              </Frame.Action>
+            </Frame.Header>
+            <Frame.Panel
+              render={<span />}
+              className="w-full flex-1 gap-1 px-2 py-2.5 transition-colors group-hover/frame:bg-muted/25 motion-reduce:transition-none sm:gap-1.5 sm:p-4"
+            >
               <span
                 className={cn(
                   "text-2xl leading-8 font-bold tracking-tight tabular-nums sm:text-3xl sm:leading-9",
@@ -94,8 +105,8 @@ function ManagerDashboardSummary({
               >
                 {context}
               </span>
-            </span>
-          </button>
+            </Frame.Panel>
+          </Frame>
         )
       )}
     </div>
