@@ -23,7 +23,7 @@ function ManagerDashboardFilters({
   onDate: (date?: string) => void
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+    <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
       <DashboardSelect
         label="Location"
         containerClassName="sm:w-52 sm:max-w-72"

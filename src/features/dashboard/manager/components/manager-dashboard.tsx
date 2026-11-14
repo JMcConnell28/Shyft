@@ -87,7 +87,7 @@ function ManagerDashboard({
   }
   const data = day.data ?? placeholder
   return (
-    <DashboardLayout className="max-w-[1440px] gap-4 sm:gap-6 sm:pt-6">
+    <DashboardLayout className="@container/manager max-w-[1440px] gap-4 sm:gap-6 sm:pt-6">
       <ManagerDashboardHeader
         access={access.data}
         data={data}
@@ -102,16 +102,6 @@ function ManagerDashboard({
           onSearch({ location: location.id, date })
         }}
       />
-      {day.data ? (
-        <ManagerDashboardSummary
-          data={day.data}
-          attentionTotal={attention.data?.total}
-          onScheduled={() => selectTeam("scheduled")}
-          onWorking={() => selectTeam("working")}
-          onAll={() => selectTeam("all")}
-          onAttention={() => scrollTo("dashboard-attention")}
-        />
-      ) : null}
       {day.isError ? (
         <ManagerDashboardError
           message={
@@ -122,8 +112,19 @@ function ManagerDashboard({
           onRetry={() => void day.refetch()}
         />
       ) : null}
-      <div className="grid items-start gap-4 sm:gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] xl:grid-rows-[auto_1fr]">
-        <div className="min-w-0 xl:col-start-1 xl:row-span-2 xl:row-start-1">
+      <div className="grid items-start gap-4 sm:gap-6 @min-[48rem]/manager:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)] @min-[62rem]/manager:grid-cols-[minmax(12rem,3fr)_minmax(0,7fr)_minmax(16rem,4.5fr)]">
+        {day.data ? (
+          <ManagerDashboardSummary
+            className="@min-[48rem]/manager:col-span-full @min-[62rem]/manager:col-span-1 @min-[62rem]/manager:grid-cols-1 @min-[62rem]/manager:gap-4"
+            data={day.data}
+            attentionTotal={attention.data?.total}
+            onScheduled={() => selectTeam("scheduled")}
+            onWorking={() => selectTeam("working")}
+            onAll={() => selectTeam("all")}
+            onAttention={() => scrollTo("dashboard-attention")}
+          />
+        ) : null}
+        <div className="min-w-0 @min-[62rem]/manager:col-start-2">
           {day.isPending ? (
             <ManagerDashboardLoading />
           ) : day.data ? (
@@ -139,27 +140,29 @@ function ManagerDashboard({
             />
           ) : null}
         </div>
-        <ManagerAttentionSection
-          data={attention.data}
-          error={attention.isError}
-          pending={attention.isFetching}
-          workspaceSlug={workspaceSlug}
-          onPage={setAttentionPage}
-          onReview={(item) =>
-            actions.setRequest({
-              kind: item.kind === "arrival" ? "arrival" : "review",
-              item,
-            })
-          }
-          onRetry={() => void attention.refetch()}
-        />
-        {day.data ? (
-          <ManagerComingUp
-            data={day.data}
-            access={access.data}
+        <div className="grid min-w-0 gap-4 sm:gap-6">
+          <ManagerAttentionSection
+            data={attention.data}
+            error={attention.isError}
+            pending={attention.isFetching}
             workspaceSlug={workspaceSlug}
+            onPage={setAttentionPage}
+            onReview={(item) =>
+              actions.setRequest({
+                kind: item.kind === "arrival" ? "arrival" : "review",
+                item,
+              })
+            }
+            onRetry={() => void attention.refetch()}
           />
-        ) : null}
+          {day.data ? (
+            <ManagerComingUp
+              data={day.data}
+              access={access.data}
+              workspaceSlug={workspaceSlug}
+            />
+          ) : null}
+        </div>
       </div>
       <ManagerDashboardDialogs
         actions={actions}

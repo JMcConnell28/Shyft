@@ -44,7 +44,7 @@ function ManagerTeamSection({
           <div
             role="row"
             className={cn(
-              "sr-only @2xl/team:not-sr-only @2xl/team:grid @2xl/team:min-h-10 @2xl/team:items-center @2xl/team:gap-3 @2xl/team:border-t @2xl/team:border-border/60 @2xl/team:bg-muted/20 @2xl/team:px-4 @2xl/team:py-2 @2xl/team:text-sm @2xl/team:font-medium @2xl/team:text-muted-foreground",
+              "sr-only @min-[39rem]/team:not-sr-only @min-[39rem]/team:grid @min-[39rem]/team:min-h-10 @min-[39rem]/team:items-center @min-[39rem]/team:gap-3 @min-[39rem]/team:border-t @min-[39rem]/team:border-border/60 @min-[39rem]/team:bg-muted/20 @min-[39rem]/team:px-4 @min-[39rem]/team:py-2 @min-[39rem]/team:text-sm @min-[39rem]/team:font-medium @min-[39rem]/team:text-muted-foreground",
               data.location.attendanceEnabled
                 ? dashboardTeamColumns.attendance
                 : dashboardTeamColumns.published

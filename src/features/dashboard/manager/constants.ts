@@ -32,9 +32,9 @@ const dashboardSelectClass =
   "h-11 min-w-0 rounded-lg border border-input bg-card px-3 text-base font-medium text-foreground outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring md:h-8 md:text-sm"
 const dashboardTeamColumns = {
   attendance:
-    "@2xl/team:grid-cols-[minmax(9rem,1.4fr)_minmax(7rem,1fr)_minmax(8rem,1.1fr)_minmax(7rem,1fr)_2.75rem]",
+    "@min-[39rem]/team:grid-cols-[minmax(9rem,1.4fr)_minmax(8rem,1fr)_minmax(7rem,1.1fr)_minmax(6rem,1fr)_2.75rem]",
   published:
-    "@2xl/team:grid-cols-[minmax(9rem,1.4fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_2.75rem]",
+    "@min-[39rem]/team:grid-cols-[minmax(9rem,1.4fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_2.75rem]",
 }
 export {
   teamStatusLabels,

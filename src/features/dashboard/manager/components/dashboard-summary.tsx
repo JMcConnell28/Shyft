@@ -10,6 +10,7 @@ import { Frame } from "@/components/panelui/frame"
 import { cn } from "@/lib/utils"
 
 function ManagerDashboardSummary({
+  className,
   data,
   attentionTotal,
   onScheduled,
@@ -17,6 +18,7 @@ function ManagerDashboardSummary({
   onAttention,
   onAll,
 }: {
+  className?: string
   data: ManagerDayData
   attentionTotal: number | undefined
   onScheduled: () => void
@@ -61,7 +63,7 @@ function ManagerDashboardSummary({
   ]
 
   return (
-    <div className="grid grid-cols-3 gap-2 sm:gap-6">
+    <div className={cn("grid min-w-0 grid-cols-3 gap-2 sm:gap-6", className)}>
       {items.map(
         ({ label, value, action, context, icon: Icon, highlighted }) => (
           <Frame
@@ -73,7 +75,7 @@ function ManagerDashboardSummary({
           >
             <Frame.Header
               render={<span />}
-              className="min-h-11 w-full group-data-[variant=band]/frame:px-1.5 group-data-[variant=band]/frame:py-1.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:group-data-[variant=band]/frame:px-4"
+              className="min-h-9 w-full group-data-[variant=band]/frame:px-1.5 group-data-[variant=band]/frame:py-1 sm:grid-cols-[minmax(0,1fr)_auto] sm:group-data-[variant=band]/frame:px-4"
             >
               <span className="text-xs leading-4 font-semibold sm:text-sm">
                 {label}

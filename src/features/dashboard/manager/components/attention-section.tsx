@@ -31,7 +31,7 @@ function ManagerAttentionSection({
       description="All locations and dates"
       descriptionId="attention-scope"
       tabIndex={-1}
-      className="scroll-mt-4 xl:col-start-2 xl:row-start-1"
+      className="scroll-mt-4"
       action={
         data ? (
           <span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium tabular-nums">

@@ -48,10 +48,10 @@ not write application records or apply migrations to the configured database.
 
 ## Presentation
 
-The staffing overview leads the manager dashboard. After the summary, source
-order and narrow-screen layout show the team, outstanding attention items, then
-rota planning. At wide widths, the team occupies the main column with attention
-and planning alongside it.
+On narrow screens, the summary strip is followed by the team, outstanding
+attention items and rota planning. At wide widths, the summary cards stack in
+the left column, with the team in the centre and attention and planning stacked
+on the right.
 
 Dashboard content follows the root `DESIGN.md` and its reference study. Team,
 attention and planning share `ManagerDashboardCard`, which uses PanelUI's

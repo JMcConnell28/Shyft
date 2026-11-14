@@ -19,13 +19,13 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
     <div
       role="row"
       className={cn(
-        "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center gap-x-2 gap-y-1 border-t border-border/60 px-4 py-4 transition-colors hover:bg-muted/25 @2xl/team:min-h-16 @2xl/team:gap-3 @2xl/team:py-3",
+        "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center gap-x-2 gap-y-1 border-t border-border/60 px-4 py-4 transition-colors hover:bg-muted/25 @min-[39rem]/team:min-h-16 @min-[39rem]/team:gap-3 @min-[39rem]/team:py-3",
         location.attendanceEnabled
           ? dashboardTeamColumns.attendance
           : dashboardTeamColumns.published
       )}
     >
-      <div role="cell" className="col-span-2 min-w-0 @2xl/team:col-span-1">
+      <div role="cell" className="col-span-2 min-w-0 @min-[39rem]/team:col-span-1">
         <EmployeeIdentity
           name={row.employeeName}
           secondary={row.zone}
@@ -35,7 +35,7 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
       </div>
       <div
         role="cell"
-        className="col-start-1 row-start-2 text-sm @2xl/team:col-auto @2xl/team:row-auto"
+        className="col-start-1 row-start-2 text-sm @min-[39rem]/team:col-auto @min-[39rem]/team:row-auto"
       >
         <p className="text-sm font-medium text-foreground tabular-nums">
           {row.startsAt && row.endsAt
@@ -60,13 +60,13 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
       {location.attendanceEnabled ? (
         <div
           role="cell"
-          className="col-start-1 row-start-3 text-sm @2xl/team:col-auto @2xl/team:row-auto"
+          className="col-start-1 row-start-3 text-sm @min-[39rem]/team:col-auto @min-[39rem]/team:row-auto"
         >
           <p className="text-muted-foreground tabular-nums">
             {row.clockedInAt ? (
               `In ${time(row.clockedInAt)}`
             ) : (
-              <span className="hidden @2xl/team:inline">
+              <span className="hidden @min-[39rem]/team:inline">
                 <span aria-hidden="true">—</span>
                 <span className="sr-only">No clock-in recorded</span>
               </span>
@@ -82,7 +82,7 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
       ) : null}
       <div
         role="cell"
-        className="col-start-2 row-span-2 row-start-2 max-w-28 text-right @2xl/team:col-auto @2xl/team:row-auto @2xl/team:text-left"
+        className="col-start-2 row-span-2 row-start-2 max-w-28 text-right @min-[39rem]/team:col-auto @min-[39rem]/team:row-auto @min-[39rem]/team:text-left"
       >
         <span
           className={cn(
@@ -105,7 +105,7 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
       </div>
       <div
         role="cell"
-        className="col-start-3 row-span-3 row-start-1 justify-self-end @2xl/team:col-auto @2xl/team:row-auto"
+        className="col-start-3 row-span-3 row-start-1 justify-self-end @min-[39rem]/team:col-auto @min-[39rem]/team:row-auto"
       >
         <DashboardTeamRowActions {...props} />
       </div>

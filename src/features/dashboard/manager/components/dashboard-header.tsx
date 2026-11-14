@@ -22,13 +22,19 @@ function ManagerDashboardHeader({
   onDate: (date?: string) => void
 }) {
   return (
-    <header className="grid min-w-0 gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5">
-        <div className="min-w-0">
-          <h1 className="text-2xl leading-8 font-bold tracking-tight">
-            Manager dashboard
-          </h1>
-        </div>
+    <header className="flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-3">
+      <h1 className="min-w-0 text-2xl leading-8 font-bold tracking-tight">
+        Manager dashboard
+      </h1>
+      <div className="flex w-full min-w-0 max-w-full flex-wrap items-center gap-2 sm:w-auto">
+        <ManagerDashboardFilters
+          locations={access.locations}
+          locationId={locationId}
+          date={data.date}
+          isToday={data.isToday}
+          onLocation={onLocation}
+          onDate={onDate}
+        />
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <Button
             nativeButton={false}
@@ -64,14 +70,6 @@ function ManagerDashboardHeader({
           />
         </div>
       </div>
-      <ManagerDashboardFilters
-        locations={access.locations}
-        locationId={locationId}
-        date={data.date}
-        isToday={data.isToday}
-        onLocation={onLocation}
-        onDate={onDate}
-      />
     </header>
   )
 }

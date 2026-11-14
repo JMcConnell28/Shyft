@@ -30,7 +30,7 @@ function ManagerDashboardCard({
       className={cn("min-w-0", className)}
       {...props}
     >
-      <Frame.Header className="min-h-11 group-data-[variant=band]/frame:px-4 group-data-[variant=band]/frame:py-2">
+      <Frame.Header className="min-h-9 group-data-[variant=band]/frame:px-4 group-data-[variant=band]/frame:py-1">
         <Frame.Title as="h2" id={headingId} className="font-semibold">
           {title}
         </Frame.Title>

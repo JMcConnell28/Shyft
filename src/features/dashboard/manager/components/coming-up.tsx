@@ -26,7 +26,6 @@ function ManagerComingUp({
     locations.find((item) => item.id === data.location.id) ?? null
   return (
     <ManagerDashboardCard
-      className="xl:col-start-2 xl:row-start-2"
       headingId="coming-up-heading"
       title="Upcoming rotas"
       action={
