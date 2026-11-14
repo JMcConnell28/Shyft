@@ -30,7 +30,7 @@ function ManagerDashboard({
 }) {
   const { access, location, day, attention, setAttentionPage } =
     useDashboardData(organizationId, userId, search)
-  useContentReadyTiming(Boolean(day.data))
+  useContentReadyTiming(Boolean(day.data), "manage")
   const filters = useTeamFilters(
     day.data?.team ?? [],
     `${location?.id}:${search.date ?? "today"}`

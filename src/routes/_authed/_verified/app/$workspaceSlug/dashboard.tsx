@@ -1,24 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Suspense, lazy } from "react"
 
-import { DashboardViewTabs } from "@/features/dashboard/components/dashboard-view-tabs"
-import { dashboardSearchSchema } from "@/features/dashboard/schemas/dashboard-search"
-import { canViewManagerDashboard } from "@/features/dashboard/utils/dashboard-view"
+import { legacyDashboardSearchSchema } from "@/features/dashboard/schemas/dashboard-search"
+import { canViewManagerDashboard } from "@/features/dashboard/manager/capabilities"
 import { loadDashboard } from "@/features/dashboard/load-dashboard"
-import { DashboardRouteError } from "@/features/dashboard/manager/components/dashboard-state"
+import { WorkspaceRouteError } from "@/features/navigation/components/workspace-route-error"
 import { WorkspaceRoutePending } from "@/features/navigation/components/workspace-route-pending"
 
 const PersonalDashboard = lazy(() =>
   import("@/features/dashboard/components/personal-dashboard").then(
     (module) => ({
       default: module.PersonalDashboard,
-    })
-  )
-)
-const ManagerDashboard = lazy(() =>
-  import("@/features/dashboard/manager/components/manager-dashboard").then(
-    (module) => ({
-      default: module.ManagerDashboard,
     })
   )
 )
@@ -36,16 +28,24 @@ export const Route = createFileRoute(
   pendingMs: 150,
   pendingMinMs: 0,
   pendingComponent: WorkspaceRoutePending,
-  errorComponent: DashboardRouteError,
-  validateSearch: (search) => dashboardSearchSchema.parse(search),
+  errorComponent: WorkspaceRouteError,
+  validateSearch: (search) => legacyDashboardSearchSchema.parse(search),
+  beforeLoad: ({ context, params, search }) => {
+    if (
+      search.view === "manager" &&
+      canViewManagerDashboard(context.capabilities)
+    ) {
+      throw redirect({
+        to: "/app/$workspaceSlug/manage",
+        params,
+        search: { location: search.location, date: search.date },
+        replace: true,
+      })
+    }
+  },
   staleTime: 0,
   preloadStaleTime: 0,
-  loaderDeps: ({ search }) => ({
-    view: search.view,
-    location: search.location,
-    date: search.date,
-  }),
-  loader: async ({ context, deps }) => {
+  loader: ({ context }) => {
     const activeWorkspace = context.viewer.activeWorkspace
 
     if (!activeWorkspace) {
@@ -56,8 +56,6 @@ export const Route = createFileRoute(
       queryClient: context.queryClient,
       workspace: activeWorkspace,
       userId: context.viewer.user.id,
-      capabilities: context.capabilities,
-      search: deps,
     })
   },
   head: () => ({
@@ -75,8 +73,6 @@ export const Route = createFileRoute(
 function DashboardWorkspaceRoute() {
   const context = Route.useRouteContext()
   const result = Route.useLoaderData()
-  const search = Route.useSearch()
-  const navigate = Route.useNavigate()
   const activeWorkspace = context.viewer.activeWorkspace
 
   if (!activeWorkspace) {
@@ -94,44 +90,24 @@ function DashboardWorkspaceRoute() {
         />
       </Suspense>
 
-      <DashboardViewTabs
-        canManage={canViewManagerDashboard(context.capabilities)}
-        view={result.mode === "manager" ? "manager" : "personal"}
-        onViewChange={(view) => {
-          void navigate({ search: { ...search, view } })
-        }}
-      >
-        <Suspense fallback={<WorkspaceRoutePending />}>
-          {result.mode === "manager" ? (
-            <ManagerDashboard
-              organizationId={activeWorkspace.id}
-              userId={context.viewer.user.id}
-              workspaceSlug={activeWorkspace.slug}
-              search={search}
-              onSearch={(value) => {
-                void navigate({ search: { view: search.view, ...value } })
-              }}
-            />
-          ) : (
-            <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
-              <PersonalDashboard
-                input={{
-                  organizationId: activeWorkspace.id,
-                  userId: context.viewer.user.id,
-                }}
-                organizationName={activeWorkspace.name}
-                announcements={result.announcements}
-                mobileContext={{
-                  userName: context.viewer.user.name,
-                  workspaceSlug: activeWorkspace.slug,
-                  workspaceType: activeWorkspace.type,
-                }}
-                overview={result.overview}
-              />
-            </div>
-          )}
-        </Suspense>
-      </DashboardViewTabs>
+      <Suspense fallback={<WorkspaceRoutePending />}>
+        <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
+          <PersonalDashboard
+            input={{
+              organizationId: activeWorkspace.id,
+              userId: context.viewer.user.id,
+            }}
+            organizationName={activeWorkspace.name}
+            announcements={result.announcements}
+            mobileContext={{
+              userName: context.viewer.user.name,
+              workspaceSlug: activeWorkspace.slug,
+              workspaceType: activeWorkspace.type,
+            }}
+            overview={result.overview}
+          />
+        </div>
+      </Suspense>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { RotaWorkspaceSkeleton } from "@/features/rota/components/rota-workspace
 
 const loadingLabels = {
   dashboard: "Dashboard",
+  manage: "Manage",
   rota: "Rotas",
   "rota-editor": "Rota editor",
   timesheets: "Timesheets",

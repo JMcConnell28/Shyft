@@ -20,7 +20,7 @@ const managerRotaPages: ReadonlyArray<HelpPage> = [
         type: "steps",
         title: "Build the week",
         items: [
-          "Select Create rota from the dashboard or rotas area. Choose the correct location and week; weeks run Monday to Sunday.",
+          "Select Create rota from Manage or Rotas. Choose the correct location and week; weeks run Monday to Sunday.",
           "Start blank, copy an available previous week or choose a saved template. If the week already has a rota, open that rota instead.",
           "Add the required shifts with their start and finish times, staff groups and zones. Assign employees using the editor's staff controls or drag and drop.",
           "Check coverage by day and by person. Resolve overlapping assignments and check split shifts, closing times and any rota notes.",

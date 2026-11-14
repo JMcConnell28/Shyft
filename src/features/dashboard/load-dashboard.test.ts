@@ -1,7 +1,6 @@
 import { QueryClient } from "@tanstack/react-query"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { loadDashboard } from "./load-dashboard"
-import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
 
 const mock = vi.hoisted(() => ({
   welcome: vi.fn(),
@@ -42,64 +41,30 @@ beforeEach(() => {
 })
 afterEach(() => queryClient.clear())
 
-describe("dashboard data loading by role and selected view", () => {
-  it("keeps employees on personal data when a manager view is requested", async () => {
+describe("personal dashboard data loading", () => {
+  it("loads shifts and announcements without requesting manager data", async () => {
     const result = await loadDashboard({
       queryClient,
       workspace: { id: "org", type: "organization" },
       userId: "employee",
-      capabilities: getOrgCapabilitiesForRole("employee"),
-      search: { view: "manager" },
     })
-    expect(result.mode).toBe("employee")
+    expect(result).toEqual({
+      announcements: { items: [] },
+      overview: { thisWeekShifts: [] },
+    })
     expect(mock.overview).toHaveBeenCalledTimes(1)
     expect(mock.announcements).toHaveBeenCalledTimes(1)
     expect(mock.manager).not.toHaveBeenCalled()
   })
 
-  it("loads manager data without fetching the personal dashboard", async () => {
-    const search = { date: "2026-10-18", location: "permitted" }
-    const result = await loadDashboard({
-      queryClient,
-      workspace: { id: "org", type: "organization" },
-      userId: "manager",
-      capabilities: getOrgCapabilitiesForRole("manager"),
-      search,
-    })
-    expect(result.mode).toBe("manager")
-    expect(mock.manager).toHaveBeenCalledWith(
-      queryClient,
-      "org",
-      "manager",
-      search
-    )
-    expect(mock.overview).not.toHaveBeenCalled()
-    expect(mock.announcements).not.toHaveBeenCalled()
-  })
-
-  it("lets managers choose their personal dashboard without manager requests", async () => {
-    const result = await loadDashboard({
-      queryClient,
-      workspace: { id: "org", type: "organization" },
-      userId: "manager",
-      capabilities: getOrgCapabilitiesForRole("manager"),
-      search: { view: "personal" },
-    })
-    expect(result.mode).toBe("employee")
-    expect(mock.overview).toHaveBeenCalledTimes(1)
-    expect(mock.manager).not.toHaveBeenCalled()
-  })
-
   it("resolves useful content while the optional welcome request is still pending", async () => {
     mock.welcome.mockReturnValue(new Promise(() => {}))
-    const result = await loadDashboard({
+    await loadDashboard({
       queryClient,
       workspace: { id: "org", type: "organization" },
       userId: "employee",
-      capabilities: getOrgCapabilitiesForRole("employee"),
-      search: {},
     })
-    expect(result.mode).toBe("employee")
+    expect(mock.welcome).toHaveBeenCalledTimes(1)
     expect(mock.overview).toHaveBeenCalledTimes(1)
   })
 })

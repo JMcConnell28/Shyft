@@ -55,7 +55,7 @@ const managerSetupPages: ReadonlyArray<HelpPage> = [
   },
   {
     slug: "managers/staffing-dashboard",
-    title: "Use the manager dashboard",
+    title: "Review staffing in Manage",
     description:
       "Check daily staffing, live attendance and items that need a manager's attention.",
     categoryId: "managers",
@@ -80,7 +80,7 @@ const managerSetupPages: ReadonlyArray<HelpPage> = [
         type: "steps",
         title: "Review staffing for a day",
         items: [
-          "Open Dashboard and choose Manager dashboard. Use My dashboard when you want to check your own shifts.",
+          "Open Manage from the sidebar to review staffing. Open Dashboard to check your own shifts.",
           "Choose the location and date. Use the previous and next day controls or Today to return to the current day.",
           "Check Staff scheduled and the attendance summary, then use the employee search, zone and status filters in Today's team.",
           "Use the planning section to open an existing rota or create the next one when your role allows it.",

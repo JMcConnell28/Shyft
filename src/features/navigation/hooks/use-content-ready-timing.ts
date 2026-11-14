@@ -3,7 +3,10 @@ import { useEffect, useRef } from "react"
 import { isPerformanceProfilingEnabled } from "@/features/navigation/utils/profiling-enabled"
 
 // Profile the first usable content, which may arrive after the route resolves.
-function useContentReadyTiming(ready: boolean): void {
+function useContentReadyTiming(
+  ready: boolean,
+  destination: "dashboard" | "manage" = "dashboard"
+): void {
   const recorded = useRef(false)
   useEffect(() => {
     if (!isPerformanceProfilingEnabled || !ready || recorded.current) return
@@ -15,7 +18,7 @@ function useContentReadyTiming(ready: boolean): void {
     console.info(
       "[content-ready-timing]",
       JSON.stringify({
-        destination: "dashboard",
+        destination,
         documentElapsedMs: Math.round(performance.now()),
         documentTtfbMs: documentTiming
           ? Math.round(Number(documentTiming.responseStart))
@@ -25,7 +28,7 @@ function useContentReadyTiming(ready: boolean): void {
           .filter((entry) => entry.name.includes("/_serverFn/")).length,
       })
     )
-  }, [ready])
+  }, [destination, ready])
 }
 
 export { useContentReadyTiming }

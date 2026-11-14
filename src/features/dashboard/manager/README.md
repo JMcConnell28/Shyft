@@ -1,19 +1,15 @@
 # Manager dashboard
 
-Managers and supervisors enter through the existing workspace dashboard route
-and can switch between My dashboard and Manager dashboard using the dashboard
-tabs. The `view` search parameter preserves the selected view across refreshes
-and browser history; management remains their default. Employees retain their
-personal dashboard and cannot select the management view. Only the selected
-dashboard's data is loaded. Every server function verifies the
-session, active organisation, management capability and permitted locations.
-Time & Attendance data is gated by each location's existing entitlement.
+Dashboard (`/dashboard`) shows the signed-in user's shifts and announcements.
+Manage (`/manage`) shows staffing, attendance and upcoming rotas. Its sidebar
+link and route require rota or time tracking management permissions. Old
+workspace links with `view=manager` redirect authorised users to Manage with
+their date and location filters. Both routes load their own data and lazy client
+chunks, and Dashboard hosts the welcome tour.
 
-Personal and manager views are separate lazy client chunks. The dashboard loader
-imports the manager data loader only for an authorised management view; employee
-visits, including a forged `view=manager` URL, use the personal view. The welcome
-tour is imported only when it should be shown. Public JavaScript is not an access
-control boundary: manager data and actions remain authorised on the server.
+Every manager server function verifies the session, active organisation,
+management capability and permitted locations. Time & Attendance data is gated
+by each location's existing entitlement.
 
 Create rota uses a lightweight trigger and dialog shell. Its form and preview
 logic load on first open, then remain mounted for subsequent opens and closing

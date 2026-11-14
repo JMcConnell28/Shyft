@@ -1,6 +1,7 @@
 import "@tanstack/react-start/server-only"
 
 import { z } from "zod"
+import { canViewManagerDashboard } from "../capabilities"
 import type { DashboardLocation, ManagerDashboardAccess } from "../types"
 import { requireVerifiedSessionOrThrow } from "@/features/onboarding/server/session"
 import { listPermittedRotaLocations } from "@/features/rota/server/access"
@@ -34,7 +35,7 @@ async function resolveManagerDashboardAccess(
   }
   const role = await getOrganizationRole(organizationId, session.user.id)
   const capabilities = getOrgCapabilitiesForRole(role)
-  if (!capabilities.canManageRota && !capabilities.canManageTimeClock) {
+  if (!canViewManagerDashboard(capabilities)) {
     throw new Error("You do not have permission to view the manager dashboard.")
   }
   const permitted = await listPermittedRotaLocations(

@@ -1,4 +1,3 @@
-import type { LucideIcon } from "lucide-react"
 import {
   CalendarDaysIcon,
   CheckIcon,
@@ -18,7 +17,7 @@ type WelcomeStep = {
   title: string
   description: string
   items: Array<{
-    icon: LucideIcon
+    icon: typeof CalendarDaysIcon
     title: string
     description: string
   }>
@@ -26,7 +25,7 @@ type WelcomeStep = {
 
 function getDashboardWelcomeSteps(
   capabilities: WelcomeCapabilities
-): WelcomeStep[] {
+): Array<WelcomeStep> {
   const isManager =
     capabilities.canManageRota ||
     capabilities.canManageSettings ||
@@ -65,8 +64,7 @@ function getDashboardWelcomeSteps(
   return [
     {
       title: "A clear starting point",
-      description:
-        "Use the dashboard to spot what needs attention before planning the week.",
+      description: "Dashboard shows your own shifts and clock status.",
       items: [
         {
           icon: CalendarDaysIcon,
@@ -78,7 +76,7 @@ function getDashboardWelcomeSteps(
           icon: Clock3Icon,
           title: "Live clock status",
           description:
-            "See current attendance information without opening another report.",
+            "Check whether you’re clocked in and see your recorded time today.",
         },
       ],
     },
@@ -104,7 +102,7 @@ function getDashboardWelcomeSteps(
   ]
 }
 
-const employeeSteps: WelcomeStep[] = [
+const employeeSteps: Array<WelcomeStep> = [
   {
     title: "Your working week at a glance",
     description: "The dashboard keeps the most useful information close by.",

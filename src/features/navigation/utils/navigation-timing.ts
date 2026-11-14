@@ -4,6 +4,7 @@ import type { AnyRouter } from "@tanstack/react-router"
 
 const navigationSections = [
   "dashboard",
+  "manage",
   "rota",
   "timesheets",
   "time-clock",
@@ -15,10 +16,7 @@ type NavigationLabel =
   | "other"
 
 function getNavigationLabel(pathname: string): NavigationLabel {
-  const section =
-    /^\/app\/[^/]+\/(dashboard|rota|timesheets|time-clock|settings)(?:\/|$)/.exec(
-      pathname
-    )?.[1]
+  const section = /^\/app\/[^/]+\/([^/]+)/.exec(pathname)?.[1]
   if (section === "rota" && /\/rota\/[^/]+\/[^/]+/.test(pathname)) {
     return "rota-editor"
   }

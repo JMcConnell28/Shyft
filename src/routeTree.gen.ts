@@ -58,6 +58,7 @@ import { Route as AuthedVerifiedAppWorkspaceSlugIndexRouteImport } from './route
 import { Route as AuthedVerifiedAppWorkspaceSlugAccountRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/account'
 import { Route as AuthedVerifiedAppWorkspaceSlugAnnouncementsRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/announcements'
 import { Route as AuthedVerifiedAppWorkspaceSlugDashboardRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/dashboard'
+import { Route as AuthedVerifiedAppWorkspaceSlugManageRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/manage'
 import { Route as AuthedVerifiedAppWorkspaceSlugSettingsRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/settings'
 import { Route as AuthedVerifiedAppWorkspaceSlugShiftSwapsRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/shift-swaps'
 import { Route as AuthedVerifiedAppWorkspaceSlugTimeClockRouteImport } from './routes/_authed/_verified/app/$workspaceSlug/time-clock'
@@ -351,6 +352,12 @@ const AuthedVerifiedAppWorkspaceSlugDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthedVerifiedAppWorkspaceSlugRouteRoute,
   } as any)
+const AuthedVerifiedAppWorkspaceSlugManageRoute =
+  AuthedVerifiedAppWorkspaceSlugManageRouteImport.update({
+    id: '/manage',
+    path: '/manage',
+    getParentRoute: () => AuthedVerifiedAppWorkspaceSlugRouteRoute,
+  } as any)
 const AuthedVerifiedAppWorkspaceSlugSettingsRoute =
   AuthedVerifiedAppWorkspaceSlugSettingsRouteImport.update({
     id: '/settings',
@@ -602,6 +609,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/account': typeof AuthedVerifiedAppWorkspaceSlugAccountRouteWithChildren
   '/app/$workspaceSlug/announcements': typeof AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute
   '/app/$workspaceSlug/dashboard': typeof AuthedVerifiedAppWorkspaceSlugDashboardRoute
+  '/app/$workspaceSlug/manage': typeof AuthedVerifiedAppWorkspaceSlugManageRoute
   '/app/$workspaceSlug/settings': typeof AuthedVerifiedAppWorkspaceSlugSettingsRouteWithChildren
   '/app/$workspaceSlug/shift-swaps': typeof AuthedVerifiedAppWorkspaceSlugShiftSwapsRoute
   '/app/$workspaceSlug/time-clock': typeof AuthedVerifiedAppWorkspaceSlugTimeClockRoute
@@ -682,6 +690,7 @@ export interface FileRoutesByTo {
   '/w': typeof AuthedVerifiedWIndexRoute
   '/app/$workspaceSlug/announcements': typeof AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute
   '/app/$workspaceSlug/dashboard': typeof AuthedVerifiedAppWorkspaceSlugDashboardRoute
+  '/app/$workspaceSlug/manage': typeof AuthedVerifiedAppWorkspaceSlugManageRoute
   '/app/$workspaceSlug/shift-swaps': typeof AuthedVerifiedAppWorkspaceSlugShiftSwapsRoute
   '/app/$workspaceSlug/time-clock': typeof AuthedVerifiedAppWorkspaceSlugTimeClockRoute
   '/app/$workspaceSlug/timesheets': typeof AuthedVerifiedAppWorkspaceSlugTimesheetsRoute
@@ -761,6 +770,7 @@ export interface FileRoutesById {
   '/_authed/_verified/app/$workspaceSlug/account': typeof AuthedVerifiedAppWorkspaceSlugAccountRouteWithChildren
   '/_authed/_verified/app/$workspaceSlug/announcements': typeof AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute
   '/_authed/_verified/app/$workspaceSlug/dashboard': typeof AuthedVerifiedAppWorkspaceSlugDashboardRoute
+  '/_authed/_verified/app/$workspaceSlug/manage': typeof AuthedVerifiedAppWorkspaceSlugManageRoute
   '/_authed/_verified/app/$workspaceSlug/settings': typeof AuthedVerifiedAppWorkspaceSlugSettingsRouteWithChildren
   '/_authed/_verified/app/$workspaceSlug/shift-swaps': typeof AuthedVerifiedAppWorkspaceSlugShiftSwapsRoute
   '/_authed/_verified/app/$workspaceSlug/time-clock': typeof AuthedVerifiedAppWorkspaceSlugTimeClockRoute
@@ -845,6 +855,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/account'
     | '/app/$workspaceSlug/announcements'
     | '/app/$workspaceSlug/dashboard'
+    | '/app/$workspaceSlug/manage'
     | '/app/$workspaceSlug/settings'
     | '/app/$workspaceSlug/shift-swaps'
     | '/app/$workspaceSlug/time-clock'
@@ -925,6 +936,7 @@ export interface FileRouteTypes {
     | '/w'
     | '/app/$workspaceSlug/announcements'
     | '/app/$workspaceSlug/dashboard'
+    | '/app/$workspaceSlug/manage'
     | '/app/$workspaceSlug/shift-swaps'
     | '/app/$workspaceSlug/time-clock'
     | '/app/$workspaceSlug/timesheets'
@@ -1003,6 +1015,7 @@ export interface FileRouteTypes {
     | '/_authed/_verified/app/$workspaceSlug/account'
     | '/_authed/_verified/app/$workspaceSlug/announcements'
     | '/_authed/_verified/app/$workspaceSlug/dashboard'
+    | '/_authed/_verified/app/$workspaceSlug/manage'
     | '/_authed/_verified/app/$workspaceSlug/settings'
     | '/_authed/_verified/app/$workspaceSlug/shift-swaps'
     | '/_authed/_verified/app/$workspaceSlug/time-clock'
@@ -1416,6 +1429,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugDashboardRouteImport
       parentRoute: typeof AuthedVerifiedAppWorkspaceSlugRouteRoute
     }
+    '/_authed/_verified/app/$workspaceSlug/manage': {
+      id: '/_authed/_verified/app/$workspaceSlug/manage'
+      path: '/manage'
+      fullPath: '/app/$workspaceSlug/manage'
+      preLoaderRoute: typeof AuthedVerifiedAppWorkspaceSlugManageRouteImport
+      parentRoute: typeof AuthedVerifiedAppWorkspaceSlugRouteRoute
+    }
     '/_authed/_verified/app/$workspaceSlug/settings': {
       id: '/_authed/_verified/app/$workspaceSlug/settings'
       path: '/settings'
@@ -1810,6 +1830,7 @@ interface AuthedVerifiedAppWorkspaceSlugRouteRouteChildren {
   AuthedVerifiedAppWorkspaceSlugAccountRoute: typeof AuthedVerifiedAppWorkspaceSlugAccountRouteWithChildren
   AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute: typeof AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute
   AuthedVerifiedAppWorkspaceSlugDashboardRoute: typeof AuthedVerifiedAppWorkspaceSlugDashboardRoute
+  AuthedVerifiedAppWorkspaceSlugManageRoute: typeof AuthedVerifiedAppWorkspaceSlugManageRoute
   AuthedVerifiedAppWorkspaceSlugSettingsRoute: typeof AuthedVerifiedAppWorkspaceSlugSettingsRouteWithChildren
   AuthedVerifiedAppWorkspaceSlugShiftSwapsRoute: typeof AuthedVerifiedAppWorkspaceSlugShiftSwapsRoute
   AuthedVerifiedAppWorkspaceSlugTimeClockRoute: typeof AuthedVerifiedAppWorkspaceSlugTimeClockRoute
@@ -1829,6 +1850,8 @@ const AuthedVerifiedAppWorkspaceSlugRouteRouteChildren: AuthedVerifiedAppWorkspa
       AuthedVerifiedAppWorkspaceSlugAnnouncementsRoute,
     AuthedVerifiedAppWorkspaceSlugDashboardRoute:
       AuthedVerifiedAppWorkspaceSlugDashboardRoute,
+    AuthedVerifiedAppWorkspaceSlugManageRoute:
+      AuthedVerifiedAppWorkspaceSlugManageRoute,
     AuthedVerifiedAppWorkspaceSlugSettingsRoute:
       AuthedVerifiedAppWorkspaceSlugSettingsRouteWithChildren,
     AuthedVerifiedAppWorkspaceSlugShiftSwapsRoute:

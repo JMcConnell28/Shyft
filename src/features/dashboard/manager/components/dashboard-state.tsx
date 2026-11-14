@@ -1,5 +1,3 @@
-import { useRouter } from "@tanstack/react-router"
-
 import { Button } from "@/components/ui/button"
 
 function ManagerDashboardError({
@@ -21,13 +19,4 @@ function ManagerDashboardError({
     </div>
   )
 }
-function DashboardRouteError() {
-  const router = useRouter()
-  return (
-    <ManagerDashboardError
-      message="We could not load your workspace dashboard."
-      onRetry={() => void router.invalidate()}
-    />
-  )
-}
-export { ManagerDashboardError, DashboardRouteError }
+export { ManagerDashboardError }

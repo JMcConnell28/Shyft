@@ -1,12 +1,8 @@
 import { z } from "zod"
 import { managerDashboardSearchSchema } from "@/features/dashboard/manager/schemas"
 
-const dashboardViewSchema = z.enum(["personal", "manager"])
-const dashboardSearchSchema = managerDashboardSearchSchema.extend({
-  view: dashboardViewSchema.optional().catch(undefined),
+const legacyDashboardSearchSchema = managerDashboardSearchSchema.extend({
+  view: z.enum(["personal", "manager"]).optional().catch(undefined),
 })
 
-type DashboardView = z.infer<typeof dashboardViewSchema>
-
-export { dashboardSearchSchema }
-export type { DashboardView }
+export { legacyDashboardSearchSchema }

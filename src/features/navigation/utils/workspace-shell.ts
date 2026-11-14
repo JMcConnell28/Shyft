@@ -28,6 +28,15 @@ function getWorkspaceShellConfig(
     ? pathname.slice(workspaceBasePath.length)
     : pathname
 
+  if (workspacePath === "/manage" || workspacePath === "/manage/") {
+    return {
+      routeKey: "manage",
+      title: "Manage",
+      description: "Review staffing, attendance, and upcoming rotas.",
+      mobileBrandHeader: true,
+    }
+  }
+
   if (isRotaDetailPath(workspacePath)) {
     return {
       routeKey: "rota",

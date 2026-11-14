@@ -5,6 +5,7 @@ import LocationName from "./location-name"
 import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
 import type { OrganizationAppRouteKey } from "@/lib/organization-paths"
 import type { OrganizationSummary, WorkspaceSummary } from "@/lib/onboarding"
+import { canViewManagerDashboard } from "@/features/dashboard/manager/capabilities"
 import { getWorkspaceShellConfig } from "@/features/navigation/utils/workspace-shell"
 import { navItems } from "@/components/app/shell/nav-items"
 import { SidebarInviteLink } from "@/components/app/shell/sidebar-invite-link"
@@ -67,6 +68,7 @@ function AppSidebar({
   const [inviteOpen, setInviteOpen] = React.useState(false)
   const visibleNavItems = navItems.filter(
     (item) =>
+      (item.routeKey !== "manage" || canViewManagerDashboard(capabilities)) &&
       (item.routeKey !== "shiftSwaps" || shiftSwapsEnabled) &&
       (!item.requiredCapability || capabilities[item.requiredCapability])
   )

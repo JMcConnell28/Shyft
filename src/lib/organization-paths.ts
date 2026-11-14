@@ -1,6 +1,7 @@
 type OrganizationAppRouteKey =
   | "announcements"
   | "dashboard"
+  | "manage"
   | "rota"
   | "settings"
   | "shiftSwaps"
@@ -14,6 +15,10 @@ function getWorkspaceBasePath(workspaceSlug: string) {
 
 function getWorkspaceDashboardPath(workspaceSlug: string) {
   return `${getWorkspaceBasePath(workspaceSlug)}/dashboard`
+}
+
+function getWorkspaceManagePath(workspaceSlug: string) {
+  return `${getWorkspaceBasePath(workspaceSlug)}/manage`
 }
 
 function getWorkspaceAnnouncementsPath(workspaceSlug: string) {
@@ -54,6 +59,10 @@ function getWorkspaceAppPath(
 ) {
   if (routeKey === "announcements") {
     return getWorkspaceAnnouncementsPath(workspaceSlug)
+  }
+
+  if (routeKey === "manage") {
+    return getWorkspaceManagePath(workspaceSlug)
   }
 
   if (routeKey === "rota") {
@@ -121,6 +130,10 @@ function getOrganizationAppPath(
 ) {
   if (routeKey === "announcements") {
     return getOrganizationAnnouncementsPath(orgSlug)
+  }
+
+  if (routeKey === "manage") {
+    return getWorkspaceManagePath(orgSlug)
   }
 
   if (routeKey === "rota") {

@@ -29,7 +29,7 @@ const managerAttendancePages: ReadonlyArray<HelpPage> = [
         type: "steps",
         title: "Add a missed clock-in or clock-out",
         items: [
-          "Open the employee's attendance controls in the manager dashboard or time tracking area. Your role must allow attendance changes for that location.",
+          "Open the employee's attendance controls in Manage or Time tracking. Your role must allow attendance changes for that location.",
           "Choose the appropriate manual clock-in or clock-out action and enter the actual date and time. You can choose a time in the past.",
           "Check the date carefully for overnight work. The manual input uses the timezone of your device, so take extra care when managing another timezone.",
           "Enter a clear reason, check the employee and location, then save. Future times, overlapping entries and a finish before the start are rejected.",

@@ -23,9 +23,9 @@ const employeeSchedulePages: ReadonlyArray<HelpPage> = [
       },
       {
         type: "paragraphs",
-        title: "Personal and manager views",
+        title: "Dashboard and Manage",
         body: [
-          "Employees see their personal dashboard. Managers and supervisors can switch between My dashboard and Manager dashboard to see their own shifts or the staffing overview.",
+          "Dashboard shows your own shifts. Managers and supervisors can open Manage from the sidebar for the staffing overview.",
           "A scheduled shift does not automatically clock you in. Use your workplace's clocking station to record when you actually start and finish.",
         ],
       },

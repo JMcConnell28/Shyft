@@ -6,6 +6,7 @@ import {
   LifeBuoyIcon,
   MegaphoneIcon,
   ShuffleIcon,
+  UsersRoundIcon,
 } from "lucide-react"
 
 import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
@@ -20,6 +21,7 @@ type NavItem = {
   routeKey:
     | "announcements"
     | "dashboard"
+    | "manage"
     | "rota"
     | "shiftSwaps"
     | "support"
@@ -34,6 +36,11 @@ const navItems = [
     title: "Dashboard",
     routeKey: "dashboard" as const,
     icon: HomeIcon,
+  },
+  {
+    title: "Manage",
+    routeKey: "manage" as const,
+    icon: UsersRoundIcon,
   },
   {
     title: "Rotas",
