@@ -132,7 +132,6 @@ function ManagerDashboard({
               data={day.data}
               filters={filters}
               workspaceSlug={workspaceSlug}
-              canManageRota={access.data.capabilities.canManageRota}
               canManageTimesheets={access.data.capabilities.canManageTimesheets}
               onClock={actions.openClock}
               onReview={(row) => actions.reviewTeam(row, day.data)}

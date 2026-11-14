@@ -63,7 +63,6 @@ type DashboardTeamRowProps = {
   location: DashboardLocation
   isToday: boolean
   workspaceSlug: string
-  canManageRota: boolean
   canManageTimesheets: boolean
   clockEmployee: ManagerClockEmployee | undefined
   onClock: (

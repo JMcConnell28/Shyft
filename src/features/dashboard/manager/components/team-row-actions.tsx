@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router"
 import {
-  CalendarDaysIcon,
   Clock3Icon,
   FileTextIcon,
   LogInIcon,
@@ -27,7 +26,6 @@ function DashboardTeamRowActions(props: DashboardTeamRowProps) {
     row,
     location,
     workspaceSlug,
-    canManageRota,
     canManageTimesheets,
     onClock,
     onReview,
@@ -36,6 +34,10 @@ function DashboardTeamRowActions(props: DashboardTeamRowProps) {
   const timeEntry = location.attendanceEnabled
     ? getTeamTimeEntry(row, location)
     : null
+  const showClockActions =
+    clockActions && (clockActions.canClockIn || clockActions.canClockOut)
+
+  if (!showClockActions && !timeEntry) return null
 
   return (
     <DropdownMenu>
@@ -54,7 +56,7 @@ function DashboardTeamRowActions(props: DashboardTeamRowProps) {
         align="end"
         className="w-52 max-w-(--available-width) max-md:[&_[data-slot=dropdown-menu-item]]:min-h-11 max-md:[&_[data-slot=dropdown-menu-item]]:text-sm"
       >
-        {clockActions ? (
+        {showClockActions ? (
           <>
             <DropdownMenuItem
               disabled={!clockActions.canClockIn}
@@ -74,7 +76,7 @@ function DashboardTeamRowActions(props: DashboardTeamRowProps) {
               <LogOutIcon aria-hidden="true" />
               Clock out
             </DropdownMenuItem>
-            {timeEntry || row.rotaId ? <DropdownMenuSeparator /> : null}
+            {timeEntry ? <DropdownMenuSeparator /> : null}
           </>
         ) : null}
         {timeEntry ? (
@@ -96,30 +98,6 @@ function DashboardTeamRowActions(props: DashboardTeamRowProps) {
             <FileTextIcon aria-hidden="true" />
             View in timesheets
           </DropdownMenuItem>
-        ) : null}
-        {row.rotaId ? (
-          <DropdownMenuItem
-            render={
-              <Link
-                to={
-                  canManageRota
-                    ? "/app/$workspaceSlug/rota/$locationSlug/$rotaId"
-                    : "/app/$workspaceSlug/rota/$locationSlug/$rotaId/view"
-                }
-                params={{
-                  workspaceSlug,
-                  locationSlug: location.slug,
-                  rotaId: row.rotaId,
-                }}
-              />
-            }
-          >
-            <CalendarDaysIcon aria-hidden="true" />
-            Open rota
-          </DropdownMenuItem>
-        ) : null}
-        {!row.rotaId && !timeEntry && !clockActions ? (
-          <DropdownMenuItem disabled>No actions available</DropdownMenuItem>
         ) : null}
       </DropdownMenuContent>
     </DropdownMenu>

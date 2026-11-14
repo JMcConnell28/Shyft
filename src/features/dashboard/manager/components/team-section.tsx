@@ -11,7 +11,6 @@ function ManagerTeamSection({
   data,
   filters,
   workspaceSlug,
-  canManageRota,
   canManageTimesheets,
   onClock,
   onReview,
@@ -19,7 +18,6 @@ function ManagerTeamSection({
   data: ManagerDayData
   filters: ReturnType<typeof useTeamFilters>
   workspaceSlug: string
-  canManageRota: boolean
   canManageTimesheets: boolean
   onClock: DashboardTeamRowProps["onClock"]
   onReview: DashboardTeamRowProps["onReview"]
@@ -74,7 +72,6 @@ function ManagerTeamSection({
                 location={data.location}
                 isToday={data.isToday}
                 workspaceSlug={workspaceSlug}
-                canManageRota={canManageRota}
                 canManageTimesheets={canManageTimesheets}
                 clockEmployee={clockEmployees.get(row.employeeId)}
                 onClock={onClock}
