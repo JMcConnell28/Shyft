@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
-import { formatAttentionDate, getDashboardWeekStart } from "../utils/date"
+import { formatAttentionDate } from "../utils/date"
+import { getDashboardTimesheetSearch } from "../utils/team-attendance"
 import type { AttentionItem } from "../types"
 import {
   Dialog,
@@ -75,10 +76,7 @@ function DashboardTimeReviewDialog({
                 <Link
                   to="/app/$workspaceSlug/timesheets"
                   params={{ workspaceSlug }}
-                  search={{
-                    entryId: item.id,
-                    weekStart: getDashboardWeekStart(item.workDate),
-                  }}
+                  search={getDashboardTimesheetSearch(item)}
                 />
               }
             >

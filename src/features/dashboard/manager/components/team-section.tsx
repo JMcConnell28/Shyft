@@ -2,7 +2,7 @@ import { dashboardTeamColumns } from "../constants"
 import { ManagerDashboardCard } from "./dashboard-card"
 import { ManagerTeamFilters } from "./team-filters"
 import { DashboardTeamRow } from "./team-row"
-import type { ManagerDayData, TeamRow } from "../types"
+import type { DashboardTeamRowProps, ManagerDayData } from "../types"
 import type { useTeamFilters } from "../hooks/use-team-filters"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -12,6 +12,7 @@ function ManagerTeamSection({
   filters,
   workspaceSlug,
   canManageRota,
+  canManageTimesheets,
   onClock,
   onReview,
 }: {
@@ -19,9 +20,14 @@ function ManagerTeamSection({
   filters: ReturnType<typeof useTeamFilters>
   workspaceSlug: string
   canManageRota: boolean
-  onClock: (row: TeamRow, action: "clock_in" | "clock_out") => void
-  onReview: (row: TeamRow) => void
+  canManageTimesheets: boolean
+  onClock: DashboardTeamRowProps["onClock"]
+  onReview: DashboardTeamRowProps["onReview"]
 }) {
+  const clockEmployees = new Map(
+    data.clockEmployees.map((employee) => [employee.id, employee])
+  )
+
   return (
     <ManagerDashboardCard
       id="dashboard-team"
@@ -69,11 +75,8 @@ function ManagerTeamSection({
                 isToday={data.isToday}
                 workspaceSlug={workspaceSlug}
                 canManageRota={canManageRota}
-                isClockedIn={Boolean(
-                  data.clockEmployees.find(
-                    (employee) => employee.id === row.employeeId
-                  )?.openEntry
-                )}
+                canManageTimesheets={canManageTimesheets}
+                clockEmployee={clockEmployees.get(row.employeeId)}
                 onClock={onClock}
                 onReview={onReview}
               />

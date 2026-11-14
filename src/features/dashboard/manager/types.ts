@@ -1,5 +1,6 @@
 import type { z } from "zod"
 import type {
+  ClockAction,
   ClockShiftSegment,
   ManagerClockEmployee,
 } from "@/features/time-clock/types"
@@ -63,8 +64,13 @@ type DashboardTeamRowProps = {
   isToday: boolean
   workspaceSlug: string
   canManageRota: boolean
-  isClockedIn: boolean
-  onClock: (row: TeamRow, action: "clock_in" | "clock_out") => void
+  canManageTimesheets: boolean
+  clockEmployee: ManagerClockEmployee | undefined
+  onClock: (
+    employee: ManagerClockEmployee,
+    action: ClockAction,
+    segment: ClockShiftSegment
+  ) => void
   onReview: (row: TeamRow) => void
 }
 type ManagerDayData = {

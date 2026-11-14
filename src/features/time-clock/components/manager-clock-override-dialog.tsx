@@ -28,6 +28,7 @@ type OverrideSubmission = {
 }
 
 type ManagerClockOverrideDialogProps = {
+  allowActionChange?: boolean
   employees: Array<ManagerClockEmployee>
   initialAction: ClockAction
   initialEmployeeKey: string
@@ -38,6 +39,7 @@ type ManagerClockOverrideDialogProps = {
 }
 
 function ManagerClockOverrideDialog({
+  allowActionChange = true,
   employees,
   initialAction,
   initialEmployeeKey,
@@ -70,23 +72,25 @@ function ManagerClockOverrideDialog({
         </DialogHeader>
 
         <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-          <fieldset>
-            <legend className="text-xs font-semibold text-[#617096]">
-              Action
-            </legend>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <ManualClockActionButton
-                action="clock_in"
-                currentAction={action}
-                onClick={() => form.setAction("clock_in")}
-              />
-              <ManualClockActionButton
-                action="clock_out"
-                currentAction={action}
-                onClick={() => form.setAction("clock_out")}
-              />
-            </div>
-          </fieldset>
+          {allowActionChange ? (
+            <fieldset>
+              <legend className="text-xs font-semibold text-[#617096]">
+                Action
+              </legend>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <ManualClockActionButton
+                  action="clock_in"
+                  currentAction={action}
+                  onClick={() => form.setAction("clock_in")}
+                />
+                <ManualClockActionButton
+                  action="clock_out"
+                  currentAction={action}
+                  onClick={() => form.setAction("clock_out")}
+                />
+              </div>
+            </fieldset>
+          ) : null}
 
           <label className="block text-xs font-semibold text-[#617096]">
             Team member

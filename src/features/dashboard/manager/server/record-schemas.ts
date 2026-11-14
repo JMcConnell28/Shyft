@@ -29,6 +29,7 @@ const attendanceRowSchema = z.object({
   shift_segment: segmentSchema,
   clocked_in_at: timestampSchema,
   clocked_out_at: timestampSchema.nullable(),
+  work_date: z.iso.date(),
   scheduled_end_at: timestampSchema.nullable(),
   source: z.enum(["employee_nfc", "manager_override", "adjustment"]),
   status: z.enum(["open", "closed", "requires_review"]),

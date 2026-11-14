@@ -133,9 +133,8 @@ function ManagerDashboard({
               filters={filters}
               workspaceSlug={workspaceSlug}
               canManageRota={access.data.capabilities.canManageRota}
-              onClock={(row, action) =>
-                actions.openClock(row, action, day.data)
-              }
+              canManageTimesheets={access.data.capabilities.canManageTimesheets}
+              onClock={actions.openClock}
               onReview={(row) => actions.reviewTeam(row, day.data)}
             />
           ) : null}

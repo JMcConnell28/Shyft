@@ -51,7 +51,10 @@ async function listDashboardAttendance(
       `select te.id, te.employee_id, e.full_name as employee_name, e.status as employee_status,
             te.rota_published_shift_id, te.shift_segment, te.clocked_in_at,
             te.clocked_out_at, te.scheduled_end_at, te.status, te.source, te.notes,
-            s.zone_name_snapshot as zone, s.rota_id
+            s.zone_name_snapshot as zone, s.rota_id,
+            coalesce(s.day_date,
+              (coalesce(te.scheduled_start_at, te.clocked_in_at) at time zone $7::text)::date
+            )::text as work_date
      from public.time_entries te
      join public.employees e on e.id = te.employee_id
      left join public.rota_published_shifts s on s.id = te.rota_published_shift_id
@@ -67,6 +70,7 @@ async function listDashboardAttendance(
         window.end,
         date,
         now.toISOString(),
+        location.timeZone,
       ]
     )
   )

@@ -38,6 +38,7 @@ function ManagerDashboardDialogs({
       <Suspense fallback={null}>
         <ClockDialog
           open
+          allowActionChange={false}
           employees={[request.employee]}
           initialAction={request.action}
           initialEmployeeKey={getManagerClockEmployeeKey(request.employee)}
@@ -94,7 +95,7 @@ function ManagerDashboardDialogs({
         item={request.item}
         workspaceSlug={workspaceSlug}
         canApprove={canWrite}
-        canViewTimesheets={access.capabilities.canManageTimesheets}
+        canViewTimesheets={canWrite && access.capabilities.canManageTimesheets}
         pending={clock.approveAsRecordedMutation.isPending}
         onClose={close}
         onApprove={() =>

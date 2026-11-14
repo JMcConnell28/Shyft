@@ -35,6 +35,7 @@ const dashboardAttendance: AttendanceRow = {
   shift_segment: "full",
   clocked_in_at: "2026-10-16T08:03:00.000Z",
   clocked_out_at: null,
+  work_date: dashboardSchedule.day_date,
   scheduled_end_at: dashboardSchedule.ends_at,
   source: "employee_nfc",
   status: "open",

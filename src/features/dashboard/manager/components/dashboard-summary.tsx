@@ -63,7 +63,7 @@ function ManagerDashboardSummary({
   ]
 
   return (
-    <div className={cn("grid min-w-0 grid-cols-3 gap-2 sm:gap-6", className)}>
+    <div className={cn("hidden min-w-0 grid-cols-3 gap-6 md:grid", className)}>
       {items.map(
         ({ label, value, action, context, icon: Icon, highlighted }) => (
           <Frame
@@ -75,36 +75,26 @@ function ManagerDashboardSummary({
           >
             <Frame.Header
               render={<span />}
-              className="min-h-9 w-full group-data-[variant=band]/frame:px-1.5 group-data-[variant=band]/frame:py-1 sm:grid-cols-[minmax(0,1fr)_auto] sm:group-data-[variant=band]/frame:px-4"
+              className="min-h-9 w-full grid-cols-[minmax(0,1fr)_auto] group-data-[variant=band]/frame:px-4 group-data-[variant=band]/frame:py-1"
             >
-              <span className="text-xs leading-4 font-semibold sm:text-sm">
-                {label}
-              </span>
-              <Frame.Action
-                render={<span />}
-                className="row-span-1 hidden sm:block"
-              >
+              <span className="text-sm leading-4 font-semibold">{label}</span>
+              <Frame.Action render={<span />} className="row-span-1">
                 <Icon aria-hidden="true" className="size-4" />
               </Frame.Action>
             </Frame.Header>
             <Frame.Panel
               render={<span />}
-              className="w-full flex-1 gap-1 px-2 py-2.5 transition-colors group-hover/frame:bg-muted/25 motion-reduce:transition-none sm:gap-1.5 sm:p-4"
+              className="w-full flex-1 gap-1.5 p-4 transition-colors group-hover/frame:bg-muted/25 motion-reduce:transition-none"
             >
               <span
                 className={cn(
-                  "text-2xl leading-8 font-bold tracking-tight tabular-nums sm:text-3xl sm:leading-9",
+                  "text-3xl leading-9 font-bold tracking-tight tabular-nums",
                   highlighted && "text-amber-800 dark:text-amber-300"
                 )}
               >
                 {value}
               </span>
-              <span
-                className={cn(
-                  "text-xs leading-4 text-muted-foreground",
-                  label !== "Attention" && "hidden sm:block"
-                )}
-              >
+              <span className="text-xs leading-4 text-muted-foreground">
                 {context}
               </span>
             </Frame.Panel>

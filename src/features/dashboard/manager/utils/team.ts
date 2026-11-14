@@ -91,7 +91,7 @@ function makeRow(
     employeeName:
       shift?.employee_name ?? entry?.employee_name ?? "Unknown employee",
     isActive: (shift?.employee_status ?? entry?.employee_status) === "active",
-    workDate: shift?.day_date ?? null,
+    workDate: entry?.work_date ?? shift?.day_date ?? null,
     zone: shift?.zone ?? entry?.zone ?? "Unscheduled",
     rotaId: shift?.rota_id ?? entry?.rota_id ?? null,
     assignmentId: shift?.assignment_id ?? null,

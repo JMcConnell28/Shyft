@@ -31,8 +31,9 @@ component immediately starts its import even when its dialog is closed.
   the unchanged shift's schedule identity, surviving replaced published snapshot
   IDs when a rota is republished. Apply
   `20261017211620_manager_dashboard_arrival_resolutions.sql` before deploying.
-- Clock overrides and approvals reuse the time-clock workflows. Corrections link
-  to the exact entry in its original timesheet week. Existing clock/timesheet
+- Employee actions use the existing clock-in, clock-out and time review workflows.
+  The clock-out applies to the row with the open entry. Timesheet shortcuts link
+  to the exact entry in its original week. Existing clock/timesheet
   mutations invalidate dashboard queries. Historical attendance does not poll; the independent current
   attention queue refreshes once a minute.
 - Break tracking is intentionally deferred. No break controls, statuses or
@@ -44,10 +45,9 @@ not write application records or apply migrations to the configured database.
 
 ## Presentation
 
-On narrow screens, the summary strip is followed by the team, outstanding
-attention items and rota planning. At wide widths, the summary cards stack in
-the left column, with the team in the centre and attention and planning stacked
-on the right.
+On phones, the team appears first, followed by outstanding attention items and
+rota planning. At wide widths, the summary cards stack in the left column,
+with the team in the centre and attention and planning stacked on the right.
 
 Dashboard content follows the root `DESIGN.md` and its reference study. Team,
 attention and planning share `ManagerDashboardCard`, which uses PanelUI's
@@ -57,7 +57,7 @@ Manager controls use 32px desktop sizing and 44px phone hit areas. Primary
 buttons use the rota Publish blue; secondary actions use the Notes treatment.
 Button labels are semibold.
 
-Three summary cards use real counts and compact phone layouts. Location and date
+Three summary cards use real counts on tablet and desktop. Location and date
 controls establish staffing scope; attention explicitly spans all locations and
 dates. The staffing table shares its column tracks and 16px insets between header
 and rows, with a compact layout below its container breakpoint. Neutral employee
