@@ -3,10 +3,7 @@ import { ArrowRightIcon, LayoutDashboardIcon, LogInIcon } from "lucide-react"
 
 import { navigationFeatures } from "@/features/marketing/constants/navigation-features"
 import { MarketingMobileNavigation } from "./marketing-mobile-navigation"
-import {
-  marketingLoginButtonClassName,
-  marketingPrimaryButtonClassName,
-} from "@/features/marketing/constants/button-styles"
+import { marketingPrimaryButtonClassName } from "@/features/marketing/constants/button-styles"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -114,15 +111,11 @@ function MarketingHeader({
       </NavigationMenu>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        <MarketingMobileNavigation />
         <Link
           to={isAuthenticated ? "/dashboard" : "/login"}
           search={isAuthenticated ? undefined : { redirect: "/dashboard" }}
           reloadDocument={isAuthenticated}
-          className={cn(
-            buttonVariants({ variant: "pill", size: "lg" }),
-            marketingLoginButtonClassName
-          )}
+          className={cn(buttonVariants({ variant: "secondary" }))}
         >
           <AuthButtonIcon className="size-4" />
           {isAuthenticated ? "Dashboard" : "Log in"}
@@ -139,6 +132,7 @@ function MarketingHeader({
           Start free trial
           <ArrowRightIcon className="size-4 transition-transform group-hover/button:translate-x-0.5" />
         </Link>
+        <MarketingMobileNavigation />
       </div>
     </header>
   )
