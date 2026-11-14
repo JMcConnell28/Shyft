@@ -17,7 +17,7 @@ function TimeAttendanceSetupPrompt({
       </h1>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
         Time &amp; Attendance hasn’t been set up for your locations yet. Enable
-        it to use the clocking tools.
+        it to use clocking and timesheets.
       </p>
       <ul className="my-6 list-disc space-y-3 pl-5 text-sm leading-6">
         <li>Let your team clock in and out at an NFC station.</li>

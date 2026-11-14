@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router"
 import { TimesheetPage } from "@/features/timesheets/components/timesheet-page"
 import { timesheetQueryOptions } from "@/features/timesheets/query-options"
 import { timesheetSearchSchema } from "@/features/timesheets/schemas/timesheet-search-schema"
+import { TimeAttendanceSetupPrompt } from "@/features/time-clock/components/time-attendance-setup-prompt"
+import { needsTimeAttendanceSetup } from "@/features/time-clock/utils/time-attendance-access"
 
 export const Route = createFileRoute(
   "/_authed/_verified/app/$workspaceSlug/timesheets"
@@ -11,14 +13,17 @@ export const Route = createFileRoute(
   preloadStaleTime: 0,
   validateSearch: (search) => timesheetSearchSchema.parse(search),
   loaderDeps: ({ search }) => ({ weekStart: search.weekStart }),
-  loader: ({ context, deps }) => {
+  loader: async ({ context, deps }) => {
     const workspace = context.viewer.activeWorkspace
 
     if (!workspace) {
       throw new Error("An active workspace is required.")
     }
 
-    return context.queryClient.ensureQueryData({
+    if (needsTimeAttendanceSetup(context.viewer.billing))
+      return { setupRequired: true }
+
+    await context.queryClient.ensureQueryData({
       ...timesheetQueryOptions({
         organizationId: workspace.id,
         userId: context.viewer.user.id,
@@ -26,6 +31,7 @@ export const Route = createFileRoute(
       }),
       revalidateIfStale: true,
     })
+    return { setupRequired: false }
   },
   component: WorkspaceTimesheetsRoute,
 })
@@ -33,10 +39,20 @@ export const Route = createFileRoute(
 function WorkspaceTimesheetsRoute() {
   const { viewer } = Route.useRouteContext()
   const search = Route.useSearch()
+  const { setupRequired } = Route.useLoaderData()
   const activeWorkspace = viewer.activeWorkspace
 
   if (!activeWorkspace) {
     throw new Error("An active workspace is required.")
+  }
+
+  if (setupRequired) {
+    return (
+      <TimeAttendanceSetupPrompt
+        workspaceSlug={activeWorkspace.slug}
+        canActivate={viewer.activeRole === "owner"}
+      />
+    )
   }
 
   const input = {

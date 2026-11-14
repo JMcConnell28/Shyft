@@ -5,6 +5,7 @@ import { getOrgCapabilitiesForRole } from "@/lib/auth/get-org-capabilities"
 import { getLocationRole } from "@/lib/auth/has-location-permission"
 import { getOrganizationRole } from "@/lib/auth/has-org-permission"
 import { getDatabase } from "@/lib/db"
+import { listLocationEntitlements } from "@/features/billing/server/entitlements"
 
 type TimesheetAccessScope = {
   canManage: boolean
@@ -33,6 +34,11 @@ async function resolveTimesheetAccess(input: {
       return getEmptyScope(session.user.id, input.organizationId ?? null)
     }
 
+    const enabled = await listAttendanceLocationIds([input.locationId])
+    if (!enabled.has(input.locationId)) {
+      return getEmptyScope(session.user.id, input.organizationId ?? null)
+    }
+
     const location = await getLocation(input.locationId)
 
     return {
@@ -50,11 +56,17 @@ async function resolveTimesheetAccess(input: {
 
   const role = await getOrganizationRole(input.organizationId, session.user.id)
   const capabilities = getOrgCapabilitiesForRole(role)
-  const locations = await listPermittedRotaLocations(
+  const permitted = await listPermittedRotaLocations(
     input.organizationId,
     session.user.id,
     role
   )
+  const enabled = await listAttendanceLocationIds(
+    permitted.map((location) => location.id)
+  )
+  const locations = permitted.filter((location) => enabled.has(location.id))
+  if (!locations.length)
+    return getEmptyScope(session.user.id, input.organizationId)
 
   return {
     canManage: capabilities.canManageTimesheets,
@@ -66,6 +78,18 @@ async function resolveTimesheetAccess(input: {
     organizationId: input.organizationId,
     userId: session.user.id,
   }
+}
+
+async function listAttendanceLocationIds(
+  locationIds: Array<string>
+): Promise<Set<string>> {
+  if (!locationIds.length) return new Set()
+  const entitlements = await listLocationEntitlements(locationIds)
+  return new Set(
+    entitlements
+      .filter((item) => item.timeAttendanceEnabled)
+      .map((item) => item.locationId)
+  )
 }
 
 async function getLocation(locationId: string) {
