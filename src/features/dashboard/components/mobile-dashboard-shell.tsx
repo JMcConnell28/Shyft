@@ -26,7 +26,7 @@ import {
 type MobileDashboardShellProps = {
   announcements: DashboardAnnouncements
   announcementsHref: string
-  clockStatus: DashboardClockStatus
+  clockStatus: DashboardClockStatus | null
   context: DashboardMobileContext
   nextShift: DashboardShiftSummary | null
   shifts: Array<DashboardShiftSummary>
@@ -48,20 +48,22 @@ function MobileDashboardShell({
     <div className="min-h-full bg-background/95 text-[#0b1836] md:hidden">
       <div className="mx-auto flex min-h-full max-w-md flex-col px-5 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <MobileDashboardHero userName={context.userName} />
-        <DashboardClockStatusPanel
-          clockStatus={clockStatus}
-          mobileDetailsHref={
-            activeShift
-              ? getRotaViewPath({
-                  shift: activeShift,
-                  workspaceSlug: context.workspaceSlug,
-                  workspaceType: context.workspaceType,
-                })
-              : undefined
-          }
-          mobileShift={activeShift}
-          variant="mobile"
-        />
+        {clockStatus ? (
+          <DashboardClockStatusPanel
+            clockStatus={clockStatus}
+            mobileDetailsHref={
+              activeShift
+                ? getRotaViewPath({
+                    shift: activeShift,
+                    workspaceSlug: context.workspaceSlug,
+                    workspaceType: context.workspaceType,
+                  })
+                : undefined
+            }
+            mobileShift={activeShift}
+            variant="mobile"
+          />
+        ) : null}
         <DashboardAnnouncementsPanel
           announcements={announcements}
           href={announcementsHref}
@@ -113,7 +115,7 @@ function NextShiftPanel({
             workspaceSlug: context.workspaceSlug,
             workspaceType: context.workspaceType,
           })}
-          className="mt-2.5 grid grid-cols-[3.1rem_minmax(0,1fr)] gap-3 rounded-xl bg-white p-2.5 shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#e0e5ed] transition-colors active:bg-[#f8faff]"
+          className="mt-2.5 grid grid-cols-[3.1rem_minmax(0,1fr)] gap-3 rounded-[10px] bg-white p-2.5 shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#e0e5ed] transition-colors active:bg-[#f8faff]"
         >
           <ShiftDateTile date={date} />
           <div className="flex min-w-0 flex-col">
@@ -140,7 +142,7 @@ function NextShiftPanel({
           </div>
         </Link>
       ) : (
-        <div className="mt-2.5 rounded-xl bg-white px-4 py-6 text-center text-sm font-medium text-[#66738d] shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#e0e5ed]">
+        <div className="mt-2.5 rounded-[10px] bg-white px-4 py-6 text-center text-sm font-medium text-[#66738d] shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#e0e5ed]">
           Your next assigned shift will appear here.
         </div>
       )}

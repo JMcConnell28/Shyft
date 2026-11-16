@@ -7,7 +7,7 @@ import {
   NextShiftCard,
   ThisWeekShiftsCard,
 } from "@/features/dashboard/components/dashboard-shift-panels"
-import { DashboardSummaryStrip } from "@/features/dashboard/components/dashboard-summary-strip"
+import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout"
 import { MobileDashboardShell } from "@/features/dashboard/components/mobile-dashboard-shell"
 
 function ShiftOverviewCards({
@@ -34,25 +34,31 @@ function ShiftOverviewCards({
         shifts={overview.thisWeekShifts}
         weekHoursLabel={overview.weekHoursLabel}
       />
-      <div className="hidden flex-col gap-4 md:flex">
-        <DashboardSummaryStrip
-          overview={overview}
-          organizationName={organizationName}
-        />
-        <div className="grid items-start gap-4 xl:grid-cols-[minmax(22rem,0.78fr)_minmax(0,1.22fr)]">
-          <div className="space-y-4">
-            <DashboardClockStatusPanel clockStatus={overview.clockStatus} />
+      <DashboardLayout className="@container/personal hidden max-w-[1440px] gap-6 md:flex md:pt-6">
+        <header>
+          <h1 className="text-2xl leading-8 font-bold tracking-tight">
+            Your shift overview
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {organizationName} · {overview.weekRangeLabel}
+          </p>
+        </header>
+        <div className="grid items-start gap-6 @min-[44rem]/personal:grid-cols-[minmax(0,1.75fr)_minmax(16rem,1fr)]">
+          <div className="grid min-w-0 gap-6">
+            <ThisWeekShiftsCard shifts={overview.thisWeekShifts} />
             <DashboardAnnouncementsPanel
               announcements={announcements}
               href={announcementsHref}
             />
           </div>
-          <div className="space-y-4">
-            <NextShiftCard shift={overview.nextShift} />
-            <ThisWeekShiftsCard shifts={overview.thisWeekShifts} />
+          <div className="grid min-w-0 gap-6">
+            <NextShiftCard shift={overview.nextShift} context={mobileContext} />
+            {overview.clockStatus ? (
+              <DashboardClockStatusPanel clockStatus={overview.clockStatus} />
+            ) : null}
           </div>
         </div>
-      </div>
+      </DashboardLayout>
     </>
   )
 }

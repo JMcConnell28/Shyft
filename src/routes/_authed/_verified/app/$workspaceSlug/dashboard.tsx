@@ -91,7 +91,7 @@ function DashboardWorkspaceRoute() {
       </Suspense>
 
       <Suspense fallback={<WorkspaceRoutePending />}>
-        <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 lg:p-5">
+        <div className="flex flex-1 flex-col">
           <PersonalDashboard
             input={{
               organizationId: activeWorkspace.id,

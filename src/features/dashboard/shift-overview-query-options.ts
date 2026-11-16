@@ -14,7 +14,7 @@ function shiftOverviewQueryOptions(
     queryFn: () => fetcher({ data: input }),
     staleTime: 15_000,
     refetchInterval: (query) =>
-      query.state.data?.clockStatus.openEntry ? 30_000 : false,
+      query.state.data?.clockStatus?.openEntry ? 30_000 : false,
   })
 }
 

@@ -34,7 +34,7 @@ function WeeklyShiftPanel({
         ) : null}
       </div>
 
-      <div className="mt-2.5 overflow-hidden rounded-xl bg-white shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#e0e5ed]">
+      <div className="mt-2.5 overflow-hidden rounded-[10px] bg-white shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#e0e5ed]">
         {shifts.length === 0 ? (
           <p className="px-4 py-6 text-center text-sm font-medium text-[#66738d]">
             No shifts are assigned to you this week.

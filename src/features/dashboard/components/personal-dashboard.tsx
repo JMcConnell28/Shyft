@@ -14,7 +14,8 @@ function PersonalDashboard({
     <>
       {query.isError ? (
         <p role="alert" className="px-4 py-2 text-sm">
-          Could not refresh your clock status. Showing the last recorded status.
+          Could not refresh your shift overview. Showing the last available
+          data.
         </p>
       ) : null}
       <ShiftOverviewCards {...props} overview={query.data} />

@@ -23,7 +23,7 @@ describe("personal dashboard attendance refresh", () => {
     const interval = options.refetchInterval
     if (typeof interval !== "function")
       throw new Error("Expected a polling policy.")
-    const overview: DashboardShiftOverview = {
+    const overview = {
       clockStatus: {
         completedTodayMs: 0,
         todayEntryCount: 1,
@@ -39,13 +39,15 @@ describe("personal dashboard attendance refresh", () => {
       thisWeekShifts: [],
       weekHoursLabel: null,
       weekRangeLabel: "This week",
-    }
+    } satisfies DashboardShiftOverview
     query.setData(overview)
     expect(interval(query)).toBe(30_000)
     query.setData({
       ...overview,
       clockStatus: { ...overview.clockStatus, openEntry: null },
     })
+    expect(interval(query)).toBe(false)
+    query.setData({ ...overview, clockStatus: null })
     expect(interval(query)).toBe(false)
     client.clear()
   })

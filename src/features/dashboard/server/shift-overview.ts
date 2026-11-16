@@ -6,6 +6,7 @@ import type {
   DashboardShiftSummary,
 } from "@/features/dashboard/types"
 import { listPermittedRotaLocations } from "@/features/rota/server/access"
+import { listLocationEntitlements } from "@/features/billing/server/entitlements"
 import { getLocationRole } from "@/lib/auth/has-location-permission"
 import { getOrgCapabilitiesForRole } from "@/lib/auth/workspace-capabilities"
 import { getDatabase } from "@/lib/db"
@@ -59,7 +60,7 @@ async function getDashboardShiftOverview(
 
   if (locationIds.length === 0) {
     return {
-      clockStatus: getEmptyClockStatus(),
+      clockStatus: null,
       nextShift: null,
       thisWeekShifts: [],
       weekHoursLabel: null,
@@ -74,7 +75,7 @@ async function getDashboardShiftOverview(
 
   if (employeeIds.length === 0) {
     return {
-      clockStatus: getEmptyClockStatus(),
+      clockStatus: null,
       nextShift: null,
       thisWeekShifts: [],
       weekHoursLabel: null,
@@ -124,7 +125,13 @@ async function getDashboardClockStatus(input: {
   employeeIds: Array<string>
   locationIds: Array<string>
   now: Date
-}): Promise<DashboardClockStatus> {
+}): Promise<DashboardClockStatus | null> {
+  const entitlements = await listLocationEntitlements(input.locationIds)
+  const enabledLocationIds = entitlements
+    .filter((location) => location.timeAttendanceEnabled)
+    .map((location) => location.locationId)
+  if (enabledLocationIds.length === 0) return null
+
   const todayStart = new Date(
     input.now.getFullYear(),
     input.now.getMonth(),
@@ -146,7 +153,7 @@ async function getDashboardClockStatus(input: {
          or entry.clocked_out_at is null
        )
      order by entry.clocked_in_at desc`,
-    [input.employeeIds, input.locationIds, todayStart.toISOString()]
+    [input.employeeIds, enabledLocationIds, todayStart.toISOString()]
   )
   const openEntry = result.rows.find((entry) => entry.clocked_out_at === null)
   const completedTodayMs = result.rows.reduce((total, entry) => {
@@ -395,14 +402,6 @@ function getEntryDurationMs(entry: DashboardClockEntryRow) {
   }
 
   return Math.max(0, clockedOutAt - clockedInAt)
-}
-
-function getEmptyClockStatus(): DashboardClockStatus {
-  return {
-    completedTodayMs: 0,
-    openEntry: null,
-    todayEntryCount: 0,
-  }
 }
 
 export { getDashboardShiftOverview }

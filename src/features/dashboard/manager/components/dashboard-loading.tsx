@@ -1,8 +1,8 @@
-import { ManagerDashboardCard } from "./dashboard-card"
+import { DashboardCard } from "@/features/dashboard/components/dashboard-card"
 
 function ManagerDashboardLoading() {
   return (
-    <ManagerDashboardCard title="Team" role="status">
+    <DashboardCard title="Team" role="status">
       <div className="p-4">
         <div className="h-11 rounded-lg bg-muted/60 motion-safe:animate-pulse md:h-8" />
       </div>
@@ -17,7 +17,7 @@ function ManagerDashboardLoading() {
         </div>
       ))}
       <span className="sr-only">Loading staffing…</span>
-    </ManagerDashboardCard>
+    </DashboardCard>
   )
 }
 

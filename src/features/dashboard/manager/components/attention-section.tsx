@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { formatAttentionDate } from "../utils/date"
-import { ManagerDashboardCard } from "./dashboard-card"
 import type { AttentionItem, AttentionPage } from "../types"
+import { DashboardCard } from "@/features/dashboard/components/dashboard-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/panelui/badge"
 
@@ -25,7 +25,7 @@ function ManagerAttentionSection({
   onRetry: () => void
 }) {
   return (
-    <ManagerDashboardCard
+    <DashboardCard
       id="dashboard-attention"
       headingId="attention-heading"
       title="Needs attention"
@@ -114,7 +114,7 @@ function ManagerAttentionSection({
       {data && data.total > 1 ? (
         <AttentionPager data={data} pending={pending} onPage={onPage} />
       ) : null}
-    </ManagerDashboardCard>
+    </DashboardCard>
   )
 }
 

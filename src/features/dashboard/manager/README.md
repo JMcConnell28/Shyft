@@ -50,8 +50,9 @@ rota planning. At wide widths, the summary cards stack in the left column,
 with the team in the centre and attention and planning stacked on the right.
 
 Dashboard content follows the root `DESIGN.md` and its reference study. Team,
-attention and planning share `ManagerDashboardCard`, which uses PanelUI's
-`Frame` band variant with a heading in the muted band and an inset card surface.
+attention and planning share `DashboardCard` with the desktop personal dashboard.
+It uses PanelUI's `Frame` band variant with a lightly tinted heading and an inset
+card surface.
 The summary metrics use the same band variant with a button as the frame root.
 Manager controls use 32px desktop sizing and 44px phone hit areas. Primary
 buttons use the rota Publish blue; secondary actions use the Notes treatment.

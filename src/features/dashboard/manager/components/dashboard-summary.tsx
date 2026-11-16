@@ -7,6 +7,10 @@ import {
 import { getTeamSummary } from "../utils/team"
 import type { ManagerDayData } from "../types"
 import { Frame } from "@/components/panelui/frame"
+import {
+  dashboardCardFrameClassName,
+  dashboardCardPanelClassName,
+} from "@/features/dashboard/components/dashboard-card"
 import { cn } from "@/lib/utils"
 
 function ManagerDashboardSummary({
@@ -71,7 +75,10 @@ function ManagerDashboardSummary({
             variant="band"
             render={<button type="button" onClick={action} />}
             aria-label={`${label}: ${value}, ${context}`}
-            className="min-w-0 cursor-pointer text-start transition-colors hover:bg-accent/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
+            className={cn(
+              dashboardCardFrameClassName,
+              "cursor-pointer text-start transition-colors hover:bg-accent/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
+            )}
           >
             <Frame.Header
               render={<span />}
@@ -84,7 +91,10 @@ function ManagerDashboardSummary({
             </Frame.Header>
             <Frame.Panel
               render={<span />}
-              className="w-full flex-1 gap-1.5 p-4 transition-colors group-hover/frame:bg-muted/25 motion-reduce:transition-none"
+              className={cn(
+                dashboardCardPanelClassName,
+                "w-full flex-1 gap-1.5 p-4 transition-colors group-hover/frame:bg-muted/25 motion-reduce:transition-none"
+              )}
             >
               <span
                 className={cn(

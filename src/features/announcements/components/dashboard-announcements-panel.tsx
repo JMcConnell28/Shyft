@@ -10,11 +10,8 @@ import type {
 } from "@/features/announcements/types"
 import { Badge } from "@/components/panelui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  DashboardEmptyState,
-  DashboardPanel,
-  DashboardPanelHeader,
-} from "@/features/dashboard/components/dashboard-desktop-panel"
+import { DashboardCard } from "@/features/dashboard/components/dashboard-card"
+import { DashboardEmptyState } from "@/features/dashboard/components/dashboard-layout"
 
 function DashboardAnnouncementsPanel({
   announcements,
@@ -32,30 +29,27 @@ function DashboardAnnouncementsPanel({
   }
 
   return (
-    <DashboardPanel>
-      <DashboardPanelHeader
-        action={
-          <Button
-            size="sm"
-            variant="secondary"
-            nativeButton={false}
-            render={<Link to={href} />}
-          >
-            View all
-          </Button>
-        }
-        icon={MegaphoneIcon}
-        subtitle={
-          announcements.unreadCount > 0
-            ? `${announcements.unreadCount} unread`
-            : "Latest workplace updates"
-        }
-        title="Announcements"
-      />
-      <div className="p-4">
-        <AnnouncementPreviewList announcements={announcements} href={href} />
-      </div>
-    </DashboardPanel>
+    <DashboardCard
+      headingId="personal-announcements"
+      action={
+        <Button
+          size="sm"
+          variant="secondary"
+          nativeButton={false}
+          render={<Link to={href} />}
+        >
+          View all
+        </Button>
+      }
+      description={
+        announcements.unreadCount > 0
+          ? `${announcements.unreadCount} unread`
+          : undefined
+      }
+      title="Announcements"
+    >
+      <AnnouncementPreviewList announcements={announcements} href={href} />
+    </DashboardCard>
   )
 }
 
@@ -76,7 +70,7 @@ function MobileAnnouncementsPanel({
       {announcement ? (
         <Link
           to={href}
-          className="mt-2.5 block overflow-hidden rounded-xl border border-[#ffd2d2] bg-[#fffafa] transition-colors active:bg-[#fff4f4]"
+          className="mt-2.5 block overflow-hidden rounded-[10px] border border-[#ffd2d2] bg-[#fffafa] transition-colors active:bg-[#fff4f4]"
         >
           <div className="relative grid grid-cols-[3rem_minmax(0,1fr)] gap-2.5 px-3 py-3">
             <span className="flex size-[2.625rem] items-center justify-center rounded-full bg-[#ffe8e8] text-[#e31818]">
@@ -109,7 +103,7 @@ function MobileAnnouncementsPanel({
       ) : (
         <Link
           to={href}
-          className="mt-2.5 flex min-h-28 items-center justify-center rounded-xl border border-dashed border-[#d9dfeb] bg-white px-4 text-sm font-medium text-[#66738d]"
+          className="mt-2.5 flex min-h-28 items-center justify-center rounded-[10px] border border-dashed border-[#d9dfeb] bg-white px-4 text-sm font-medium text-[#66738d]"
         >
           No announcements yet.
         </Link>
@@ -130,7 +124,7 @@ function AnnouncementPreviewList({
   }
 
   return (
-    <div className="divide-y divide-[#edf0f6] overflow-hidden rounded-[12px] border border-[#dfe5f0] bg-white">
+    <div className="divide-y divide-border/60">
       {announcements.announcements.map((announcement) => (
         <DesktopAnnouncementRow
           announcement={announcement}
@@ -152,20 +146,22 @@ function DesktopAnnouncementRow({
   return (
     <Link
       to={href}
-      className="block bg-white px-3.5 py-3 transition-colors hover:bg-[#fbfcff]"
+      className="block px-4 py-3 transition-colors hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-[#11245a]">
-            {announcement.title}
-          </p>
-          <p className="mt-1 line-clamp-2 text-xs leading-5 font-medium text-[#7a86a4]">
+          <p className="truncate text-sm font-semibold">{announcement.title}</p>
+          <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
             {announcement.body}
           </p>
         </div>
-        {announcement.isUnread ? <Badge>New</Badge> : null}
+        {announcement.isUnread ? (
+          <Badge size="sm" variant="info">
+            New
+          </Badge>
+        ) : null}
       </div>
-      <p className="mt-2 text-xs font-medium text-[#9aa4b8]">
+      <p className="mt-1 text-xs text-muted-foreground">
         {formatDistanceToNow(new Date(announcement.publishedAt), {
           addSuffix: true,
         })}

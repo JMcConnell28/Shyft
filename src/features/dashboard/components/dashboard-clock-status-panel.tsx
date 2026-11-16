@@ -1,7 +1,9 @@
 "use client"
 
 import { Link } from "@tanstack/react-router"
-import { Clock3Icon, ClockIcon, InfoIcon, TimerIcon } from "lucide-react"
+import { Clock3Icon, ClockIcon, InfoIcon } from "lucide-react"
+
+import { DashboardCard } from "./dashboard-card"
 
 import type {
   DashboardClockStatus,
@@ -13,10 +15,6 @@ import {
   formatElapsedTime,
   getElapsedMilliseconds,
 } from "@/features/time-clock/utils/elapsed-time"
-import {
-  DashboardPanel,
-  DashboardPanelHeader,
-} from "@/features/dashboard/components/dashboard-desktop-panel"
 import { Badge } from "@/components/panelui/badge"
 
 function DashboardClockStatusPanel({
@@ -50,55 +48,48 @@ function DashboardClockStatusPanel({
   }
 
   return (
-    <DashboardPanel>
-      <DashboardPanelHeader
-        action={
-          <Badge
-            size="sm"
-            variant={clockStatus.openEntry ? "success" : "secondary"}
-            dot
-          >
-            {clockStatus.openEntry ? "Clocked in" : "Not clocked in"}
-          </Badge>
-        }
-        icon={Clock3Icon}
-        subtitle={
-          clockStatus.openEntry
-            ? `Since ${formatDateTime(clockStatus.openEntry.clockedInAt)}`
-            : "Clock in at your workplace when you arrive"
-        }
-        title="Time clock"
-      />
+    <DashboardCard
+      headingId="personal-clock-heading"
+      action={
+        <Badge
+          size="sm"
+          variant={clockStatus.openEntry ? "success" : "secondary"}
+          dot
+        >
+          {clockStatus.openEntry ? "Clocked in" : "Not clocked in"}
+        </Badge>
+      }
+      title="Time clock"
+    >
+      <div className="space-y-3 px-4 py-3">
+        {clockStatus.openEntry ? (
+          <div>
+            <p className="font-mono text-2xl font-semibold tracking-tight tabular-nums">
+              {formatElapsedTime(openElapsedMs)}
+            </p>
+            <p className="text-xs wrap-anywhere text-muted-foreground">
+              {clockStatus.openEntry.locationName} · Since{" "}
+              {formatDateTime(clockStatus.openEntry.clockedInAt)}
+            </p>
+          </div>
+        ) : null}
 
-      <div className="grid gap-3 p-4 lg:grid-cols-[minmax(0,1fr)_10rem]">
-        <div className="rounded-[12px] border border-[#edf0f6] bg-[#fbfcff] px-4 py-3">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-[#7a86a4] uppercase">
-            Current timer
-          </p>
-          <p className="mt-1 font-mono text-3xl font-semibold tracking-[-0.04em] text-[#11245a] tabular-nums">
-            {clockStatus.openEntry ? formatElapsedTime(openElapsedMs) : "0:00"}
-          </p>
-          <p className="mt-1 text-xs font-medium text-[#7a86a4]">
-            {clockStatus.openEntry
-              ? clockStatus.openEntry.locationName
-              : "No active time entry"}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-          <ClockStat
-            icon={TimerIcon}
-            label="Today"
-            value={formatElapsedSummary(totalTodayMs)}
-          />
-          <ClockStat
-            icon={ClockIcon}
-            label="Entries"
-            value={String(clockStatus.todayEntryCount)}
-          />
-        </div>
+        <dl className="grid grid-cols-2 gap-3">
+          <div>
+            <dt className="text-xs text-muted-foreground">Today</dt>
+            <dd className="text-sm font-semibold tabular-nums">
+              {formatElapsedSummary(totalTodayMs)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs text-muted-foreground">Entries</dt>
+            <dd className="text-sm font-semibold tabular-nums">
+              {clockStatus.todayEntryCount}
+            </dd>
+          </div>
+        </dl>
       </div>
-    </DashboardPanel>
+    </DashboardCard>
   )
 }
 
@@ -122,7 +113,7 @@ function MobileClockStatus({
   const timeLabel = shift?.timeLabel
 
   return (
-    <section className="animate-in overflow-hidden rounded-xl bg-white shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#dfe4ec] duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
+    <section className="animate-in overflow-hidden rounded-[10px] bg-white shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#dfe4ec] duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
       <div className="flex items-center justify-between gap-3 px-3 pt-2.5">
         <Badge size="md" variant={isClockedIn ? "success" : "secondary"} dot>
           {isClockedIn ? "Clocked in" : "Not clocked in"}
@@ -175,26 +166,6 @@ function MobileClockStatus({
         ) : null}
       </div>
     </section>
-  )
-}
-
-function ClockStat({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof ClockIcon
-  label: string
-  value: string
-}) {
-  return (
-    <div className="rounded-xl border border-[#edf0f6] bg-[#fbfcff] px-3 py-3">
-      <div className="flex items-center gap-1.5 text-xs font-bold text-[#7a86a4] uppercase">
-        <Icon className="size-3.5" />
-        {label}
-      </div>
-      <p className="mt-1 text-base font-bold text-[#11245a]">{value}</p>
-    </div>
   )
 }
 

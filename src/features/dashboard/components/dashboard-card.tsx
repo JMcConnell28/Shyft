@@ -3,7 +3,10 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react"
 import { Frame } from "@/components/panelui/frame"
 import { cn } from "@/lib/utils"
 
-type ManagerDashboardCardProps = ComponentPropsWithoutRef<"section"> & {
+const dashboardCardFrameClassName = "min-w-0 rounded-[18px] bg-muted/40"
+const dashboardCardPanelClassName = "group-data-[variant=band]/frame:rounded-xl"
+
+type DashboardCardProps = ComponentPropsWithoutRef<"section"> & {
   title: string
   headingId?: string
   description?: string
@@ -11,7 +14,7 @@ type ManagerDashboardCardProps = ComponentPropsWithoutRef<"section"> & {
   action?: ReactNode
 }
 
-function ManagerDashboardCard({
+function DashboardCard({
   title,
   headingId,
   description,
@@ -20,14 +23,14 @@ function ManagerDashboardCard({
   className,
   children,
   ...props
-}: ManagerDashboardCardProps) {
+}: DashboardCardProps) {
   return (
     <Frame
       variant="band"
       render={<section />}
       aria-labelledby={headingId}
       aria-describedby={descriptionId}
-      className={cn("min-w-0", className)}
+      className={cn(dashboardCardFrameClassName, className)}
       {...props}
     >
       <Frame.Header className="min-h-9 group-data-[variant=band]/frame:px-4 group-data-[variant=band]/frame:py-1">
@@ -45,9 +48,15 @@ function ManagerDashboardCard({
           </Frame.Action>
         ) : null}
       </Frame.Header>
-      <Frame.Panel>{children}</Frame.Panel>
+      <Frame.Panel className={dashboardCardPanelClassName}>
+        {children}
+      </Frame.Panel>
     </Frame>
   )
 }
 
-export { ManagerDashboardCard }
+export {
+  DashboardCard,
+  dashboardCardFrameClassName,
+  dashboardCardPanelClassName,
+}

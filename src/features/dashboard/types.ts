@@ -14,7 +14,7 @@ type DashboardShiftSummary = {
 }
 
 type DashboardShiftOverview = {
-  clockStatus: DashboardClockStatus
+  clockStatus: DashboardClockStatus | null
   nextShift: DashboardShiftSummary | null
   thisWeekShifts: Array<DashboardShiftSummary>
   weekHoursLabel: string | null

@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router"
 import { format, parseISO } from "date-fns"
 import { ChevronRightIcon } from "lucide-react"
 
-import { ManagerDashboardCard } from "./dashboard-card"
 import type { ManagerDashboardAccess, ManagerDayData } from "../types"
+import { DashboardCard } from "@/features/dashboard/components/dashboard-card"
 import { Button } from "@/components/ui/button"
 import { NewRotaDialog } from "@/features/rota/components/new-rota-dialog"
 import { parseRotaListSearch } from "@/features/rota/schemas/rota-schemas"
@@ -25,7 +25,7 @@ function ManagerComingUp({
   const selectedLocation =
     locations.find((item) => item.id === data.location.id) ?? null
   return (
-    <ManagerDashboardCard
+    <DashboardCard
       headingId="coming-up-heading"
       title="Upcoming rotas"
       action={
@@ -103,7 +103,7 @@ function ManagerComingUp({
       ) : (
         <p className="p-4 text-sm text-muted-foreground">No upcoming rotas.</p>
       )}
-    </ManagerDashboardCard>
+    </DashboardCard>
   )
 }
 export { ManagerComingUp }

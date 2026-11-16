@@ -1,9 +1,9 @@
 import { dashboardTeamColumns } from "../constants"
-import { ManagerDashboardCard } from "./dashboard-card"
 import { ManagerTeamFilters } from "./team-filters"
 import { DashboardTeamRow } from "./team-row"
 import type { DashboardTeamRowProps, ManagerDayData } from "../types"
 import type { useTeamFilters } from "../hooks/use-team-filters"
+import { DashboardCard } from "@/features/dashboard/components/dashboard-card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -27,7 +27,7 @@ function ManagerTeamSection({
   )
 
   return (
-    <ManagerDashboardCard
+    <DashboardCard
       id="dashboard-team"
       headingId="team-heading"
       title={data.isToday ? "Today’s team" : "Team"}
@@ -117,7 +117,7 @@ function ManagerTeamSection({
           </Button>
         </div>
       ) : null}
-    </ManagerDashboardCard>
+    </DashboardCard>
   )
 }
 export { ManagerTeamSection }
