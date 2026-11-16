@@ -2,6 +2,7 @@ import type { StaffGroupSettingsGroup } from "@/features/staff-groups/types"
 import { DeleteStaffGroupDialog } from "@/features/staff-groups/components/delete-staff-group-dialog"
 import { StaffGroupDialog } from "@/features/staff-groups/components/staff-group-dialog"
 import { getStaffGroupColorAppearance } from "@/features/staff-groups/constants/staff-group-colors"
+import { Badge } from "@/components/panelui/badge"
 
 type GroupListProps = {
   groups: Array<StaffGroupSettingsGroup>
@@ -65,11 +66,13 @@ function GroupRow({
         </span>
         <span>{group.isFallback ? "Default group" : "This workspace"}</span>
       </div>
-      <span
-        className={`hidden w-fit rounded-lg border px-2 py-1 text-[11px] font-semibold md:block ${appearance.badgeClassName}`}
-      >
+      <Badge size="sm" variant="outline" className="hidden md:inline-flex">
+        <span
+          aria-hidden="true"
+          className={`size-2 rounded-full ${appearance.swatchClassName}`}
+        />
         {appearance.label}
-      </span>
+      </Badge>
       <div className="flex justify-end gap-2">
         {!group.isFallback ? (
           <StaffGroupDialog

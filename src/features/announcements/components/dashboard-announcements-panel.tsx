@@ -8,7 +8,7 @@ import type {
   DashboardAnnouncement,
   DashboardAnnouncements,
 } from "@/features/announcements/types"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DashboardEmptyState,

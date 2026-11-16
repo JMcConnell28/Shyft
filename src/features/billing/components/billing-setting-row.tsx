@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 
 import type { BillingSettingsStatus } from "@/features/billing/types"
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/panelui/badge"
 
 function BillingSettingRow({
   children,
@@ -46,6 +47,13 @@ function BillingSettingValue({
   )
 }
 
+const billingBadgeVariants = {
+  positive: "success",
+  warning: "warning",
+  danger: "destructive",
+  neutral: "info",
+} as const
+
 function BillingStatusPill({
   label,
   tone,
@@ -54,17 +62,9 @@ function BillingStatusPill({
   tone: BillingSettingsStatus["tone"]
 }) {
   return (
-    <span
-      className={cn(
-        "inline-flex h-6 items-center rounded-md px-2 text-[10px] font-bold capitalize",
-        tone === "positive" && "bg-emerald-50 text-emerald-700",
-        tone === "warning" && "bg-amber-50 text-amber-700",
-        tone === "danger" && "bg-red-50 text-red-700",
-        tone === "neutral" && "bg-[#eef3ff] text-blue-700"
-      )}
-    >
+    <Badge variant={billingBadgeVariants[tone]} className="capitalize">
       {label}
-    </span>
+    </Badge>
   )
 }
 

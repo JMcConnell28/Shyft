@@ -1,4 +1,11 @@
-import { cn } from "@/lib/utils"
+import { Badge } from "@panelui/badge"
+
+const variants = {
+  neutral: "secondary",
+  good: "success",
+  warning: "warning",
+  danger: "destructive",
+} as const
 
 function StatusBadge({
   children,
@@ -7,19 +14,7 @@ function StatusBadge({
   children: React.ReactNode
   tone?: "neutral" | "good" | "warning" | "danger"
 }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex rounded-full px-2 py-0.5 text-xs font-semibold",
-        tone === "neutral" && "bg-slate-100 text-slate-700",
-        tone === "good" && "bg-emerald-50 text-emerald-700",
-        tone === "warning" && "bg-amber-50 text-amber-700",
-        tone === "danger" && "bg-red-50 text-red-700",
-      )}
-    >
-      {children}
-    </span>
-  )
+  return <Badge variant={variants[tone]}>{children}</Badge>
 }
 
 export { StatusBadge }

@@ -17,7 +17,7 @@ import {
   DashboardPanel,
   DashboardPanelHeader,
 } from "@/features/dashboard/components/dashboard-desktop-panel"
-import { cn } from "@/lib/utils"
+import { Badge } from "@/components/panelui/badge"
 
 function DashboardClockStatusPanel({
   clockStatus,
@@ -53,22 +53,13 @@ function DashboardClockStatusPanel({
     <DashboardPanel>
       <DashboardPanelHeader
         action={
-          <span
-            className={cn(
-              "inline-flex items-center gap-2 rounded-[10px] px-2.5 py-1 text-[11px] font-semibold",
-              clockStatus.openEntry
-                ? "bg-[#e7f8f1] text-[#248964]"
-                : "bg-[#f1f3f7] text-[#6f7688]"
-            )}
+          <Badge
+            size="sm"
+            variant={clockStatus.openEntry ? "success" : "secondary"}
+            dot
           >
-            <span
-              className={cn(
-                "size-1.5 rounded-full",
-                clockStatus.openEntry ? "bg-[#36ad7d]" : "bg-[#a7adba]"
-              )}
-            />
             {clockStatus.openEntry ? "Clocked in" : "Not clocked in"}
-          </span>
+          </Badge>
         }
         icon={Clock3Icon}
         subtitle={
@@ -133,22 +124,9 @@ function MobileClockStatus({
   return (
     <section className="animate-in overflow-hidden rounded-xl bg-white shadow-[0_2px_9px_rgba(25,45,85,0.07)] ring-1 ring-[#dfe4ec] duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none">
       <div className="flex items-center justify-between gap-3 px-3 pt-2.5">
-        <span
-          className={cn(
-            "inline-flex items-center gap-2 rounded-[10px] px-2.5 py-1.5 text-sm font-bold",
-            isClockedIn
-              ? "bg-[#e9f8ed] text-[#129238]"
-              : "bg-[#f1f3f7] text-[#6f7688]"
-          )}
-        >
-          <span
-            className={cn(
-              "size-2 rounded-full",
-              isClockedIn ? "bg-[#36ad7d]" : "bg-[#a7adba]"
-            )}
-          />
+        <Badge size="md" variant={isClockedIn ? "success" : "secondary"} dot>
           {isClockedIn ? "Clocked in" : "Not clocked in"}
-        </span>
+        </Badge>
         <span className="flex size-7 items-center justify-center rounded-lg bg-[#edf2ff] text-[#0865f5]">
           <Clock3Icon className="size-[1.125rem]" />
         </span>

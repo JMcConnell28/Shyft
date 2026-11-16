@@ -2,10 +2,9 @@ import { Link } from "@tanstack/react-router"
 import { ChevronRightIcon } from "lucide-react"
 
 import type { CompanyEmployeeListItem } from "@/features/company/types"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { CompanyEmployeeAvatar } from "@/features/company/components/company-employee-avatar"
 import { getCompanyRoleLabel } from "@/features/company/utils/roles"
-import { cn } from "@/lib/utils"
 
 function CompanyEmployeeListRow({
   employee,
@@ -34,13 +33,13 @@ function CompanyEmployeeListRow({
         </span>
       </span>
       <Badge
-        variant="outline"
-        className={cn(
-          "hidden w-fit rounded-full border-0 px-2.5 py-1 text-[11px] font-semibold md:inline-flex",
+        variant={
           employee.role === "admin" || employee.role === "owner"
-            ? "bg-[#eef3ff] text-[#0968f5]"
-            : "bg-[#f2f5fb] text-[#405078]"
-        )}
+            ? "info"
+            : "secondary"
+        }
+        size="sm"
+        className="hidden md:inline-flex"
       >
         {getCompanyRoleLabel(employee.role)}
       </Badge>

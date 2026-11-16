@@ -6,13 +6,12 @@ import type {
   ShiftSwapRequestSummary,
   ShiftSwapShift,
 } from "@/features/shift-swaps/types"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import {
   ShiftSwapPanel,
   ShiftSwapPanelHeader,
   ShiftSwapPill,
 } from "@/features/shift-swaps/components/shift-swap-panel"
-import { cn } from "@/lib/utils"
 
 function RequestSection({
   children,
@@ -61,17 +60,12 @@ function RequestCard({
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge
               variant={getStatusBadgeVariant(request.status)}
-              className={cn(
-                "rounded-lg px-2 py-0.5 text-[11px] font-semibold capitalize",
-                getStatusBadgeClassName(request.status)
-              )}
+              className="capitalize"
+              size="sm"
             >
               {request.status.replaceAll("_", " ")}
             </Badge>
-            <Badge
-              variant="outline"
-              className="rounded-lg border-[#dfe5f0] bg-[#fafbfe] px-2 py-0.5 text-[11px] font-semibold text-[#61709a] capitalize"
-            >
+            <Badge variant="outline" className="capitalize" size="sm">
               {request.requestType}
             </Badge>
             <span className="text-[11px] font-medium text-[#68769a]">
@@ -123,23 +117,12 @@ function formatDateTime(value: string) {
 }
 
 function getStatusBadgeVariant(status: ShiftSwapRequestStatus) {
-  if (status === "approved") return "secondary" as const
+  if (status === "approved") return "success" as const
+  if (status === "pending_manager") return "warning" as const
   if (status === "denied" || status === "cancelled" || status === "expired") {
     return "destructive" as const
   }
   return "outline" as const
-}
-
-function getStatusBadgeClassName(status: ShiftSwapRequestStatus) {
-  if (status === "approved")
-    return "border-transparent bg-[#e7f8f1] text-[#248964]"
-  if (status === "denied" || status === "cancelled" || status === "expired") {
-    return "border-transparent bg-red-50 text-red-700"
-  }
-  if (status === "pending_manager") {
-    return "border-transparent bg-amber-50 text-amber-700"
-  }
-  return "border-[#dfe5f0] bg-[#fafbfe] text-[#61709a]"
 }
 
 export { RequestCard, RequestSection }

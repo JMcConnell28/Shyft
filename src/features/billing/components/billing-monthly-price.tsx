@@ -7,6 +7,7 @@ import {
   getMonthlyPricing,
 } from "@/features/billing/utils/monthly-pricing"
 import { INCLUDED_CORE_EMPLOYEES } from "@/features/billing/utils/pricing-quantities"
+import { Badge } from "@/components/panelui/badge"
 
 function BillingMonthlyPrice({
   billing,
@@ -20,9 +21,13 @@ function BillingMonthlyPrice({
       <div className="rounded-xl border border-[#dce6f8] bg-[#f5f8ff] p-4">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-xs font-bold text-[#14214a]">Monthly pricing</h3>
-          <span className="rounded-md border border-[#d6e2f7] bg-white px-2 py-1 text-[10px] font-bold tracking-wide text-[#46577d] uppercase">
+          <Badge
+            variant="outline"
+            size="sm"
+            className="tracking-wide uppercase"
+          >
             Monthly
-          </span>
+          </Badge>
         </div>
 
         <dl className="mt-4 space-y-3 text-[11px] text-[#46577d]">

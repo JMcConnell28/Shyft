@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import type { LucideIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/panelui/badge"
 
 function TimesheetPanel({
   children,
@@ -65,14 +66,9 @@ function TimesheetPill({
   className?: string
 }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border border-[#dfe4ef] bg-[#fafbfe] px-2.5 py-1 text-[11px] font-semibold text-[#617096]",
-        className
-      )}
-    >
+    <Badge size="sm" variant="outline" className={className}>
       {children}
-    </span>
+    </Badge>
   )
 }
 

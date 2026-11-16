@@ -5,6 +5,7 @@ import type { DashboardTeamRowProps } from "../types"
 import { EmployeeIdentity } from "@/features/time-clock/components/employee-identity"
 import { getDateKeyInTimeZone } from "@/lib/time-zone"
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/panelui/badge"
 
 function DashboardTeamRow(props: DashboardTeamRowProps) {
   const { row, location } = props
@@ -25,7 +26,10 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
           : dashboardTeamColumns.published
       )}
     >
-      <div role="cell" className="col-span-2 min-w-0 @min-[39rem]/team:col-span-1">
+      <div
+        role="cell"
+        className="col-span-2 min-w-0 @min-[39rem]/team:col-span-1"
+      >
         <EmployeeIdentity
           name={row.employeeName}
           secondary={row.zone}
@@ -84,19 +88,20 @@ function DashboardTeamRow(props: DashboardTeamRowProps) {
         role="cell"
         className="col-start-2 row-span-2 row-start-2 max-w-28 text-right @min-[39rem]/team:col-auto @min-[39rem]/team:row-auto @min-[39rem]/team:text-left"
       >
-        <span
-          className={cn(
-            "inline-flex rounded-md px-2 py-1 text-xs font-medium",
+        <Badge
+          size="sm"
+          className="h-auto min-h-5 max-w-full py-0.5 leading-4 whitespace-normal"
+          variant={
             row.status === "working"
-              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+              ? "success"
               : row.status === "arrival_due" ||
                   row.status === "clock_out_missing"
-                ? "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                : "bg-muted/60 text-muted-foreground"
-          )}
+                ? "warning"
+                : "secondary"
+          }
         >
           {teamStatusLabels[row.status]}
-        </span>
+        </Badge>
         {row.requiresReview ? (
           <p className="text-xs text-amber-800 dark:text-amber-300">
             Needs review

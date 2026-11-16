@@ -4,7 +4,7 @@ import * as React from "react"
 import { PinIcon, StickyNoteIcon } from "lucide-react"
 
 import type { WorkspaceEmployee } from "@/features/rota/types/workspace"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import {
   Dialog,
   DialogContent,
@@ -201,7 +201,7 @@ function EmployeeRotaNotesTrigger({
           <button
             type="button"
             className={cn(
-              "pointer-events-none absolute z-10 flex shrink-0 items-center justify-center rounded-md text-[#0069ff] opacity-0 transition-opacity hover:bg-[#eef3ff] focus-visible:ring-2 focus-visible:ring-[#0069ff] focus-visible:outline-hidden group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100",
+              "pointer-events-none absolute z-10 flex shrink-0 items-center justify-center rounded-md text-[#0069ff] opacity-0 transition-opacity group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100 group-hover/card:pointer-events-auto group-hover/card:opacity-100 hover:bg-[#eef3ff] focus-visible:ring-2 focus-visible:ring-[#0069ff] focus-visible:outline-hidden",
               layout === "compact"
                 ? "top-1/2 right-1 size-5 -translate-y-1/2"
                 : "top-1.5 right-1.5 size-6"
@@ -290,7 +290,7 @@ function EmployeeRotaNotesContent({
                 {employeeRotaNoteCategoryLabels[note.category]}
               </Badge>
             </div>
-            <p className="mt-1.5 whitespace-pre-wrap text-xs font-medium text-[#33477d]">
+            <p className="mt-1.5 text-xs font-medium whitespace-pre-wrap text-[#33477d]">
               {note.body}
             </p>
             <p className="mt-1.5 text-[11px] font-semibold text-[#61709a]">

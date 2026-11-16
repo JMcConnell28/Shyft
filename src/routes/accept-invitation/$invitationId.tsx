@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start"
 import { MailPlusIcon } from "lucide-react"
 
 import { OnboardingShell } from "@/components/app/onboarding-shell"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Card,

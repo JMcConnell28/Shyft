@@ -2,7 +2,7 @@
 
 import { ArrowUpRightIcon, Clock3Icon, FileStackIcon, LoaderCircleIcon } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import type { WeekPreviewSummary } from "@/features/rota/hooks/use-rota-week-previews"

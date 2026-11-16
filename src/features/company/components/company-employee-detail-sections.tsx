@@ -10,7 +10,7 @@ import type {
   CompanyEmployeeDetail,
   CompanyEmployeeLocation,
 } from "@/features/company/types"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { CompanyEmployeeAvatar } from "@/features/company/components/company-employee-avatar"

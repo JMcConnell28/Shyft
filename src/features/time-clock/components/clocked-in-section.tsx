@@ -22,6 +22,7 @@ import {
   getElapsedMilliseconds,
 } from "@/features/time-clock/utils/elapsed-time"
 import { formatClockTime } from "@/features/time-clock/utils/manager-clock-formatters"
+import { Badge } from "@/components/panelui/badge"
 
 type ClockedInEmployee = ManagerClockEmployee & {
   openEntry: NonNullable<ManagerClockEmployee["openEntry"]>
@@ -94,14 +95,14 @@ function ClockedInSection({
                   {formatClockTime(employee.openEntry.clockedInAt)}
                 </TableCell>
                 <TableCell>
-                  <span className="inline-flex rounded-lg bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                  <Badge variant="success" size="sm">
                     {formatElapsedSummary(
                       getElapsedMilliseconds(
                         employee.openEntry.clockedInAt,
                         liveNow
                       )
                     )}
-                  </span>
+                  </Badge>
                 </TableCell>
                 <TableCell className="pr-4 text-right">
                   <Button

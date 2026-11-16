@@ -12,7 +12,6 @@ const staffGroupColorOptions = [
 type StaffGroupColor = (typeof staffGroupColorOptions)[number]
 
 type StaffGroupColorAppearance = {
-  badgeClassName: string
   buttonClassName: string
   cardClassName: string
   dotClassName: string
@@ -26,7 +25,6 @@ const staffGroupColorAppearance: Record<
   StaffGroupColorAppearance
 > = {
   slate: {
-    badgeClassName: "border-slate-200 bg-slate-50 text-slate-700",
     buttonClassName:
       "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100",
     cardClassName: "border-l-slate-400",
@@ -36,7 +34,6 @@ const staffGroupColorAppearance: Record<
     swatchClassName: "bg-slate-500",
   },
   sky: {
-    badgeClassName: "border-sky-200 bg-sky-50 text-sky-700",
     buttonClassName: "border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100",
     cardClassName: "border-l-sky-400",
     dotClassName: "bg-sky-500",
@@ -45,8 +42,6 @@ const staffGroupColorAppearance: Record<
     swatchClassName: "bg-sky-500",
   },
   emerald: {
-    badgeClassName:
-      "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
     buttonClassName:
       "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
     cardClassName: "border-l-emerald-400",
@@ -56,7 +51,6 @@ const staffGroupColorAppearance: Record<
     swatchClassName: "bg-emerald-500",
   },
   amber: {
-    badgeClassName: "border-amber-200 bg-amber-50 text-amber-700",
     buttonClassName:
       "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
     cardClassName: "border-l-amber-400",
@@ -66,7 +60,6 @@ const staffGroupColorAppearance: Record<
     swatchClassName: "bg-amber-500",
   },
   rose: {
-    badgeClassName: "border-rose-200 bg-rose-50 text-rose-700",
     buttonClassName:
       "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100",
     cardClassName: "border-l-rose-400",
@@ -76,7 +69,6 @@ const staffGroupColorAppearance: Record<
     swatchClassName: "bg-rose-500",
   },
   violet: {
-    badgeClassName: "border-violet-200 bg-violet-50 text-violet-700",
     buttonClassName:
       "border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100",
     cardClassName: "border-l-violet-400",
@@ -86,7 +78,6 @@ const staffGroupColorAppearance: Record<
     swatchClassName: "bg-violet-500",
   },
   cyan: {
-    badgeClassName: "border-cyan-200 bg-cyan-50 text-cyan-700",
     buttonClassName:
       "border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100",
     cardClassName: "border-l-cyan-400",
@@ -96,7 +87,6 @@ const staffGroupColorAppearance: Record<
     swatchClassName: "bg-cyan-500",
   },
   orange: {
-    badgeClassName: "border-orange-200 bg-orange-50 text-orange-700",
     buttonClassName:
       "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100",
     cardClassName: "border-l-orange-400",

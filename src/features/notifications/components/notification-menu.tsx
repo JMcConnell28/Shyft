@@ -17,6 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/panelui/badge"
 
 function NotificationMenu({
   announcements,
@@ -60,9 +61,13 @@ function NotificationMenu({
       >
         <BellIcon className="size-4.5" />
         {unreadCount > 0 ? (
-          <span className="absolute -top-1 -right-1 flex min-w-4.5 items-center justify-center rounded-full bg-[#f04444] px-1 text-[10px] leading-4.5 font-bold text-white ring-2 ring-white">
+          <Badge
+            variant="destructive"
+            size="sm"
+            className="absolute -top-1 -right-1 min-w-5 rounded-full ring-2 ring-card"
+          >
             {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
+          </Badge>
         ) : null}
         <span className="sr-only">Open notifications</span>
       </PopoverTrigger>
@@ -78,9 +83,9 @@ function NotificationMenu({
               Notifications
             </h2>
             {unreadCount > 0 ? (
-              <span className="rounded-full bg-[#eef3ff] px-2 py-1 text-[10px] font-bold text-[#0968f5]">
+              <Badge variant="info" size="sm">
                 {unreadCount} new
-              </span>
+              </Badge>
             ) : null}
           </div>
           <p className="mt-0.5 text-xs font-medium text-[#61709a]">

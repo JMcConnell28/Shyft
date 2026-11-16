@@ -21,6 +21,7 @@ import { useEffect, useRef } from "react"
 import type { AdminMembership } from "@/features/auth/types"
 import { SupportInboxIndicator } from "@/features/support/components/support-inbox-indicator"
 import { StationNotification } from "@/features/customers/components/station-notification"
+import { Badge } from "@panelui/badge"
 
 const navItems = [
   { href: "/dashboard", icon: GaugeIcon, label: "Dashboard" },
@@ -158,9 +159,13 @@ function AdminShell({ membership }: { membership: AdminMembership }) {
             {roleHasAdminPermission(membership.role, "support.manage") ? (
               <SupportInboxIndicator />
             ) : null}
-            <span className="hidden rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 sm:inline-flex">
+            <Badge
+              variant="secondary"
+              size="sm"
+              className="hidden sm:inline-flex"
+            >
               {membership.role}
-            </span>
+            </Badge>
           </div>
         </header>
         <main className="mx-auto w-full max-w-7xl min-w-0 px-3 py-5 sm:px-4 lg:px-6 lg:py-6">

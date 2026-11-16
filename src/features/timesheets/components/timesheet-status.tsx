@@ -6,7 +6,7 @@ import type {
 } from "@/features/timesheets/types"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { getTimesheetHealth } from "@/features/timesheets/utils/timesheet-view"
-import { cn } from "@/lib/utils"
+import { Badge } from "@/components/panelui/badge"
 
 function TimesheetHealthBadge({ timesheet }: { timesheet: TimesheetTotals }) {
   const health = getTimesheetHealth(timesheet)
@@ -24,55 +24,49 @@ function TimesheetHealthBadge({ timesheet }: { timesheet: TimesheetTotals }) {
         : "Needs review"
 
   return (
-    <span
-      className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold",
-        health === "ready" && "bg-emerald-50 text-emerald-700",
-        health === "open" && "bg-blue-50 text-[#236cff]",
-        health === "attention" && "bg-orange-50 text-orange-700"
-      )}
+    <Badge
+      size="sm"
+      variant={
+        health === "ready" ? "success" : health === "open" ? "info" : "warning"
+      }
     >
-      <Icon className="size-3" />
+      <Icon className="size-3" aria-hidden="true" />
       {label}
-    </span>
+    </Badge>
   )
 }
 
 function TimesheetEntryBadge({ entry }: { entry: TimesheetEntry | null }) {
-  if (!entry) return <StatusBadge label="No entry" tone="muted" />
+  if (!entry)
+    return (
+      <Badge size="sm" variant="secondary">
+        No entry
+      </Badge>
+    )
   if (entry.status === "requires_review") {
-    return <StatusBadge label="Review" tone="orange" />
+    return (
+      <Badge size="sm" variant="warning">
+        Review
+      </Badge>
+    )
   }
-  if (entry.status === "open") return <StatusBadge label="Open" tone="blue" />
+  if (entry.status === "open")
+    return (
+      <Badge size="sm" variant="info">
+        Open
+      </Badge>
+    )
   if (entry.status === "scheduled") {
-    return <StatusBadge label="Scheduled" tone="muted" />
+    return (
+      <Badge size="sm" variant="secondary">
+        Scheduled
+      </Badge>
+    )
   }
-  return <StatusBadge label="Complete" tone="green" />
-}
-
-function StatusBadge({
-  label,
-  tone,
-}: {
-  label: string
-  tone: "blue" | "green" | "muted" | "orange"
-}) {
-  const toneClassName = {
-    blue: "bg-blue-50 text-[#236cff]",
-    green: "bg-emerald-50 text-emerald-700",
-    muted: "bg-[#f0f3f8] text-[#68769a]",
-    orange: "bg-orange-50 text-orange-700",
-  }[tone]
-
   return (
-    <span
-      className={cn(
-        "inline-flex shrink-0 rounded-md px-2 py-1 text-[10px] font-semibold",
-        toneClassName
-      )}
-    >
-      {label}
-    </span>
+    <Badge size="sm" variant="success">
+      Complete
+    </Badge>
   )
 }
 

@@ -10,7 +10,7 @@ import { OnboardingShell } from "@/components/app/onboarding-shell"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { SelectFormField } from "@/components/forms/select-form-field"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,

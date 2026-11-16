@@ -7,6 +7,7 @@ import type { AnnouncementSummary } from "@/features/announcements/types"
 import { Button } from "@/components/ui/button"
 import { AnnouncementPoll } from "@/features/announcements/components/announcement-poll"
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/panelui/badge"
 
 type AnnouncementCardProps = {
   announcement: AnnouncementSummary
@@ -45,20 +46,20 @@ function AnnouncementCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             {announcement.isPinned ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#eef3ff] px-2 py-0.5 text-[11px] font-semibold text-[#0968f5]">
+              <Badge variant="info" size="sm">
                 <PinIcon className="size-3" />
                 Pinned
-              </span>
+              </Badge>
             ) : null}
             {announcement.poll ? (
-              <span className="rounded-full bg-[#f2f5fb] px-2 py-0.5 text-[11px] font-semibold text-[#405078]">
+              <Badge variant="secondary" size="sm">
                 Poll
-              </span>
+              </Badge>
             ) : null}
             {announcement.status === "archived" ? (
-              <span className="rounded-full bg-[#f2f5fb] px-2 py-0.5 text-[11px] font-semibold text-[#61709a]">
+              <Badge variant="secondary" size="sm">
                 Archived
-              </span>
+              </Badge>
             ) : null}
           </div>
           <h2 className="mt-1 text-base leading-snug font-bold tracking-[-0.02em] [overflow-wrap:anywhere] text-[#10204b] sm:text-[17px]">

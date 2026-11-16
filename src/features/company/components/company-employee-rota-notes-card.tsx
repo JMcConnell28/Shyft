@@ -8,7 +8,7 @@ import type {
   CompanyEmployeeRotaNote,
   CompanyEmployeeRotaNoteFormValues,
 } from "@/features/company/types"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { Button } from "@/components/ui/button"
 import { CompanyEmployeeRotaNoteDialog } from "@/features/company/components/company-employee-rota-note-dialog"
 import { SettingsSection } from "@/features/settings/components/settings-section"
@@ -111,10 +111,7 @@ function RotaNoteItem({
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="truncate text-sm font-bold">{note.title}</h4>
             {note.isPinned ? (
-              <Badge
-                variant="secondary"
-                className="bg-[#eef3ff] text-[#0069ff]"
-              >
+              <Badge variant="info" size="sm">
                 <PinIcon className="size-3" />
                 Pinned
               </Badge>

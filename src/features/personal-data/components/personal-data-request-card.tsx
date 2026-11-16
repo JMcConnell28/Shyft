@@ -1,6 +1,6 @@
 import { privacyStatusLabels } from "@rocketrota/shared/privacy"
 import type { PrivacyRequestSummary } from "@rocketrota/shared/privacy/types"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 
 const date = (value: string) =>
   new Date(value).toLocaleDateString("en-GB", {

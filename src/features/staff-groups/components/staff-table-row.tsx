@@ -7,6 +7,7 @@ import type {
 
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { getStaffGroupColorAppearance } from "@/features/staff-groups/constants/staff-group-colors"
+import { Badge } from "@/components/panelui/badge"
 
 function StaffTableRow({
   employee,
@@ -71,15 +72,12 @@ function StaffTableRow({
           pending={pending}
           onAssign={onAssign}
         />
-        <span
-          className={`w-fit rounded-md px-2 py-1 text-[11px] font-semibold ${
-            employee.status === "active"
-              ? "bg-[#eaf8ec] text-[#15963d]"
-              : "bg-[#f1f3f7] text-[#6f7a98]"
-          }`}
+        <Badge
+          size="sm"
+          variant={employee.status === "active" ? "success" : "secondary"}
         >
           {employee.status === "active" ? "Active" : "Inactive"}
-        </span>
+        </Badge>
         <p className="truncate text-xs text-[#61709a]">
           {employee.email ?? "No contact email"}
         </p>
@@ -88,7 +86,11 @@ function StaffTableRow({
   )
 }
 
-function EmployeeAvatar({ employee }: { employee: StaffGroupSettingsEmployee }) {
+function EmployeeAvatar({
+  employee,
+}: {
+  employee: StaffGroupSettingsEmployee
+}) {
   return (
     <span className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-[#eef3fb] text-xs font-bold text-[#1f58b3]">
       {getInitials(employee.name)}
@@ -149,7 +151,11 @@ function GroupSelect({
   )
 }
 
-function StatusDot({ status }: { status: StaffGroupSettingsEmployee["status"] }) {
+function StatusDot({
+  status,
+}: {
+  status: StaffGroupSettingsEmployee["status"]
+}) {
   return (
     <span
       className={`size-2 shrink-0 rounded-full ${

@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/panelui/badge"
 
 export function DemoPageControls({
   controls,
@@ -20,9 +21,9 @@ export function DemoPageControls({
         <div>
           <h1 className="text-sm font-bold">
             Harbour House{" "}
-            <span className="ml-2 rounded-md bg-blue-50 px-2 py-1 text-[10px] font-semibold text-blue-700">
+            <Badge variant="info" size="sm" className="ml-2">
               Local demo
-            </span>
+            </Badge>
           </h1>
           <p className="mt-1 text-xs text-muted-foreground">
             Fictional staff. All changes reset on refresh. No emails, saving or

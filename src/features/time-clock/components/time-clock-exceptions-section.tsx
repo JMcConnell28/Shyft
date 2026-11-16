@@ -11,6 +11,7 @@ import {
   TimeClockPill,
 } from "@/features/time-clock/components/time-clock-panel"
 import { formatClockDateTime } from "@/features/time-clock/utils/manager-clock-formatters"
+import { Badge } from "@/components/panelui/badge"
 
 function TimeClockExceptionsSection({
   data,
@@ -48,9 +49,13 @@ function TimeClockExceptionsSection({
                   }`}
                   size="compact"
                 />
-                <span className="ml-auto hidden rounded-md bg-orange-50 px-2 py-1 text-[10px] font-semibold text-orange-700 sm:inline-flex">
+                <Badge
+                  variant="warning"
+                  size="sm"
+                  className="ml-auto hidden sm:inline-flex"
+                >
                   Review
-                </span>
+                </Badge>
                 <Button
                   aria-label={`Approve ${entry.employeeName}'s time entry`}
                   disabled={
@@ -75,10 +80,10 @@ function TimeClockExceptionsSection({
                 secondary={attempt.failureReason ?? "Clock attempt failed"}
                 size="compact"
               />
-              <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-rose-50 px-2 py-1 text-[10px] font-semibold text-rose-700">
+              <Badge variant="destructive" size="sm" className="ml-auto">
                 <ShieldAlertIcon className="size-3" />
                 Failed
-              </span>
+              </Badge>
             </div>
           ))}
         </div>

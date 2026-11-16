@@ -9,7 +9,7 @@ import {
 import type { StaffGroupSettingsGroup } from "@/features/staff-groups/types"
 import { DeleteStaffGroupDialog } from "@/features/staff-groups/components/delete-staff-group-dialog"
 import { StaffGroupDialog } from "@/features/staff-groups/components/staff-group-dialog"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 function StaffGroupListCard({

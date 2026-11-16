@@ -1,6 +1,6 @@
 import { UserRoundIcon } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { SettingsSection } from "@/features/settings/components/settings-section"
 
 function AccountProfileSection({

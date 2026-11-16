@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { PackageIcon } from "lucide-react"
 import { useStationCount } from "../hooks/use-customers"
+import { Badge } from "@panelui/badge"
 
 function StationNotification() {
   const query = useStationCount()
@@ -21,9 +22,9 @@ function StationNotification() {
         <span className="text-amber-700">!</span>
       ) : (
         count > 0 && (
-          <span className="rounded-full bg-amber-500 px-1.5 text-xs text-white">
+          <Badge variant="warning" size="sm">
             {count > 99 ? "99+" : count}
-          </span>
+          </Badge>
         )
       )}
     </Link>

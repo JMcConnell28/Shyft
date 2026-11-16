@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router"
 import { useEffect, useRef } from "react"
 
 import { useSupportUnreadCount } from "@/features/support/hooks/use-support-unread-count"
+import { Badge } from "@panelui/badge"
 
 function SupportInboxIndicator() {
   const pathname = useLocation({ select: (location) => location.pathname })
@@ -21,9 +22,9 @@ function SupportInboxIndicator() {
     >
       Support{" "}
       {unreadCount > 0 ? (
-        <span className="ml-1 rounded-full bg-blue-600 px-1.5 py-0.5 text-xs text-white">
+        <Badge variant="info" size="sm" className="ml-1">
           {unreadCount > 99 ? "99+" : unreadCount}
-        </span>
+        </Badge>
       ) : null}
       <span className="sr-only"> unread customer conversations</span>
     </Link>

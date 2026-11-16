@@ -1,11 +1,33 @@
 @import "tailwindcss";
 @import "@fontsource-variable/manrope";
+@source "../../../src/components/panelui/badge.tsx";
 
 @theme {
   --font-sans: "Manrope Variable", sans-serif;
 }
 
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--color-slate-600);
+}
+
 :root {
+  --background: var(--color-slate-50);
+  --foreground: var(--color-slate-900);
+  --primary: var(--color-blue-700);
+  --primary-foreground: white;
+  --secondary: var(--color-slate-100);
+  --secondary-foreground: var(--color-slate-700);
+  --border: var(--color-slate-200);
+  --success: var(--color-emerald-700);
+  --info: var(--color-blue-700);
+  --warning: var(--color-amber-700);
+  --destructive: var(--color-red-700);
   color-scheme: light;
   background: #f8fafc;
   color: #111827;

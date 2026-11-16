@@ -5,6 +5,7 @@ import { formatAttentionDate } from "../utils/date"
 import { ManagerDashboardCard } from "./dashboard-card"
 import type { AttentionItem, AttentionPage } from "../types"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/panelui/badge"
 
 function ManagerAttentionSection({
   data,
@@ -34,9 +35,9 @@ function ManagerAttentionSection({
       className="scroll-mt-4"
       action={
         data ? (
-          <span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium tabular-nums">
+          <Badge variant="secondary" size="sm">
             {data.total}
-          </span>
+          </Badge>
         ) : null
       }
     >

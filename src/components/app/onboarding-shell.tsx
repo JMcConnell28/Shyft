@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 
 import { BrandLockup } from "@/components/app/brand"
 import { SignOutButton } from "@/components/app/sign-out-button"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/panelui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 

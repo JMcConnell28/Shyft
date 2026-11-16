@@ -32,6 +32,7 @@ import {
 import { getErrorMessage } from "@/lib/errors"
 import { showSuccessToast } from "@/lib/toast"
 import { createZodFieldValidator } from "@/lib/validation"
+import { Badge } from "@/components/panelui/badge"
 
 function CreateShiftDialog({ onClose }: { onClose: () => void }) {
   const {
@@ -292,9 +293,9 @@ function CreateShiftDialog({ onClose }: { onClose: () => void }) {
                             Add the return segment after the break.
                           </p>
                         </div>
-                        <span className="rounded-md bg-[#eef2f7] px-1.5 py-0.5 text-[10px] font-bold text-[#61709a]">
+                        <Badge variant="secondary" size="sm">
                           Split
-                        </span>
+                        </Badge>
                       </div>
                       <div className="grid gap-2.5 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
                         <form.Field
