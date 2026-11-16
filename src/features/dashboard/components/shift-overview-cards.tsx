@@ -15,11 +15,13 @@ function ShiftOverviewCards({
   organizationName,
   mobileContext,
   overview,
+  rotasHref,
 }: {
   announcements: DashboardAnnouncements
   organizationName: string
   mobileContext: DashboardMobileContext
   overview: DashboardShiftOverview
+  rotasHref?: string
 }) {
   const announcementsHref = `/app/${mobileContext.workspaceSlug}/announcements`
 
@@ -45,7 +47,10 @@ function ShiftOverviewCards({
         </header>
         <div className="grid items-start gap-6 @min-[44rem]/personal:grid-cols-[minmax(0,1.75fr)_minmax(16rem,1fr)]">
           <div className="grid min-w-0 gap-6">
-            <ThisWeekShiftsCard shifts={overview.thisWeekShifts} />
+            <ThisWeekShiftsCard
+              shifts={overview.thisWeekShifts}
+              rotasHref={rotasHref}
+            />
             <DashboardAnnouncementsPanel
               announcements={announcements}
               href={announcementsHref}

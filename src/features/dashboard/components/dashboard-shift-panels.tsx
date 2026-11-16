@@ -1,12 +1,19 @@
 import { Link } from "@tanstack/react-router"
-import { ChevronRightIcon } from "lucide-react"
+import {
+  ArrowRightIcon,
+  CalendarClockIcon,
+  CalendarDaysIcon,
+  ChevronRightIcon,
+} from "lucide-react"
 
 import { DashboardCard } from "./dashboard-card"
-import { DashboardEmptyState } from "./dashboard-layout"
+import { DashboardEmptyState } from "./dashboard-empty-state"
 import type { DashboardMobileContext } from "./dashboard-mobile-types"
 import type { DashboardShiftSummary } from "@/features/dashboard/types"
 import { Badge } from "@/components/panelui/badge"
+import { buttonVariants } from "@/components/ui/button"
 import { getRotaViewPath } from "@/features/dashboard/utils/shift-display"
+import { cn } from "@/lib/utils"
 
 function NextShiftCard({
   shift,
@@ -40,7 +47,11 @@ function NextShiftCard({
           />
         </Link>
       ) : (
-        <DashboardEmptyState title="No upcoming shift" />
+        <DashboardEmptyState
+          icon={CalendarClockIcon}
+          title="No upcoming shift"
+          description="Your next published shift will appear here."
+        />
       )}
     </DashboardCard>
   )
@@ -48,17 +59,21 @@ function NextShiftCard({
 
 function ThisWeekShiftsCard({
   shifts,
+  rotasHref,
 }: {
   shifts: Array<DashboardShiftSummary>
+  rotasHref?: string
 }) {
   return (
     <DashboardCard
       title="Your shifts this week"
       headingId="personal-week-shifts"
       action={
-        <Badge variant="secondary" size="sm">
-          {shifts.length} {shifts.length === 1 ? "shift" : "shifts"}
-        </Badge>
+        shifts.length > 0 ? (
+          <Badge variant="secondary" size="sm">
+            {shifts.length} {shifts.length === 1 ? "shift" : "shifts"}
+          </Badge>
+        ) : null
       }
     >
       {shifts.length > 0 ? (
@@ -68,7 +83,23 @@ function ThisWeekShiftsCard({
           ))}
         </ul>
       ) : (
-        <DashboardEmptyState title="No shifts this week. Published shifts assigned to you will appear here." />
+        <DashboardEmptyState
+          variant="featured"
+          icon={CalendarDaysIcon}
+          title="No shifts this week"
+          description="Any shifts assigned to you will appear once the rota is published."
+          action={
+            rotasHref ? (
+              <Link
+                to={rotasHref}
+                className={cn(buttonVariants({ variant: "secondary" }))}
+              >
+                View rotas
+                <ArrowRightIcon aria-hidden="true" />
+              </Link>
+            ) : null
+          }
+        />
       )}
     </DashboardCard>
   )

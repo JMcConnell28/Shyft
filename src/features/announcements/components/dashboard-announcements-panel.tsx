@@ -11,7 +11,7 @@ import type {
 import { Badge } from "@/components/panelui/badge"
 import { Button } from "@/components/ui/button"
 import { DashboardCard } from "@/features/dashboard/components/dashboard-card"
-import { DashboardEmptyState } from "@/features/dashboard/components/dashboard-layout"
+import { DashboardEmptyState } from "@/features/dashboard/components/dashboard-empty-state"
 
 function DashboardAnnouncementsPanel({
   announcements,
@@ -120,7 +120,13 @@ function AnnouncementPreviewList({
   href: string
 }) {
   if (announcements.announcements.length === 0) {
-    return <DashboardEmptyState title="No announcements yet" />
+    return (
+      <DashboardEmptyState
+        icon={MegaphoneIcon}
+        title="No announcements yet"
+        description="Team updates will appear here when a manager posts them."
+      />
+    )
   }
 
   return (

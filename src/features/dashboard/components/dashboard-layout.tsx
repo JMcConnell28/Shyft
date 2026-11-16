@@ -62,28 +62,4 @@ function DashboardPanelHeader({
   )
 }
 
-function DashboardEmptyState({
-  title,
-  className,
-}: {
-  title: string
-  className?: string
-}) {
-  return (
-    <p
-      className={cn(
-        "px-3.5 py-4 text-sm text-muted-foreground sm:px-4",
-        className
-      )}
-    >
-      {title}
-    </p>
-  )
-}
-
-export {
-  DashboardEmptyState,
-  DashboardLayout,
-  DashboardPanel,
-  DashboardPanelHeader,
-}
+export { DashboardLayout, DashboardPanel, DashboardPanelHeader }

@@ -3,8 +3,10 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react"
 import { Frame } from "@/components/panelui/frame"
 import { cn } from "@/lib/utils"
 
-const dashboardCardFrameClassName = "min-w-0 rounded-[18px] bg-muted/40"
-const dashboardCardPanelClassName = "group-data-[variant=band]/frame:rounded-xl"
+const dashboardCardFrameClassName =
+  "min-w-0 rounded-[18px] border border-border bg-muted/40"
+const dashboardCardPanelClassName =
+  "group-data-[variant=band]/frame:rounded-xl group-data-[variant=band]/frame:border-0 group-data-[variant=band]/frame:shadow-none"
 
 type DashboardCardProps = ComponentPropsWithoutRef<"section"> & {
   title: string

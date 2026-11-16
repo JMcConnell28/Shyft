@@ -105,6 +105,11 @@ function DashboardWorkspaceRoute() {
               workspaceType: activeWorkspace.type,
             }}
             overview={result.overview}
+            rotasHref={
+              context.capabilities.canViewRota
+                ? `/app/${activeWorkspace.slug}/rota`
+                : undefined
+            }
           />
         </div>
       </Suspense>
