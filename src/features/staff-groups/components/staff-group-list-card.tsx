@@ -2,11 +2,8 @@
 
 import { StarIcon } from "lucide-react"
 
-import {
-  getStaffGroupColorAppearance,
-  type StaffGroupColor,
-} from "@/features/staff-groups/constants/staff-group-colors"
 import type { StaffGroupSettingsGroup } from "@/features/staff-groups/types"
+import { getStaffGroupColorAppearance } from "@/features/staff-groups/constants/staff-group-colors"
 import { DeleteStaffGroupDialog } from "@/features/staff-groups/components/delete-staff-group-dialog"
 import { StaffGroupDialog } from "@/features/staff-groups/components/staff-group-dialog"
 import { Badge } from "@/components/panelui/badge"
@@ -22,9 +19,9 @@ function StaffGroupListCard({
 }: {
   groups: Array<StaffGroupSettingsGroup>
   isBusy?: boolean
-  onCreate: (values: { name: string; color: StaffGroupColor }) => Promise<void>
+  onCreate: (values: { name: string; color: StaffGroupSettingsGroup["color"] }) => Promise<void>
   onRename: (groupId: string, name: string) => Promise<void>
-  onSetColor: (groupId: string, color: StaffGroupColor) => Promise<void>
+  onSetColor: (groupId: string, color: StaffGroupSettingsGroup["color"]) => Promise<void>
   onDelete: (groupId: string) => Promise<void>
 }) {
   return (

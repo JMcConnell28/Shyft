@@ -18,10 +18,10 @@ import {
 } from "lucide-react"
 import { useEffect, useRef } from "react"
 
+import { Badge } from "@panelui/badge"
 import type { AdminMembership } from "@/features/auth/types"
 import { SupportInboxIndicator } from "@/features/support/components/support-inbox-indicator"
 import { StationNotification } from "@/features/customers/components/station-notification"
-import { Badge } from "@panelui/badge"
 
 const navItems = [
   { href: "/dashboard", icon: GaugeIcon, label: "Dashboard" },

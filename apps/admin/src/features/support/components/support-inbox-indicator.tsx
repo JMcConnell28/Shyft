@@ -1,8 +1,8 @@
 import { Link, useLocation } from "@tanstack/react-router"
 import { useEffect, useRef } from "react"
 
-import { useSupportUnreadCount } from "@/features/support/hooks/use-support-unread-count"
 import { Badge } from "@panelui/badge"
+import { useSupportUnreadCount } from "@/features/support/hooks/use-support-unread-count"
 
 function SupportInboxIndicator() {
   const pathname = useLocation({ select: (location) => location.pathname })

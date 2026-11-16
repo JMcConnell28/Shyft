@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { PackageIcon } from "lucide-react"
-import { useStationCount } from "../hooks/use-customers"
 import { Badge } from "@panelui/badge"
+import { useStationCount } from "../hooks/use-customers"
 
 function StationNotification() {
   const query = useStationCount()

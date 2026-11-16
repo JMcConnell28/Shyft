@@ -1,7 +1,7 @@
 import { useRotaWorkspace } from "./rota-workspace-provider"
 import { RotaVersionLabel } from "./rota-version-label"
-import type { ReactNode } from "react"
 import { RotaListStatusBadge } from "./rota-list-status-badge"
+import type { ReactNode } from "react"
 
 function ToolBarFrame({
   actions,
