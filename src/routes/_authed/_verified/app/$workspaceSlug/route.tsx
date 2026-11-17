@@ -82,7 +82,7 @@ function WorkspaceShellRoute({
       routeKey={shellConfig.routeKey}
       title={shellConfig.title}
       description={shellConfig.description}
-      backLink={shellConfig.backLink}
+      back={shellConfig.back}
       mobileBrandHeader={shellConfig.mobileBrandHeader}
       hasUnreadRotaUpdates={hasUnreadRotaUpdates}
       hasUnreadAnnouncements={hasUnreadAnnouncements}

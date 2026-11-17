@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Link } from "@tanstack/react-router"
+import { Link, useCanGoBack, useRouter } from "@tanstack/react-router"
 import { ArrowLeftIcon, SettingsIcon } from "lucide-react"
 import { TooltipProvider } from "../ui/tooltip"
 import type {
@@ -7,6 +7,7 @@ import type {
   WorkspaceTrial,
 } from "@/features/billing/types"
 import type { DashboardAnnouncement } from "@/features/announcements/types"
+import type { WorkspaceShellConfig } from "@/features/navigation/utils/workspace-shell"
 import type { SupportThreadSummary } from "@/features/support/types"
 import type { OrganizationCapabilities } from "@/lib/auth/get-org-capabilities"
 import type { OrganizationSummary, WorkspaceSummary } from "@/lib/onboarding"
@@ -43,7 +44,7 @@ function DashboardShell({
   routeKey,
   title,
   description,
-  backLink,
+  back,
   mobileBrandHeader = false,
   children,
   hasUnreadRotaUpdates,
@@ -68,10 +69,7 @@ function DashboardShell({
   title: string
   description: string
   mobileBrandHeader?: boolean
-  backLink?: {
-    href: string
-    label: string
-  }
+  back?: WorkspaceShellConfig["back"]
   children?: React.ReactNode
   hasUnreadRotaUpdates?: boolean
   hasUnreadAnnouncements?: boolean
@@ -107,7 +105,10 @@ function DashboardShell({
           organizationId: activeOrganization.id,
         }
       : null)
-  const isDashboardHome = routeKey === "dashboard" && !backLink
+  const router = useRouter()
+  const canGoBack = useCanGoBack()
+  const backFallbackHref = canGoBack ? undefined : back?.fallbackHref
+  const isDashboardHome = routeKey === "dashboard" && !back
   const isRotaListHome = routeKey === "rota"
   const isSettingsHome = routeKey === "settings"
   const isTimesheetsHome = routeKey === "timesheets"
@@ -191,7 +192,7 @@ function DashboardShell({
                 </div>
               </Link>
             ) : null}
-            {backLink ? (
+            {back && (canGoBack || backFallbackHref) ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -199,12 +200,14 @@ function DashboardShell({
                   "gap-2 text-muted-foreground",
                   hasMobileBrandHeader && "hidden md:inline-flex"
                 )}
-                nativeButton={false}
-                render={<Link to={backLink.href} />}
+                nativeButton={!backFallbackHref}
+                render={
+                  backFallbackHref ? <Link to={backFallbackHref} /> : undefined
+                }
+                onClick={canGoBack ? () => router.history.back() : undefined}
               >
                 <ArrowLeftIcon className="size-3.5" />
-                <span className="hidden sm:inline">{backLink.label}</span>
-                <span className="sm:hidden">Back</span>
+                Back
               </Button>
             ) : null}
             <Breadcrumb

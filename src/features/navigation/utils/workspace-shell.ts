@@ -2,20 +2,14 @@ import type { WorkspaceSummary } from "@/features/onboarding/types"
 import {
   // eslint-disable-next-line import/consistent-type-specifier-style
   type OrganizationAppRouteKey,
-  getWorkspaceDashboardPath,
   getWorkspaceRotaPath,
 } from "@/lib/organization-paths"
-
-type WorkspaceShellBackLink = {
-  href: string
-  label: string
-}
 
 type WorkspaceShellConfig = {
   routeKey: OrganizationAppRouteKey
   title: string
   description: string
-  backLink?: WorkspaceShellBackLink
+  back?: { fallbackHref?: string }
   mobileBrandHeader?: boolean
 }
 
@@ -42,10 +36,7 @@ function getWorkspaceShellConfig(
       routeKey: "rota",
       title: "Rota",
       description: "Create, review, and publish the selected weekly rota.",
-      backLink: {
-        href: getWorkspaceRotaPath(workspace.slug),
-        label: "Back to rotas",
-      },
+      back: { fallbackHref: getWorkspaceRotaPath(workspace.slug) },
     } satisfies WorkspaceShellConfig
   }
 
@@ -55,10 +46,7 @@ function getWorkspaceShellConfig(
       title: "Rota",
       description:
         "Review weekly rotas across venues and jump into the builder.",
-      backLink: {
-        href: getWorkspaceDashboardPath(workspace.slug),
-        label: "Back to dashboard",
-      },
+      back: {},
     } satisfies WorkspaceShellConfig
   }
 
@@ -67,10 +55,7 @@ function getWorkspaceShellConfig(
       routeKey: "settings",
       title: "Settings",
       description: "Manage workspace settings and team setup.",
-      backLink: {
-        href: getWorkspaceDashboardPath(workspace.slug),
-        label: "Back to dashboard",
-      },
+      back: {},
     } satisfies WorkspaceShellConfig
   }
 
@@ -79,10 +64,7 @@ function getWorkspaceShellConfig(
       routeKey: "support",
       title: "Support",
       description: "Your conversations with RocketRota support.",
-      backLink: {
-        href: getWorkspaceDashboardPath(workspace.slug),
-        label: "Back to dashboard",
-      },
+      back: {},
     } satisfies WorkspaceShellConfig
   }
 
@@ -91,10 +73,7 @@ function getWorkspaceShellConfig(
       routeKey: "announcements",
       title: "Announcements",
       description: "Read and share team updates.",
-      backLink: {
-        href: getWorkspaceDashboardPath(workspace.slug),
-        label: "Back to dashboard",
-      },
+      back: {},
     } satisfies WorkspaceShellConfig
   }
 
@@ -103,10 +82,7 @@ function getWorkspaceShellConfig(
       routeKey: "shiftSwaps",
       title: "Shift swaps",
       description: "Request swaps, offer cover, and review approvals.",
-      backLink: {
-        href: getWorkspaceDashboardPath(workspace.slug),
-        label: "Back to dashboard",
-      },
+      back: {},
     } satisfies WorkspaceShellConfig
   }
 
@@ -115,10 +91,7 @@ function getWorkspaceShellConfig(
       routeKey: "timeClock",
       title: "Time tracking",
       description: "Monitor clock-ins, failed attempts, and manager overrides.",
-      backLink: {
-        href: getWorkspaceDashboardPath(workspace.slug),
-        label: "Back to dashboard",
-      },
+      back: {},
     } satisfies WorkspaceShellConfig
   }
 
@@ -127,10 +100,7 @@ function getWorkspaceShellConfig(
       routeKey: "timesheets",
       title: "Timesheets",
       description: "Review weekly worked, scheduled, and payable hours.",
-      backLink: {
-        href: getWorkspaceDashboardPath(workspace.slug),
-        label: "Back to dashboard",
-      },
+      back: {},
     } satisfies WorkspaceShellConfig
   }
 
@@ -140,10 +110,7 @@ function getWorkspaceShellConfig(
       mobileBrandHeader: true,
       title: "Account",
       description: "Manage your personal details and password.",
-      backLink: {
-        href: getWorkspaceDashboardPath(workspace.slug),
-        label: "Back to dashboard",
-      },
+      back: {},
     } satisfies WorkspaceShellConfig
   }
 
