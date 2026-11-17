@@ -40,6 +40,9 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
+const headerIconClassName =
+  "size-9 rounded-lg border-sidebar-border text-sidebar-accent-foreground hover:bg-sidebar-accent md:size-8 dark:bg-sidebar-accent max-md:rounded-xl max-md:border-[#0069ff]/20 max-md:bg-[#eef3ff] max-md:text-[#0069ff] max-md:shadow-sm"
+
 function DashboardShell({
   routeKey,
   title,
@@ -256,7 +259,7 @@ function DashboardShell({
                 hasUnreadRotaUpdates={Boolean(hasUnreadRotaUpdates)}
                 hasError={notificationsError}
                 isLoading={notificationsLoading}
-                prominent={hasMobileBrandHeader}
+                triggerClassName={headerIconClassName}
                 workspaceSlug={activeWorkspace?.slug ?? ""}
               />
             </div>
@@ -264,10 +267,7 @@ function DashboardShell({
               <Button
                 variant="pill"
                 size="icon"
-                className={cn(
-                  hasMobileBrandHeader &&
-                    "size-9 rounded-lg bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
-                )}
+                className={headerIconClassName}
                 nativeButton={false}
                 render={
                   <Link

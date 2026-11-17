@@ -26,7 +26,7 @@ function NotificationMenu({
   hasUnreadRotaUpdates,
   hasError,
   isLoading,
-  prominent,
+  triggerClassName,
   workspaceSlug,
 }: {
   announcements: Array<DashboardAnnouncement>
@@ -35,7 +35,7 @@ function NotificationMenu({
   hasUnreadRotaUpdates: boolean
   hasError: boolean
   isLoading: boolean
-  prominent: boolean
+  triggerClassName?: string
   workspaceSlug: string
 }) {
   const unreadCount =
@@ -51,11 +51,7 @@ function NotificationMenu({
             type="button"
             variant="pill"
             size="icon"
-            className={cn(
-              "relative ml-auto",
-              prominent &&
-                "size-9 rounded-lg bg-white text-[#142453] shadow-[0_4px_14px_rgba(30,50,96,0.08)] ring-1 ring-[#e7eaf2] hover:bg-white md:size-8 md:rounded-full"
-            )}
+            className={cn("relative ml-auto", triggerClassName)}
           />
         }
       >
