@@ -33,6 +33,7 @@ type BillingAccountRow = {
 
 type BillingAccessRow = BillingAccountRow & {
   subscription_status: string | null
+  subscription_ends_at: Date | string | null
   past_due_started_at: Date | string | null
 }
 
@@ -54,6 +55,9 @@ function mapBillingAccess(row: BillingAccessRow): WorkspaceBillingState {
     stripePaymentMethodId: row.stripe_payment_method_id,
     paymentMethodSavedAt,
     subscriptionStatus,
+    subscriptionEndsAt: row.subscription_ends_at
+      ? new Date(row.subscription_ends_at).toISOString()
+      : null,
     pastDueStartedAt: pastDueStartedAt?.toISOString() ?? null,
     pastDueGraceEndsAt: pastDueGraceEndsAt?.toISOString() ?? null,
     isPastDueGraceActive:
@@ -269,11 +273,12 @@ async function getLocationBillingAccess(locationId: string) {
        ba.stripe_payment_method_id,
        ba.payment_method_saved_at,
        subscription.status as subscription_status,
+       case when subscription.cancel_at_period_end then subscription.current_period_end end as subscription_ends_at,
        subscription.past_due_started_at
      from public.locations l
      join public.billing_accounts ba on ba.id = l.billing_account_id
      left join lateral (
-       select status,
+       select status, cancel_at_period_end, current_period_end,
               past_due_started_at
        from public.billing_subscriptions
        where billing_account_id = ba.id
@@ -303,10 +308,11 @@ async function getOrganizationBillingAccess(organizationId: string) {
             account.stripe_payment_method_id,
             account.payment_method_saved_at,
             subscription.status as subscription_status,
+            case when subscription.cancel_at_period_end then subscription.current_period_end end as subscription_ends_at,
             subscription.past_due_started_at
      from public.billing_accounts account
      left join lateral (
-       select status, past_due_started_at
+       select status, past_due_started_at, cancel_at_period_end, current_period_end
        from public.billing_subscriptions
        where billing_account_id = account.id
        order by created_at desc

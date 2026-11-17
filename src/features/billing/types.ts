@@ -32,6 +32,7 @@ type WorkspaceBillingState = {
   stripePaymentMethodId: string | null
   paymentMethodSavedAt: string | null
   subscriptionStatus: BillingSubscriptionStatus | null
+  subscriptionEndsAt?: string | null
   pastDueStartedAt: string | null
   pastDueGraceEndsAt: string | null
   isPastDueGraceActive: boolean
@@ -110,6 +111,7 @@ type OrganizationBillingLocationSummary = {
 }
 
 type BillingSettingsPageProps = {
+  canManageBilling?: boolean
   canManageStations?: boolean
   billing: WorkspaceBillingState | null
   trial: WorkspaceTrial | null

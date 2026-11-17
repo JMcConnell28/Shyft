@@ -6,13 +6,15 @@ import { BrandedArtworkShell } from "@/components/app/branded-artwork-shell"
 
 type SetupAuthShellProps = {
   title: string
-  description: string
-  alternateLabel: string
-  alternateAction: string
-  alternateHref: "/login" | "/sign-up"
-  alternateRedirect: string
+  description: ReactNode
+  alternate?: {
+    label: string
+    action: string
+    to: "/login" | "/sign-up"
+    redirect: string
+  }
+  headerAction?: ReactNode
   showArtwork?: boolean
-  hideAlternate?: boolean
   children: ReactNode
 }
 
@@ -25,27 +27,26 @@ const setupAuthSecondaryButtonClassName =
 function SetupAuthShell({
   title,
   description,
-  alternateLabel,
-  alternateAction,
-  alternateHref,
-  alternateRedirect,
+  alternate,
+  headerAction,
   showArtwork = true,
-  hideAlternate = false,
   children,
 }: SetupAuthShellProps) {
   return (
     <BrandedArtworkShell
       showArtwork={showArtwork}
       headerAction={
-        <Link
-          to="/"
-          data-pwa-hide
-          aria-label="Back to site"
-          className="inline-flex min-h-9 items-center gap-1 text-xs font-semibold text-[#53698d] hover:text-[#075fe6]"
-        >
-          <ArrowLeftIcon className="size-3.5" />
-          <span className="hidden sm:inline">Back to site</span>
-        </Link>
+        headerAction ?? (
+          <Link
+            to="/"
+            data-pwa-hide
+            aria-label="Back to site"
+            className="inline-flex min-h-9 items-center gap-1 text-xs font-semibold text-[#53698d] hover:text-[#075fe6]"
+          >
+            <ArrowLeftIcon className="size-3.5" />
+            <span className="hidden sm:inline">Back to site</span>
+          </Link>
+        )
       }
     >
       <div className="mx-auto max-w-[540px] [&_[data-slot=field-label]]:text-sm [&_[data-slot=field-label]]:font-semibold [&_[data-slot=field-label]]:text-[#24395f] [&_[data-slot=field]]:gap-1 [&_[data-slot=input]]:h-11 [&_[data-slot=input]]:rounded-xl [&_[data-slot=input]]:border-[#cbd9f1] [&_[data-slot=input]]:text-sm [&_[data-slot=input]]:shadow-none [&_[data-slot=input]]:focus-visible:border-[#1264e9]">
@@ -58,15 +59,15 @@ function SetupAuthShell({
           </p>
         </div>
         {children}
-        {!hideAlternate ? (
+        {alternate ? (
           <p className="mt-4 text-center text-xs text-[#657797]">
-            {alternateLabel}{" "}
+            {alternate.label}{" "}
             <Link
-              to={alternateHref}
-              search={{ redirect: alternateRedirect }}
+              to={alternate.to}
+              search={{ redirect: alternate.redirect }}
               className="font-semibold text-[#075fe6] underline underline-offset-4 hover:text-[#064cb8]"
             >
-              {alternateAction}
+              {alternate.action}
             </Link>
           </p>
         ) : null}

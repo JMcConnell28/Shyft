@@ -1,16 +1,18 @@
 import { Building2Icon, Clock3Icon, MapPinIcon, UsersIcon } from "lucide-react"
 
+import type { ReactNode } from "react"
 import type { TimeAttendanceAddressValue } from "@/features/billing/components/time-attendance-address-fields"
+import { OrganizationNameEditDialog } from "@/features/onboarding/components/organization-name-edit-dialog"
 
 function ReviewStep({
-  organizationName,
+  organization,
   locationName,
   zoneNames,
   addonEnabled,
   address,
   onEdit,
 }: {
-  organizationName: string
+  organization: ReactNode
   locationName: string
   zoneNames: Array<string>
   addonEnabled: boolean
@@ -28,11 +30,7 @@ function ReviewStep({
         </p>
       </div>
       <div className="mx-auto max-w-[540px] divide-y divide-[#dce5f4] rounded-xl border border-[#dce5f4] px-3 sm:px-4">
-        <ReviewRow
-          icon={Building2Icon}
-          label="Organisation"
-          value={organizationName}
-        />
+        {organization}
         <ReviewRow
           icon={MapPinIcon}
           label="First location"
@@ -63,18 +61,47 @@ function ReviewStep({
   )
 }
 
+function SetupOrganizationRow({
+  name,
+  disabled,
+  onSave,
+}: {
+  name: string
+  disabled: boolean
+  onSave?: (name: string) => Promise<void>
+}) {
+  return (
+    <ReviewRow
+      icon={Building2Icon}
+      label="Organisation"
+      value={name}
+      action={
+        onSave ? (
+          <OrganizationNameEditDialog
+            name={name}
+            disabled={disabled}
+            onSave={onSave}
+          />
+        ) : null
+      }
+    />
+  )
+}
+
 function ReviewRow({
   icon: Icon,
   label,
   value,
   detail,
   onEdit,
+  action,
 }: {
   icon: typeof Building2Icon
   label: string
   value: string
   detail?: string
   onEdit?: () => void
+  action?: ReactNode
 }) {
   return (
     <div className="flex min-h-[62px] items-center gap-3 py-2">
@@ -96,9 +123,11 @@ function ReviewRow({
         >
           Edit
         </button>
-      ) : null}
+      ) : (
+        action
+      )}
     </div>
   )
 }
 
-export { ReviewStep }
+export { ReviewStep, SetupOrganizationRow }

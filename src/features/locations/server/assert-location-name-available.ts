@@ -19,7 +19,7 @@ async function assertLocationNameAvailable(
   const result = await client.query(
     `select exists (
        select 1 from public.locations
-       where organization_id = $1 and name = $2
+       where organization_id = $1 and lower(btrim(name)) = lower($2)
      ) as exists`,
     [organizationId, name.trim()]
   )

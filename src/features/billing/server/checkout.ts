@@ -128,7 +128,8 @@ function isDeletedStripeCustomer(
 }
 
 async function createSubscriptionCheckoutSession(
-  input: CheckoutWorkspaceInput
+  input: CheckoutWorkspaceInput,
+  assertHeld: () => void = () => {}
 ) {
   const stripe = getStripe()
   const billingAccount = input.organizationId
@@ -176,6 +177,7 @@ async function createSubscriptionCheckoutSession(
       billingAccountId: billingAccount.id,
       input,
       stripeCustomerId,
+      assertHeld,
     })
   }
 
@@ -196,6 +198,8 @@ async function createSubscriptionCheckoutSession(
         ),
       },
     }
+  const lineItems = await buildSubscriptionLineItems()
+  assertHeld()
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: stripeCustomerId,
@@ -206,7 +210,7 @@ async function createSubscriptionCheckoutSession(
     tax_id_collection: { enabled: true },
     automatic_tax: { enabled: true },
     submit_type: "subscribe",
-    line_items: await buildSubscriptionLineItems(),
+    line_items: lineItems,
     metadata: {
       billingAccountId: billingAccount.id,
       organizationId: input.organizationId ?? "",
@@ -242,7 +246,9 @@ async function createPaymentMethodSetupCheckoutSession(input: {
   billingAccountId: string
   input: CheckoutWorkspaceInput
   stripeCustomerId: string
+  assertHeld: () => void
 }): Promise<CheckoutSessionResult> {
+  input.assertHeld()
   const session = await getStripe().checkout.sessions.create({
     mode: "setup",
     customer: input.stripeCustomerId,

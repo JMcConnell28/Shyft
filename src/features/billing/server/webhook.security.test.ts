@@ -47,9 +47,9 @@ vi.mock("./webhook-events", () => ({
 vi.mock("./subscriptions", () => ({
   upsertStripeSubscription: sync,
   syncSubscriptionFromInvoice: sync,
-  upsertStripeCheckoutSession: vi.fn(),
   syncStripeCustomerTaxState: vi.fn(),
 }))
+vi.mock("./checkout-sync", () => ({ upsertStripeCheckoutSession: vi.fn() }))
 vi.mock("./payment-risks", () => ({ recordPaymentRisk: risk }))
 vi.mock("./station-payments", () => ({ recordStationPayment: payment }))
 vi.mock("./station-alerts", () => ({ sendPendingStationAlerts: vi.fn() }))

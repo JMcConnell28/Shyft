@@ -148,10 +148,12 @@ function SignUpRoute() {
     <SetupAuthShell
       title="Create your account"
       description="Sign-up is currently limited to people with an access code."
-      alternateLabel="Already have an account?"
-      alternateAction="Sign in"
-      alternateHref="/login"
-      alternateRedirect={redirectTarget}
+      alternate={{
+        label: "Already have an account?",
+        action: "Sign in",
+        to: "/login",
+        redirect: redirectTarget,
+      }}
     >
       <form
         className="space-y-4"

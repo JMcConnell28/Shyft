@@ -12,6 +12,7 @@ function BillingSettingsPage({
   trial,
   organizationId,
   locationId,
+  canManageBilling = false,
   canManageStations = false,
 }: BillingSettingsPageProps) {
   const status = getBillingStatus({ billing, trial })
@@ -21,6 +22,7 @@ function BillingSettingsPage({
       <BillingTrialNotice billing={billing} trial={trial} />
       <BillingSubscriptionSection
         billing={billing}
+        canManageBilling={canManageBilling}
         locationId={locationId}
         organizationId={organizationId}
         status={status}

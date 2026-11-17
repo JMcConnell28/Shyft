@@ -24,11 +24,15 @@ const startStationPurchase = createServerFn({ method: "POST" })
     const { requireWorkspaceBillingPermission } =
       await import("@/features/billing/server/permissions")
     const { createStationCheckout } = await import("./server/checkout")
+    const { withWorkspaceBillingLock } =
+      await import("@/features/billing/server/workspace-billing-lock")
     const { session } = await requireVerifiedSessionOrThrow()
-    await requireWorkspaceBillingPermission({
+    const { organizationId } = await requireWorkspaceBillingPermission({
       locationId: data.locationId,
       userId: session.user.id,
     })
-    return createStationCheckout(data, session.user.id)
+    return withWorkspaceBillingLock(organizationId, () =>
+      createStationCheckout(data, session.user.id)
+    )
   })
 export { getStationPurchaseOptions, startStationPurchase }

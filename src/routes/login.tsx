@@ -135,10 +135,12 @@ function LoginRoute() {
     <SetupAuthShell
       title="Welcome back"
       description="Sign in to manage your rota and team."
-      alternateLabel="Need an account?"
-      alternateAction="Create one"
-      alternateHref="/sign-up"
-      alternateRedirect={search.redirect}
+      alternate={{
+        label: "Need an account?",
+        action: "Create one",
+        to: "/sign-up",
+        redirect: search.redirect,
+      }}
     >
       <form
         className="space-y-3"

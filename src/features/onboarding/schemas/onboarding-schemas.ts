@@ -284,6 +284,10 @@ const activateOrganizationSchema = z.object({
   organizationId: z.string().trim().min(1, "Choose an organization."),
 })
 
+const renameOnboardingOrganizationSchema = onboardingOrganizationSchema.extend(
+  activateOrganizationSchema.shape
+)
+
 const organizationRouteParamsSchema = z.object({
   orgSlug: organizationSlugSchema,
 })
@@ -354,6 +358,7 @@ export {
   acceptInviteSchema,
   acceptOrganizationInvitationSchema,
   activateOrganizationSchema,
+  renameOnboardingOrganizationSchema,
   dateOfBirthSchema,
   emailSchema,
   firstNameSchema,

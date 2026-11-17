@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start"
 import { Link, createFileRoute } from "@tanstack/react-router"
 import { ArrowRightIcon } from "lucide-react"
 
-import { AuthStatusMessage } from "@/components/app/auth-card"
+import { AuthStatusMessage } from "@/components/app/auth-status-message"
 import {
   SetupAuthShell,
   setupAuthPrimaryButtonClassName,
@@ -72,16 +72,21 @@ function ResetPasswordRoute() {
     <SetupAuthShell
       title="Choose a new password"
       description="Use the secure link from your email to finish resetting your password."
-      alternateLabel="Remembered your password?"
-      alternateAction="Back to sign in"
-      alternateHref="/login"
-      alternateRedirect="/dashboard"
+      alternate={
+        didReset
+          ? undefined
+          : {
+              label: "Remembered your password?",
+              action: "Back to sign in",
+              to: "/login",
+              redirect: "/dashboard",
+            }
+      }
       showArtwork={false}
-      hideAlternate={didReset}
     >
       {didReset ? (
         <div className="space-y-4">
-          <AuthStatusMessage tone="neutral">
+          <AuthStatusMessage>
             <p>Your password has been reset.</p>
           </AuthStatusMessage>
           <Button

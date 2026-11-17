@@ -41,24 +41,31 @@ const startSubscriptionCheckout = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { session } = await requireVerifiedSessionOrThrow()
 
-    await requireWorkspaceBillingPermission({
+    const { organizationId } = await requireWorkspaceBillingPermission({
       organizationId: data.organizationId,
       locationId: data.locationId,
       userId: session.user.id,
     })
 
-    const module = await import("@/features/billing/server/checkout")
-
-    return module.createSubscriptionCheckoutSession({
-      organizationId: data.organizationId,
-      locationId: data.locationId,
-      returnPath: data.returnPath,
-      user: {
-        id: session.user.id,
-        email: session.user.email,
-        name: session.user.name,
-      },
-    })
+    const [checkout, { withWorkspaceBillingLock }] = await Promise.all([
+      import("@/features/billing/server/checkout"),
+      import("@/features/billing/server/workspace-billing-lock"),
+    ])
+    return withWorkspaceBillingLock(organizationId, (assertHeld) =>
+      checkout.createSubscriptionCheckoutSession(
+        {
+          organizationId: data.organizationId,
+          locationId: data.locationId,
+          returnPath: data.returnPath,
+          user: {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.name,
+          },
+        },
+        assertHeld
+      )
+    )
   })
 
 const getWorkspaceBillingStatus = createServerFn({ method: "POST" })
@@ -77,11 +84,10 @@ const getWorkspaceBillingStatus = createServerFn({ method: "POST" })
     const billing = data.organizationId
       ? await billingAccounts.getOrganizationBillingAccess(data.organizationId)
       : await billingAccounts.getLocationBillingAccess(data.locationId ?? "")
-    const subscriptions =
-      await import("@/features/billing/server/subscriptions")
-
     if (data.checkoutSessionId && billing) {
-      await subscriptions.syncCheckoutSessionForBillingAccount({
+      const { syncCheckoutSessionForBillingAccount } =
+        await import("@/features/billing/server/checkout-sync")
+      await syncCheckoutSessionForBillingAccount({
         checkoutSessionId: data.checkoutSessionId,
         billingAccountId: billing.billingAccountId,
       })
@@ -94,7 +100,9 @@ const getWorkspaceBillingStatus = createServerFn({ method: "POST" })
     }
 
     if (billing?.stripeCustomerId) {
-      await subscriptions.refreshStripeSubscriptionsForBillingAccount({
+      const { refreshStripeSubscriptionsForBillingAccount } =
+        await import("@/features/billing/server/subscriptions")
+      await refreshStripeSubscriptionsForBillingAccount({
         billingAccountId: billing.billingAccountId,
         stripeCustomerId: billing.stripeCustomerId,
       })
@@ -133,9 +141,7 @@ const startBillingPortal = createServerFn({ method: "POST" })
   })
 
 const updateTimeAttendanceAddon = createServerFn({ method: "POST" })
-  .validator((input: unknown) =>
-    timeAttendanceAddonInputSchema.parse(input)
-  )
+  .validator((input: unknown) => timeAttendanceAddonInputSchema.parse(input))
   .handler(async ({ data }) => {
     const { session } = await requireVerifiedSessionOrThrow()
 

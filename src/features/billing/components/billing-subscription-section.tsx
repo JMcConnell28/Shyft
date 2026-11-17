@@ -12,6 +12,7 @@ import {
   BillingStatusPill,
 } from "@/features/billing/components/billing-setting-row"
 import { CheckoutButton } from "@/features/billing/components/checkout-button"
+import { SubscriptionCancellationRow } from "@/features/billing/components/subscription-cancellation-row"
 import {
   getPaymentMethodDescription,
   getPlanValue,
@@ -27,20 +28,23 @@ import { SettingsSection } from "@/features/settings/components/settings-section
 
 function BillingSubscriptionSection({
   billing,
+  canManageBilling,
   locationId,
   organizationId,
   status,
   trial,
 }: {
   billing: WorkspaceBillingState | null
+  canManageBilling: boolean
   locationId?: string | null
   organizationId?: string | null
   status: BillingSettingsStatus
   trial: WorkspaceTrial | null
 }) {
-  const canOpenPortal = Boolean(billing?.stripeCustomerId)
+  const canOpenPortal = canManageBilling && Boolean(billing?.stripeCustomerId)
   const trialState = getTrialDisplayState(trial)
   const canStartCheckout =
+    canManageBilling &&
     !billing?.hasActiveSubscription &&
     billing?.subscriptionStatus !== "past_due" &&
     !billing?.hasSavedPaymentMethod
@@ -100,6 +104,17 @@ function BillingSubscriptionSection({
           ) : null}
         </div>
       </div>
+      {canOpenPortal &&
+        organizationId &&
+        billing?.subscriptionStatus !== "canceled" &&
+        billing?.subscriptionStatus !== "incomplete_expired" &&
+        (billing?.subscriptionStatus || billing?.hasSavedPaymentMethod) && (
+          <SubscriptionCancellationRow
+            key={organizationId}
+            organizationId={organizationId}
+            endsAt={billing.subscriptionEndsAt}
+          />
+        )}
     </SettingsSection>
   )
 }

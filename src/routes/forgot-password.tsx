@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start"
 import { createFileRoute } from "@tanstack/react-router"
 import { ArrowRightIcon } from "lucide-react"
 
-import { AuthStatusMessage } from "@/components/app/auth-card"
+import { AuthStatusMessage } from "@/components/app/auth-status-message"
 import {
   SetupAuthShell,
   setupAuthPrimaryButtonClassName,
@@ -63,14 +63,16 @@ function ForgotPasswordRoute() {
     <SetupAuthShell
       title="Forgot your password?"
       description="Enter your email and we will send a secure reset link if the account exists."
-      alternateLabel="Remembered your password?"
-      alternateAction="Back to sign in"
-      alternateHref="/login"
-      alternateRedirect="/dashboard"
+      alternate={{
+        label: "Remembered your password?",
+        action: "Back to sign in",
+        to: "/login",
+        redirect: "/dashboard",
+      }}
       showArtwork={false}
     >
       {didSend ? (
-        <AuthStatusMessage tone="neutral">
+        <AuthStatusMessage>
           <p>If that email exists, a reset link is on its way.</p>
         </AuthStatusMessage>
       ) : (

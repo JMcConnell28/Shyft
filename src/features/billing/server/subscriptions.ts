@@ -5,10 +5,7 @@ import type Stripe from "stripe"
 import {
   ensureLocationBillingAccount,
   ensureOrganizationBillingAccount,
-  setBillingAccountPaymentMethod,
 } from "@/features/billing/server/billing-accounts"
-import { getBillingPricingQuantities } from "@/features/billing/server/pricing"
-import { buildSubscriptionItems } from "@/features/billing/server/subscription-items"
 import { validateSubscriptionPrices } from "@/features/billing/server/subscription-prices"
 import {
   getCoreBasePriceId,
@@ -18,7 +15,6 @@ import {
   getStripe,
 } from "@/features/billing/server/stripe"
 import { syncSubscriptionUsagePeriods } from "@/features/billing/server/usage"
-import { ensureWorkspaceTrial } from "@/features/billing/server/trials"
 import { getDatabase } from "@/lib/db"
 import { syncCurrentStripeSubscription } from "@/features/billing/server/current-subscription"
 
@@ -44,14 +40,6 @@ function getBillingAccountIdFromSubscription(
   subscription: Stripe.Subscription
 ) {
   return subscription.metadata.billingAccountId || null
-}
-
-function getBillingAccountIdFromCheckoutSession(
-  session: Stripe.Checkout.Session
-) {
-  return (
-    session.metadata?.billingAccountId || session.client_reference_id || null
-  )
 }
 
 async function findBillingAccountIdByStripeCustomer(stripeCustomerId: string) {
@@ -299,41 +287,6 @@ async function hasBillingSubscriptionColumn(columnName: string) {
   return exists
 }
 
-async function upsertStripeCheckoutSession(session: Stripe.Checkout.Session) {
-  if (session.mode === "setup") {
-    await upsertSetupCheckoutSession(session)
-    return
-  }
-
-  if (session.mode !== "subscription" || !session.subscription) {
-    return
-  }
-
-  const billingAccountId = getBillingAccountIdFromCheckoutSession(session)
-  const stripeCustomerId =
-    typeof session.customer === "string"
-      ? session.customer
-      : session.customer?.id
-
-  if (billingAccountId && stripeCustomerId) {
-    await getDatabase().query(
-      `update public.billing_accounts
-       set stripe_customer_id = coalesce(stripe_customer_id, $2),
-           updated_at = timezone('utc', now())
-       where id = $1`,
-      [billingAccountId, stripeCustomerId]
-    )
-  }
-
-  const subscriptionId =
-    typeof session.subscription === "string"
-      ? session.subscription
-      : session.subscription.id
-  const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
-
-  await upsertStripeSubscription(subscription)
-}
-
 function getInvoiceSubscriptionId(invoice: Stripe.Invoice) {
   const subscription =
     invoice.parent?.subscription_details?.subscription ?? null
@@ -353,144 +306,6 @@ async function syncSubscriptionFromInvoice(invoice: Stripe.Invoice) {
   }
 
   return upsertStripeSubscription({ id: subscriptionId })
-}
-
-async function upsertSetupCheckoutSession(session: Stripe.Checkout.Session) {
-  if (!session.setup_intent) {
-    return
-  }
-
-  const billingAccountId = getBillingAccountIdFromCheckoutSession(session)
-
-  if (!billingAccountId) {
-    throw new Error("Setup checkout session is missing a billing account.")
-  }
-
-  const setupIntentId =
-    typeof session.setup_intent === "string"
-      ? session.setup_intent
-      : session.setup_intent.id
-  const setupIntent = await getStripe().setupIntents.retrieve(setupIntentId)
-  const paymentMethodId =
-    typeof setupIntent.payment_method === "string"
-      ? setupIntent.payment_method
-      : setupIntent.payment_method?.id
-
-  if (!paymentMethodId || setupIntent.status !== "succeeded") {
-    return
-  }
-
-  const stripeCustomerId =
-    typeof session.customer === "string"
-      ? session.customer
-      : session.customer?.id
-
-  if (stripeCustomerId) {
-    await getStripe().customers.update(stripeCustomerId, {
-      invoice_settings: {
-        default_payment_method: paymentMethodId,
-      },
-    })
-  }
-
-  await setBillingAccountPaymentMethod({
-    billingAccountId,
-    stripePaymentMethodId: paymentMethodId,
-  })
-  await createTrialSubscriptionForSavedPaymentMethod({
-    billingAccountId,
-    locationId: getOptionalMetadataValue(session.metadata?.locationId),
-    organizationId: getOptionalMetadataValue(session.metadata?.organizationId),
-    stripeCustomerId,
-    stripePaymentMethodId: paymentMethodId,
-  })
-}
-
-function getOptionalMetadataValue(value: string | null | undefined) {
-  return value && value.length > 0 ? value : undefined
-}
-
-async function createTrialSubscriptionForSavedPaymentMethod(input: {
-  billingAccountId: string
-  locationId?: string
-  organizationId?: string
-  stripeCustomerId?: string
-  stripePaymentMethodId: string
-}) {
-  if (!input.stripeCustomerId) {
-    return null
-  }
-
-  const existingDatabaseSubscription = await getOpenBillingSubscription(
-    input.billingAccountId
-  )
-
-  if (existingDatabaseSubscription) {
-    return null
-  }
-
-  const existingStripeSubscription =
-    await findOpenStripeSubscriptionForBillingAccount({
-      billingAccountId: input.billingAccountId,
-      stripeCustomerId: input.stripeCustomerId,
-    })
-
-  if (existingStripeSubscription) {
-    return existingStripeSubscription
-  }
-
-  const trial = await ensureWorkspaceTrial({
-    organizationId: input.organizationId,
-    locationId: input.locationId,
-  })
-  const trialEnd = getFutureTrialEndTimestamp(trial.trialEndsAt)
-  const quantities = await getBillingPricingQuantities(input.billingAccountId)
-  const subscription = await getStripe().subscriptions.create({
-    customer: input.stripeCustomerId,
-    default_payment_method: input.stripePaymentMethodId,
-    items: await buildSubscriptionItems(),
-    automatic_tax: { enabled: true },
-    metadata: {
-      billingAccountId: input.billingAccountId,
-      organizationId: input.organizationId ?? "",
-      locationId: input.locationId ?? "",
-      locationQuantity: String(quantities.locationQuantity),
-      usedEmployeeQuantity: String(quantities.usedEmployeeQuantity),
-      includedEmployeeQuantity: String(quantities.includedEmployeeQuantity),
-      billableEmployeeQuantity: String(quantities.extraEmployeeQuantity),
-      extraEmployeeQuantity: String(quantities.extraEmployeeQuantity),
-      timeAttendanceEmployeeQuantity: String(quantities.timeAttendanceQuantity),
-      createdFrom: "saved_payment_method",
-    },
-    ...(trialEnd ? { trial_end: trialEnd } : {}),
-  })
-
-  await upsertStripeSubscription(subscription)
-
-  return subscription
-}
-
-function getFutureTrialEndTimestamp(trialEndsAt: string) {
-  const timestamp = Math.floor(new Date(trialEndsAt).getTime() / 1000)
-
-  return timestamp > Math.floor(Date.now() / 1000) ? timestamp : null
-}
-
-async function syncCheckoutSessionForBillingAccount(input: {
-  checkoutSessionId: string
-  billingAccountId: string
-}) {
-  const session = await getStripe().checkout.sessions.retrieve(
-    input.checkoutSessionId
-  )
-  const sessionBillingAccountId =
-    getBillingAccountIdFromCheckoutSession(session)
-
-  if (sessionBillingAccountId !== input.billingAccountId) {
-    throw new Error("That checkout session does not belong to this workspace.")
-  }
-
-  await upsertStripeCheckoutSession(session)
 }
 
 async function getOpenBillingSubscription(billingAccountId: string) {
@@ -753,10 +568,8 @@ export {
   refreshStripeSubscriptionsForBillingAccount,
   syncBillingAccountAfterCoverageChange,
   syncBillingSubscriptionQuantities,
-  syncCheckoutSessionForBillingAccount,
   syncSubscriptionFromInvoice,
   syncStripeCustomerTaxState,
   syncWorkspaceBillingSubscriptionQuantities,
-  upsertStripeCheckoutSession,
   upsertStripeSubscription,
 }

@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label"
 import { StepIntro } from "@/features/onboarding/components/setup-step-intro"
 
 function LocationStep({
+  organization,
   locationName,
   onLocationNameChange,
 }: {
+  organization: React.ReactNode
   locationName: string
   onLocationNameChange: (value: string) => void
 }) {
@@ -20,7 +22,10 @@ function LocationStep({
         title="Set up your workspace"
         description="Start with your first location. You can add more locations later."
       />
-      <div className="mx-auto max-w-[540px]">
+      <div className="mx-auto max-w-[540px] space-y-4">
+        <div className="rounded-xl border border-[#dce5f4] px-3 sm:px-4">
+          {organization}
+        </div>
         <div className="space-y-2">
           <Label
             htmlFor="first-location-name"

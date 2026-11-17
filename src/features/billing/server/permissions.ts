@@ -26,7 +26,7 @@ async function requireWorkspaceBillingPermission(
     throw new Error("You do not have permission to manage billing.")
   }
 
-  return role
+  return { organizationId }
 }
 
 async function getLocationOrganizationId(locationId: string | undefined) {

@@ -1,9 +1,9 @@
 import "@tanstack/react-start/server-only"
 
+import { upsertStripeCheckoutSession } from "@/features/billing/server/checkout-sync"
 import {
   syncStripeCustomerTaxState,
   syncSubscriptionFromInvoice,
-  upsertStripeCheckoutSession,
   upsertStripeSubscription,
 } from "@/features/billing/server/subscriptions"
 import { sendPaymentFailedNotification } from "@/features/billing/server/email-notifications"

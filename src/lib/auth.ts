@@ -116,6 +116,7 @@ const auth = betterAuth({
     organization({
       ac,
       roles,
+      disableOrganizationDeletion: true,
       requireEmailVerificationOnInvitation: !isEmailVerificationBypassed,
       sendInvitationEmail: async ({ email, id, organization, role }) => {
         const invitationUrl = `${authOrigin}/accept-invitation/${id}`

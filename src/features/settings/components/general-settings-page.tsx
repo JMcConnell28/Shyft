@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 
+import { RemoveOrganizationSection } from "@/features/settings/components/remove-organization-section"
 import { WorkplaceContactSection } from "@/features/settings/components/workplace-contact-section"
 import { WorkplaceLocationsSection } from "@/features/settings/components/workplace-locations-section"
 import { WorkplaceOverviewSection } from "@/features/settings/components/workplace-overview-section"
@@ -11,11 +12,15 @@ import { useUpdateGeneralSettings } from "@/features/settings/hooks/use-update-g
 import { generalSettingsFeatures } from "@/features/settings/constants/general-settings-features"
 
 function GeneralSettingsPage({
+  canRemoveOrganization,
   organizationId,
   userId,
+  workspaceSlug,
 }: {
+  canRemoveOrganization: boolean
   organizationId: string
   userId: string
+  workspaceSlug: string
 }) {
   const settingsQuery = useGeneralSettingsQuery({ organizationId, userId })
   const { isSaving, saveGeneralSettings } = useUpdateGeneralSettings({
@@ -65,6 +70,14 @@ function GeneralSettingsPage({
           onSave={() => {
             void saveGeneralSettings({ contactEmail, contactPhone })
           }}
+        />
+      )}
+      {canRemoveOrganization && (
+        <RemoveOrganizationSection
+          key={organizationId}
+          organizationId={organizationId}
+          organizationName={data.organization.name}
+          workspaceSlug={workspaceSlug}
         />
       )}
     </div>

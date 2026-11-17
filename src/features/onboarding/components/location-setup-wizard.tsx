@@ -15,13 +15,17 @@ import {
   ZonesStep,
 } from "@/features/onboarding/components/location-setup-wizard-steps"
 import { AddonStep } from "@/features/onboarding/components/location-setup-addon-step"
-import { ReviewStep } from "@/features/onboarding/components/location-setup-review-step"
+import {
+  ReviewStep,
+  SetupOrganizationRow,
+} from "@/features/onboarding/components/location-setup-review-step"
 import { SetupStepper } from "@/features/onboarding/components/setup-stepper"
 import { locationSetupSchema } from "@/features/onboarding/schemas/onboarding-schemas"
 import { getErrorMessage } from "@/lib/errors"
 
 type LocationSetupWizardProps = {
   organizationName: string
+  onRenameOrganization?: (name: string) => Promise<{ name: string }>
   onSubmit: (input: LocationSetupInput) => Promise<{ redirectTo: string }>
 }
 
@@ -29,8 +33,11 @@ const stepLabels = ["Location", "Zones", "Add-on", "Review"] as const
 
 function LocationSetupWizard({
   organizationName,
+  onRenameOrganization,
   onSubmit,
 }: LocationSetupWizardProps) {
+  const [savedOrganizationName, setSavedOrganizationName] =
+    React.useState(organizationName)
   const [step, setStep] = React.useState(0)
   const [locationName, setLocationName] = React.useState("")
   const [zoneNames, setZoneNames] = React.useState<Array<string>>(["Main area"])
@@ -99,6 +106,21 @@ function LocationSetupWizard({
     }
   }
 
+  const organization = (
+    <SetupOrganizationRow
+      name={savedOrganizationName}
+      disabled={isSubmitting}
+      onSave={
+        onRenameOrganization
+          ? async (name) => {
+              const result = await onRenameOrganization(name)
+              setSavedOrganizationName(result.name)
+            }
+          : undefined
+      }
+    />
+  )
+
   return (
     <form
       onSubmit={(event) => {
@@ -113,6 +135,7 @@ function LocationSetupWizard({
       >
         {step === 0 ? (
           <LocationStep
+            organization={organization}
             locationName={locationName}
             onLocationNameChange={setLocationName}
           />
@@ -130,7 +153,7 @@ function LocationSetupWizard({
         ) : null}
         {step === 3 ? (
           <ReviewStep
-            organizationName={organizationName}
+            organization={organization}
             locationName={locationName}
             zoneNames={zoneNames}
             addonEnabled={addonEnabled}

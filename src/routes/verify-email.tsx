@@ -2,17 +2,16 @@ import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
-import { MailCheckIcon } from "lucide-react"
-
 import {
-  AuthCard,
-  AuthStatusMessage,
-  authButtonClassName,
-} from "@/components/app/auth-card"
-import { AuthShell } from "@/components/app/auth-shell"
+  SetupAuthShell,
+  setupAuthPrimaryButtonClassName,
+  setupAuthSecondaryButtonClassName,
+} from "@/components/app/setup-auth-shell"
+import { SignOutButton } from "@/components/app/sign-out-button"
 import { FormErrorMessage } from "@/components/forms/form-error-message"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { TextFormField } from "@/components/forms/text-form-field"
+import { buttonVariants } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { getSession } from "@/lib/auth-server"
 import { isEmailVerificationSatisfied } from "@/lib/email-verification"
@@ -20,6 +19,7 @@ import { getErrorMessage } from "@/lib/errors"
 import { resendVerificationEmail } from "@/lib/onboarding"
 import { emailSchema } from "@/lib/onboarding-schemas"
 import { showSuccessToast } from "@/lib/toast"
+import { cn } from "@/lib/utils"
 import { createZodFieldValidator } from "@/lib/validation"
 import { invalidateNavigationCache } from "@/features/navigation/invalidate-navigation-cache"
 import { verificationSearchSchema } from "@/features/account/schemas/authentication-search-schemas"
@@ -60,6 +60,8 @@ function VerifyEmailRoute() {
   const loaderData = Route.useLoaderData()
   const resendVerificationEmailFn = useServerFn(resendVerificationEmail)
   const [error, setError] = React.useState<string | null>(null)
+  const [resentEmail, setResentEmail] = React.useState<string | null>(null)
+  const sentEmail = resentEmail ?? (loaderData.sent ? loaderData.email : null)
 
   const form = useForm({
     defaultValues: {
@@ -76,6 +78,7 @@ function VerifyEmailRoute() {
             callbackURL: value.callbackURL,
           },
         })
+        setResentEmail(value.email)
         showSuccessToast("Verification email sent. Check your inbox.")
       } catch (submissionError) {
         setError(
@@ -89,82 +92,86 @@ function VerifyEmailRoute() {
   })
 
   return (
-    <AuthShell
-      eyebrow="Almost there"
-      title="Verify your email"
-      description="We sent a verification link to your email. Once you confirm it, RocketRota will take you back to the right onboarding step automatically."
-      alternateLabel="Already verified?"
-      alternateAction="Back to sign in"
-      alternateHref="/login"
-      alternateRedirect={loaderData.redirect}
-      hideAlternate={loaderData.hasSession}
-      showSignOut={loaderData.hasSession}
+    <SetupAuthShell
+      title={sentEmail !== null ? "Check your inbox" : "Verify your email"}
+      description={
+        sentEmail ? (
+          <>
+            Open the verification link we sent to{" "}
+            <strong className="font-semibold wrap-anywhere">{sentEmail}</strong>{" "}
+            to continue.
+          </>
+        ) : (
+          "Open the verification link in your inbox or request another below."
+        )
+      }
+      headerAction={loaderData.hasSession ? <SignOutButton /> : undefined}
+      alternate={
+        loaderData.hasSession
+          ? undefined
+          : {
+              label: "Already verified?",
+              action: "Back to sign in",
+              to: "/login",
+              redirect: loaderData.redirect,
+            }
+      }
     >
-      <AuthCard
-        icon={MailCheckIcon}
-        title="Check your inbox"
-        description={
-          loaderData.sent
-            ? "Open the verification link we just sent to continue."
-            : "Use the link in your inbox to unlock workplace setup and invitations."
-        }
+      <form
+        className="space-y-4"
+        onSubmit={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          void form.handleSubmit()
+        }}
       >
-        <div className="space-y-5">
-          {loaderData.sent ? (
-            <AuthStatusMessage>
-              Verification email sent to{" "}
-              <span className="font-bold">{loaderData.email}</span>. After
-              verifying, you will continue to the right onboarding step.
-            </AuthStatusMessage>
-          ) : null}
-
-          <form
-            className="space-y-5"
-            onSubmit={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              void form.handleSubmit()
+        <FieldGroup>
+          <form.Field
+            name="email"
+            validators={{
+              onSubmit: createZodFieldValidator(emailSchema),
             }}
           >
-            <FieldGroup>
-              <form.Field
-                name="email"
-                validators={{
-                  onSubmit: createZodFieldValidator(emailSchema),
-                }}
-              >
-                {(field) => (
-                  <TextFormField
-                    field={field}
-                    label="Email address"
-                    type="email"
-                    placeholder="you@company.com"
-                    autoComplete="email"
-                  />
-                )}
-              </form.Field>
-            </FieldGroup>
+            {(field) => (
+              <TextFormField
+                field={field}
+                label="Email address"
+                type="email"
+                placeholder="you@company.com"
+                autoComplete="email"
+              />
+            )}
+          </form.Field>
+        </FieldGroup>
 
+        {error ? (
+          <div role="alert">
             <FormErrorMessage message={error} />
-
-            <div className="space-y-3">
+          </div>
+        ) : null}
+        <div className="space-y-2">
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
               <FormSubmitButton
-                className={authButtonClassName}
-                isSubmitting={form.state.isSubmitting}
+                className={setupAuthPrimaryButtonClassName}
+                isSubmitting={isSubmitting}
                 submittingText="Sending email..."
               >
                 Resend verification email
               </FormSubmitButton>
-              <a
-                href={loaderData.redirect}
-                className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-[#dfe4ef] bg-white px-3 text-sm font-bold text-[#10204b] transition-colors hover:bg-[#f8faff]"
-              >
-                I have already verified
-              </a>
-            </div>
-          </form>
+            )}
+          </form.Subscribe>
+          <a
+            href={loaderData.redirect}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              setupAuthSecondaryButtonClassName
+            )}
+          >
+            I’ve verified my email
+          </a>
         </div>
-      </AuthCard>
-    </AuthShell>
+      </form>
+    </SetupAuthShell>
   )
 }

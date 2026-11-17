@@ -5,7 +5,7 @@ import type { PoolClient } from "pg"
 
 import { getDatabase } from "@/lib/db"
 
-type BillingLockScope = "event" | "subscription"
+type BillingLockScope = "event" | "subscription" | "workspace"
 type BillingProcessingLock = {
   release: () => Promise<void>
   assertHeld: () => void
@@ -13,6 +13,7 @@ type BillingProcessingLock = {
 const activeLocks: Record<BillingLockScope, number> = {
   event: 0,
   subscription: 0,
+  workspace: 0,
 }
 const acquiredSchema = z.object({ acquired: z.boolean() })
 

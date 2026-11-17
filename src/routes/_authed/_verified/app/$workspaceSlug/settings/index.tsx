@@ -39,8 +39,10 @@ function WorkspaceSettingsRoute() {
   return (
     <SettingsLayout workspaceSlug={workspaceSlug} activePath={pathname}>
       <GeneralSettingsPage
+        canRemoveOrganization={viewer.activeRole === "owner"}
         organizationId={activeWorkspace.id}
         userId={viewer.user.id}
+        workspaceSlug={workspaceSlug}
       />
     </SettingsLayout>
   )
