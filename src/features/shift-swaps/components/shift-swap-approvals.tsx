@@ -1,11 +1,10 @@
 import { useState } from "react"
-import { ClipboardCheckIcon } from "lucide-react"
 
 import type { ShiftSwapRequestSummary } from "@/features/shift-swaps/types"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import {
-  RequestCard,
+  RequestRow,
   RequestSection,
 } from "@/features/shift-swaps/components/shift-swap-requests"
 
@@ -31,38 +30,40 @@ function ManagerApprovalSection({
       count={requests.length}
       title="Manager approvals"
       emptyLabel="No shift changes waiting for approval."
-      icon={ClipboardCheckIcon}
     >
       {requests.map((request) => (
-        <RequestCard key={request.id} request={request}>
-          <div className="grid w-full gap-2 md:w-64">
-            <label className="sr-only" htmlFor={`manager-note-${request.id}`}>
-              Manager note for {request.sourceShift.employeeName}
+        <RequestRow key={request.id} request={request}>
+          <div className="grid w-full gap-2 @lg/requests:w-64">
+            <label className="grid gap-1.5 text-sm font-medium">
+              <span>
+                Manager note{" "}
+                <span className="text-muted-foreground">(optional)</span>
+                <span className="sr-only">
+                  {" "}
+                  for {request.sourceShift.employeeName}
+                </span>
+              </span>
+              <Textarea
+                className="min-h-14 rounded-lg bg-card px-3 text-base md:text-sm dark:bg-card"
+                maxLength={500}
+                value={notes[request.id] ?? ""}
+                onChange={(event) =>
+                  setNotes((current) => ({
+                    ...current,
+                    [request.id]: event.target.value,
+                  }))
+                }
+              />
             </label>
-            <Textarea
-              id={`manager-note-${request.id}`}
-              className="min-h-12 rounded-xl border-[#dfe5f0] bg-white text-xs text-[#11245a] shadow-none placeholder:text-[#9aa4bb]"
-              maxLength={500}
-              placeholder="Manager note"
-              value={notes[request.id] ?? ""}
-              onChange={(event) =>
-                setNotes((current) => ({
-                  ...current,
-                  [request.id]: event.target.value,
-                }))
-              }
-            />
-            <div className="flex gap-2 md:justify-end">
+            <div className="flex flex-wrap gap-2 @lg/requests:justify-end">
               <Button
                 variant="primary"
-                size="sm"
                 disabled={isApproving || request.status === "expired"}
                 onClick={() => onApprove(request.id, notes[request.id])}
               >
                 Approve
               </Button>
               <Button
-                size="sm"
                 variant="secondary"
                 disabled={isDenying}
                 onClick={() => onDeny(request.id, notes[request.id])}
@@ -71,7 +72,7 @@ function ManagerApprovalSection({
               </Button>
             </div>
           </div>
-        </RequestCard>
+        </RequestRow>
       ))}
     </RequestSection>
   )

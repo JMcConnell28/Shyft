@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { ArrowRightLeftIcon, LoaderCircleIcon } from "lucide-react"
+import { LoaderCircleIcon } from "lucide-react"
 // eslint-disable-next-line no-duplicate-imports
 import type { ReactNode } from "react"
 
@@ -9,24 +9,23 @@ import type {
 } from "@/features/shift-swaps/types"
 import { Button } from "@/components/ui/button"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import {
-  ShiftSwapPanel,
-  ShiftSwapPanelHeader,
-} from "@/features/shift-swaps/components/shift-swap-panel"
+import { DashboardCard } from "@/features/dashboard/components/dashboard-card"
 
 type ShiftSwapComposerProps = {
   data: ShiftSwapPageData
-  isCreating: boolean
+  isCreatingCover: boolean
+  isCreatingSwap: boolean
   onCreateCover: (assignmentId: string) => void
   onCreateSwap: (sourceAssignmentId: string, targetAssignmentId: string) => void
 }
 
 const selectClassName =
-  "w-full [&_select]:h-10 [&_select]:rounded-xl [&_select]:border-[#dfe5f0] [&_select]:bg-white [&_select]:px-3 [&_select]:pr-8 [&_select]:text-sm [&_select]:font-medium [&_select]:text-[#11245a]"
+  "w-full [&_select]:h-11 [&_select]:rounded-lg [&_select]:bg-card [&_select]:pr-8 [&_select]:pl-3 [&_select]:text-base [&_select]:font-medium [&_select]:text-ellipsis dark:[&_select]:bg-card md:[&_select]:h-8 md:[&_select]:text-sm [&_svg]:right-2.5 [&_svg]:size-4"
 
 function ShiftSwapComposer({
   data,
-  isCreating,
+  isCreatingCover,
+  isCreatingSwap,
   onCreateCover,
   onCreateSwap,
 }: ShiftSwapComposerProps) {
@@ -66,15 +65,15 @@ function ShiftSwapComposer({
   )
     ? swapShiftId
     : (targetShifts[0]?.assignmentId ?? "")
+  const isCreating = isCreatingCover || isCreatingSwap
 
   return (
-    <ShiftSwapPanel>
-      <ShiftSwapPanelHeader
-        icon={ArrowRightLeftIcon}
-        subtitle="Choose one of your published shifts to swap or offer for cover."
-        title="New request"
-      />
-      <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-3 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
+    <DashboardCard
+      title="New request"
+      headingId="shift-swap-new-request"
+      description="Choose one of your published shifts to swap or offer for cover."
+    >
+      <div className="grid gap-3 p-4 @min-[42rem]/shift-swaps:grid-cols-3">
         <Field label="Rota">
           <NativeSelect
             className={selectClassName}
@@ -88,7 +87,7 @@ function ShiftSwapComposer({
             ) : null}
             {data.rotas.map((rota) => (
               <NativeSelectOption key={rota.id} value={rota.id}>
-                {rota.weekLabel} - {rota.locationName}
+                {rota.weekLabel} · {rota.locationName}
               </NativeSelectOption>
             ))}
           </NativeSelect>
@@ -104,12 +103,13 @@ function ShiftSwapComposer({
         <Field label="Swap with">
           <ShiftSelect
             emptyLabel="No matching shifts"
+            showEmployee
             shifts={targetShifts}
             value={selectedSwapShiftId}
             onChange={setSwapShiftId}
           />
         </Field>
-        <div className="grid gap-2 sm:flex lg:col-span-3 xl:col-span-1 xl:justify-end">
+        <div className="flex flex-wrap gap-2 @min-[42rem]/shift-swaps:col-span-full @min-[42rem]/shift-swaps:justify-end">
           <Button
             variant="primary"
             disabled={!selectedOwnShiftId || !selectedSwapShiftId || isCreating}
@@ -117,7 +117,12 @@ function ShiftSwapComposer({
               onCreateSwap(selectedOwnShiftId, selectedSwapShiftId)
             }
           >
-            {isCreating ? <LoaderCircleIcon className="animate-spin" /> : null}
+            {isCreatingSwap ? (
+              <LoaderCircleIcon
+                aria-hidden="true"
+                className="animate-spin motion-reduce:animate-none"
+              />
+            ) : null}
             Request swap
           </Button>
           <Button
@@ -125,17 +130,23 @@ function ShiftSwapComposer({
             disabled={!selectedOwnShiftId || isCreating}
             onClick={() => onCreateCover(selectedOwnShiftId)}
           >
+            {isCreatingCover ? (
+              <LoaderCircleIcon
+                aria-hidden="true"
+                className="animate-spin motion-reduce:animate-none"
+              />
+            ) : null}
             Put up for cover
           </Button>
         </div>
       </div>
-    </ShiftSwapPanel>
+    </DashboardCard>
   )
 }
 
 function Field({ children, label }: { children: ReactNode; label: string }) {
   return (
-    <label className="grid min-w-0 gap-1.5 text-[11px] font-semibold tracking-[0.08em] text-[#68769a] uppercase">
+    <label className="grid min-w-0 gap-1.5 text-sm font-medium">
       {label}
       {children}
     </label>
@@ -145,11 +156,13 @@ function Field({ children, label }: { children: ReactNode; label: string }) {
 function ShiftSelect({
   emptyLabel,
   onChange,
+  showEmployee = false,
   shifts,
   value,
 }: {
   emptyLabel: string
   onChange: (value: string) => void
+  showEmployee?: boolean
   shifts: Array<ShiftSwapShift>
   value: string
 }) {
@@ -164,7 +177,8 @@ function ShiftSelect({
       ) : null}
       {shifts.map((shift) => (
         <NativeSelectOption key={shift.assignmentId} value={shift.assignmentId}>
-          {shift.employeeName} - {shift.dateLabel}, {shift.timeLabel} -{" "}
+          {shift.dateLabel}, {shift.timeLabel} ·{" "}
+          {showEmployee ? `${shift.employeeName} · ` : null}
           {shift.zoneName || "No zone"}
         </NativeSelectOption>
       ))}

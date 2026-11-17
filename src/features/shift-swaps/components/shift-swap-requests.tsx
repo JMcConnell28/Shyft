@@ -1,128 +1,137 @@
-import type { ReactNode } from "react"
-import type { LucideIcon } from "lucide-react"
+import * as React from "react"
 
+import type { BadgeVariant } from "@/components/panelui/badge"
 import type {
   ShiftSwapRequestStatus,
   ShiftSwapRequestSummary,
   ShiftSwapShift,
 } from "@/features/shift-swaps/types"
+// eslint-disable-next-line no-duplicate-imports
 import { Badge } from "@/components/panelui/badge"
-import {
-  ShiftSwapPanel,
-  ShiftSwapPanelHeader,
-  ShiftSwapPill,
-} from "@/features/shift-swaps/components/shift-swap-panel"
+import { DashboardCard } from "@/features/dashboard/components/dashboard-card"
+
+const requestStatuses = {
+  awaiting_peer: { label: "Awaiting response", variant: "outline" },
+  open: { label: "Open", variant: "outline" },
+  pending_manager: { label: "Pending approval", variant: "warning" },
+  approved: { label: "Approved", variant: "success" },
+  denied: { label: "Denied", variant: "destructive" },
+  cancelled: { label: "Cancelled", variant: "secondary" },
+  expired: { label: "Expired", variant: "secondary" },
+} satisfies Record<
+  ShiftSwapRequestStatus,
+  { label: string; variant: BadgeVariant }
+>
+
+const cutoffFormatter = new Intl.DateTimeFormat("en-GB", {
+  dateStyle: "medium",
+  timeStyle: "short",
+})
 
 function RequestSection({
   children,
   count,
   emptyLabel,
-  icon,
   title,
 }: {
-  children: ReactNode
+  children: React.ReactNode
   count: number
   emptyLabel: string
-  icon: LucideIcon
   title: string
 }) {
+  const headingId = React.useId()
+
   return (
-    <ShiftSwapPanel className="min-w-0">
-      <ShiftSwapPanelHeader
-        action={<ShiftSwapPill>{count}</ShiftSwapPill>}
-        icon={icon}
-        title={title}
-      />
-      <div className="p-4 sm:p-5">
-        {count > 0 ? (
-          <div className="grid gap-2">{children}</div>
-        ) : (
-          <div className="rounded-xl border border-dashed border-[#dfe5f0] bg-[#fafbfe] px-4 py-7 text-center text-sm font-medium text-[#68769a]">
-            {emptyLabel}
-          </div>
-        )}
-      </div>
-    </ShiftSwapPanel>
+    <DashboardCard
+      title={title}
+      headingId={headingId}
+      action={
+        <Badge variant="secondary" size="sm">
+          {count}
+        </Badge>
+      }
+    >
+      {count > 0 ? (
+        <ul role="list" className="@container/requests divide-y divide-border">
+          {children}
+        </ul>
+      ) : (
+        <p className="p-4 text-sm text-muted-foreground">{emptyLabel}</p>
+      )}
+    </DashboardCard>
   )
 }
 
-function RequestCard({
+function RequestRow({
   children,
   request,
 }: {
-  children?: ReactNode
+  children?: React.ReactNode
   request: ShiftSwapRequestSummary
 }) {
+  const { label, variant } = requestStatuses[request.status]
+
   return (
-    <article className="min-w-0 rounded-xl border border-[#dfe5f0] bg-white p-3.5 transition-colors hover:bg-[#fafcff] sm:p-4">
-      <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div className="min-w-0 space-y-2">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Badge
-              variant={getStatusBadgeVariant(request.status)}
-              className="capitalize"
-              size="sm"
-            >
-              {request.status.replaceAll("_", " ")}
-            </Badge>
-            <Badge variant="outline" className="capitalize" size="sm">
-              {request.requestType}
-            </Badge>
-            <span className="text-[11px] font-medium text-[#68769a]">
-              Cutoff {formatDateTime(request.cutoffAt)}
-            </span>
-          </div>
+    <li className="flex min-w-0 flex-col gap-3 px-4 py-3 @lg/requests:flex-row @lg/requests:items-start @lg/requests:justify-between">
+      <div className="max-w-[44rem] min-w-0 flex-1 space-y-2 wrap-anywhere">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-semibold">
+            {request.requestType === "swap" ? "Swap" : "Cover"}
+          </span>
+          <Badge variant={variant} size="sm">
+            {label}
+          </Badge>
+        </div>
+        <dl className="grid gap-x-6 gap-y-1.5 text-sm @min-[56rem]/requests:grid-cols-2">
           <ShiftLine label="From" shift={request.sourceShift} />
           {request.targetShift ? (
             <ShiftLine label="For" shift={request.targetShift} />
           ) : null}
-          {request.responder ? (
-            <p className="text-xs font-medium text-[#68769a]">
-              Cover offered by {request.responder.name}
-            </p>
-          ) : null}
-          {request.managerNote ? (
-            <p className="rounded-lg bg-[#fafbfe] px-3 py-2 text-xs font-medium text-[#68769a]">
-              {request.managerNote}
-            </p>
-          ) : null}
+        </dl>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <span>{request.sourceShift.locationName}</span>
+          <span className="tabular-nums">
+            Cutoff{" "}
+            <time dateTime={request.cutoffAt}>
+              {cutoffFormatter.format(new Date(request.cutoffAt))}
+            </time>
+          </span>
         </div>
-        {children ? (
-          <div className="flex min-w-0 shrink-0 flex-wrap gap-2 md:justify-end">
-            {children}
-          </div>
+        {request.responder ? (
+          <p className="text-sm text-muted-foreground">
+            Cover offered by{" "}
+            <span className="font-medium">{request.responder.name}</span>
+          </p>
+        ) : null}
+        {request.managerNote ? (
+          <p className="w-fit rounded-lg bg-muted/40 px-3 py-2 text-sm whitespace-pre-wrap text-muted-foreground">
+            <span className="font-medium text-foreground">Manager note</span>
+            <br />
+            {request.managerNote}
+          </p>
         ) : null}
       </div>
-    </article>
+      {children ? (
+        <div className="flex min-w-0 flex-wrap items-start gap-2 @lg/requests:shrink-0 @lg/requests:justify-end">
+          {children}
+        </div>
+      ) : null}
+    </li>
   )
 }
 
 function ShiftLine({ label, shift }: { label: string; shift: ShiftSwapShift }) {
   return (
-    <p className="text-xs leading-relaxed font-medium text-[#11245a]">
-      <span className="font-semibold text-[#68769a]">{label}</span>{" "}
-      <span className="font-semibold">{shift.employeeName}</span>{" "}
-      <span className="text-[#68769a]">
-        - {shift.dateLabel}, {shift.timeLabel} - {shift.zoneName || "No zone"}
-      </span>
-    </p>
+    <div className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-1">
+      <dt className="text-xs leading-5 text-muted-foreground">{label}</dt>
+      <dd>
+        <span className="font-semibold">{shift.employeeName}</span>
+        <span className="block text-xs text-muted-foreground tabular-nums">
+          {shift.dateLabel}, {shift.timeLabel} · {shift.zoneName || "No zone"}
+        </span>
+      </dd>
+    </div>
   )
 }
 
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
-}
-
-function getStatusBadgeVariant(status: ShiftSwapRequestStatus) {
-  if (status === "approved") return "success" as const
-  if (status === "pending_manager") return "warning" as const
-  if (status === "denied" || status === "cancelled" || status === "expired") {
-    return "destructive" as const
-  }
-  return "outline" as const
-}
-
-export { RequestCard, RequestSection }
+export { RequestRow, RequestSection }

@@ -1,32 +1,36 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowRightLeftIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
+import { DashboardCard } from "@/features/dashboard/components/dashboard-card"
+import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout"
 
 function ShiftSwapDisabledState({ dashboardHref }: { dashboardHref: string }) {
   return (
-    <main className="flex flex-1 items-center justify-center bg-[#f6f8fc] px-4 py-12 text-[#10204b]">
-      <div className="w-full max-w-md text-center">
-        <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#236cff]">
-          <ArrowRightLeftIcon className="size-6" />
-        </span>
-        <h1 className="mt-5 text-2xl font-bold tracking-tight">
-          Shift swapping is turned off
+    <DashboardLayout className="max-w-[1440px] sm:gap-6 sm:pt-6">
+      <header>
+        <h1 className="text-2xl leading-8 font-bold tracking-tight">
+          Shift swaps
         </h1>
-        <p className="mt-3 text-sm leading-6 font-medium text-[#68769a]">
-          Your workspace has disabled shift swaps and cover requests. Ask a
-          manager if you need to change a shift.
-        </p>
-        <Button
-          variant="primary"
-          className={"mt-6"}
-          nativeButton={false}
-          render={<Link to={dashboardHref} />}
-        >
-          Back to dashboard
-        </Button>
-      </div>
-    </main>
+      </header>
+      <DashboardCard
+        title="Shift swapping is turned off"
+        headingId="shift-swaps-disabled"
+        className="w-full max-w-xl"
+      >
+        <div className="space-y-4 p-4">
+          <p className="text-sm text-muted-foreground">
+            Your workspace has disabled shift swaps and cover requests. Ask a
+            manager if you need to change a shift.
+          </p>
+          <Link
+            className={buttonVariants({ variant: "secondary" })}
+            to={dashboardHref}
+          >
+            Back to dashboard
+          </Link>
+        </div>
+      </DashboardCard>
+    </DashboardLayout>
   )
 }
 

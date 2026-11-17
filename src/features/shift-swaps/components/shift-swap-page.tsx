@@ -1,13 +1,5 @@
 "use client"
 
-import {
-  ArrowRightLeftIcon,
-  CheckIcon,
-  InboxIcon,
-  SendIcon,
-  XIcon,
-} from "lucide-react"
-
 import type {
   ShiftSwapPageData,
   ShiftSwapRequestStatus,
@@ -15,11 +7,14 @@ import type {
 import type { ShiftSwapScopeInput } from "@/features/shift-swaps/hooks/use-shift-swap-page-query"
 import { useShiftSwapFlag } from "@/features/feature-flags/hooks/use-shift-swap-flag"
 import { Button } from "@/components/ui/button"
+import {
+  DashboardLayout,
+  DashboardPanel,
+} from "@/features/dashboard/components/dashboard-layout"
 import { ManagerApprovalSection } from "@/features/shift-swaps/components/shift-swap-approvals"
 import { ShiftSwapComposer } from "@/features/shift-swaps/components/shift-swap-composer"
-import { ShiftSwapPill } from "@/features/shift-swaps/components/shift-swap-panel"
 import {
-  RequestCard,
+  RequestRow,
   RequestSection,
 } from "@/features/shift-swaps/components/shift-swap-requests"
 import { useShiftSwapMutations } from "@/features/shift-swaps/hooks/use-shift-swap-mutations"
@@ -32,12 +27,23 @@ type ShiftSwapPageProps = ShiftSwapScopeInput & {
 
 function ShiftSwapPage(props: ShiftSwapPageProps) {
   const enabled = useShiftSwapFlag(props.organizationId, props.userId, true)
-  return enabled ? (
-    <ConnectedShiftSwapPage {...props} />
-  ) : (
-    <p role="status" className="p-6 text-sm text-muted-foreground">
-      Shift swaps are currently unavailable for your locations.
-    </p>
+  return (
+    <DashboardLayout className="@container/shift-swaps max-w-[1440px] sm:gap-6 sm:pt-6">
+      <header>
+        <h1 className="text-2xl leading-8 font-bold tracking-tight">
+          Shift swaps
+        </h1>
+      </header>
+      {enabled ? (
+        <ConnectedShiftSwapPage {...props} />
+      ) : (
+        <DashboardPanel>
+          <p role="status" className="p-4 text-sm text-muted-foreground">
+            Shift swaps are currently unavailable for your locations.
+          </p>
+        </DashboardPanel>
+      )}
+    </DashboardLayout>
   )
 }
 
@@ -45,156 +51,136 @@ function ConnectedShiftSwapPage({ initialData, ...scope }: ShiftSwapPageProps) {
   const query = useShiftSwapPageQuery(scope, initialData)
   const data = query.data ?? initialData
   const mutations = useShiftSwapMutations(scope)
-  const isCreating =
-    mutations.createSwapMutation.isPending ||
-    mutations.createCoverMutation.isPending
-  const requestCount =
-    data.incomingRequests.length +
-    data.openCoverRequests.length +
-    data.myRequests.length +
-    data.managerRequests.length
-
   return (
-    <main className="flex flex-1 bg-[#f6f8fc] px-4 py-5 text-[#10204b] sm:px-6 sm:py-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-[88rem] min-w-0 flex-col gap-4 sm:gap-5">
-        <header className="flex animate-in flex-col gap-3 duration-500 fade-in slide-in-from-bottom-2 motion-reduce:animate-none sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-2xl leading-none font-bold tracking-[-0.035em] sm:text-[1.75rem]">
-              Shift swaps
-            </h1>
-            <p className="mt-2 text-sm font-medium text-[#68769a]">
-              Request a swap, offer cover, and track your requests.
-            </p>
-          </div>
-          <ShiftSwapPill className="w-fit">
-            {requestCount} request{requestCount === 1 ? "" : "s"}
-          </ShiftSwapPill>
-        </header>
-
-        <ShiftSwapComposer
-          data={data}
-          isCreating={isCreating}
-          onCreateCover={(assignmentId) =>
-            mutations.createCoverMutation.mutate(assignmentId)
-          }
-          onCreateSwap={(sourceAssignmentId, targetAssignmentId) =>
-            mutations.createSwapMutation.mutate({
-              sourceAssignmentId,
-              targetAssignmentId,
-            })
-          }
-        />
-
-        <div className="grid items-start gap-4 sm:gap-5 xl:grid-cols-2">
-          <RequestSection
-            count={data.incomingRequests.length}
-            emptyLabel="No swap requests waiting for you."
-            icon={InboxIcon}
-            title="Requests for me"
+    <>
+      {query.isError ? (
+        <DashboardPanel className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+          <p role="alert" className="text-sm text-muted-foreground">
+            Could not refresh requests. Showing the last available data.
+          </p>
+          <Button
+            variant="secondary"
+            disabled={query.isFetching}
+            onClick={() => void query.refetch()}
           >
-            {data.incomingRequests.map((request) => (
-              <RequestCard key={request.id} request={request}>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  disabled={
-                    mutations.respondMutation.isPending ||
-                    request.status === "expired"
-                  }
-                  onClick={() =>
-                    mutations.respondMutation.mutate({
-                      requestId: request.id,
-                      decision: "accept",
-                    })
-                  }
-                >
-                  <CheckIcon />
-                  Accept
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={
-                    mutations.respondMutation.isPending ||
-                    request.status === "expired"
-                  }
-                  onClick={() =>
-                    mutations.respondMutation.mutate({
-                      requestId: request.id,
-                      decision: "decline",
-                    })
-                  }
-                >
-                  <XIcon />
-                  Decline
-                </Button>
-              </RequestCard>
-            ))}
-          </RequestSection>
+            Retry
+          </Button>
+        </DashboardPanel>
+      ) : null}
 
-          <RequestSection
-            count={data.openCoverRequests.length}
-            emptyLabel="No open cover requests."
-            icon={SendIcon}
-            title="Open covers"
-          >
-            {data.openCoverRequests.map((request) => (
-              <RequestCard key={request.id} request={request}>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  disabled={
-                    mutations.offerCoverMutation.isPending ||
-                    request.status === "expired"
-                  }
-                  onClick={() =>
-                    mutations.offerCoverMutation.mutate(request.id)
-                  }
-                >
-                  Offer cover
-                </Button>
-              </RequestCard>
-            ))}
-          </RequestSection>
-        </div>
+      <ShiftSwapComposer
+        data={data}
+        isCreatingCover={mutations.createCoverMutation.isPending}
+        isCreatingSwap={mutations.createSwapMutation.isPending}
+        onCreateCover={(assignmentId) =>
+          mutations.createCoverMutation.mutate(assignmentId)
+        }
+        onCreateSwap={(sourceAssignmentId, targetAssignmentId) =>
+          mutations.createSwapMutation.mutate({
+            sourceAssignmentId,
+            targetAssignmentId,
+          })
+        }
+      />
 
+      <div className="grid items-start gap-4 sm:gap-6 @min-[52rem]/shift-swaps:grid-cols-2">
         <RequestSection
-          count={data.myRequests.length}
-          emptyLabel="No shift swap or cover requests yet."
-          icon={ArrowRightLeftIcon}
-          title="My requests"
+          count={data.incomingRequests.length}
+          emptyLabel="No swap requests waiting for you."
+          title="Requests for me"
         >
-          {data.myRequests.map((request) => (
-            <RequestCard key={request.id} request={request}>
-              {canCancel(request.status) ? (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={mutations.cancelMutation.isPending}
-                  onClick={() => mutations.cancelMutation.mutate(request.id)}
-                >
-                  Cancel
-                </Button>
-              ) : null}
-            </RequestCard>
+          {data.incomingRequests.map((request) => (
+            <RequestRow key={request.id} request={request}>
+              <Button
+                variant="primary"
+                disabled={
+                  mutations.respondMutation.isPending ||
+                  request.status === "expired"
+                }
+                onClick={() =>
+                  mutations.respondMutation.mutate({
+                    requestId: request.id,
+                    decision: "accept",
+                  })
+                }
+              >
+                Accept
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={
+                  mutations.respondMutation.isPending ||
+                  request.status === "expired"
+                }
+                onClick={() =>
+                  mutations.respondMutation.mutate({
+                    requestId: request.id,
+                    decision: "decline",
+                  })
+                }
+              >
+                Decline
+              </Button>
+            </RequestRow>
           ))}
         </RequestSection>
 
-        {data.canManage ? (
-          <ManagerApprovalSection
-            requests={data.managerRequests}
-            isApproving={mutations.approveMutation.isPending}
-            isDenying={mutations.denyMutation.isPending}
-            onApprove={(requestId, note) =>
-              mutations.approveMutation.mutate({ requestId, note })
-            }
-            onDeny={(requestId, note) =>
-              mutations.denyMutation.mutate({ requestId, note })
-            }
-          />
-        ) : null}
+        <RequestSection
+          count={data.openCoverRequests.length}
+          emptyLabel="No open cover requests."
+          title="Open covers"
+        >
+          {data.openCoverRequests.map((request) => (
+            <RequestRow key={request.id} request={request}>
+              <Button
+                variant="primary"
+                disabled={
+                  mutations.offerCoverMutation.isPending ||
+                  request.status === "expired"
+                }
+                onClick={() => mutations.offerCoverMutation.mutate(request.id)}
+              >
+                Offer cover
+              </Button>
+            </RequestRow>
+          ))}
+        </RequestSection>
       </div>
-    </main>
+
+      {data.canManage ? (
+        <ManagerApprovalSection
+          requests={data.managerRequests}
+          isApproving={mutations.approveMutation.isPending}
+          isDenying={mutations.denyMutation.isPending}
+          onApprove={(requestId, note) =>
+            mutations.approveMutation.mutate({ requestId, note })
+          }
+          onDeny={(requestId, note) =>
+            mutations.denyMutation.mutate({ requestId, note })
+          }
+        />
+      ) : null}
+
+      <RequestSection
+        count={data.myRequests.length}
+        emptyLabel="No shift swap or cover requests yet."
+        title="My requests"
+      >
+        {data.myRequests.map((request) => (
+          <RequestRow key={request.id} request={request}>
+            {canCancel(request.status) ? (
+              <Button
+                variant="secondary"
+                disabled={mutations.cancelMutation.isPending}
+                onClick={() => mutations.cancelMutation.mutate(request.id)}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </RequestRow>
+        ))}
+      </RequestSection>
+    </>
   )
 }
 
